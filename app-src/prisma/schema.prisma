@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for Faculty authentication (ready for Student expansion)
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  role         String   @default("faculty") // faculty, student, admin
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations (for future features)
+  modules    Module[]
+  courses    Course[]
+  sessions   Session[]
+  mediaFiles MediaFile[]
+
+  @@map("users")
+}
+
+// Session model for NextAuth.js
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// Independent Modules (reusable building blocks)
+model Module {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String
+  content        String?  @db.Text // Rich text content with embedded media
+  description    String?  @db.Text
+  authorId       String   @map("author_id")
+  parentModuleId String?  @map("parent_module_id")
+  sortOrder      Int      @default(0) @map("sort_order")
+  moduleNumber   String?  @map("module_number") // Auto-generated (1.1.1.1...)
+  status         String   @default("draft") // draft, published
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  author       User           @relation(fields: [authorId], references: [id])
+  parentModule Module?        @relation("ModuleHierarchy", fields: [parentModuleId], references: [id])
+  subModules   Module[]       @relation("ModuleHierarchy")
+  courseModules CourseModule[]
+  moduleMedia  ModuleMedia[]
+
+  @@unique([parentModuleId, sortOrder])
+  @@index([parentModuleId])
+  @@index([authorId])
+  @@index([status])
+  @@map("modules")
+}
+
+// Courses (collections of modules)
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?  @db.Text
+  authorId    String   @map("author_id")
+  status      String   @default("draft") // draft, published
+  featured    Boolean  @default(false)
+  tags        String[] // PostgreSQL array for course tags
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  author        User           @relation(fields: [authorId], references: [id])
+  courseModules CourseModule[]
+
+  @@index([authorId])
+  @@index([status])
+  @@index([slug])
+  @@map("courses")
+}
+
+// Many-to-Many: Modules can be reused in multiple courses
+model CourseModule {
+  id          String   @id @default(cuid())
+  courseId    String   @map("course_id")
+  moduleId    String   @map("module_id")
+  sortOrder   Int      @map("sort_order")
+  customTitle String?  @map("custom_title") // Optional course-specific title override
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, moduleId])
+  @@unique([courseId, sortOrder])
+  @@index([courseId])
+  @@index([moduleId])
+  @@map("course_modules")
+}
+
+// Media Files (referenced by modules)
+model MediaFile {
+  id            String   @id @default(cuid())
+  filename      String
+  originalName  String   @map("original_name")
+  fileSize      BigInt   @map("file_size")
+  mimeType      String   @map("mime_type")
+  storagePath   String   @map("storage_path") // S3 path or local path
+  thumbnailPath String?  @map("thumbnail_path") // For images/videos
+  uploadedBy    String   @map("uploaded_by")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  uploader    User          @relation(fields: [uploadedBy], references: [id])
+  moduleMedia ModuleMedia[]
+
+  @@index([uploadedBy])
+  @@index([mimeType])
+  @@map("media_files")
+}
+
+// Module-Media relationships (for tracking usage)
+model ModuleMedia {
+  id          String   @id @default(cuid())
+  moduleId    String   @map("module_id")
+  mediaFileId String   @map("media_file_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  module    Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  mediaFile MediaFile @relation(fields: [mediaFileId], references: [id], onDelete: Cascade)
+
+  @@unique([moduleId, mediaFileId])
+  @@index([moduleId])
+  @@index([mediaFileId])
+  @@map("module_media")
+}
