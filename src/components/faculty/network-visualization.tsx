@@ -392,19 +392,19 @@ export function NetworkVisualization({ courseId, onClose }: NetworkVisualization
   return (
     <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-background' : 'relative'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b space-y-4 sm:space-y-0">
         <div className="flex items-center space-x-4">
           {onClose && (
             <NeuralButton variant="ghost" size="sm" onClick={onClose}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              <span className="hidden sm:inline">Back</span>
             </NeuralButton>
           )}
           <div>
-            <h2 className="text-xl font-bold text-neural-primary">
+            <h2 className="text-lg sm:text-xl font-bold text-neural-primary">
               {data?.type === 'course' ? `Course Structure: ${data.course?.title}` : 'Content Structure'}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Interactive visualization of your {data?.type === 'course' ? 'course' : 'content'} structure
             </p>
           </div>
@@ -415,6 +415,7 @@ export function NetworkVisualization({ courseId, onClose }: NetworkVisualization
             variant="ghost"
             size="sm"
             onClick={() => setIsFullscreen(!isFullscreen)}
+            className="hidden sm:flex"
           >
             {isFullscreen ? (
               <Minimize2 className="h-4 w-4" />
@@ -424,13 +425,14 @@ export function NetworkVisualization({ courseId, onClose }: NetworkVisualization
           </NeuralButton>
           <NeuralButton variant="ghost" size="sm" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4" />
+            <span className="hidden sm:inline ml-2">Refresh</span>
           </NeuralButton>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center space-x-4 p-4 bg-muted/50">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 p-4 bg-muted/50">
+        <div className="relative flex-1 max-w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search modules..."
@@ -440,34 +442,42 @@ export function NetworkVisualization({ courseId, onClose }: NetworkVisualization
           />
         </div>
         
-        <div className="flex items-center space-x-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <NeuralButton
-            variant={statusFilter === 'all' ? 'neural' : 'ghost'}
-            size="sm"
-            onClick={() => setStatusFilter('all')}
-          >
-            All
-          </NeuralButton>
-          <NeuralButton
-            variant={statusFilter === 'published' ? 'neural' : 'ghost'}
-            size="sm"
-            onClick={() => setStatusFilter('published')}
-          >
-            Published
-          </NeuralButton>
-          <NeuralButton
-            variant={statusFilter === 'draft' ? 'neural' : 'ghost'}
-            size="sm"
-            onClick={() => setStatusFilter('draft')}
-          >
-            Drafts
-          </NeuralButton>
+        <div className="flex items-center justify-between sm:justify-start space-x-2">
+          <div className="flex items-center space-x-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground hidden sm:inline">Filter:</span>
+          </div>
+          <div className="flex space-x-1 sm:space-x-2">
+            <NeuralButton
+              variant={statusFilter === 'all' ? 'neural' : 'ghost'}
+              size="sm"
+              onClick={() => setStatusFilter('all')}
+              className="text-xs sm:text-sm"
+            >
+              All
+            </NeuralButton>
+            <NeuralButton
+              variant={statusFilter === 'published' ? 'neural' : 'ghost'}
+              size="sm"
+              onClick={() => setStatusFilter('published')}
+              className="text-xs sm:text-sm"
+            >
+              Published
+            </NeuralButton>
+            <NeuralButton
+              variant={statusFilter === 'draft' ? 'neural' : 'ghost'}
+              size="sm"
+              onClick={() => setStatusFilter('draft')}
+              className="text-xs sm:text-sm"
+            >
+              Drafts
+            </NeuralButton>
+          </div>
         </div>
       </div>
 
       {/* React Flow */}
-      <div className={`${isFullscreen ? 'h-[calc(100vh-120px)]' : 'h-96'} border rounded-lg`}>
+      <div className={`${isFullscreen ? 'h-[calc(100vh-180px)] sm:h-[calc(100vh-120px)]' : 'h-64 sm:h-96'} border rounded-lg`}>
         <ReactFlow
           nodes={nodes}
           edges={edges}

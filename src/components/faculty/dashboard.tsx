@@ -59,52 +59,52 @@ export function FacultyDashboard({ user }: FacultyDashboardProps) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="cognitive-card">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <FileText className="h-8 w-8 text-neural-primary" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Modules</p>
-                  <p className="text-2xl font-bold text-foreground">0</p>
+                <FileText className="h-6 sm:h-8 w-6 sm:w-8 text-neural-primary" />
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Modules</p>
+                  <p className="text-lg sm:text-2xl font-bold text-foreground">0</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="cognitive-card">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <BookOpen className="h-8 w-8 text-synapse-primary" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Courses</p>
-                  <p className="text-2xl font-bold text-foreground">0</p>
+                <BookOpen className="h-6 sm:h-8 w-6 sm:w-8 text-synapse-primary" />
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Courses</p>
+                  <p className="text-lg sm:text-2xl font-bold text-foreground">0</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="cognitive-card">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <Users className="h-8 w-8 text-cognition-teal" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Students</p>
-                  <p className="text-2xl font-bold text-foreground">0</p>
+                <Users className="h-6 sm:h-8 w-6 sm:w-8 text-cognition-teal" />
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Students</p>
+                  <p className="text-lg sm:text-2xl font-bold text-foreground">0</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="cognitive-card">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <BarChart3 className="h-8 w-8 text-cognition-orange" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Views</p>
-                  <p className="text-2xl font-bold text-foreground">0</p>
+                <BarChart3 className="h-6 sm:h-8 w-6 sm:w-8 text-cognition-orange" />
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Views</p>
+                  <p className="text-lg sm:text-2xl font-bold text-foreground">0</p>
                 </div>
               </div>
             </CardContent>
