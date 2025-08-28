@@ -1,23 +1,25 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {/* Header */}
-      <header className="bg-white shadow">
+      <header className="bg-white dark:bg-gray-800 shadow transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 BCS E-Textbook Platform
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Brain and Cognitive Sciences Department
               </p>
             </div>
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               <Link href="/courses">
                 <Button variant="outline">Browse Courses</Button>
               </Link>

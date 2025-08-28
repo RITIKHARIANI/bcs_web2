@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { SessionProvider } from '@/components/providers/session-provider'
+import { ThemeProvider } from '@/components/providers/theme-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,11 +17,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <SessionProvider>
-          {children}
-        </SessionProvider>
+        <ThemeProvider
+          defaultTheme="system"
+          storageKey="bcs-ui-theme"
+        >
+          <SessionProvider>
+            {children}
+          </SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
