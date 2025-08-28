@@ -23,12 +23,12 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" role="banner">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between">
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-neural">
+          <Link href="/" className="flex items-center space-x-2" aria-label="NeuroLearn - Go to homepage">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-neural" aria-hidden="true">
               <Brain className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="font-bold text-lg sm:text-xl text-neural-primary">
@@ -37,23 +37,23 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium" role="navigation" aria-label="Main navigation">
             <Link
               href="/courses"
-              className="thought-pathway transition-colors hover:text-neural-primary"
+              className="thought-pathway transition-colors hover:text-neural-primary focus:text-neural-primary focus:outline-none focus:ring-2 focus:ring-neural-primary focus:ring-offset-2 rounded px-2 py-1"
             >
               Courses
             </Link>
             <Link
               href="/courses"
-              className="thought-pathway transition-colors hover:text-neural-primary"
+              className="thought-pathway transition-colors hover:text-neural-primary focus:text-neural-primary focus:outline-none focus:ring-2 focus:ring-neural-primary focus:ring-offset-2 rounded px-2 py-1"
             >
               Library
             </Link>
             {session?.user?.role === "faculty" && (
               <Link
                 href="/faculty/dashboard"
-                className="thought-pathway transition-colors hover:text-neural-primary"
+                className="thought-pathway transition-colors hover:text-neural-primary focus:text-neural-primary focus:outline-none focus:ring-2 focus:ring-neural-primary focus:ring-offset-2 rounded px-2 py-1"
               >
                 Faculty
               </Link>
@@ -64,10 +64,12 @@ export function Header() {
             {/* Desktop Search */}
             <div className="hidden lg:block">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
                   placeholder="Search courses..."
                   className="h-9 w-[300px] bg-background pl-10 border-neural-light/30 focus:border-neural-primary"
+                  aria-label="Search courses and topics"
+                  role="searchbox"
                 />
               </div>
             </div>

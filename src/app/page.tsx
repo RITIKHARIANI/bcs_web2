@@ -9,7 +9,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main>
+      <main id="main-content" role="main" aria-label="Main content">
         <Hero />
         <CoursesSection />
         <NetworkVisualization />
