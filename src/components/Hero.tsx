@@ -1,5 +1,6 @@
 import { ArrowRight, Play, Sparkles, Network } from "lucide-react"
 import { NeuralButton } from "./ui/neural-button"
+import Link from 'next/link'
 import Image from "next/image"
 
 export function Hero() {

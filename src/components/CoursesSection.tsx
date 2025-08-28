@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { CourseCard } from "./CourseCard";
-import { NeuralButton } from "./ui/neural-button";
+import { NeuralButton } from "./ui/neural-button"
 import { ArrowRight, Filter, Grid, List, Loader2 } from "lucide-react";
 
 interface Course {
