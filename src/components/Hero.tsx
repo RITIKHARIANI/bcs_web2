@@ -1,7 +1,6 @@
 import { ArrowRight, Play, Sparkles, Network } from "lucide-react"
 import { NeuralButton } from "./ui/neural-button"
 import Image from "next/image"
-import heroImage from "@/assets/neural-hero.jpg"
 
 export function Hero() {
   return (
@@ -10,7 +9,7 @@ export function Hero() {
       <div className="absolute inset-0 neural-bg">
         <div className="absolute inset-0 neural-connections opacity-30"></div>
         <Image 
-          src={heroImage} 
+          src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=1200&h=600&fit=crop&crop=center" 
           alt="Neural network visualization representing cognitive learning pathways"
           fill
           className="object-cover opacity-20 mix-blend-overlay"
