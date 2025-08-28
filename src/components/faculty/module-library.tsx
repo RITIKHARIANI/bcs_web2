@@ -352,7 +352,7 @@ export function ModuleLibrary() {
                     </div>
                     
                     <div className="flex items-center space-x-2">
-                      <Link href={`/modules/${module.id}`}>
+                      <Link href={`/faculty/modules/${module.id}`}>
                         <NeuralButton variant="ghost" size="sm">
                           <Eye className="h-4 w-4" />
                         </NeuralButton>
