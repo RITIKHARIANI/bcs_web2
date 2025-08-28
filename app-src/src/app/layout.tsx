@@ -19,10 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          defaultTheme="system"
-          storageKey="bcs-ui-theme"
-        >
+                        <ThemeProvider
+                  defaultTheme="light"
+                  storageKey="bcs-ui-theme"
+                >
           <SessionProvider>
             {children}
           </SessionProvider>

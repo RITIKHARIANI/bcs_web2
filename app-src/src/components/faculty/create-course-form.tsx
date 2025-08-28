@@ -235,7 +235,7 @@ export function CreateCourseForm({ user }: CreateCourseFormProps) {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Brief description of this course (optional)"
-                className="w-full p-3 border border-gray-200 rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2"
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-md resize-none h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
               />
             </div>
 
@@ -249,7 +249,7 @@ export function CreateCourseForm({ user }: CreateCourseFormProps) {
                 onChange={handleChange}
                 placeholder="Enter tags separated by commas (optional)"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 E.g., neuroscience, cognitive psychology, research methods
               </p>
             </div>
@@ -259,9 +259,9 @@ export function CreateCourseForm({ user }: CreateCourseFormProps) {
               {errors.modules && (
                 <p className="text-sm text-red-500">{errors.modules}</p>
               )}
-              <div className="min-h-[120px] p-3 border border-gray-200 rounded-md bg-gray-50">
+              <div className="min-h-[120px] p-3 border border-gray-200 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800">
                 {selectedModules.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">
+                  <p className="text-gray-600 dark:text-gray-400 text-center py-8">
                     No modules selected. Choose modules from the library on the right.
                   </p>
                 ) : (
@@ -269,10 +269,10 @@ export function CreateCourseForm({ user }: CreateCourseFormProps) {
                     {getSelectedModulesList().map((moduleItem, index) => (
                       <div
                         key={moduleItem.id}
-                        className="flex items-center justify-between bg-white p-2 rounded border"
+                        className="flex items-center justify-between bg-white dark:bg-gray-700 p-2 rounded border border-gray-200 dark:border-gray-600"
                       >
                         <div>
-                          <span className="font-medium text-sm">
+                          <span className="font-medium text-sm text-gray-900 dark:text-gray-100">
                             {index + 1}. {moduleItem.moduleNumber} - {moduleItem.title}
                           </span>
                         </div>
@@ -340,10 +340,10 @@ export function CreateCourseForm({ user }: CreateCourseFormProps) {
             {isLoadingModules ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                <p className="mt-2 text-gray-600">Loading modules...</p>
+                <p className="mt-2 text-gray-700 dark:text-gray-300">Loading modules...</p>
               </div>
             ) : filteredModules.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-600 dark:text-gray-400">
                 <p>No modules found</p>
                 {searchTerm && (
                   <p className="text-sm">Try a different search term</p>
@@ -363,8 +363,8 @@ export function CreateCourseForm({ user }: CreateCourseFormProps) {
                   key={moduleItem.id}
                   className={`p-3 border rounded-md cursor-pointer transition-colors ${
                     selectedModules.includes(moduleItem.id)
-                      ? 'bg-blue-50 border-blue-300'
-                      : 'bg-white border-gray-200 hover:bg-gray-50'
+                      ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600'
+                      : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                   onClick={() => toggleModuleSelection(moduleItem.id)}
                 >
@@ -377,16 +377,16 @@ export function CreateCourseForm({ user }: CreateCourseFormProps) {
                           onChange={() => {}} // Handled by parent click
                           className="rounded"
                         />
-                        <span className="font-medium text-sm">
+                        <span className="font-medium text-sm text-gray-900 dark:text-gray-100">
                           {moduleItem.moduleNumber} - {moduleItem.title}
                         </span>
                       </div>
                       {moduleItem.description && (
-                        <p className="text-xs text-gray-600 mt-1 ml-6">
+                        <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 ml-6">
                           {moduleItem.description}
                         </p>
                       )}
-                      <div className="flex items-center space-x-2 mt-1 ml-6 text-xs text-gray-500">
+                      <div className="flex items-center space-x-2 mt-1 ml-6 text-xs text-gray-600 dark:text-gray-400">
                         <span>Status: {moduleItem.status}</span>
                         {moduleItem._count && (
                           <>

@@ -248,7 +248,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-600">
             <Button
               type="button"
               variant="ghost"

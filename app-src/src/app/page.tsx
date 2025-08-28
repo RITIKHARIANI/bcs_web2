@@ -34,10 +34,10 @@ export default function HomePage() {
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             Interactive Learning Platform
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">
             Explore comprehensive courses in Brain and Cognitive Sciences through 
             our modern e-textbook platform with rich multimedia content and 
             hierarchical learning modules.
@@ -96,10 +96,10 @@ export default function HomePage() {
         <div className="text-center">
           <Card className="max-w-2xl mx-auto">
             <CardContent className="pt-6">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                 Start Learning Today
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-700 dark:text-gray-300 mb-6">
                 Browse our course catalog and dive into the fascinating world of 
                 brain and cognitive sciences.
               </p>
@@ -119,7 +119,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-white border-t mt-16">
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-gray-600">
+          <div className="text-center text-gray-700 dark:text-gray-300">
             <p>&copy; 2024 Brain and Cognitive Sciences Department. All rights reserved.</p>
           </div>
         </div>

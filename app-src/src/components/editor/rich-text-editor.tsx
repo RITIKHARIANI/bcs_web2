@@ -69,7 +69,7 @@ export function RichTextEditor({
           <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
         </div>
         <div className="min-h-[300px] p-4 bg-gray-50 flex items-center justify-center">
-          <div className="text-gray-500">Loading editor...</div>
+          <div className="text-gray-600 dark:text-gray-400">Loading editor...</div>
         </div>
       </div>
     )

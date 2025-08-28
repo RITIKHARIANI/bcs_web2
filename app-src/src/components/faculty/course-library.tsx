@@ -105,7 +105,7 @@ export function CourseLibrary({ user }: CourseLibraryProps) {
     return (
       <div className="text-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading courses...</p>
+        <p className="mt-4 text-gray-700 dark:text-gray-300">Loading courses...</p>
       </div>
     )
   }
@@ -154,12 +154,12 @@ export function CourseLibrary({ user }: CourseLibraryProps) {
         <Card>
           <CardContent className="text-center py-12">
             <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No courses found</h3>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
               {searchTerm ? 'No courses match your search.' : 'Start building your course library by creating your first course.'}
             </p>
             {!searchTerm && (
@@ -205,7 +205,7 @@ function CourseCard({ course, onDelete }: CourseCardProps) {
       case 'draft':
         return 'bg-yellow-100 text-yellow-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
     }
   }
 
@@ -244,7 +244,7 @@ function CourseCard({ course, onDelete }: CourseCardProps) {
       <CardContent>
         <div className="space-y-4">
           {/* Module Count and Info */}
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             <div className="flex items-center justify-between">
               <span>{course._count.courseModules} module{course._count.courseModules !== 1 ? 's' : ''}</span>
               <span>Updated {formatDate(course.updatedAt)}</span>
@@ -254,16 +254,16 @@ function CourseCard({ course, onDelete }: CourseCardProps) {
           {/* Module List Preview */}
           {course.courseModules.length > 0 && (
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-700">Modules:</p>
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Modules:</p>
               <div className="space-y-1 max-h-24 overflow-y-auto">
                 {course.courseModules.slice(0, 3).map((courseModule) => (
-                  <div key={courseModule.id} className="text-xs text-gray-600 flex items-center">
+                  <div key={courseModule.id} className="text-xs text-gray-700 dark:text-gray-300 flex items-center">
                     <span className="mr-2">{courseModule.sortOrder}.</span>
                     <span>{courseModule.module.moduleNumber} - {courseModule.module.title}</span>
                   </div>
                 ))}
                 {course.courseModules.length > 3 && (
-                  <div className="text-xs text-gray-500 italic">
+                  <div className="text-xs text-gray-600 dark:text-gray-400 italic">
                     +{course.courseModules.length - 3} more modules...
                   </div>
                 )}

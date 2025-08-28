@@ -53,8 +53,8 @@ export function ForgotPasswordForm() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Sent!</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Email Sent!</h3>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
               If an account with that email exists, we&apos;ve sent you a password reset link.
             </p>
             <Link href="/auth/login">
@@ -104,7 +104,7 @@ export function ForgotPasswordForm() {
             {isLoading ? 'Sending...' : 'Send Reset Link'}
           </Button>
           
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-gray-700 dark:text-gray-300">
             Remember your password?{' '}
             <Link href="/auth/login" className="text-blue-600 hover:underline">
               Sign in

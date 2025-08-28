@@ -16,10 +16,10 @@ export default async function CreateCoursePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 Create New Course
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
                 Assemble a course by selecting existing modules
               </p>
             </div>

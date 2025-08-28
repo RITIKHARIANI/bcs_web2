@@ -126,13 +126,13 @@ export function LoginForm() {
             {isLoading ? 'Signing in...' : 'Sign In'}
           </Button>
           
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-gray-700 dark:text-gray-300">
             <Link href="/auth/forgot-password" className="hover:underline">
               Forgot your password?
             </Link>
           </div>
           
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-gray-700 dark:text-gray-300">
             Don&apos;t have an account?{' '}
             <Link href="/auth/register" className="text-blue-600 hover:underline">
               Register here

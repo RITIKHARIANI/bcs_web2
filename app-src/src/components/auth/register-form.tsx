@@ -120,8 +120,8 @@ export function RegisterForm() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Registration Successful!</h3>
-            <p className="text-gray-600">Redirecting you to the login page...</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Registration Successful!</h3>
+            <p className="text-gray-700 dark:text-gray-300">Redirecting you to the login page...</p>
           </div>
         </CardContent>
       </Card>
@@ -190,7 +190,7 @@ export function RegisterForm() {
             {errors.password && (
               <p className="text-sm text-red-500">{errors.password}</p>
             )}
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-600 dark:text-gray-400">
               Password must be at least 8 characters with uppercase, lowercase, and number.
             </p>
           </div>
@@ -217,7 +217,7 @@ export function RegisterForm() {
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
           
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-gray-700 dark:text-gray-300">
             Already have an account?{' '}
             <Link href="/auth/login" className="text-blue-600 hover:underline">
               Sign in here

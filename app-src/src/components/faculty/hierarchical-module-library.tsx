@@ -99,7 +99,7 @@ function SortableModuleItem({
                   className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
                   title="Drag to reorder"
                 >
-                  <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                   </svg>
                 </div>
@@ -130,17 +130,17 @@ function SortableModuleItem({
                 </span>
               </div>
 
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 {moduleItem.title}
               </h3>
               
               {moduleItem.description && (
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                <p className="text-gray-700 dark:text-gray-300 text-sm mb-3 line-clamp-2">
                   {moduleItem.description}
                 </p>
               )}
 
-              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
                 <span>Used in {moduleItem._count?.courseModules || 0} course{(moduleItem._count?.courseModules || 0) !== 1 ? 's' : ''}</span>
                 <span>•</span>
                 <span>{moduleItem._count?.subModules || 0} submodule{(moduleItem._count?.subModules || 0) !== 1 ? 's' : ''}</span>
@@ -166,7 +166,7 @@ function SortableModuleItem({
                 variant="ghost"
                 size="sm"
                 onClick={() => onEdit(moduleItem.id)}
-                className="text-gray-600 hover:text-gray-700"
+                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                 title="Edit Module"
               >
                 Edit
@@ -391,7 +391,7 @@ export function HierarchicalModuleLibrary({ searchTerm = '' }: HierarchicalModul
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading modules...</p>
+          <p className="text-gray-700 dark:text-gray-300">Loading modules...</p>
         </div>
       </div>
     )
@@ -409,8 +409,8 @@ export function HierarchicalModuleLibrary({ searchTerm = '' }: HierarchicalModul
   if (filteredModules.length === 0) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">No modules found</h3>
-        <p className="text-gray-600 mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No modules found</h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-6">
           {searchTerm ? 'No modules match your search criteria.' : 'Start by creating your first module.'}
         </p>
         <Link href="/faculty/modules/create">
@@ -444,7 +444,7 @@ export function HierarchicalModuleLibrary({ searchTerm = '' }: HierarchicalModul
             Collapse All
           </Button>
         </div>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
           {filteredModules.length} module{filteredModules.length !== 1 ? 's' : ''} total
         </div>
       </div>
@@ -478,7 +478,7 @@ export function HierarchicalModuleLibrary({ searchTerm = '' }: HierarchicalModul
 
         <DragOverlay>
           {activeId ? (
-            <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 opacity-90">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg p-4 opacity-90">
               <span className="font-medium">
                 {findModuleById(modules, activeId)?.title}
               </span>

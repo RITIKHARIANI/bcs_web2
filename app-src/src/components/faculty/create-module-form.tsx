@@ -133,8 +133,8 @@ export function CreateModuleForm({ parentModuleId, user }: CreateModuleFormProps
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Module Created!</h3>
-            <p className="text-gray-600">Redirecting to module library...</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Module Created!</h3>
+            <p className="text-gray-700 dark:text-gray-300">Redirecting to module library...</p>
           </div>
         </CardContent>
       </Card>
@@ -196,7 +196,7 @@ export function CreateModuleForm({ parentModuleId, user }: CreateModuleFormProps
               value={formData.description}
               onChange={handleChange}
               placeholder="Brief description of this module (optional)"
-              className="w-full p-3 border border-gray-200 rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2"
+              className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-md resize-none h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
             />
           </div>
 

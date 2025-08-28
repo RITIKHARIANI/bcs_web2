@@ -93,7 +93,7 @@ export function ModuleLibrary({ user }: ModuleLibraryProps) {
     return (
       <div className="text-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading modules...</p>
+        <p className="mt-4 text-gray-700 dark:text-gray-300">Loading modules...</p>
       </div>
     )
   }
@@ -142,12 +142,12 @@ export function ModuleLibrary({ user }: ModuleLibraryProps) {
         <Card>
           <CardContent className="text-center py-12">
             <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No modules found</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No modules found</h3>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
               {searchTerm ? 'No modules match your search.' : 'Start building your module library by creating your first module.'}
             </p>
             {!searchTerm && (
@@ -197,7 +197,7 @@ function ModuleCard({ module, onDelete, level }: ModuleCardProps) {
       case 'draft':
         return 'bg-yellow-100 text-yellow-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
     }
   }
 
@@ -222,7 +222,7 @@ function ModuleCard({ module, onDelete, level }: ModuleCardProps) {
                   {module.description}
                 </CardDescription>
               )}
-              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
                 <span>Used in {module._count?.courseModules || 0} course{(module._count?.courseModules || 0) !== 1 ? 's' : ''}</span>
                 <span>•</span>
                 <span>{module._count?.subModules || 0} submodule{(module._count?.subModules || 0) !== 1 ? 's' : ''}</span>

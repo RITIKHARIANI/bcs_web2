@@ -23,10 +23,10 @@ export default async function EditModulePage({ params }: EditModulePageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 Edit Module
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
                 Update your module content and settings
               </p>
             </div>
