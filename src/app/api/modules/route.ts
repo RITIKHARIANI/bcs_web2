@@ -61,7 +61,12 @@ export async function POST(request: NextRequest) {
 
     const newModule = await prisma.module.create({
       data: {
-        ...validatedData,
+        title: validatedData.title,
+        slug: validatedData.slug,
+        content: validatedData.content,
+        description: validatedData.description,
+        parentModuleId: validatedData.parentModuleId,
+        status: validatedData.status,
         authorId: session.user.id,
         sortOrder,
       },

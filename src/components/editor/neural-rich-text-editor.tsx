@@ -6,7 +6,7 @@ import Heading from '@tiptap/extension-heading'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import { NeuralButton } from '@/components/ui/neural-button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -58,6 +58,7 @@ export function NeuralRichTextEditor({
   const [wordCount, setWordCount] = useState(0)
   const [characterCount, setCharacterCount] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const editor = useEditor({
     extensions: [
@@ -100,8 +101,10 @@ export function NeuralRichTextEditor({
 
       // Auto-save functionality
       if (autoSave && onSave) {
-        clearTimeout(window.autoSaveTimeout)
-        window.autoSaveTimeout = setTimeout(() => {
+        if (autoSaveTimeoutRef.current) {
+          clearTimeout(autoSaveTimeoutRef.current)
+        }
+        autoSaveTimeoutRef.current = setTimeout(() => {
           handleSave(html)
         }, autoSaveDelay)
       }
