@@ -1,15 +1,16 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth/config'
-import { CreateModuleForm } from '@/components/faculty/create-module-form'
+import { EditModuleForm } from '@/components/faculty/edit-module-form'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
-interface CreateModulePageProps {
-  searchParams: {
-    parent?: string
-  }
+interface EditModulePageProps {
+  params: Promise<{ id: string }>
 }
 
-export default async function CreateModulePage({ searchParams }: CreateModulePageProps) {
+export default async function EditModulePage({ params }: EditModulePageProps) {
   const session = await auth()
+  const { id } = await params
 
   if (!session || session.user.role !== 'faculty') {
     redirect('/auth/login')
@@ -23,12 +24,17 @@ export default async function CreateModulePage({ searchParams }: CreateModulePag
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Create New Module
+                Edit Module
               </h1>
               <p className="text-sm text-gray-600">
-                Add a new learning module to your library
+                Update your module content and settings
               </p>
             </div>
+            <Link href="/faculty/modules">
+              <Button variant="ghost">
+                ← Back to Modules
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -36,10 +42,7 @@ export default async function CreateModulePage({ searchParams }: CreateModulePag
       {/* Main Content */}
       <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <CreateModuleForm 
-            parentModuleId={searchParams.parent}
-            user={session.user}
-          />
+          <EditModuleForm moduleId={id} />
         </div>
       </main>
     </div>
