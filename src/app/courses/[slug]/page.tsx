@@ -25,23 +25,42 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   
   if (!course) {
     return {
-      title: "Course Not Found - BCS Interactive Platform",
+      title: "Course Not Found - NeuroLearn",
+      description: "The requested course could not be found.",
     };
   }
 
   return {
-    title: `${course.title} - BCS Interactive Platform`,
+    title: `${course.title} - NeuroLearn`,
     description: course.description || `Learn about ${course.title} through interactive modules and comprehensive content.`,
+    keywords: ["neuroscience", "cognitive science", "brain", "learning", course.title],
+    openGraph: {
+      title: `${course.title} - NeuroLearn`,
+      description: course.description || `Learn about ${course.title} through interactive modules.`,
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${course.title} - NeuroLearn`,
+      description: course.description || `Learn about ${course.title} through interactive modules.`,
+    },
   };
 }
 
-export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CoursePage({ 
+  params,
+  searchParams 
+}: { 
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ module?: string; search?: string }>;
+}) {
   const { slug } = await params;
+  const search = await searchParams;
   const course = await getCourse(slug);
 
   if (!course) {
     notFound();
   }
 
-  return <CourseViewer course={course} />;
+  return <CourseViewer course={course} initialModule={search?.module} initialSearch={search?.search} />;
 }

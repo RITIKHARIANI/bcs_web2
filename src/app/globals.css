@@ -57,6 +57,111 @@
   }
 }
 
+/* Enhanced Reading Interface */
+.reading-interface {
+  line-height: 1.8;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.reading-interface h1, 
+.reading-interface h2, 
+.reading-interface h3 {
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 700;
+  color: #6366f1;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.reading-interface h1 {
+  font-size: 2rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+.reading-interface h2 {
+  font-size: 1.5rem;
+}
+
+.reading-interface h3 {
+  font-size: 1.25rem;
+}
+
+.reading-interface p {
+  margin-bottom: 1.5rem;
+  text-align: justify;
+}
+
+.reading-interface blockquote {
+  border-left: 4px solid #6366f1;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 0.5rem;
+  font-style: italic;
+}
+
+.reading-interface code {
+  background: #f1f5f9;
+  color: #6366f1;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}
+
+.reading-interface pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.reading-interface img {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin: 1.5rem auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.reading-interface ul, 
+.reading-interface ol {
+  margin: 1.5rem 0;
+  padding-left: 2rem;
+}
+
+.reading-interface li {
+  margin: 0.5rem 0;
+}
+
+.reading-interface table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.reading-interface th,
+.reading-interface td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.reading-interface th {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.reading-interface tr:hover {
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
 /* Mobile-friendly interactions */
 @media (max-width: 768px) {
   .neural-button {
