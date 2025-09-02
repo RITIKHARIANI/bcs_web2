@@ -35,8 +35,10 @@ import {
   Minimize2,
   Eye,
   FileText,
-  Navigation
+  Navigation,
+  Network
 } from 'lucide-react'
+import { IntegratedGraphSystem } from '../visualization/integrated-graph-system'
 
 interface Module {
   id: string
@@ -477,8 +479,22 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
                   </CardContent>
                 </Card>
 
-                {/* Course Structure Visualization - Placeholder */}
-                {/* TODO: Add back IntegratedGraphSystem after fixing imports */}
+                {/* Course Structure Visualization */}
+                <Card className="cognitive-card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-lg">
+                      <Network className="mr-3 h-5 w-5 text-neural-primary" />
+                      Course Structure
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <IntegratedGraphSystem
+                      mode="public"
+                      course={course}
+                      className="h-96"
+                    />
+                  </CardContent>
+                </Card>
 
                 {/* Navigation Footer */}
                 <Card className="cognitive-card">

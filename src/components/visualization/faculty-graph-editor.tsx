@@ -305,7 +305,8 @@ function FacultyGraphEditorFlow({ courseId, className, onSave }: FacultyGraphEdi
 
     setNodes(newNodes)
     setEdges(newEdges)
-  }, [courseData, setNodes, setEdges])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseData])
 
   // Update available modules
   useEffect(() => {
