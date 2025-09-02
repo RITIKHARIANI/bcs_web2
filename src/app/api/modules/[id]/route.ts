@@ -41,6 +41,11 @@ export async function GET(
     }
 
     const { id } = await params
+    
+    // Validate the ID parameter
+    if (!id || typeof id !== 'string' || id.trim() === '') {
+      return NextResponse.json({ error: 'Invalid module ID' }, { status: 400 })
+    }
     const foundModule = await prisma.module.findFirst({
       where: {
         id,
@@ -91,6 +96,15 @@ export async function GET(
     return NextResponse.json({ module: foundModule })
   } catch (error) {
     console.error('Error fetching module:', error)
+    
+    // Check if it's a Prisma validation error
+    if (error instanceof Error && error.message.includes('Invalid')) {
+      return NextResponse.json(
+        { error: 'Invalid request parameters' },
+        { status: 400 }
+      )
+    }
+    
     return NextResponse.json(
       { error: 'Failed to fetch module' },
       { status: 500 }
