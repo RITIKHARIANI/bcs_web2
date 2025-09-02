@@ -365,7 +365,7 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
                 <CardContent className="space-y-2 max-h-96 overflow-y-auto pt-0">
                   {filteredModules.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">
-                      No modules found matching "{searchQuery}"
+                      No modules found matching &quot;{searchQuery}&quot;
                     </p>
                   ) : (
                     filteredModules.map((courseModule, index) => {

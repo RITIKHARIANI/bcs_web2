@@ -35,11 +35,11 @@ export async function generateMetadata({
   }
 
   // Find the specific module
-  const module = course.courseModules.find((cm: any) => 
+  const foundModule = course.courseModules.find((cm: any) => 
     cm.module.slug === moduleSlug
   )?.module;
 
-  if (!module) {
+  if (!foundModule) {
     return {
       title: `${course.title} - NeuroLearn`,
       description: course.description || `Learn about ${course.title} through interactive modules.`,
@@ -47,18 +47,18 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${module.title} - ${course.title} - NeuroLearn`,
-    description: module.description || `Learn about ${module.title} in the ${course.title} course.`,
-    keywords: ["neuroscience", "cognitive science", "brain", "learning", course.title, module.title],
+    title: `${foundModule.title} - ${course.title} - NeuroLearn`,
+    description: foundModule.description || `Learn about ${foundModule.title} in the ${course.title} course.`,
+    keywords: ["neuroscience", "cognitive science", "brain", "learning", course.title, foundModule.title],
     openGraph: {
-      title: `${module.title} - ${course.title} - NeuroLearn`,
-      description: module.description || `Learn about ${module.title} in the ${course.title} course.`,
+      title: `${foundModule.title} - ${course.title} - NeuroLearn`,
+      description: foundModule.description || `Learn about ${foundModule.title} in the ${course.title} course.`,
       type: "article",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${module.title} - ${course.title} - NeuroLearn`,
-      description: module.description || `Learn about ${module.title} in the ${course.title} course.`,
+      title: `${foundModule.title} - ${course.title} - NeuroLearn`,
+      description: foundModule.description || `Learn about ${foundModule.title} in the ${course.title} course.`,
     },
   };
 }
