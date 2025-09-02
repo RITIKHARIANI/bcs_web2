@@ -305,7 +305,7 @@ function FacultyGraphEditorFlow({ courseId, className, onSave }: FacultyGraphEdi
 
     setNodes(newNodes)
     setEdges(newEdges)
-  }, [courseData, handleNodeUpdate, handleNodeEdit, handleNodeRemove, setNodes, setEdges])
+  }, [courseData, setNodes, setEdges])
 
   // Update available modules
   useEffect(() => {
@@ -624,7 +624,6 @@ function FacultyGraphEditorFlow({ courseId, className, onSave }: FacultyGraphEdi
           color="#6366f1" 
           gap={20} 
           size={1} 
-          variant="dots" 
           className="opacity-20"
         />
         

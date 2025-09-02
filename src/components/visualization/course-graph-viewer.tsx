@@ -442,7 +442,6 @@ function CourseGraphFlow({ course, showMiniMap = true, interactive = true }: Cou
           color="#6366f1" 
           gap={20} 
           size={1} 
-          variant="dots" 
           className="opacity-20"
         />
         

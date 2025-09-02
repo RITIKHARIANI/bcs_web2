@@ -526,7 +526,6 @@ function ModuleRelationshipFlow({ className }: ModuleRelationshipViewerProps) {
           color="#6366f1" 
           gap={20} 
           size={1} 
-          variant="dots" 
           className="opacity-20"
         />
         
