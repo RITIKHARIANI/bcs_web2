@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://neurolearn.ai/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1
+
+# Specific paths
+Allow: /courses
+Allow: /auth/login
+Allow: /api/auth/
+
+# Disallow faculty areas for public crawlers
+Disallow: /faculty/
+Disallow: /api/modules
+Disallow: /api/courses
+Disallow: /api/visualization
