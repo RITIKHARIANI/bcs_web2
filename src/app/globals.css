@@ -535,11 +535,14 @@ Neural network-inspired design with sophisticated academic aesthetics */
     max-width: 250px;
     font-size: 0.8rem;
   }
-    border: 2px solid hsl(var(--neural-light) / 0.3);
-    border-radius: 50%;
-    box-shadow: var(--shadow-cognitive);
-    transition: var(--transition-neural);
-  }
+}
+
+.neural-graph-node {
+  border: 2px solid hsl(var(--neural-light) / 0.3);
+  border-radius: 50%;
+  box-shadow: var(--shadow-cognitive);
+  transition: var(--transition-neural);
+}
   
   .neural-graph-node:hover {
     transform: scale(1.1);
