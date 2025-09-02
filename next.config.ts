@@ -156,8 +156,8 @@ const nextConfig: NextConfig = {
 
   // Experimental features for production
   experimental: {
-    // Enable for better performance
-    optimizeCss: true,
+    // Note: optimizeCss removed due to critters dependency issues
+    // Can be re-enabled once the issue is resolved
   },
 };
 

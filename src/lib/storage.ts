@@ -99,7 +99,6 @@ const saveFileToS3 = async (file: File): Promise<{ url: string; path: string }> 
 
   try {
     // Dynamic import to avoid bundle bloat if not using S3
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const awsSdk = await import('@aws-sdk/client-s3' as any).catch((err: Error) => {
       console.warn('AWS SDK not available:', err.message);
       throw new Error('AWS SDK not installed. Run: npm install @aws-sdk/client-s3');
@@ -144,7 +143,6 @@ const saveFileToCloudinary = async (file: File): Promise<{ url: string; path: st
 
   try {
     // Dynamic import to avoid bundle bloat if not using Cloudinary
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cloudinary = await import('cloudinary' as any).catch((err: Error) => {
       console.warn('Cloudinary SDK not available:', err.message);
       throw new Error('Cloudinary SDK not installed. Run: npm install cloudinary');
@@ -181,7 +179,6 @@ const saveFileToVercelBlob = async (file: File): Promise<{ url: string; path: st
 
   try {
     // Dynamic import to avoid bundle bloat if not using Vercel Blob
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const vercelBlob = await import('@vercel/blob' as any).catch((err: Error) => {
       console.warn('Vercel Blob SDK not available:', err.message);
       throw new Error('Vercel Blob SDK not installed. Run: npm install @vercel/blob');
