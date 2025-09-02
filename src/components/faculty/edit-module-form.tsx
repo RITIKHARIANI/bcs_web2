@@ -37,7 +37,7 @@ const editModuleSchema = z.object({
   slug: z.string().min(1, 'Slug is required').max(200, 'Slug too long'),
   description: z.string().optional(),
   content: z.string().min(1, 'Content is required'),
-  parentModuleId: z.string().optional(),
+  parentModuleId: z.string().nullable().optional(),
   status: z.enum(['draft', 'published']).default('draft'),
 })
 
@@ -398,7 +398,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                   <Label htmlFor="parentModule">Parent Module</Label>
                   <Select 
                     value={watchedParentId || 'none'} 
-                    onValueChange={(value) => setValue('parentModuleId', value === 'none' ? undefined : value)}
+                    onValueChange={(value) => setValue('parentModuleId', value === 'none' ? null : value)}
                   >
                     <SelectTrigger className="border-neural-light/30 focus:border-neural-primary">
                       <SelectValue placeholder="None (Root Module)" />

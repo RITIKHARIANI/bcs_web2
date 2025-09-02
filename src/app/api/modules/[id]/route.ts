@@ -3,6 +3,24 @@ import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 
+// Helper function to check if a module is an ancestor of another module
+async function checkIfModuleIsAncestor(moduleId: string, potentialDescendantId: string): Promise<boolean> {
+  if (moduleId === potentialDescendantId) {
+    return true
+  }
+
+  const descendant = await prisma.module.findUnique({
+    where: { id: potentialDescendantId },
+    select: { parentModuleId: true },
+  })
+
+  if (!descendant || !descendant.parentModuleId) {
+    return false
+  }
+
+  return await checkIfModuleIsAncestor(moduleId, descendant.parentModuleId)
+}
+
 const updateModuleSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title too long').optional(),
   slug: z.string().min(1, 'Slug is required').max(200, 'Slug too long').optional(),
@@ -121,6 +139,46 @@ export async function PUT(
           { error: 'A module with this slug already exists' },
           { status: 400 }
         )
+      }
+    }
+
+    // Validate parentModuleId if provided
+    if (validatedData.parentModuleId !== undefined) {
+      if (validatedData.parentModuleId !== null && validatedData.parentModuleId !== '') {
+        // Check if parent module exists and belongs to the same author
+        const parentModule = await prisma.module.findFirst({
+          where: {
+            id: validatedData.parentModuleId,
+            authorId: session.user.id,
+          },
+        })
+
+        if (!parentModule) {
+          return NextResponse.json(
+            { error: 'Parent module not found or you do not have permission to access it' },
+            { status: 400 }
+          )
+        }
+
+        // Prevent circular reference (module cannot be its own parent)
+        if (validatedData.parentModuleId === id) {
+          return NextResponse.json(
+            { error: 'A module cannot be its own parent' },
+            { status: 400 }
+          )
+        }
+
+        // Prevent circular reference in hierarchy (check if current module is an ancestor of the intended parent)
+        const isAncestor = await checkIfModuleIsAncestor(id, validatedData.parentModuleId)
+        if (isAncestor) {
+          return NextResponse.json(
+            { error: 'Cannot create circular reference. The selected parent module is already a descendant of this module.' },
+            { status: 400 }
+          )
+        }
+      } else if (validatedData.parentModuleId === '') {
+        // Convert empty string to null
+        validatedData.parentModuleId = null
       }
     }
 
