@@ -17,19 +17,19 @@ export function NetworkVisualization() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [hoveredNode, setHoveredNode] = useState<string | null>(null)
   
-  const nodes: Node[] = [
+  const nodes: Node[] = useMemo(() => [
     { id: "1", x: 200, y: 150, label: "Neural Networks", type: "concept", icon: Brain, connections: ["2", "3"] },
     { id: "2", x: 400, y: 100, label: "Synaptic Plasticity", type: "theory", icon: Zap, connections: ["1", "4"] },
     { id: "3", x: 300, y: 250, label: "Visual Perception", type: "research", icon: Eye, connections: ["1", "4"] },
     { id: "4", x: 500, y: 200, label: "AI Applications", type: "application", icon: Cpu, connections: ["2", "3"] },
-  ]
+  ], [])
 
-  const typeColors = {
+  const typeColors = useMemo(() => ({
     concept: "hsl(var(--neural-primary))",
     theory: "hsl(var(--synapse-primary))",
     research: "hsl(var(--cognition-teal))",
     application: "hsl(var(--cognition-orange))"
-  }
+  }), [])
 
   useEffect(() => {
     const canvas = canvasRef.current
