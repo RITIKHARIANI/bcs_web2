@@ -122,7 +122,9 @@ export async function PUT(
     }
 
     const body = await request.json()
+    console.log('Request body received:', JSON.stringify(body, null, 2))
     const validatedData = updateModuleSchema.parse(body)
+    console.log('Validated data:', JSON.stringify(validatedData, null, 2))
 
     // If slug is being updated, check uniqueness
     if (validatedData.slug && validatedData.slug !== existingModule.slug) {
@@ -142,45 +144,49 @@ export async function PUT(
       }
     }
 
-    // Validate parentModuleId if provided
+    // Simplified validation - just log what we receive
+    console.log('=== MODULE UPDATE DEBUG ===')
+    console.log('Module ID being updated:', id)
+    console.log('User ID:', session.user.id)
+    console.log('parentModuleId received:', validatedData.parentModuleId)
+    console.log('parentModuleId type:', typeof validatedData.parentModuleId)
+    console.log('================================')
+    
+    // Basic validation
     if (validatedData.parentModuleId !== undefined) {
-      if (validatedData.parentModuleId !== null && validatedData.parentModuleId !== '') {
-        // Check if parent module exists and belongs to the same author
-        const parentModule = await prisma.module.findFirst({
-          where: {
-            id: validatedData.parentModuleId,
-            authorId: session.user.id,
-          },
+      if (validatedData.parentModuleId === '') {
+        // Convert empty string to null
+        validatedData.parentModuleId = null
+        console.log('Converted empty string to null')
+      } else if (validatedData.parentModuleId !== null) {
+        // Only validate if it's not null
+        console.log('Checking if parent module exists...')
+        const parentExists = await prisma.module.findUnique({
+          where: { id: validatedData.parentModuleId }
         })
-
-        if (!parentModule) {
+        
+        if (!parentExists) {
+          console.log('❌ Parent module does not exist!')
           return NextResponse.json(
-            { error: 'Parent module not found or you do not have permission to access it' },
+            { error: `Parent module '${validatedData.parentModuleId}' does not exist` },
             { status: 400 }
           )
         }
-
-        // Prevent circular reference (module cannot be its own parent)
+        
+        console.log('✅ Parent module exists:', parentExists.title)
+        
+        // Basic circular reference check
         if (validatedData.parentModuleId === id) {
+          console.log('❌ Circular reference detected!')
           return NextResponse.json(
             { error: 'A module cannot be its own parent' },
             { status: 400 }
           )
         }
-
-        // Prevent circular reference in hierarchy (check if current module is an ancestor of the intended parent)
-        const isAncestor = await checkIfModuleIsAncestor(id, validatedData.parentModuleId)
-        if (isAncestor) {
-          return NextResponse.json(
-            { error: 'Cannot create circular reference. The selected parent module is already a descendant of this module.' },
-            { status: 400 }
-          )
-        }
-      } else if (validatedData.parentModuleId === '') {
-        // Convert empty string to null
-        validatedData.parentModuleId = null
       }
     }
+    
+    console.log('Final parentModuleId for update:', validatedData.parentModuleId)
 
     const updatedModule = await prisma.module.update({
       where: { id },

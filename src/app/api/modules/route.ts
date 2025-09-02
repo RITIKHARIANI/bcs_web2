@@ -119,15 +119,32 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const parentId = searchParams.get('parentId')
+    const parentModuleId = searchParams.get('parentModuleId') 
     const status = searchParams.get('status')
 
+    // Handle different query parameter formats
+    let whereClause: any = { authorId: session.user.id }
+    
+    if (parentId) {
+      if (parentId === 'root') {
+        whereClause.parentModuleId = null
+      } else {
+        whereClause.parentModuleId = parentId
+      }
+    } else if (parentModuleId !== undefined) {
+      if (parentModuleId === 'null' || parentModuleId === null) {
+        whereClause.parentModuleId = null
+      } else {
+        whereClause.parentModuleId = parentModuleId
+      }
+    }
+    
+    if (status) {
+      whereClause.status = status
+    }
+
     const modules = await prisma.module.findMany({
-      where: {
-        authorId: session.user.id,
-        ...(parentId && { parentModuleId: parentId }),
-        ...(parentId === 'root' && { parentModuleId: null }),
-        ...(status && { status }),
-      },
+      where: whereClause,
       include: {
         author: {
           select: {
