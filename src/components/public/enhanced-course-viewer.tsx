@@ -477,6 +477,9 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
                   </CardContent>
                 </Card>
 
+                {/* Course Structure Visualization - Placeholder */}
+                {/* TODO: Add back IntegratedGraphSystem after fixing imports */}
+
                 {/* Navigation Footer */}
                 <Card className="cognitive-card">
                   <CardContent className="p-4 sm:p-6">
