@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { NeuralButton } from '@/components/ui/neural-button'
@@ -67,6 +67,8 @@ export function ModuleLibrary() {
   const { data: modules = [], isLoading, error } = useQuery({
     queryKey: ['modules'],
     queryFn: fetchModules,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
   })
 
   const filteredModules = modules.filter(module => {
@@ -79,6 +81,19 @@ export function ModuleLibrary() {
     
     return matchesSearch && matchesStatus
   })
+
+  // Debug logging for troubleshooting
+  React.useEffect(() => {
+    console.log('=== MODULE LIBRARY DEBUG ===')
+    console.log('Total modules:', modules.length)
+    console.log('Status filter:', statusFilter)
+    console.log('Search term:', searchTerm)
+    console.log('Filtered modules:', filteredModules.length)
+    console.log('Modules by status:')
+    console.log('- Published:', modules.filter(m => m.status === 'published').length)
+    console.log('- Draft:', modules.filter(m => m.status === 'draft').length)
+    console.log('================================')
+  }, [modules, statusFilter, searchTerm, filteredModules])
 
   const rootModules = filteredModules.filter(module => !module.parentModule)
   const subModules = filteredModules.filter(module => module.parentModule)

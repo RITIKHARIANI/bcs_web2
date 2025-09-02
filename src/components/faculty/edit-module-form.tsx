@@ -151,6 +151,8 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
       toast.success('Module updated successfully!')
       queryClient.invalidateQueries({ queryKey: ['module', moduleId] })
       queryClient.invalidateQueries({ queryKey: ['modules'] })
+      // Redirect to the module's view page
+      router.push(`/faculty/modules/${moduleId}`)
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update module')
