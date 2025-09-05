@@ -1,9 +1,7 @@
 {
-  "buildCommand": "npm run vercel:build",
+  "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "npm run vercel:install",
   "framework": "nextjs",
-  "regions": ["iad1", "sfo1", "lhr1"],
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
