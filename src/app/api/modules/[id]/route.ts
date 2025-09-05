@@ -9,16 +9,16 @@ async function checkIfModuleIsAncestor(moduleId: string, potentialDescendantId: 
     return true
   }
 
-  const descendant = await prisma.module.findUnique({
+  const descendant = await prisma.modules.findUnique({
     where: { id: potentialDescendantId },
-    select: { parentModuleId: true },
+    select: { parent_module_id: true },
   })
 
-  if (!descendant || !descendant.parentModuleId) {
+  if (!descendant || !descendant.parent_module_id) {
     return false
   }
 
-  return await checkIfModuleIsAncestor(moduleId, descendant.parentModuleId)
+  return await checkIfModuleIsAncestor(moduleId, descendant.parent_module_id)
 }
 
 const updateModuleSchema = z.object({
@@ -26,7 +26,7 @@ const updateModuleSchema = z.object({
   slug: z.string().min(1, 'Slug is required').max(200, 'Slug too long').optional(),
   content: z.string().optional(),
   description: z.string().optional(),
-  parentModuleId: z.string().nullable().optional(),
+  parent_module_id: z.string().nullable().optional(),
   status: z.enum(['draft', 'published']).optional(),
 })
 
@@ -46,44 +46,41 @@ export async function GET(
     if (!id || typeof id !== 'string' || id.trim() === '') {
       return NextResponse.json({ error: 'Invalid module ID' }, { status: 400 })
     }
-    const foundModule = await prisma.module.findFirst({
+    const foundModule = await prisma.modules.findFirst({
       where: {
         id,
-        authorId: session.user.id,
+        author_id: session.user.id,
       },
       include: {
-        author: {
+        users: {
           select: {
             name: true,
             email: true,
           },
         },
-        parentModule: {
+        modules: {
           select: {
             id: true,
             title: true,
           },
         },
-        subModules: {
+        other_modules: {
           select: {
             id: true,
             title: true,
             status: true,
-            createdAt: true,
-          },
-          orderBy: {
-            sortOrder: 'asc',
+            created_at: true,
           },
         },
-        moduleMedia: {
+        module_media: {
           include: {
-            mediaFile: true,
+            media_files: true,
           },
         },
         _count: {
           select: {
-            subModules: true,
-            courseModules: true,
+            other_modules: true,
+            course_modules: true,
           },
         },
       },
@@ -124,10 +121,10 @@ export async function PUT(
 
     const { id } = await params
     // Check if module exists and belongs to user
-    const existingModule = await prisma.module.findFirst({
+    const existingModule = await prisma.modules.findFirst({
       where: {
         id,
-        authorId: session.user.id,
+        author_id: session.user.id,
       },
     })
 
@@ -142,10 +139,10 @@ export async function PUT(
 
     // If slug is being updated, check uniqueness
     if (validatedData.slug && validatedData.slug !== existingModule.slug) {
-      const slugExists = await prisma.module.findFirst({
+      const slugExists = await prisma.modules.findFirst({
         where: {
           slug: validatedData.slug,
-          authorId: session.user.id,
+          author_id: session.user.id,
           id: { not: id },
         },
       })
@@ -162,27 +159,27 @@ export async function PUT(
     console.log('=== MODULE UPDATE DEBUG ===')
     console.log('Module ID being updated:', id)
     console.log('User ID:', session.user.id)
-    console.log('parentModuleId received:', validatedData.parentModuleId)
-    console.log('parentModuleId type:', typeof validatedData.parentModuleId)
+    console.log('parent_module_id received:', validatedData.parent_module_id)
+    console.log('parent_module_id type:', typeof validatedData.parent_module_id)
     console.log('================================')
     
     // Basic validation
-    if (validatedData.parentModuleId !== undefined) {
-      if (validatedData.parentModuleId === '') {
+    if (validatedData.parent_module_id !== undefined) {
+      if (validatedData.parent_module_id === '') {
         // Convert empty string to null
-        validatedData.parentModuleId = null
+        validatedData.parent_module_id = null
         console.log('Converted empty string to null')
-      } else if (validatedData.parentModuleId !== null) {
+      } else if (validatedData.parent_module_id !== null) {
         // Only validate if it's not null
         console.log('Checking if parent module exists...')
-        const parentExists = await prisma.module.findUnique({
-          where: { id: validatedData.parentModuleId }
+        const parentExists = await prisma.modules.findUnique({
+          where: { id: validatedData.parent_module_id }
         })
         
         if (!parentExists) {
           console.log('❌ Parent module does not exist!')
           return NextResponse.json(
-            { error: `Parent module '${validatedData.parentModuleId}' does not exist` },
+            { error: `Parent module '${validatedData.parent_module_id}' does not exist` },
             { status: 400 }
           )
         }
@@ -190,7 +187,7 @@ export async function PUT(
         console.log('✅ Parent module exists:', parentExists.title)
         
         // Basic circular reference check
-        if (validatedData.parentModuleId === id) {
+        if (validatedData.parent_module_id === id) {
           console.log('❌ Circular reference detected!')
           return NextResponse.json(
             { error: 'A module cannot be its own parent' },
@@ -200,39 +197,39 @@ export async function PUT(
       }
     }
     
-    console.log('Final parentModuleId for update:', validatedData.parentModuleId)
+    console.log('Final parent_module_id for update:', validatedData.parent_module_id)
 
-    const updatedModule = await prisma.module.update({
+    const updatedModule = await prisma.modules.update({
       where: { id },
       data: validatedData,
       include: {
-        author: {
+        users: {
           select: {
             name: true,
             email: true,
           },
         },
-        parentModule: {
+        modules: {
           select: {
             id: true,
             title: true,
           },
         },
-        subModules: {
+        other_modules: {
           select: {
             id: true,
             title: true,
             status: true,
-            createdAt: true,
+            created_at: true,
           },
           orderBy: {
-            sortOrder: 'asc',
+            sort_order: 'asc',
           },
         },
         _count: {
           select: {
-            subModules: true,
-            courseModules: true,
+            other_modules: true,
+            course_modules: true,
           },
         },
       },
@@ -268,16 +265,16 @@ export async function DELETE(
 
     const { id } = await params
     // Check if module exists and belongs to user
-    const moduleToDelete = await prisma.module.findFirst({
+    const moduleToDelete = await prisma.modules.findFirst({
       where: {
         id,
-        authorId: session.user.id,
+        author_id: session.user.id,
       },
       include: {
         _count: {
           select: {
-            subModules: true,
-            courseModules: true,
+            other_modules: true,
+            course_modules: true,
           },
         },
       },
@@ -288,21 +285,21 @@ export async function DELETE(
     }
 
     // Prevent deletion if module has submodules or is used in courses
-    if (moduleToDelete._count.subModules > 0) {
+    if (moduleToDelete._count.other_modules > 0) {
       return NextResponse.json(
         { error: 'Cannot delete module with submodules. Please delete submodules first.' },
         { status: 400 }
       )
     }
 
-    if (moduleToDelete._count.courseModules > 0) {
+    if (moduleToDelete._count.course_modules > 0) {
       return NextResponse.json(
         { error: 'Cannot delete module that is used in courses. Remove from courses first.' },
         { status: 400 }
       )
     }
 
-    await prisma.module.delete({
+    await prisma.modules.delete({
       where: { id },
     })
 

@@ -24,19 +24,19 @@ export async function GET(
     const { searchParams } = new URL(request.url)
     const includeModules = searchParams.get('includeModules') === 'true'
 
-    const course = await prisma.course.findUnique({
+    const course = await prisma.courses.findUnique({
       where: { id },
       include: {
-        author: {
+        users: {
           select: {
             name: true,
             email: true,
           },
         },
         ...(includeModules && {
-          courseModules: {
+          course_modules: {
             include: {
-              module: {
+              modules: {
                 select: {
                   id: true,
                   title: true,
@@ -44,18 +44,18 @@ export async function GET(
                   description: true,
                   content: true,
                   status: true,
-                  createdAt: true,
+                  created_at: true,
                 },
               },
             },
             orderBy: {
-              sortOrder: 'asc',
+              sort_order: 'asc',
             },
           },
         }),
         _count: {
           select: {
-            courseModules: true,
+            course_modules: true,
           },
         },
       },
@@ -67,7 +67,7 @@ export async function GET(
 
     // Check if user has access (public if published, or author for any status)
     const session = await auth()
-    const isAuthor = session?.user?.id === course.authorId
+    const isAuthor = session?.user?.id === course.author_id
     const isPublished = course.status === 'published'
 
     if (!isPublished && !isAuthor) {
@@ -97,10 +97,10 @@ export async function PUT(
     const { id } = await params
 
     // Check if course exists and belongs to user
-    const existingCourse = await prisma.course.findFirst({
+    const existingCourse = await prisma.courses.findFirst({
       where: {
         id,
-        authorId: session.user.id,
+        author_id: session.user.id,
       },
     })
 
@@ -113,10 +113,10 @@ export async function PUT(
 
     // If slug is being updated, check uniqueness
     if (validatedData.slug && validatedData.slug !== existingCourse.slug) {
-      const slugExists = await prisma.course.findFirst({
+      const slugExists = await prisma.courses.findFirst({
         where: {
           slug: validatedData.slug,
-          authorId: session.user.id,
+          author_id: session.user.id,
           id: { not: id },
         },
       })
@@ -133,10 +133,10 @@ export async function PUT(
     if (validatedData.modules) {
       if (validatedData.modules.length > 0) {
         const moduleIds = validatedData.modules.map(m => m.moduleId)
-        const userModules = await prisma.module.findMany({
+        const userModules = await prisma.modules.findMany({
           where: {
             id: { in: moduleIds },
-            authorId: session.user.id,
+            author_id: session.user.id,
           },
         })
 
@@ -152,7 +152,7 @@ export async function PUT(
     // Update course and modules in a transaction
     const updatedCourse = await prisma.$transaction(async (tx) => {
       // Update course basic info
-      const course = await tx.course.update({
+      const course = await tx.courses.update({
         where: { id },
         data: {
           title: validatedData.title,
@@ -166,17 +166,18 @@ export async function PUT(
       // Update modules if provided
       if (validatedData.modules !== undefined) {
         // Delete existing course-module relationships
-        await tx.courseModule.deleteMany({
-          where: { courseId: id },
+        await tx.course_modules.deleteMany({
+          where: { course_id: id },
         })
 
         // Create new relationships
         if (validatedData.modules.length > 0) {
-          await tx.courseModule.createMany({
-            data: validatedData.modules.map(({ moduleId, order }) => ({
-              courseId: id,
-              moduleId,
-              sortOrder: order,
+          await tx.course_modules.createMany({
+            data: validatedData.modules.map(({ moduleId, order }, index) => ({
+              id: `${id}_${moduleId}_${Date.now()}_${index}`,
+              course_id: id,
+              module_id: moduleId,
+              sort_order: order,
             })),
           })
         }
@@ -186,18 +187,18 @@ export async function PUT(
     })
 
     // Fetch the updated course with complete details
-    const courseWithDetails = await prisma.course.findUnique({
+    const courseWithDetails = await prisma.courses.findUnique({
       where: { id },
       include: {
-        author: {
+        users: {
           select: {
             name: true,
             email: true,
           },
         },
-        courseModules: {
+        course_modules: {
           include: {
-            module: {
+            modules: {
               select: {
                 id: true,
                 title: true,
@@ -208,12 +209,12 @@ export async function PUT(
             },
           },
           orderBy: {
-            sortOrder: 'asc',
+            sort_order: 'asc',
           },
         },
         _count: {
           select: {
-            courseModules: true,
+            course_modules: true,
           },
         },
       },
@@ -250,10 +251,10 @@ export async function DELETE(
     const { id } = await params
 
     // Check if course exists and belongs to user
-    const course = await prisma.course.findFirst({
+    const course = await prisma.courses.findFirst({
       where: {
         id,
-        authorId: session.user.id,
+        author_id: session.user.id,
       },
     })
 
@@ -262,7 +263,7 @@ export async function DELETE(
     }
 
     // Delete course (cascade will handle course-module relationships)
-    await prisma.course.delete({
+    await prisma.courses.delete({
       where: { id },
     })
 

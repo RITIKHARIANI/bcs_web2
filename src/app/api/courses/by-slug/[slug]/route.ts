@@ -8,21 +8,21 @@ export async function GET(
   try {
     const { slug } = await params
 
-    const course = await prisma.course.findFirst({
+    const course = await prisma.courses.findFirst({
       where: {
         slug,
         status: 'published', // Only show published courses publicly
       },
       include: {
-        author: {
+        users: {
           select: {
             name: true,
             email: true,
           },
         },
-        courseModules: {
+        course_modules: {
           include: {
-            module: {
+            modules: {
               select: {
                 id: true,
                 title: true,
@@ -30,25 +30,25 @@ export async function GET(
                 description: true,
                 content: true,
                 status: true,
-                parentModuleId: true,
-                sortOrder: true,
-                createdAt: true,
-                updatedAt: true,
+                parent_module_id: true,
+                sort_order: true,
+                created_at: true,
+                updated_at: true,
               },
             },
           },
           where: {
-            module: {
+            modules: {
               status: 'published', // Only include published modules
             },
           },
           orderBy: {
-            sortOrder: 'asc',
+            sort_order: 'asc',
           },
         },
         _count: {
           select: {
-            courseModules: true,
+            course_modules: true,
           },
         },
       },

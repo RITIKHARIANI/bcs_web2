@@ -9,26 +9,26 @@ interface ModulePageProps {
 }
 
 async function getModuleBySlug(slug: string) {
-  const foundModule = await prisma.module.findFirst({
+  const foundModule = await prisma.modules.findFirst({
     where: {
       slug,
       status: 'published', // Only show published modules publicly
     },
     include: {
-      author: {
+      users: {
         select: {
           name: true,
           email: true,
         },
       },
-      parentModule: {
+      modules: {
         select: {
           id: true,
           title: true,
           slug: true,
         },
       },
-      subModules: {
+      other_modules: {
         where: {
           status: 'published', // Only show published submodules
         },
@@ -37,10 +37,10 @@ async function getModuleBySlug(slug: string) {
           title: true,
           slug: true,
           description: true,
-          sortOrder: true,
+          sort_order: true,
         },
         orderBy: {
-          sortOrder: 'asc',
+          sort_order: 'asc',
         },
       },
     },
@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: ModulePageProps): Promise<Met
       title: foundModule.title,
       description: foundModule.description || `Learn about ${foundModule.title} in this educational module.`,
       type: 'article',
-      authors: [foundModule.author.name],
+      authors: [foundModule.users.name],
     },
   }
 }
@@ -84,8 +84,14 @@ export default async function ModulePage({ params }: ModulePageProps) {
   const moduleData = {
     ...foundModule,
     status: foundModule.status as 'draft' | 'published',
-    createdAt: foundModule.createdAt.toISOString(),
-    updatedAt: foundModule.updatedAt.toISOString(),
+    createdAt: foundModule.created_at.toISOString(),
+    updatedAt: foundModule.updated_at.toISOString(),
+    author: foundModule.users, // Map users to author for component compatibility
+    parentModule: foundModule.modules, // Map modules to parentModule for component compatibility
+    subModules: foundModule.other_modules.map(subModule => ({
+      ...subModule,
+      sortOrder: subModule.sort_order // Map sort_order to sortOrder for component compatibility
+    })), // Map other_modules to subModules for component compatibility
   }
 
   return (
@@ -95,11 +101,11 @@ export default async function ModulePage({ params }: ModulePageProps) {
         <div className="mb-6">
           <nav className="text-sm text-muted-foreground">
             <Link href="/" className="hover:text-foreground">Home</Link>
-            {foundModule.parentModule && (
+            {foundModule.modules && (
               <>
                 <span className="mx-2">/</span>
-                <Link href={`/modules/${foundModule.parentModule.slug}`} className="hover:text-foreground">
-                  {foundModule.parentModule.title}
+                <Link href={`/modules/${foundModule.modules.slug}`} className="hover:text-foreground">
+                  {foundModule.modules.title}
                 </Link>
               </>
             )}

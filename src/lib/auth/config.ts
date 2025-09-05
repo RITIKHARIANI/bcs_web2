@@ -29,7 +29,7 @@ export const authConfig = {
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password as string,
-          user.passwordHash
+          user.password_hash
         )
 
         if (!isPasswordValid) {

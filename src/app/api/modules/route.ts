@@ -8,7 +8,7 @@ const createModuleSchema = z.object({
   slug: z.string().min(1, 'Slug is required').max(200, 'Slug too long'),
   content: z.string().optional(),
   description: z.string().optional(),
-  parentModuleId: z.string().optional(),
+  parent_module_id: z.string().optional(),
   status: z.enum(['draft', 'published']).default('draft'),
 })
 
@@ -23,10 +23,10 @@ export async function POST(request: NextRequest) {
     const validatedData = createModuleSchema.parse(body)
 
     // Check if slug is unique for this author
-    const existingModule = await prisma.module.findFirst({
+    const existingModule = await prisma.modules.findFirst({
       where: {
         slug: validatedData.slug,
-        authorId: session.user.id,
+        author_id: session.user.id,
       },
     })
 
@@ -38,46 +38,47 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine sort order for hierarchical positioning
-    let sortOrder = 0
-    if (validatedData.parentModuleId) {
-      const lastSibling = await prisma.module.findFirst({
+    let sort_order = 0
+    if (validatedData.parent_module_id) {
+      const lastSibling = await prisma.modules.findFirst({
         where: {
-          parentModuleId: validatedData.parentModuleId,
-          authorId: session.user.id,
+          parent_module_id: validatedData.parent_module_id,
+          author_id: session.user.id,
         },
-        orderBy: { sortOrder: 'desc' },
+        orderBy: { sort_order: 'desc' },
       })
-      sortOrder = (lastSibling?.sortOrder || 0) + 1
+      sort_order = (lastSibling?.sort_order || 0) + 1
     } else {
-      const lastRootModule = await prisma.module.findFirst({
+      const lastRootModule = await prisma.modules.findFirst({
         where: {
-          parentModuleId: null,
-          authorId: session.user.id,
+          parent_module_id: null,
+          author_id: session.user.id,
         },
-        orderBy: { sortOrder: 'desc' },
+        orderBy: { sort_order: 'desc' },
       })
-      sortOrder = (lastRootModule?.sortOrder || 0) + 1
+      sort_order = (lastRootModule?.sort_order || 0) + 1
     }
 
-    const newModule = await prisma.module.create({
+    const newModule = await prisma.modules.create({
       data: {
+        id: `module_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`,
         title: validatedData.title,
         slug: validatedData.slug,
         content: validatedData.content,
         description: validatedData.description,
-        parentModuleId: validatedData.parentModuleId,
+        parent_module_id: validatedData.parent_module_id,
         status: validatedData.status,
-        authorId: session.user.id,
-        sortOrder,
+        author_id: session.user.id,
+        sort_order,
       },
       include: {
-        author: {
+        users: {
           select: {
             name: true,
             email: true,
           },
         },
-        parentModule: {
+        modules: {
           select: {
             id: true,
             title: true,
@@ -85,8 +86,8 @@ export async function POST(request: NextRequest) {
         },
         _count: {
           select: {
-            subModules: true,
-            courseModules: true,
+            other_modules: true,
+            course_modules: true,
           },
         },
       },
@@ -119,23 +120,23 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const parentId = searchParams.get('parentId')
-    const parentModuleId = searchParams.get('parentModuleId') 
+    const parent_module_id = searchParams.get('parent_module_id') 
     const status = searchParams.get('status')
 
     // Handle different query parameter formats
-    let whereClause: any = { authorId: session.user.id }
+    let whereClause: any = { author_id: session.user.id }
     
     if (parentId) {
       if (parentId === 'root') {
-        whereClause.parentModuleId = null
+        whereClause.parent_module_id = null
       } else {
-        whereClause.parentModuleId = parentId
+        whereClause.parent_module_id = parentId
       }
-    } else if (parentModuleId !== undefined) {
-      if (parentModuleId === 'null' || parentModuleId === null) {
-        whereClause.parentModuleId = null
+    } else if (parent_module_id !== undefined) {
+      if (parent_module_id === 'null' || parent_module_id === null) {
+        whereClause.parent_module_id = null
       } else {
-        whereClause.parentModuleId = parentModuleId
+        whereClause.parent_module_id = parent_module_id
       }
     }
     
@@ -143,41 +144,41 @@ export async function GET(request: NextRequest) {
       whereClause.status = status
     }
 
-    const modules = await prisma.module.findMany({
+    const modules = await prisma.modules.findMany({
       where: whereClause,
       include: {
-        author: {
+        users: {
           select: {
             name: true,
             email: true,
           },
         },
-        parentModule: {
+        modules: {
           select: {
             id: true,
             title: true,
           },
         },
-        subModules: {
+        other_modules: {
           select: {
             id: true,
             title: true,
             status: true,
-            createdAt: true,
+            created_at: true,
           },
           orderBy: {
-            sortOrder: 'asc',
+            sort_order: 'asc',
           },
         },
         _count: {
           select: {
-            subModules: true,
-            courseModules: true,
+            other_modules: true,
+            course_modules: true,
           },
         },
       },
       orderBy: {
-        sortOrder: 'asc',
+        sort_order: 'asc',
       },
     })
 

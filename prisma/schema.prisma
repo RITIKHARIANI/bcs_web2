@@ -33,7 +33,7 @@ model courses {
   featured       Boolean          @default(false)
   tags           String[]
   created_at     DateTime         @default(now())
-  updated_at     DateTime
+  updated_at     DateTime         @updatedAt
   course_modules course_modules[]
   users          users            @relation(fields: [author_id], references: [id])
 
@@ -84,7 +84,7 @@ model modules {
   module_number    String?
   status           String           @default("draft")
   created_at       DateTime         @default(now())
-  updated_at       DateTime
+  updated_at       DateTime         @updatedAt
   course_modules   course_modules[]
   module_media     module_media[]
   users            users            @relation(fields: [author_id], references: [id])
@@ -113,7 +113,7 @@ model users {
   name          String
   role          String        @default("faculty")
   created_at    DateTime      @default(now())
-  updated_at    DateTime
+  updated_at    DateTime      @updatedAt
   courses       courses[]
   media_files   media_files[]
   modules       modules[]
