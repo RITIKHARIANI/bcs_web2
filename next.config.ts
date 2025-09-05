@@ -1,10 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Production optimizations
-  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
+  // Vercel deployment optimization
+  output: process.env.VERCEL ? 'standalone' : undefined,
   poweredByHeader: false,
   reactStrictMode: true,
+  
+  // Vercel-specific optimizations
+  ...(process.env.VERCEL && {
+    // Enable static exports for better caching
+    trailingSlash: false,
+  }),
   
   // Server external packages (moved from experimental)
   serverExternalPackages: ['@prisma/client', 'bcryptjs'],
@@ -97,7 +103,7 @@ const nextConfig: NextConfig = {
       headers: [
         {
           key: 'Access-Control-Allow-Origin',
-          value: process.env.CORS_ORIGINS || 'https://yourdomain.com',
+          value: process.env.CORS_ORIGINS || 'https://bcs-etextbook.vercel.app',
         },
         {
           key: 'Access-Control-Allow-Methods',
@@ -128,7 +134,7 @@ const nextConfig: NextConfig = {
             value: 'http',
           },
         ],
-        destination: 'https://yourdomain.com/:path*',
+        destination: 'https://bcs-etextbook.vercel.app/:path*',
         permanent: true,
       },
     ] : []),
