@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const validatedData = registerSchema.parse(body)
     
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.users.findUnique({
       where: {
         email: validatedData.email,
       },
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
     // Create user
-    const newUser = await prisma.user.create({
+    const newUser = await prisma.users.create({
       data: {
         id: userId,
         name: validatedData.name,
