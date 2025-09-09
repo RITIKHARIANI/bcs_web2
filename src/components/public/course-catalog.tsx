@@ -73,7 +73,7 @@ export function CourseCatalog() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background">
         <div className="container mx-auto px-6 py-12">
           <div className="animate-pulse space-y-8">
             <div className="text-center space-y-4">
@@ -101,7 +101,7 @@ export function CourseCatalog() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="bg-background flex items-center justify-center py-20">
         <Card className="cognitive-card max-w-md">
           <CardContent className="p-8 text-center">
             <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -118,7 +118,7 @@ export function CourseCatalog() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-neural-primary/10 via-background to-synapse-primary/10 py-20">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>

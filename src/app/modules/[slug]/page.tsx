@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { StandaloneModuleViewer } from '@/components/public/standalone-module-viewer'
+import { PublicLayout } from '@/components/layouts/app-layout'
 
 interface ModulePageProps {
   params: Promise<{ slug: string }>
@@ -95,7 +96,7 @@ export default async function ModulePage({ params }: ModulePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <PublicLayout>
       <div className="container mx-auto px-6 py-8">
         {/* Breadcrumb */}
         <div className="mb-6">
@@ -117,6 +118,6 @@ export default async function ModulePage({ params }: ModulePageProps) {
         {/* Module Content */}
         <StandaloneModuleViewer module={moduleData} />
       </div>
-    </div>
+    </PublicLayout>
   )
 }

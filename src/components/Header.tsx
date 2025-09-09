@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { Brain, Search, User, BookOpen, Menu, LogOut, X } from "lucide-react";
+import { Brain, Search, User, BookOpen, Menu, LogOut, X, Home, BarChart3, Settings, Plus } from "lucide-react";
 import { NeuralButton } from "./ui/neural-button";
 import { Input } from "./ui/input";
 import {
@@ -14,6 +14,30 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
+// Navigation configuration for extensibility
+const navigationConfig = {
+  public: [
+    { href: "/", label: "Home", icon: Home },
+    { href: "/courses", label: "Courses", icon: BookOpen },
+    { href: "/courses", label: "Library", icon: BookOpen }, // Temporary duplicate - can be refined later
+  ],
+  faculty: [
+    { href: "/", label: "Home", icon: Home },
+    { href: "/courses", label: "Courses", icon: BookOpen },
+    { href: "/faculty/dashboard", label: "Dashboard", icon: BarChart3 },
+    { href: "/faculty/modules", label: "My Modules", icon: BookOpen },
+    { href: "/faculty/courses", label: "My Courses", icon: BookOpen },
+    { href: "/faculty/modules/create", label: "Create Module", icon: Plus },
+  ],
+  // Future extensibility for student role
+  student: [
+    { href: "/", label: "Home", icon: Home },
+    { href: "/courses", label: "Courses", icon: BookOpen },
+    { href: "/student/dashboard", label: "Dashboard", icon: BarChart3 },
+    { href: "/student/progress", label: "Progress", icon: BarChart3 },
+  ]
+};
+
 export function Header() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,6 +45,19 @@ export function Header() {
   const handleSignOut = () => {
     signOut({ callbackUrl: "/auth/login" });
   };
+
+  // Get navigation items based on user role
+  const getNavigationItems = () => {
+    if (session?.user?.role === "faculty") {
+      return navigationConfig.faculty;
+    } else if (session?.user?.role === "student") {
+      return navigationConfig.student;
+    } else {
+      return navigationConfig.public;
+    }
+  };
+
+  const navigationItems = getNavigationItems();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" role="banner">
@@ -38,26 +75,19 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium" role="navigation" aria-label="Main navigation">
-            <Link
-              href="/courses"
-              className="thought-pathway transition-colors hover:text-neural-primary focus:text-neural-primary focus:outline-none focus:ring-2 focus:ring-neural-primary focus:ring-offset-2 rounded px-2 py-1"
-            >
-              Courses
-            </Link>
-            <Link
-              href="/courses"
-              className="thought-pathway transition-colors hover:text-neural-primary focus:text-neural-primary focus:outline-none focus:ring-2 focus:ring-neural-primary focus:ring-offset-2 rounded px-2 py-1"
-            >
-              Library
-            </Link>
-            {session?.user?.role === "faculty" && (
-              <Link
-                href="/faculty/dashboard"
-                className="thought-pathway transition-colors hover:text-neural-primary focus:text-neural-primary focus:outline-none focus:ring-2 focus:ring-neural-primary focus:ring-offset-2 rounded px-2 py-1"
-              >
-                Faculty
-              </Link>
-            )}
+            {navigationItems.slice(0, 4).map((item) => {
+              const IconComponent = item.icon;
+              return (
+                <Link
+                  key={item.href + item.label}
+                  href={item.href}
+                  className="flex items-center space-x-1 thought-pathway transition-colors hover:text-neural-primary focus:text-neural-primary focus:outline-none focus:ring-2 focus:ring-neural-primary focus:ring-offset-2 rounded px-2 py-1"
+                >
+                  <IconComponent className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center space-x-2">
@@ -84,20 +114,18 @@ export function Header() {
                   </NeuralButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  {session.user.role === "faculty" && (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link href="/faculty/dashboard">Dashboard</Link>
+                  {session && navigationItems.slice(2).map((item) => {
+                    const IconComponent = item.icon;
+                    return (
+                      <DropdownMenuItem key={item.href + item.label} asChild>
+                        <Link href={item.href} className="flex items-center">
+                          <IconComponent className="mr-2 h-4 w-4" />
+                          {item.label}
+                        </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/faculty/modules">My Modules</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/faculty/courses">My Courses</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
+                    );
+                  })}
+                  {session && <DropdownMenuSeparator />}
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
@@ -149,38 +177,20 @@ export function Header() {
 
               {/* Mobile Navigation */}
               <nav className="flex flex-col space-y-3">
-                <Link
-                  href="/courses"
-                  className="text-foreground hover:text-neural-primary transition-colors py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Courses
-                </Link>
-                <Link
-                  href="/courses"
-                  className="text-foreground hover:text-neural-primary transition-colors py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Library
-                </Link>
-                {session?.user?.role === "faculty" && (
-                  <Link
-                    href="/faculty/dashboard"
-                    className="text-foreground hover:text-neural-primary transition-colors py-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Faculty Dashboard
-                  </Link>
-                )}
-                {!session && (
-                  <Link
-                    href="/courses"
-                    className="text-foreground hover:text-neural-primary transition-colors py-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Browse Courses
-                  </Link>
-                )}
+                {navigationItems.map((item) => {
+                  const IconComponent = item.icon;
+                  return (
+                    <Link
+                      key={item.href + item.label}
+                      href={item.href}
+                      className="flex items-center space-x-2 text-foreground hover:text-neural-primary transition-colors py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <IconComponent className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
               </nav>
             </div>
           </div>
