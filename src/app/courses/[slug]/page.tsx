@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { CourseViewer } from "@/components/public/course-viewer";
+import { PublicLayout } from "@/components/layouts/app-layout";
 
 async function getCourse(slug: string) {
   try {
@@ -62,5 +63,9 @@ export default async function CoursePage({
     notFound();
   }
 
-  return <CourseViewer course={course} initialModule={search?.module} initialSearch={search?.search} />;
+  return (
+    <PublicLayout>
+      <CourseViewer course={course} initialModule={search?.module} initialSearch={search?.search} />
+    </PublicLayout>
+  );
 }

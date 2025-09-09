@@ -26,10 +26,10 @@ export async function POST(request: NextRequest) {
     const validatedData = createCourseSchema.parse(body)
 
     // Check if slug is unique for this author
-    const existingCourse = await prisma.course.findFirst({
+    const existingCourse = await prisma.courses.findFirst({
       where: {
         slug: validatedData.slug,
-        authorId: session.user.id,
+        author_id: session.user.id,
       },
     })
 
@@ -43,10 +43,10 @@ export async function POST(request: NextRequest) {
     // Verify all modules belong to the author
     if (validatedData.modules.length > 0) {
       const moduleIds = validatedData.modules.map(m => m.moduleId)
-      const userModules = await prisma.module.findMany({
+      const userModules = await prisma.modules.findMany({
         where: {
           id: { in: moduleIds },
-          authorId: session.user.id,
+          author_id: session.user.id,
         },
       })
 
@@ -60,24 +60,26 @@ export async function POST(request: NextRequest) {
 
     // Create course with modules in a transaction
     const newCourse = await prisma.$transaction(async (tx) => {
-      const course = await tx.course.create({
+      const course = await tx.courses.create({
         data: {
+          id: `course_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`,
           title: validatedData.title,
           slug: validatedData.slug,
           description: validatedData.description,
           status: validatedData.status,
           featured: validatedData.featured,
-          authorId: session.user.id,
+          author_id: session.user.id,
         },
       })
 
       // Create course-module relationships
       if (validatedData.modules.length > 0) {
-        await tx.courseModule.createMany({
-          data: validatedData.modules.map(({ moduleId, order }) => ({
-            courseId: course.id,
-            moduleId,
-            sortOrder: order,
+        await tx.course_modules.createMany({
+          data: validatedData.modules.map(({ moduleId, order }, index) => ({
+            id: `${course.id}_${moduleId}_${Date.now()}_${index}`,
+            course_id: course.id,
+            module_id: moduleId,
+            sort_order: order,
           })),
         })
       }
@@ -86,18 +88,18 @@ export async function POST(request: NextRequest) {
     })
 
     // Fetch the complete course with modules and author
-    const courseWithDetails = await prisma.course.findUnique({
+    const courseWithDetails = await prisma.courses.findUnique({
       where: { id: newCourse.id },
       include: {
-        author: {
+        users: {
           select: {
             name: true,
             email: true,
           },
         },
-        courseModules: {
+        course_modules: {
           include: {
-            module: {
+            modules: {
               select: {
                 id: true,
                 title: true,
@@ -108,12 +110,12 @@ export async function POST(request: NextRequest) {
             },
           },
           orderBy: {
-            sortOrder: 'asc',
+            sort_order: 'asc',
           },
         },
         _count: {
           select: {
-            courseModules: true,
+            course_modules: true,
           },
         },
       },
@@ -151,21 +153,21 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
 
-      const courses = await prisma.course.findMany({
+      const courses = await prisma.courses.findMany({
         where: {
-          authorId: session.user.id,
+          author_id: session.user.id,
           ...(status && { status }),
         },
         include: {
-          author: {
+          users: {
             select: {
               name: true,
               email: true,
             },
           },
-          courseModules: {
+          course_modules: {
             include: {
-              module: {
+              modules: {
                 select: {
                   id: true,
                   title: true,
@@ -176,17 +178,17 @@ export async function GET(request: NextRequest) {
               },
             },
             orderBy: {
-              sortOrder: 'asc',
+              sort_order: 'asc',
             },
           },
           _count: {
             select: {
-              courseModules: true,
+              course_modules: true,
             },
           },
         },
         orderBy: {
-          updatedAt: 'desc',
+          updated_at: 'desc',
         },
       })
 
@@ -194,26 +196,26 @@ export async function GET(request: NextRequest) {
     }
 
     // Public course listing
-    const courses = await prisma.course.findMany({
+    const courses = await prisma.courses.findMany({
       where: {
         status: 'published',
         ...(featured === 'true' && { featured: true }),
       },
       include: {
-        author: {
+        users: {
           select: {
             name: true,
           },
         },
         _count: {
           select: {
-            courseModules: true,
+            course_modules: true,
           },
         },
       },
       orderBy: [
         { featured: 'desc' },
-        { updatedAt: 'desc' },
+        { updated_at: 'desc' },
       ],
     })
 

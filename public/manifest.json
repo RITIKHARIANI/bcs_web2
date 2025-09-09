@@ -1,26 +1,12 @@
 {
-  "name": "NeuroLearn - Brain & Cognitive Sciences Platform",
-  "short_name": "NeuroLearn",
-  "description": "Interactive e-textbook platform for Brain and Cognitive Sciences",
+  "name": "University of Illinois - BCS E-Textbook Platform",
+  "short_name": "UI BCS",
+  "description": "Official University of Illinois e-textbook platform for Brain and Cognitive Sciences",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#6366f1",
+  "theme_color": "#13294B",
   "orientation": "portrait-primary",
   "categories": ["education", "reference"],
-  "lang": "en-US",
-  "icons": [
-    {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512x512.png", 
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+  "lang": "en-US"
 }

@@ -14,28 +14,28 @@ export async function GET(request: NextRequest) {
 
     if (courseId) {
       // Get specific course structure
-      const course = await prisma.course.findFirst({
+      const course = await prisma.courses.findFirst({
         where: {
           id: courseId,
-          authorId: session.user.id,
+          author_id: session.user.id,
         },
         include: {
-          courseModules: {
+          course_modules: {
             include: {
-              module: {
+              modules: {
                 select: {
                   id: true,
                   title: true,
                   slug: true,
                   description: true,
                   status: true,
-                  parentModuleId: true,
-                  sortOrder: true,
+                  parent_module_id: true,
+                  sort_order: true,
                 },
               },
             },
             orderBy: {
-              sortOrder: 'asc',
+              sort_order: 'asc',
             },
           },
         },
@@ -48,14 +48,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ 
         type: 'course',
         course,
-        modules: course.courseModules.map(cm => cm.module)
+        modules: course.course_modules.map(cm => cm.modules)
       })
     } else {
       // Get all user's modules and courses for full structure view
       const [modules, courses] = await Promise.all([
-        prisma.module.findMany({
+        prisma.modules.findMany({
           where: {
-            authorId: session.user.id,
+            author_id: session.user.id,
           },
           select: {
             id: true,
@@ -63,37 +63,37 @@ export async function GET(request: NextRequest) {
             slug: true,
             description: true,
             status: true,
-            parentModuleId: true,
-            sortOrder: true,
-            createdAt: true,
+            parent_module_id: true,
+            sort_order: true,
+            created_at: true,
           },
           orderBy: {
-            sortOrder: 'asc',
+            sort_order: 'asc',
           },
         }),
-        prisma.course.findMany({
+        prisma.courses.findMany({
           where: {
-            authorId: session.user.id,
+            author_id: session.user.id,
           },
           include: {
-                      courseModules: {
+                      course_modules: {
             include: {
-              module: {
+              modules: {
                 select: {
                   id: true,
                   title: true,
                   slug: true,
                   description: true,
                   status: true,
-                  parentModuleId: true,
-                  sortOrder: true,
+                  parent_module_id: true,
+                  sort_order: true,
                 },
               },
             },
           },
             _count: {
               select: {
-                courseModules: true,
+                course_modules: true,
               },
             },
           },

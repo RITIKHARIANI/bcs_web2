@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth/config";
 import { redirect } from "next/navigation";
 import { ModuleLibrary } from "@/components/faculty/module-library";
+import { AuthenticatedLayout } from "@/components/layouts/app-layout";
 
 export default async function ModulesPage() {
   const session = await auth();
@@ -13,5 +14,9 @@ export default async function ModulesPage() {
     redirect("/");
   }
 
-  return <ModuleLibrary />;
+  return (
+    <AuthenticatedLayout>
+      <ModuleLibrary />
+    </AuthenticatedLayout>
+  );
 }

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth/config";
 import { redirect } from "next/navigation";
 import { FacultyDashboard } from "@/components/faculty/dashboard";
+import { AuthenticatedLayout } from "@/components/layouts/app-layout";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -13,5 +14,9 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  return <FacultyDashboard user={session.user} />;
+  return (
+    <AuthenticatedLayout>
+      <FacultyDashboard user={session.user} />
+    </AuthenticatedLayout>
+  );
 }
