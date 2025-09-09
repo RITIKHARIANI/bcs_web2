@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
+import { withDatabaseRetry } from '@/lib/retry'
 import { z } from 'zod'
 
 const createModuleSchema = z.object({
@@ -10,6 +11,7 @@ const createModuleSchema = z.object({
   description: z.string().optional(),
   parent_module_id: z.string().optional(),
   status: z.enum(['draft', 'published']).default('draft'),
+  tags: z.array(z.string().min(1).max(50)).max(20).default([]),
 })
 
 export async function POST(request: NextRequest) {
@@ -22,12 +24,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createModuleSchema.parse(body)
 
-    // Check if slug is unique for this author
-    const existingModule = await prisma.modules.findFirst({
-      where: {
-        slug: validatedData.slug,
-        author_id: session.user.id,
-      },
+    // Check if slug is unique for this author (with retry)
+    const existingModule = await withDatabaseRetry(async () => {
+      return prisma.modules.findFirst({
+        where: {
+          slug: validatedData.slug,
+          author_id: session.user.id,
+        },
+      })
     })
 
     if (existingModule) {
@@ -37,60 +41,72 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Determine sort order for hierarchical positioning
+    // Determine sort order for hierarchical positioning (with retry)
     let sort_order = 0
     if (validatedData.parent_module_id) {
-      const lastSibling = await prisma.modules.findFirst({
-        where: {
-          parent_module_id: validatedData.parent_module_id,
-          author_id: session.user.id,
-        },
-        orderBy: { sort_order: 'desc' },
+      const lastSibling = await withDatabaseRetry(async () => {
+        return prisma.modules.findFirst({
+          where: {
+            parent_module_id: validatedData.parent_module_id,
+            author_id: session.user.id,
+          },
+          orderBy: { sort_order: 'desc' },
+        })
       })
       sort_order = (lastSibling?.sort_order || 0) + 1
     } else {
-      const lastRootModule = await prisma.modules.findFirst({
-        where: {
-          parent_module_id: null,
-          author_id: session.user.id,
-        },
-        orderBy: { sort_order: 'desc' },
+      const lastRootModule = await withDatabaseRetry(async () => {
+        return prisma.modules.findFirst({
+          where: {
+            parent_module_id: null,
+            author_id: session.user.id,
+          },
+          orderBy: { sort_order: 'desc' },
+        })
       })
       sort_order = (lastRootModule?.sort_order || 0) + 1
     }
 
-    const newModule = await prisma.modules.create({
-      data: {
-        id: `module_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`,
-        title: validatedData.title,
-        slug: validatedData.slug,
-        content: validatedData.content,
-        description: validatedData.description,
-        parent_module_id: validatedData.parent_module_id,
-        status: validatedData.status,
-        author_id: session.user.id,
-        sort_order,
-      },
-      include: {
-        users: {
-          select: {
-            name: true,
-            email: true,
+    // Clean and validate tags
+    const cleanTags = validatedData.tags
+      .map(tag => tag.trim().toLowerCase())
+      .filter((tag, index, arr) => tag.length > 0 && arr.indexOf(tag) === index) // Remove duplicates and empty tags
+
+    const newModule = await withDatabaseRetry(async () => {
+      return prisma.modules.create({
+        data: {
+          id: `module_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`,
+          title: validatedData.title,
+          slug: validatedData.slug,
+          content: validatedData.content,
+          description: validatedData.description,
+          parent_module_id: validatedData.parent_module_id,
+          status: validatedData.status,
+          tags: cleanTags,
+          author_id: session.user.id,
+          sort_order,
+        },
+        include: {
+          users: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+          modules: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+          _count: {
+            select: {
+              other_modules: true,
+              course_modules: true,
+            },
           },
         },
-        modules: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-        _count: {
-          select: {
-            other_modules: true,
-            course_modules: true,
-          },
-        },
-      },
+      })
     })
 
     return NextResponse.json({ module: newModule })
@@ -122,6 +138,10 @@ export async function GET(request: NextRequest) {
     const parentId = searchParams.get('parentId')
     const parent_module_id = searchParams.get('parent_module_id') 
     const status = searchParams.get('status')
+    const tags = searchParams.get('tags')
+    const search = searchParams.get('search')
+    const sortBy = searchParams.get('sortBy') || 'sort_order'
+    const sortOrder = searchParams.get('sortOrder') || 'asc'
 
     // Handle different query parameter formats
     let whereClause: any = { author_id: session.user.id }
@@ -144,45 +164,100 @@ export async function GET(request: NextRequest) {
       whereClause.status = status
     }
 
-    const modules = await prisma.modules.findMany({
-      where: whereClause,
-      include: {
-        users: {
-          select: {
-            name: true,
-            email: true,
+    // Add tag filtering
+    if (tags) {
+      const tagList = tags.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag.length > 0)
+      if (tagList.length > 0) {
+        whereClause.tags = {
+          hasSome: tagList
+        }
+      }
+    }
+
+    // Add text search
+    if (search && search.trim().length > 0) {
+      const searchTerm = search.trim()
+      whereClause.OR = [
+        { title: { contains: searchTerm, mode: 'insensitive' } },
+        { description: { contains: searchTerm, mode: 'insensitive' } },
+        { slug: { contains: searchTerm, mode: 'insensitive' } },
+        { tags: { hasSome: [searchTerm.toLowerCase()] } }
+      ]
+    }
+
+    // Build order by clause
+    let orderByClause: any
+    switch (sortBy) {
+      case 'title':
+        orderByClause = { title: sortOrder }
+        break
+      case 'created_at':
+        orderByClause = { created_at: sortOrder }
+        break
+      case 'updated_at':
+        orderByClause = { updated_at: sortOrder }
+        break
+      case 'status':
+        orderByClause = { status: sortOrder }
+        break
+      default:
+        orderByClause = { sort_order: sortOrder }
+    }
+
+    const modules = await withDatabaseRetry(async () => {
+      return prisma.modules.findMany({
+        where: whereClause,
+        include: {
+          users: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+          modules: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+          other_modules: {
+            select: {
+              id: true,
+              title: true,
+              status: true,
+              created_at: true,
+            },
+            orderBy: {
+              sort_order: 'asc',
+            },
+          },
+          _count: {
+            select: {
+              other_modules: true,
+              course_modules: true,
+            },
           },
         },
-        modules: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-        other_modules: {
-          select: {
-            id: true,
-            title: true,
-            status: true,
-            created_at: true,
-          },
-          orderBy: {
-            sort_order: 'asc',
-          },
-        },
-        _count: {
-          select: {
-            other_modules: true,
-            course_modules: true,
-          },
-        },
-      },
-      orderBy: {
-        sort_order: 'asc',
-      },
+        orderBy: orderByClause,
+      })
     })
 
-    return NextResponse.json({ modules })
+    // Get all unique tags for this user (for filtering UI)
+    const allUserTags = await withDatabaseRetry(async () => {
+      const userModules = await prisma.modules.findMany({
+        where: { author_id: session.user.id },
+        select: { tags: true }
+      })
+      
+      const tagSet = new Set<string>()
+      userModules.forEach(module => {
+        module.tags.forEach(tag => tagSet.add(tag))
+      })
+      
+      return Array.from(tagSet).sort()
+    })
+
+    return NextResponse.json({ modules, availableTags: allUserTags })
   } catch (error) {
     console.error('Error fetching modules:', error)
     return NextResponse.json(

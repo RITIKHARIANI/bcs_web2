@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
+import { withDatabaseRetry } from '@/lib/retry'
 import { z } from 'zod'
 
 // Helper function to check if a module is an ancestor of another module
@@ -28,6 +29,7 @@ const updateModuleSchema = z.object({
   description: z.string().optional(),
   parent_module_id: z.string().nullable().optional(),
   status: z.enum(['draft', 'published']).optional(),
+  tags: z.array(z.string().min(1).max(50)).max(20).optional(),
 })
 
 export async function GET(
@@ -46,44 +48,46 @@ export async function GET(
     if (!id || typeof id !== 'string' || id.trim() === '') {
       return NextResponse.json({ error: 'Invalid module ID' }, { status: 400 })
     }
-    const foundModule = await prisma.modules.findFirst({
-      where: {
-        id,
-        author_id: session.user.id,
-      },
-      include: {
-        users: {
-          select: {
-            name: true,
-            email: true,
+    const foundModule = await withDatabaseRetry(async () => {
+      return prisma.modules.findFirst({
+        where: {
+          id,
+          author_id: session.user.id,
+        },
+        include: {
+          users: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+          modules: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+          other_modules: {
+            select: {
+              id: true,
+              title: true,
+              status: true,
+              created_at: true,
+            },
+          },
+          module_media: {
+            include: {
+              media_files: true,
+            },
+          },
+          _count: {
+            select: {
+              other_modules: true,
+              course_modules: true,
+            },
           },
         },
-        modules: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-        other_modules: {
-          select: {
-            id: true,
-            title: true,
-            status: true,
-            created_at: true,
-          },
-        },
-        module_media: {
-          include: {
-            media_files: true,
-          },
-        },
-        _count: {
-          select: {
-            other_modules: true,
-            course_modules: true,
-          },
-        },
-      },
+      })
     })
 
     if (!foundModule) {

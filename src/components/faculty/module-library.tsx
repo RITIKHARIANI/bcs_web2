@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { NeuralButton } from '@/components/ui/neural-button'
+import { withFetchRetry } from '@/lib/retry'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import { 
   Plus, 
   Search, 
@@ -25,7 +28,13 @@ import {
   Users,
   MoreVertical,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Tag,
+  SortAsc,
+  SortDesc,
+  X,
+  Loader2,
+  RefreshCw
 } from 'lucide-react'
 
 interface Module {
@@ -34,6 +43,7 @@ interface Module {
   slug: string
   description: string | null
   status: 'draft' | 'published'
+  tags: string[]
   createdAt: string
   updatedAt: string
   parentModule: {
@@ -50,53 +60,109 @@ interface Module {
   }
 }
 
-async function fetchModules(): Promise<Module[]> {
-  const response = await fetch('/api/modules')
-  if (!response.ok) {
-    throw new Error('Failed to fetch modules')
-  }
-  const data = await response.json()
-  return data.modules
+interface ModulesResponse {
+  modules: Module[]
+  availableTags: string[]
+}
+
+async function fetchModules(params: {
+  search?: string
+  status?: string
+  tags?: string
+  parentId?: string
+  sortBy?: string
+  sortOrder?: string
+}): Promise<ModulesResponse> {
+  return withFetchRetry(async () => {
+    const searchParams = new URLSearchParams()
+    
+    Object.entries(params).forEach(([key, value]) => {
+      if (value && value.trim() !== '') {
+        searchParams.append(key, value)
+      }
+    })
+    
+    const url = `/api/modules?${searchParams.toString()}`
+    const response = await fetch(url)
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: Failed to fetch modules`)
+    }
+    
+    const data = await response.json()
+    return {
+      modules: data.modules || [],
+      availableTags: data.availableTags || []
+    }
+  }, {
+    maxAttempts: 3,
+    baseDelayMs: 1000
+  })
 }
 
 export function ModuleLibrary() {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published'>('all')
+  const [parentFilter, setParentFilter] = useState<'all' | 'root' | 'sub'>('all')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [sortBy, setSortBy] = useState<string>('title')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
-  const { data: modules = [], isLoading, error } = useQuery({
-    queryKey: ['modules'],
-    queryFn: fetchModules,
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
-    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+  // Memoize query params to prevent unnecessary re-fetches
+  const queryParams = useMemo(() => ({
+    search: searchTerm,
+    status: statusFilter === 'all' ? undefined : statusFilter,
+    tags: selectedTags.length > 0 ? selectedTags.join(',') : undefined,
+    parentId: parentFilter === 'root' ? 'root' : parentFilter === 'sub' ? 'sub' : undefined,
+    sortBy,
+    sortOrder
+  }), [searchTerm, statusFilter, selectedTags, parentFilter, sortBy, sortOrder])
+
+  const { 
+    data = { modules: [], availableTags: [] }, 
+    isLoading, 
+    error, 
+    refetch,
+    isFetching
+  } = useQuery({
+    queryKey: ['modules', queryParams],
+    queryFn: () => fetchModules(queryParams),
+    staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes
+    gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
+    retry: 2, // Additional retry at React Query level
   })
 
-  const filteredModules = modules.filter(module => {
-    const matchesSearch = 
-      module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      module.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      module.slug.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesStatus = statusFilter === 'all' || module.status === statusFilter
-    
-    return matchesSearch && matchesStatus
-  })
+  const { modules, availableTags } = data
 
-  // Debug logging for troubleshooting
-  React.useEffect(() => {
-    console.log('=== MODULE LIBRARY DEBUG ===')
-    console.log('Total modules:', modules.length)
-    console.log('Status filter:', statusFilter)
-    console.log('Search term:', searchTerm)
-    console.log('Filtered modules:', filteredModules.length)
-    console.log('Modules by status:')
-    console.log('- Published:', modules.filter(m => m.status === 'published').length)
-    console.log('- Draft:', modules.filter(m => m.status === 'draft').length)
-    console.log('================================')
-  }, [modules, statusFilter, searchTerm, filteredModules])
+  // Helper functions for tag management
+  const addTag = (tag: string) => {
+    if (!selectedTags.includes(tag)) {
+      setSelectedTags([...selectedTags, tag])
+    }
+  }
 
-  const rootModules = filteredModules.filter(module => !module.parentModule)
-  const subModules = filteredModules.filter(module => module.parentModule)
+  const removeTag = (tagToRemove: string) => {
+    setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove))
+  }
+
+  const clearAllFilters = () => {
+    setSearchTerm('')
+    setStatusFilter('all')
+    setParentFilter('all')
+    setSelectedTags([])
+  }
+
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+  }
+
+  // Calculate statistics
+  const rootModules = modules.filter(module => !module.parentModule)
+  const subModules = modules.filter(module => module.parentModule)
+  const publishedCount = modules.filter(m => m.status === 'published').length
+  const draftCount = modules.filter(m => m.status === 'draft').length
 
   if (isLoading) {
     return (
@@ -130,16 +196,38 @@ export function ModuleLibrary() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="cognitive-card max-w-md">
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Card className="cognitive-card max-w-md w-full">
           <CardContent className="p-8 text-center">
             <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
             <h2 className="text-xl font-semibold text-foreground mb-2">
               Unable to Load Modules
             </h2>
-            <p className="text-muted-foreground">
-              Please try again later or contact support if the problem persists.
+            <p className="text-muted-foreground mb-6">
+              {error instanceof Error ? error.message : 'An unexpected error occurred'}
             </p>
+            <div className="space-y-3">
+              <NeuralButton 
+                variant="neural" 
+                onClick={() => refetch()}
+                disabled={isFetching}
+              >
+                {isFetching ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Retrying...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Try Again
+                  </>
+                )}
+              </NeuralButton>
+              <p className="text-xs text-muted-foreground">
+                If the problem persists, please contact support
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -164,12 +252,17 @@ export function ModuleLibrary() {
               </div>
             </div>
             
-            <Link href="/faculty/modules/create">
-              <NeuralButton variant="neural" size="lg">
-                <Plus className="mr-2 h-5 w-5" />
-                Create Module
-              </NeuralButton>
-            </Link>
+            <div className="flex items-center space-x-2">
+              {isFetching && (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              )}
+              <Link href="/faculty/modules/create">
+                <NeuralButton variant="neural" size="lg">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Create Module
+                </NeuralButton>
+              </Link>
+            </div>
           </div>
 
           {/* Stats */}
@@ -193,7 +286,7 @@ export function ModuleLibrary() {
                   <div className="ml-3">
                     <p className="text-sm font-medium text-muted-foreground">Published</p>
                     <p className="text-2xl font-bold text-foreground">
-                      {modules.filter(m => m.status === 'published').length}
+                      {publishedCount}
                     </p>
                   </div>
                 </div>
@@ -207,7 +300,7 @@ export function ModuleLibrary() {
                   <div className="ml-3">
                     <p className="text-sm font-medium text-muted-foreground">Drafts</p>
                     <p className="text-2xl font-bold text-foreground">
-                      {modules.filter(m => m.status === 'draft').length}
+                      {draftCount}
                     </p>
                   </div>
                 </div>
@@ -228,72 +321,193 @@ export function ModuleLibrary() {
           </div>
 
           {/* Search and Filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search modules by title, description, or slug..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-neural-light/30 focus:border-neural-primary"
-                />
+          <div className="space-y-4 mb-6">
+            {/* Main Search Bar */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search modules by title, description, slug, or tags..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-neural-light/30 focus:border-neural-primary"
+                  />
+                </div>
               </div>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <NeuralButton
-                variant={statusFilter === 'all' ? 'neural' : 'ghost'}
-                size="sm"
-                onClick={() => setStatusFilter('all')}
-              >
-                All
-              </NeuralButton>
-              <NeuralButton
-                variant={statusFilter === 'published' ? 'neural' : 'ghost'}
-                size="sm"
-                onClick={() => setStatusFilter('published')}
-              >
-                Published
-              </NeuralButton>
-              <NeuralButton
-                variant={statusFilter === 'draft' ? 'neural' : 'ghost'}
-                size="sm"
-                onClick={() => setStatusFilter('draft')}
-              >
-                Drafts
-              </NeuralButton>
               
-              <div className="flex border border-border rounded-lg">
+              <div className="flex items-center space-x-2">
                 <NeuralButton
-                  variant={viewMode === 'grid' ? 'neural' : 'ghost'}
+                  variant="ghost"
                   size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="rounded-r-none"
+                  onClick={() => setIsFiltersOpen(!isFiltersOpen)}
                 >
-                  <Grid className="h-4 w-4" />
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filters
+                  {(selectedTags.length > 0 || statusFilter !== 'all' || parentFilter !== 'all') && (
+                    <Badge variant="secondary" className="ml-2">
+                      {[
+                        selectedTags.length,
+                        statusFilter !== 'all' ? 1 : 0,
+                        parentFilter !== 'all' ? 1 : 0
+                      ].reduce((a, b) => a + b, 0)}
+                    </Badge>
+                  )}
                 </NeuralButton>
-                <NeuralButton
-                  variant={viewMode === 'list' ? 'neural' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="rounded-l-none border-l"
-                >
-                  <List className="h-4 w-4" />
-                </NeuralButton>
+                
+                <div className="flex border border-border rounded-lg">
+                  <NeuralButton
+                    variant={viewMode === 'grid' ? 'neural' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                    className="rounded-r-none"
+                  >
+                    <Grid className="h-4 w-4" />
+                  </NeuralButton>
+                  <NeuralButton
+                    variant={viewMode === 'list' ? 'neural' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    className="rounded-l-none border-l"
+                  >
+                    <List className="h-4 w-4" />
+                  </NeuralButton>
+                </div>
               </div>
             </div>
+
+            {/* Advanced Filters Panel */}
+            {isFiltersOpen && (
+              <Card className="cognitive-card p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-foreground">Filters & Sorting</h3>
+                  <NeuralButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAllFilters}
+                  >
+                    Clear All
+                  </NeuralButton>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                  {/* Status Filter */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Status</label>
+                    <div className="flex flex-wrap gap-2">
+                      {(['all', 'published', 'draft'] as const).map((status) => (
+                        <NeuralButton
+                          key={status}
+                          variant={statusFilter === status ? 'neural' : 'outline'}
+                          size="sm"
+                          onClick={() => setStatusFilter(status)}
+                        >
+                          {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                        </NeuralButton>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Parent Filter */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Type</label>
+                    <div className="flex flex-wrap gap-2">
+                      {(['all', 'root', 'sub'] as const).map((parent) => (
+                        <NeuralButton
+                          key={parent}
+                          variant={parentFilter === parent ? 'neural' : 'outline'}
+                          size="sm"
+                          onClick={() => setParentFilter(parent)}
+                        >
+                          {parent === 'all' ? 'All' : parent === 'root' ? 'Root' : 'Sub-modules'}
+                        </NeuralButton>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Sort By */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Sort By</label>
+                    <div className="flex space-x-2">
+                      <Select value={sortBy} onValueChange={setSortBy}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="title">Title</SelectItem>
+                          <SelectItem value="created_at">Created</SelectItem>
+                          <SelectItem value="updated_at">Updated</SelectItem>
+                          <SelectItem value="status">Status</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <NeuralButton
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleSortOrder}
+                      >
+                        {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                      </NeuralButton>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Tags {availableTags.length > 0 && `(${availableTags.length} available)`}
+                    </label>
+                    {availableTags.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                        {availableTags.map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+                            className="cursor-pointer hover:bg-neural-primary hover:text-white transition-colors"
+                            onClick={() => selectedTags.includes(tag) ? removeTag(tag) : addTag(tag)}
+                          >
+                            <Tag className="h-3 w-3 mr-1" />
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No tags available</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Selected Tags Display */}
+                {selectedTags.length > 0 && (
+                  <div className="space-y-2">
+                    <Separator />
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm font-medium text-muted-foreground">Selected tags:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedTags.map((tag) => (
+                          <Badge key={tag} variant="default" className="pr-1">
+                            {tag}
+                            <X
+                              className="h-3 w-3 ml-1 cursor-pointer hover:bg-white hover:text-black rounded-full"
+                              onClick={() => removeTag(tag)}
+                            />
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </Card>
+            )}
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-6 py-8">
-        {filteredModules.length > 0 ? (
+        {modules.length > 0 ? (
           <div className={viewMode === 'grid' 
             ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
             : "space-y-4"
           }>
-            {filteredModules.map((module) => (
+            {modules.map((module) => (
               <Card key={module.id} className="cognitive-card group cursor-pointer">
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -339,6 +553,23 @@ export function ModuleLibrary() {
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                       {module.description}
                     </p>
+                  )}
+
+                  {/* Tags */}
+                  {module.tags && module.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {module.tags.slice(0, 3).map((tag) => (
+                        <Badge key={tag} variant="outline" className="text-xs">
+                          <Tag className="h-2 w-2 mr-1" />
+                          {tag}
+                        </Badge>
+                      ))}
+                      {module.tags.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{module.tags.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
                   )}
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
@@ -389,7 +620,7 @@ export function ModuleLibrary() {
           <Card className="cognitive-card">
             <CardContent className="p-12 text-center">
               <Brain className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              {searchTerm || statusFilter !== 'all' ? (
+              {searchTerm || statusFilter !== 'all' || parentFilter !== 'all' || selectedTags.length > 0 ? (
                 <>
                   <h3 className="text-xl font-semibold text-foreground mb-2">
                     No modules found
@@ -399,10 +630,7 @@ export function ModuleLibrary() {
                   </p>
                   <NeuralButton 
                     variant="neural" 
-                    onClick={() => {
-                      setSearchTerm('')
-                      setStatusFilter('all')
-                    }}
+                    onClick={clearAllFilters}
                   >
                     Clear Filters
                   </NeuralButton>
