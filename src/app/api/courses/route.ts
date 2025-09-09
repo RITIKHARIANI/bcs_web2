@@ -13,6 +13,7 @@ const createCourseSchema = z.object({
   })).optional().default([]),
   status: z.enum(['draft', 'published']).default('draft'),
   featured: z.boolean().default(false),
+  tags: z.array(z.string().min(1).max(50)).max(20).default([]),
 })
 
 export async function POST(request: NextRequest) {
@@ -58,6 +59,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Clean and validate tags
+    const cleanTags = validatedData.tags
+      .map(tag => tag.trim().toLowerCase())
+      .filter((tag, index, arr) => tag.length > 0 && arr.indexOf(tag) === index) // Remove duplicates and empty tags
+
     // Create course with modules in a transaction
     const newCourse = await prisma.$transaction(async (tx) => {
       const course = await tx.courses.create({
@@ -68,6 +74,7 @@ export async function POST(request: NextRequest) {
           description: validatedData.description,
           status: validatedData.status,
           featured: validatedData.featured,
+          tags: cleanTags,
           author_id: session.user.id,
         },
       })

@@ -9,6 +9,7 @@ import { z } from 'zod'
 import Link from 'next/link'
 import { NeuralRichTextEditor } from '@/components/editor/neural-rich-text-editor'
 import { NeuralButton } from '@/components/ui/neural-button'
+import { TagsInput } from '@/components/ui/tags-input'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -39,6 +40,7 @@ const editModuleSchema = z.object({
   content: z.string().min(1, 'Content is required'),
   parentModuleId: z.string().nullable().optional(),
   status: z.enum(['draft', 'published']).default('draft'),
+  tags: z.array(z.string()).default([]),
 })
 
 type EditModuleFormData = z.infer<typeof editModuleSchema>
@@ -50,6 +52,7 @@ interface Module {
   description: string | null
   content: string
   status: 'draft' | 'published'
+  tags: string[]
   parentModuleId: string | null
   createdAt: string
   updatedAt: string
@@ -87,13 +90,13 @@ async function fetchModule(id: string): Promise<Module> {
   return data.module
 }
 
-async function fetchParentModules(): Promise<ParentModule[]> {
+async function fetchParentModules(): Promise<{ modules: ParentModule[], availableTags: string[] }> {
   const response = await fetch('/api/modules?parentModuleId=null')
   if (!response.ok) {
     throw new Error('Failed to fetch parent modules')
   }
   const data = await response.json()
-  return data.modules
+  return { modules: data.modules, availableTags: data.availableTags || [] }
 }
 
 async function updateModule(id: string, data: EditModuleFormData) {
@@ -134,16 +137,33 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [tags, setTags] = useState<string[]>([])
+  const [availableTags, setAvailableTags] = useState<string[]>([])
 
   const { data: module, isLoading: isLoadingModule, error: moduleError } = useQuery({
     queryKey: ['module', moduleId],
     queryFn: () => fetchModule(moduleId),
   })
 
-  const { data: parentModules = [], isLoading: isLoadingParents } = useQuery({
+  const { data: parentModuleData, isLoading: isLoadingParents } = useQuery({
     queryKey: ['modules', 'parents'],
     queryFn: fetchParentModules,
   })
+
+  const parentModules = parentModuleData?.modules || []
+
+  // Populate tags and available tags when data loads
+  useEffect(() => {
+    if (module?.tags) {
+      setTags(module.tags)
+    }
+  }, [module?.tags])
+
+  useEffect(() => {
+    if (parentModuleData?.availableTags) {
+      setAvailableTags(parentModuleData.availableTags)
+    }
+  }, [parentModuleData?.availableTags])
 
   const updateMutation = useMutation({
     mutationFn: (data: EditModuleFormData) => updateModule(moduleId, data),
@@ -195,6 +215,9 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
       setValue('content', module.content)
       setValue('parentModuleId', module.parentModuleId || 'none')
       setValue('status', module.status)
+      setValue('tags', module.tags || [])
+      // Also set the tags state
+      setTags(module.tags || [])
     }
   }, [module, setValue])
 
@@ -213,7 +236,10 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
 
   const onSubmit = async (data: EditModuleFormData) => {
     try {
-      await updateMutation.mutateAsync(data)
+      await updateMutation.mutateAsync({
+        ...data,
+        tags
+      })
     } catch (error) {
       // Error is handled by mutation
     }
@@ -395,6 +421,16 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                     className="border-neural-light/30 focus:border-neural-primary"
                   />
                 </div>
+
+                <TagsInput
+                  value={tags}
+                  onChange={setTags}
+                  label="Tags"
+                  placeholder="Add tags to categorize this module..."
+                  suggestions={availableTags}
+                  maxTags={10}
+                  id="tags"
+                />
 
                 <div className="space-y-2">
                   <Label htmlFor="parentModule">Parent Module</Label>
