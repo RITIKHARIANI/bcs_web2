@@ -205,63 +205,105 @@ export async function GET(request: NextRequest) {
     }
 
     const modules = await withDatabaseRetry(async () => {
-      return prisma.modules.findMany({
-        where: whereClause,
-        include: {
-          users: {
-            select: {
-              name: true,
-              email: true,
+      try {
+        // Try the full query first
+        return await prisma.modules.findMany({
+          where: whereClause,
+          include: {
+            users: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+            modules: {
+              select: {
+                id: true,
+                title: true,
+              },
+            },
+            other_modules: {
+              select: {
+                id: true,
+                title: true,
+                status: true,
+                created_at: true,
+              },
+              orderBy: {
+                sort_order: 'asc',
+              },
+            },
+            _count: {
+              select: {
+                other_modules: true,
+                course_modules: true,
+              },
             },
           },
-          modules: {
-            select: {
-              id: true,
-              title: true,
+          orderBy: orderByClause,
+        })
+      } catch (complexQueryError) {
+        console.warn('Complex query failed, trying simplified query:', complexQueryError)
+        
+        // Fallback to simpler query without complex includes
+        return await prisma.modules.findMany({
+          where: whereClause,
+          include: {
+            users: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+            _count: {
+              select: {
+                other_modules: true,
+                course_modules: true,
+              },
             },
           },
-          other_modules: {
-            select: {
-              id: true,
-              title: true,
-              status: true,
-              created_at: true,
-            },
-            orderBy: {
-              sort_order: 'asc',
-            },
-          },
-          _count: {
-            select: {
-              other_modules: true,
-              course_modules: true,
-            },
-          },
-        },
-        orderBy: orderByClause,
-      })
+          orderBy: orderByClause,
+        })
+      }
     })
 
     // Get all unique tags for this user (for filtering UI)
-    const allUserTags = await withDatabaseRetry(async () => {
-      const userModules = await prisma.modules.findMany({
-        where: { author_id: session.user.id },
-        select: { tags: true }
+    let allUserTags: string[] = []
+    try {
+      allUserTags = await withDatabaseRetry(async () => {
+        const userModules = await prisma.modules.findMany({
+          where: { author_id: session.user.id },
+          select: { tags: true }
+        })
+        
+        const tagSet = new Set<string>()
+        userModules.forEach(module => {
+          if (module.tags && Array.isArray(module.tags)) {
+            module.tags.forEach(tag => tagSet.add(tag))
+          }
+        })
+        
+        return Array.from(tagSet).sort()
       })
-      
-      const tagSet = new Set<string>()
-      userModules.forEach(module => {
-        module.tags.forEach(tag => tagSet.add(tag))
-      })
-      
-      return Array.from(tagSet).sort()
-    })
+    } catch (tagsError) {
+      console.warn('Failed to fetch user tags, continuing without tags:', tagsError)
+      allUserTags = []
+    }
 
     return NextResponse.json({ modules, availableTags: allUserTags })
   } catch (error) {
     console.error('Error fetching modules:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
+      cause: error instanceof Error ? error.cause : 'No cause',
+      name: error instanceof Error ? error.name : 'Unknown error type'
+    })
     return NextResponse.json(
-      { error: 'Failed to fetch modules' },
+      { 
+        error: 'Failed to fetch modules',
+        details: process.env.NODE_ENV === 'development' ? error instanceof Error ? error.message : 'Unknown error' : undefined
+      },
       { status: 500 }
     )
   }
