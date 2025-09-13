@@ -234,7 +234,7 @@ export function ModuleViewer({ moduleId }: ModuleViewerProps) {
 
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Author:</span>
-                  <span className="font-medium">{module.author.name}</span>
+                  <span className="font-medium">{module.author?.name || 'Unknown'}</span>
                 </div>
 
                 <div className="flex items-center justify-between">

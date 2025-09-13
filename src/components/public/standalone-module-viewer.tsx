@@ -94,7 +94,7 @@ export function StandaloneModuleViewer({ module }: StandaloneModuleProps) {
           <div className="flex items-center space-x-6 text-sm text-muted-foreground">
             <div className="flex items-center">
               <User className="mr-1 h-4 w-4" />
-              {module.author.name}
+              {module.author?.name || 'Unknown'}
             </div>
             <div className="flex items-center">
               <Calendar className="mr-1 h-4 w-4" />
@@ -143,7 +143,7 @@ export function StandaloneModuleViewer({ module }: StandaloneModuleProps) {
                 </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-muted-foreground">Author:</span>
-                  <span className="font-medium">{module.author.name}</span>
+                  <span className="font-medium">{module.author?.name || 'Unknown'}</span>
                 </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-muted-foreground">Created:</span>
