@@ -58,7 +58,9 @@ interface DashboardData {
 async function fetchDashboardStats(): Promise<DashboardData> {
   const response = await fetch('/api/dashboard/stats')
   if (!response.ok) {
-    throw new Error('Failed to fetch dashboard statistics')
+    const errorText = await response.text()
+    console.error('Dashboard API error:', response.status, errorText)
+    throw new Error(`Failed to fetch dashboard statistics (${response.status})`)
   }
   return response.json()
 }
@@ -77,6 +79,11 @@ export function FacultyDashboard({ user }: FacultyDashboardProps) {
     queryFn: fetchDashboardStats,
     staleTime: 30000, // 30 seconds
     gcTime: 300000, // 5 minutes
+    retry: (failureCount, error) => {
+      console.log(`Dashboard stats retry attempt ${failureCount}:`, error)
+      return failureCount < 3
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   return (

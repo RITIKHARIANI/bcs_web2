@@ -25,9 +25,9 @@ const navigationConfig = {
     { href: "/", label: "Home", icon: Home },
     { href: "/courses", label: "Courses", icon: BookOpen },
     { href: "/faculty/dashboard", label: "Dashboard", icon: BarChart3 },
+    { href: "/faculty/visualization", label: "Visualization", icon: BarChart3 },
     { href: "/faculty/modules", label: "My Modules", icon: BookOpen },
     { href: "/faculty/courses", label: "My Courses", icon: BookOpen },
-    { href: "/faculty/visualization", label: "Visualization", icon: BarChart3 },
     { href: "/faculty/modules/create", label: "Create Module", icon: Plus },
   ],
   // Future extensibility for student role
@@ -76,7 +76,7 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium" role="navigation" aria-label="Main navigation">
-            {navigationItems.slice(0, 4).map((item) => {
+            {navigationItems.slice(0, 5).map((item) => {
               const IconComponent = item.icon;
               return (
                 <Link

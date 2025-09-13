@@ -10,101 +10,140 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Fetch all statistics in parallel for better performance
-    const [modulesCount, coursesCount, studentsCount, totalViews, recentModules, recentCourses] = await Promise.all([
-      // Count user's modules
-      withDatabaseRetry(async () => 
+    console.log('Dashboard stats request for user:', session.user.id)
+
+    // Start with basic counts (most likely to succeed)
+    let modulesCount = 0
+    let coursesCount = 0
+
+    try {
+      modulesCount = await withDatabaseRetry(async () => 
         prisma.modules.count({
           where: { author_id: session.user.id }
         })
-      ),
-      
-      // Count user's courses
-      withDatabaseRetry(async () =>
+      )
+      console.log('Modules count:', modulesCount)
+    } catch (error) {
+      console.error('Error counting modules:', error)
+    }
+
+    try {
+      coursesCount = await withDatabaseRetry(async () =>
         prisma.courses.count({
           where: { author_id: session.user.id }
         })
-      ),
-      
-      // Count students enrolled in user's courses (placeholder - will implement when enrollment is added)
-      Promise.resolve(0),
-      
-      // Calculate total views (placeholder - will implement when view tracking is added)  
-      Promise.resolve(0),
-      
-      // Get recent modules (last 5)
-      withDatabaseRetry(async () =>
+      )
+      console.log('Courses count:', coursesCount)
+    } catch (error) {
+      console.error('Error counting courses:', error)
+    }
+
+    // Try to get recent activity, but don't fail if this errors
+    let recentActivity = []
+    
+    try {
+      // Get recent modules (simplified query)
+      const recentModules = await withDatabaseRetry(async () =>
         prisma.modules.findMany({
           where: { author_id: session.user.id },
-          include: {
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            updated_at: true,
             users: {
-              select: { name: true, email: true }
+              select: { 
+                name: true,
+                email: true 
+              }
             }
           },
           orderBy: { updated_at: 'desc' },
-          take: 5
+          take: 3
         })
-      ),
+      )
       
-      // Get recent courses (last 5)
-      withDatabaseRetry(async () =>
+      // Get recent courses (simplified query)
+      const recentCourses = await withDatabaseRetry(async () =>
         prisma.courses.findMany({
           where: { author_id: session.user.id },
-          include: {
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            updated_at: true,
             users: {
-              select: { name: true, email: true }
-            },
-            _count: {
-              select: { course_modules: true }
+              select: { 
+                name: true,
+                email: true 
+              }
             }
           },
           orderBy: { updated_at: 'desc' },
-          take: 5
+          take: 3
         })
-      ),
-    ])
+      )
 
-    // Transform recent modules and courses for frontend
-    const recentActivity = [
-      ...recentModules.map(module => ({
+      // Transform to activity items
+      const moduleActivity = recentModules.map(module => ({
         id: module.id,
         title: module.title,
         type: 'module' as const,
         status: module.status,
         updatedAt: module.updated_at.toISOString(),
         author: {
-          name: module.users.name,
-          email: module.users.email
+          name: module.users?.name || 'Unknown',
+          email: module.users?.email || ''
         }
-      })),
-      ...recentCourses.map(course => ({
+      }))
+
+      const courseActivity = recentCourses.map(course => ({
         id: course.id,
         title: course.title,
         type: 'course' as const,
         status: course.status,
         updatedAt: course.updated_at.toISOString(),
-        moduleCount: course._count.course_modules,
         author: {
-          name: course.users.name,
-          email: course.users.email
+          name: course.users?.name || 'Unknown',
+          email: course.users?.email || ''
         }
       }))
-    ].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 10)
+
+      recentActivity = [...moduleActivity, ...courseActivity]
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .slice(0, 8)
+        
+      console.log('Recent activity items:', recentActivity.length)
+    } catch (error) {
+      console.error('Error fetching recent activity:', error)
+      recentActivity = []
+    }
 
     return NextResponse.json({
       stats: {
         modules: modulesCount,
         courses: coursesCount,
-        students: studentsCount,
-        views: totalViews,
+        students: 0, // Placeholder for future enrollment system
+        views: 0,    // Placeholder for future analytics
       },
       recentActivity
     })
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch dashboard statistics' },
-      { status: 500 }
-    )
+    console.error('Critical error in dashboard stats:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
+    })
+    
+    // Return basic fallback data instead of 500 error
+    return NextResponse.json({
+      stats: {
+        modules: 0,
+        courses: 0,
+        students: 0,
+        views: 0,
+      },
+      recentActivity: []
+    })
   }
 }
