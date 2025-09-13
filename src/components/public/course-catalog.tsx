@@ -62,7 +62,7 @@ export function CourseCatalog() {
     const matchesSearch = 
       course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       course.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.author.name.toLowerCase().includes(searchTerm.toLowerCase())
+      (course.author?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
     
     const matchesFeatured = !showFeaturedOnly || course.featured
     
@@ -194,7 +194,7 @@ export function CourseCatalog() {
                       <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                         <div className="flex items-center">
                           <User className="mr-1 h-3 w-3" />
-                          {course.author.name}
+                          {course.author?.name || 'Unknown'}
                         </div>
                         <div className="flex items-center">
                           <Layers className="mr-1 h-3 w-3" />
@@ -296,7 +296,7 @@ export function CourseCatalog() {
                       <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                         <div className="flex items-center">
                           <User className="mr-1 h-3 w-3" />
-                          {course.author.name}
+                          {course.author?.name || 'Unknown'}
                         </div>
                         <div className="flex items-center">
                           <Layers className="mr-1 h-3 w-3" />

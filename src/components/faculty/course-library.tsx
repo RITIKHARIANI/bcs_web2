@@ -337,12 +337,15 @@ export function CourseLibrary() {
                           <Eye className="h-4 w-4" />
                         </NeuralButton>
                       </Link>
-                      <Link href={`/faculty/courses/edit/${course.id}`}>
-                        <NeuralButton variant="neural" size="sm">
-                          <Edit className="mr-1 h-4 w-4" />
-                          Edit
-                        </NeuralButton>
-                      </Link>
+                      <NeuralButton 
+                        variant="neural" 
+                        size="sm" 
+                        disabled
+                        title="Course editing coming soon"
+                      >
+                        <Edit className="mr-1 h-4 w-4" />
+                        Edit
+                      </NeuralButton>
                     </div>
                   </div>
                 </CardContent>
