@@ -27,6 +27,7 @@ const navigationConfig = {
     { href: "/faculty/dashboard", label: "Dashboard", icon: BarChart3 },
     { href: "/faculty/modules", label: "My Modules", icon: BookOpen },
     { href: "/faculty/courses", label: "My Courses", icon: BookOpen },
+    { href: "/faculty/visualization", label: "Visualization", icon: BarChart3 },
     { href: "/faculty/modules/create", label: "Create Module", icon: Plus },
   ],
   // Future extensibility for student role

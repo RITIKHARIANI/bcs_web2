@@ -192,12 +192,12 @@ export function NetworkVisualization({ courseId, onClose }: NetworkVisualization
         position: { x: 400, y: 50 },
         data: {
           ...course,
-          moduleCount: course.courseModules.length,
+          moduleCount: course.courseModules?.length || 0,
         },
       })
 
       // Add module nodes
-      course.courseModules.forEach((cm, index) => {
+      course.courseModules?.forEach((cm, index) => {
         const moduleData = cm.module
         
         // Filter by search and status
@@ -233,8 +233,8 @@ export function NetworkVisualization({ courseId, onClose }: NetworkVisualization
 
           // Connect to parent module if exists
           if (moduleData.parentModuleId) {
-            const parentExists = course.courseModules.some(
-              pcm => pcm.module.id === moduleData.parentModuleId
+            const parentExists = course.courseModules?.some(
+              pcm => pcm.module?.id === moduleData.parentModuleId
             )
             if (parentExists) {
               newEdges.push({
@@ -266,9 +266,9 @@ export function NetworkVisualization({ courseId, onClose }: NetworkVisualization
         })
 
         // Add modules for this course
-        const courseModules = data.modules.filter(module =>
-          course.courseModules.some(cm => cm.module.id === module.id)
-        )
+        const courseModules = data.modules?.filter(module =>
+          course.courseModules?.some(cm => cm.module?.id === module.id)
+        ) || []
 
         courseModules.forEach((moduleData, moduleIndex) => {
           // Filter by search and status
@@ -317,11 +317,11 @@ export function NetworkVisualization({ courseId, onClose }: NetworkVisualization
       })
 
       // Add standalone modules (not in any course)
-      const standaloneModules = data.modules.filter(module =>
+      const standaloneModules = data.modules?.filter(module =>
         !data.courses?.some(course =>
-          course.courseModules.some(cm => cm.module.id === module.id)
+          course.courseModules?.some(cm => cm.module?.id === module.id)
         )
-      )
+      ) || []
 
       standaloneModules.forEach((moduleData, index) => {
         const matchesSearch = !searchTerm || 
