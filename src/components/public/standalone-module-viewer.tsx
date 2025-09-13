@@ -100,10 +100,10 @@ export function StandaloneModuleViewer({ module }: StandaloneModuleProps) {
               <Calendar className="mr-1 h-4 w-4" />
               Updated {new Date(module.updatedAt).toLocaleDateString()}
             </div>
-            {module.subModules.length > 0 && (
+            {(module.subModules?.length || 0) > 0 && (
               <div className="flex items-center">
                 <Layers className="mr-1 h-4 w-4" />
-                {module.subModules.length} submodule{module.subModules.length !== 1 ? 's' : ''}
+                {module.subModules?.length || 0} submodule{(module.subModules?.length || 0) !== 1 ? 's' : ''}
               </div>
             )}
           </div>
@@ -162,7 +162,7 @@ export function StandaloneModuleViewer({ module }: StandaloneModuleProps) {
           </Card>
 
           {/* Submodules */}
-          {module.subModules.length > 0 && (
+          {(module.subModules?.length || 0) > 0 && (
             <Card className="cognitive-card">
               <CardHeader>
                 <CardTitle className="flex items-center text-sm">
@@ -174,7 +174,7 @@ export function StandaloneModuleViewer({ module }: StandaloneModuleProps) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {module.subModules.map((subModule) => (
+                {(module.subModules || []).map((subModule) => (
                   <Link 
                     key={subModule.id} 
                     href={`/modules/${subModule.slug}`}

@@ -256,7 +256,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
   // Available parent modules (exclude self and descendants)
   const availableParentModules = parentModules.filter(parent => 
     parent.id !== moduleId && 
-    (!module?.subModules.some(sub => sub.id === parent.id))
+    (!module?.subModules?.some(sub => sub.id === parent.id))
   )
 
   if (isLoadingModule) {
@@ -514,7 +514,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Sub-modules:</span>
-                  <span className="font-medium">{module.subModules.length}</span>
+                  <span className="font-medium">{module.subModules?.length || 0}</span>
                 </div>
               </CardContent>
             </Card>
