@@ -118,7 +118,7 @@ function PublicNetworkVisualizationContent() {
       setIsLoading(true);
       setError(null);
       
-      const data = await withDatabaseRetry(() => fetchVisualizationData());
+      const data = await withDatabaseRetry(() => fetchVisualizationData(), { maxAttempts: 5 });
       
       if (!data.courses || !data.modules) {
         throw new Error('Invalid data structure received');
@@ -160,8 +160,11 @@ function PublicNetworkVisualizationContent() {
 
       // Create edges between courses and modules
       (data.courses || []).forEach((course) => {
+        console.log(`Processing course: ${course.title}, courseModules:`, course.courseModules);
         (course.courseModules || []).forEach((cm) => {
+          console.log(`Processing course module:`, cm);
           if (cm.module?.id) {
+            console.log(`Creating edge: course-${course.id} -> module-${cm.module.id}`);
             courseModuleEdges.push({
               id: `course-${course.id}-module-${cm.module.id}`,
               source: `course-${course.id}`,
@@ -178,6 +181,7 @@ function PublicNetworkVisualizationContent() {
       // Create edges between parent and child modules
       (data.modules || []).forEach((module) => {
         if (module.parentModuleId) {
+          console.log(`Creating parent-child edge: module-${module.parentModuleId} -> module-${module.id}`);
           moduleParentEdges.push({
             id: `module-${module.parentModuleId}-module-${module.id}`,
             source: `module-${module.parentModuleId}`,
@@ -192,6 +196,10 @@ function PublicNetworkVisualizationContent() {
 
       const allNodes = [...courseNodes, ...moduleNodes];
       const allEdges = [...courseModuleEdges, ...moduleParentEdges];
+
+      console.log(`Generated ${courseNodes.length} course nodes, ${moduleNodes.length} module nodes`);
+      console.log(`Generated ${courseModuleEdges.length} course-module edges, ${moduleParentEdges.length} parent-child edges`);
+      console.log('All edges:', allEdges);
 
       setNodes(allNodes);
       setEdges(allEdges);

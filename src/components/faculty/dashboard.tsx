@@ -81,7 +81,7 @@ export function FacultyDashboard({ user }: FacultyDashboardProps) {
     gcTime: 300000, // 5 minutes
     retry: (failureCount, error) => {
       console.log(`Dashboard stats retry attempt ${failureCount}:`, error)
-      return failureCount < 3
+      return failureCount < 5 // Increased from 3 to 5
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });

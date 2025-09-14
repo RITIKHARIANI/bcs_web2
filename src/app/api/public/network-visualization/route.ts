@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
           orderBy: {
             sort_order: 'asc',
           },
-        })
+        }), { maxAttempts: 5 }
       ),
       withDatabaseRetry(async () =>
         prisma.courses.findMany({
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
           orderBy: {
             created_at: 'desc',
           },
-        })
+        }), { maxAttempts: 5 }
       ),
     ])
 

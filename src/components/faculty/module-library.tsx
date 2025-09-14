@@ -95,7 +95,7 @@ async function fetchModules(params: {
       availableTags: data.availableTags || []
     }
   }, {
-    maxAttempts: 3,
+    maxAttempts: 5, // Increased from 3 to 5
     baseDelayMs: 1000
   })
 }
@@ -131,7 +131,7 @@ export function ModuleLibrary() {
     queryFn: () => fetchModules(queryParams),
     staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes
     gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
-    retry: 2, // Additional retry at React Query level
+    retry: 5, // Increased from 2 to 5 for better reliability
   })
 
   const { modules, availableTags } = data

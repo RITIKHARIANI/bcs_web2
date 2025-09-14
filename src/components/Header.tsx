@@ -24,6 +24,7 @@ const navigationConfig = {
   faculty: [
     { href: "/", label: "Home", icon: Home },
     { href: "/courses", label: "Courses", icon: BookOpen },
+    { href: "/network", label: "Network", icon: BarChart3 },
     { href: "/faculty/dashboard", label: "Dashboard", icon: BarChart3 },
     { href: "/faculty/visualization", label: "Visualization", icon: BarChart3 },
     { href: "/faculty/modules", label: "My Modules", icon: BookOpen },
@@ -34,6 +35,7 @@ const navigationConfig = {
   student: [
     { href: "/", label: "Home", icon: Home },
     { href: "/courses", label: "Courses", icon: BookOpen },
+    { href: "/network", label: "Network", icon: BarChart3 },
     { href: "/student/dashboard", label: "Dashboard", icon: BarChart3 },
     { href: "/student/progress", label: "Progress", icon: BarChart3 },
   ]
@@ -76,7 +78,7 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium" role="navigation" aria-label="Main navigation">
-            {navigationItems.slice(0, 5).map((item) => {
+            {navigationItems.slice(0, 6).map((item) => {
               const IconComponent = item.icon;
               return (
                 <Link
