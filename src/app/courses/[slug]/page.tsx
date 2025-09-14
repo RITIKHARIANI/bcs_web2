@@ -26,23 +26,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   
   if (!course) {
     return {
-      title: "Course Not Found - NeuroLearn",
+      title: "Course Not Found - Brain & Cognitive Sciences",
       description: "The requested course could not be found.",
     };
   }
 
   return {
-    title: `${course.title} - NeuroLearn`,
+    title: `${course.title} - Brain & Cognitive Sciences`,
     description: course.description || `Learn about ${course.title} through interactive modules and comprehensive content.`,
     keywords: ["neuroscience", "cognitive science", "brain", "learning", course.title],
     openGraph: {
-      title: `${course.title} - NeuroLearn`,
+      title: `${course.title} - Brain & Cognitive Sciences`,
       description: course.description || `Learn about ${course.title} through interactive modules.`,
       type: "article",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${course.title} - NeuroLearn`,
+      title: `${course.title} - Brain & Cognitive Sciences`,
       description: course.description || `Learn about ${course.title} through interactive modules.`,
     },
   };

@@ -62,15 +62,19 @@ export function Hero() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <NeuralButton size="lg" className="min-w-[200px]">
-            Start Exploring
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </NeuralButton>
+          <Link href="/courses">
+            <NeuralButton size="lg" className="min-w-[200px]">
+              Start Exploring
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </NeuralButton>
+          </Link>
           
-          <NeuralButton variant="cognitive" size="lg" className="min-w-[200px]">
-            <Play className="mr-2 h-5 w-5" />
-            Watch Demo
-          </NeuralButton>
+          <Link href="/network">
+            <NeuralButton variant="cognitive" size="lg" className="min-w-[200px]">
+              <Play className="mr-2 h-5 w-5" />
+              Explore Network
+            </NeuralButton>
+          </Link>
         </div>
 
         {/* Stats */}

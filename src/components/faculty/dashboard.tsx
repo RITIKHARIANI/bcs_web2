@@ -71,7 +71,7 @@ interface FacultyDashboardProps {
 
 export function FacultyDashboard({ user }: FacultyDashboardProps) {
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/auth/login" });
+    signOut({ callbackUrl: "/" });
   };
 
   const { data: dashboardData, isLoading, error, refetch } = useQuery({
@@ -317,7 +317,7 @@ export function FacultyDashboard({ user }: FacultyDashboardProps) {
               <div className="text-center py-12">
                 <Brain className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Welcome to NeuroLearn
+                  Welcome to Brain & Cognitive Sciences
                 </h3>
                 <p className="text-muted-foreground mb-6">
                   Start by creating your first module or course to see activity here.

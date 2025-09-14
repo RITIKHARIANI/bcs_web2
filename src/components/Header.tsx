@@ -19,7 +19,7 @@ const navigationConfig = {
   public: [
     { href: "/", label: "Home", icon: Home },
     { href: "/courses", label: "Courses", icon: BookOpen },
-    { href: "/courses", label: "Library", icon: BookOpen }, // Temporary duplicate - can be refined later
+    { href: "/network", label: "Network", icon: BarChart3 },
   ],
   faculty: [
     { href: "/", label: "Home", icon: Home },
@@ -44,7 +44,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/auth/login" });
+    signOut({ callbackUrl: "/" });
   };
 
   // Get navigation items based on user role
@@ -65,12 +65,12 @@ export function Header() {
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between">
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center space-x-2" aria-label="NeuroLearn - Go to homepage">
+          <Link href="/" className="flex items-center space-x-2" aria-label="Brain & Cognitive Sciences - Go to homepage">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-neural" aria-hidden="true">
               <Brain className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg sm:text-xl text-neural-primary">
-              NeuroLearn
+            <span className="font-bold text-sm sm:text-base lg:text-lg text-neural-primary">
+              Brain & Cognitive Sciences
             </span>
           </Link>
 

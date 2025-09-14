@@ -1,7 +1,6 @@
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { CoursesSection } from "@/components/CoursesSection";
-import { NetworkVisualization } from "@/components/NetworkVisualization";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { Footer } from "@/components/Footer";
 
@@ -12,7 +11,6 @@ export default function HomePage() {
       <main id="main-content" role="main" aria-label="Main content">
         <Hero />
         <CoursesSection />
-        <NetworkVisualization />
         <FeaturesSection />
       </main>
       <Footer />

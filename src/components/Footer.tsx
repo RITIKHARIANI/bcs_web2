@@ -12,7 +12,7 @@ export function Footer() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-neural">
                 <Brain className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-xl text-neural-primary">NeuroLearn</span>
+              <span className="font-bold text-lg text-neural-primary">Brain & Cognitive Sciences</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Advancing education through innovative neuroscience-based learning platforms.
@@ -117,7 +117,7 @@ export function Footer() {
 
         <div className="border-t border-border/40 mt-8 pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 NeuroLearn. All rights reserved. Built for advancing cognitive science education.
+            © 2024 Brain & Cognitive Sciences. All rights reserved. Built for advancing cognitive science education.
           </p>
         </div>
       </div>
