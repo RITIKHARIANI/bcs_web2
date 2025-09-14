@@ -97,11 +97,11 @@ const nodeTypes: NodeTypes = {
 };
 
 async function fetchVisualizationData(): Promise<VisualizationData> {
-  const response = await fetch('/api/visualization/course-structure')
+  const response = await fetch('/api/public/network-visualization')
   if (!response.ok) {
     const errorText = await response.text()
-    console.error('Visualization API error:', response.status, errorText)
-    throw new Error(`Failed to fetch visualization data (${response.status})`)
+    console.error('Public network API error:', response.status, errorText)
+    throw new Error(`Failed to fetch public network data (${response.status})`)
   }
   return response.json()
 }
@@ -225,8 +225,8 @@ function PublicNetworkVisualizationContent() {
       <div className="h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-neural-primary" />
-          <h2 className="text-xl font-semibold mb-2">Loading Network Visualization</h2>
-          <p className="text-muted-foreground">Fetching course and module relationships...</p>
+          <h2 className="text-xl font-semibold mb-2">Loading Public Network Visualization</h2>
+          <p className="text-muted-foreground">Fetching published course and module relationships...</p>
         </div>
       </div>
     );
@@ -239,8 +239,8 @@ function PublicNetworkVisualizationContent() {
           <CardContent className="pt-6">
             <div className="text-center">
               <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
-              <h2 className="text-xl font-semibold mb-2">Failed to Load Visualization</h2>
-              <p className="text-muted-foreground mb-4">{error}</p>
+              <h2 className="text-xl font-semibold mb-2">Failed to Load Public Network</h2>
+              <p className="text-muted-foreground mb-4">Unable to load the public course network visualization. {error}</p>
               <NeuralButton onClick={fetchData} variant="outline">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Try Again
@@ -284,7 +284,7 @@ function PublicNetworkVisualizationContent() {
                 <h3 className="font-semibold">Course Network Visualization</h3>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Explore how courses and modules are interconnected in our Brain & Cognitive Sciences curriculum.
+                Explore how published courses and modules are interconnected in our Brain & Cognitive Sciences curriculum. This view shows only publicly available content.
               </p>
               
               {/* Statistics */}
