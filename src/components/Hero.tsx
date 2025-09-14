@@ -76,22 +76,6 @@ export function Hero() {
             </NeuralButton>
           </Link>
         </div>
-
-        {/* Stats */}
-        <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-3">
-          <div className="cognitive-card p-6 text-center">
-            <div className="text-3xl font-bold text-neural-primary mb-2">500+</div>
-            <div className="text-sm text-muted-foreground">Research Papers</div>
-          </div>
-          <div className="cognitive-card p-6 text-center">
-            <div className="text-3xl font-bold text-synapse-primary mb-2">50+</div>
-            <div className="text-sm text-muted-foreground">Expert Faculty</div>
-          </div>
-          <div className="cognitive-card p-6 text-center">
-            <div className="text-3xl font-bold text-cognition-teal mb-2">10K+</div>
-            <div className="text-sm text-muted-foreground">Active Learners</div>
-          </div>
-        </div>
       </div>
     </section>
   )
