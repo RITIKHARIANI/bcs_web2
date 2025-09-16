@@ -1,93 +1,24 @@
 import { notFound } from "next/navigation";
 import { CourseViewer } from "@/components/public/course-viewer";
 import { PublicLayout } from "@/components/layouts/app-layout";
-import { prisma } from '@/lib/db';
 
 async function getCourse(slug: string) {
   try {
-    const course = await prisma.courses.findFirst({
-      where: {
-        slug,
-        status: 'published', // Only show published courses publicly
-      },
-      include: {
-        users: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        course_modules: {
-          include: {
-            modules: {
-              select: {
-                id: true,
-                title: true,
-                slug: true,
-                description: true,
-                content: true,
-                status: true,
-                parent_module_id: true,
-                sort_order: true,
-                created_at: true,
-                updated_at: true,
-              },
-            },
-          },
-          where: {
-            modules: {
-              status: 'published', // Only include published modules
-            },
-          },
-          orderBy: {
-            sort_order: 'asc',
-          },
-        },
-        _count: {
-          select: {
-            course_modules: true,
-          },
-        },
-      },
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    
+    const response = await fetch(`${baseUrl}/api/public/courses/${slug}`, {
+      cache: 'no-store',
     });
-
-    if (!course) {
+    
+    if (!response.ok) {
+      console.error(`Failed to fetch course: ${response.status} ${response.statusText}`);
       return null;
     }
-
-    // Transform data structure to match component expectations
-    return {
-      id: course.id,
-      title: course.title,
-      slug: course.slug,
-      description: course.description,
-      featured: course.featured || false,
-      status: course.status,
-      createdAt: course.created_at,
-      updatedAt: course.updated_at,
-      author: {
-        name: course.users.name,
-        email: course.users.email,
-      },
-      courseModules: course.course_modules.map(cm => ({
-        sortOrder: cm.sort_order,
-        module: {
-          id: cm.modules.id,
-          title: cm.modules.title,
-          slug: cm.modules.slug,
-          description: cm.modules.description,
-          content: cm.modules.content,
-          status: cm.modules.status,
-          parentModuleId: cm.modules.parent_module_id,
-          sortOrder: cm.modules.sort_order,
-          createdAt: cm.modules.created_at,
-          updatedAt: cm.modules.updated_at,
-        }
-      })),
-      _count: {
-        courseModules: course._count.course_modules,
-      },
-    };
+    
+    const data = await response.json();
+    return data.course;
   } catch (error) {
     console.error('Error fetching course:', error);
     return null;

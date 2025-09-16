@@ -280,12 +280,21 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Get all unique tags for this user (for filtering UI)
+    // Get all unique tags (for filtering UI)
     let allUserTags: string[] = []
     try {
       allUserTags = await withDatabaseRetry(async () => {
+        let tagQuery = {}
+        
+        // For faculty, get their own module tags; for public, get all published module tags
+        if (session?.user?.role === 'faculty') {
+          tagQuery = { author_id: session.user.id }
+        } else {
+          tagQuery = { status: 'published' }
+        }
+        
         const userModules = await prisma.modules.findMany({
-          where: { author_id: session.user.id },
+          where: tagQuery,
           select: { tags: true }
         })
         
