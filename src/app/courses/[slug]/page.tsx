@@ -4,11 +4,14 @@ import { PublicLayout } from "@/components/layouts/app-layout";
 
 async function getCourse(slug: string) {
   try {
-    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/courses/by-slug/${slug}`, {
+    // Use dynamic base URL for both development and production
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/courses/by-slug/${slug}`, {
       cache: 'no-store',
     });
     
     if (!response.ok) {
+      console.error(`Failed to fetch course: ${response.status} ${response.statusText}`);
       return null;
     }
     
