@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
+import { withDatabaseRetry } from '@/lib/retry'
 import { z } from 'zod'
 
 const createCourseSchema = z.object({
@@ -202,29 +203,31 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ courses })
     }
 
-    // Public course listing
-    const courses = await prisma.courses.findMany({
-      where: {
-        status: 'published',
-        ...(featured === 'true' && { featured: true }),
-      },
-      include: {
-        users: {
-          select: {
-            name: true,
+    // Public course listing with retry mechanism
+    const courses = await withDatabaseRetry(async () => {
+      return await prisma.courses.findMany({
+        where: {
+          status: 'published',
+          ...(featured === 'true' && { featured: true }),
+        },
+        include: {
+          users: {
+            select: {
+              name: true,
+            },
+          },
+          _count: {
+            select: {
+              course_modules: true,
+            },
           },
         },
-        _count: {
-          select: {
-            course_modules: true,
-          },
-        },
-      },
-      orderBy: [
-        { featured: 'desc' },
-        { updated_at: 'desc' },
-      ],
-    })
+        orderBy: [
+          { featured: 'desc' },
+          { updated_at: 'desc' },
+        ],
+      });
+    }, { maxAttempts: 5, baseDelayMs: 1000 });
 
     return NextResponse.json({ courses })
   } catch (error) {
