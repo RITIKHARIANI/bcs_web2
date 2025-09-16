@@ -130,10 +130,6 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session?.user || session.user.role !== 'faculty') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const { searchParams } = new URL(request.url)
     const parentId = searchParams.get('parentId')
     const parent_module_id = searchParams.get('parent_module_id') 
@@ -143,8 +139,24 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'sort_order'
     const sortOrder = searchParams.get('sortOrder') || 'asc'
 
-    // Handle different query parameter formats
-    let whereClause: any = { author_id: session.user.id }
+    // Handle different access patterns
+    let whereClause: any = {}
+
+    // Public access: only allow published modules
+    if (!session?.user) {
+      if (status !== 'published') {
+        return NextResponse.json({ error: 'Unauthorized - only published modules are publicly accessible' }, { status: 401 })
+      }
+      whereClause.status = 'published'
+    } 
+    // Faculty access: can see their own modules with any status
+    else if (session.user.role === 'faculty') {
+      whereClause.author_id = session.user.id
+    } 
+    // Other authenticated users: only published modules
+    else {
+      whereClause.status = 'published'
+    }
     
     if (parentId) {
       if (parentId === 'root') {
@@ -160,7 +172,8 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    if (status) {
+    // Apply status filter for faculty (public access already has status set)
+    if (status && session?.user?.role === 'faculty') {
       whereClause.status = status
     }
 
