@@ -15,10 +15,11 @@ function getServerlessOptimizedUrl(): string {
     // Parse the URL to add serverless parameters
     const url = new URL(baseUrl)
     
-    // Add Supabase-specific parameters for serverless
+    // Add Supabase PgBouncer parameters for serverless/Vercel
+    url.searchParams.set('pgbouncer', 'true')
+    url.searchParams.set('prepared', 'false')
     url.searchParams.set('sslmode', 'require')
-    url.searchParams.set('connection_limit', '1')
-    url.searchParams.set('pool_timeout', '20')
+    url.searchParams.set('connect_timeout', '10')
     
     const finalUrl = url.toString()
     console.log('Database URL configured for serverless with prepared statements disabled')

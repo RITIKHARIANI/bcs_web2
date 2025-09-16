@@ -205,51 +205,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ courses })
     }
 
-    // Public course listing - using raw query to bypass prepared statement conflicts
-    const rawQuery = `
-      SELECT 
-        c.id, c.title, c.slug, c.description, c.author_id, c.status, c.featured, c.tags, c.created_at, c.updated_at,
-        u.name as author_name,
-        COUNT(cm.id)::int as course_modules_count
-      FROM courses c
-      LEFT JOIN users u ON c.author_id = u.id  
-      LEFT JOIN course_modules cm ON c.id = cm.course_id
-      WHERE c.status = 'published'
-        ${featured === 'true' ? 'AND c.featured = true' : ''}
-      GROUP BY c.id, u.name
-      ORDER BY c.featured DESC, c.updated_at DESC
-    `;
-    
-    const rawCourses = await prisma.$queryRaw`SELECT 
-      c.id, c.title, c.slug, c.description, c.author_id, c.status, c.featured, c.tags, c.created_at, c.updated_at,
-      u.name as author_name,
-      COUNT(cm.id)::int as course_modules_count
-    FROM courses c
-    LEFT JOIN users u ON c.author_id = u.id  
-    LEFT JOIN course_modules cm ON c.id = cm.course_id
-    WHERE c.status = 'published'
-    GROUP BY c.id, u.name
-    ORDER BY c.featured DESC, c.updated_at DESC`;
-    
-    // Transform raw results to match expected format
-    const courses = (rawCourses as any[]).map((course: any) => ({
-      id: course.id,
-      title: course.title,
-      slug: course.slug,
-      description: course.description,
-      author_id: course.author_id,
-      status: course.status,
-      featured: course.featured,
-      tags: course.tags,
-      created_at: course.created_at,
-      updated_at: course.updated_at,
-      users: {
-        name: course.author_name
+    // Public course listing with proper PgBouncer configuration
+    const courses = await prisma.courses.findMany({
+      where: {
+        status: 'published',
+        ...(featured === 'true' && { featured: true }),
       },
-      _count: {
-        course_modules: course.course_modules_count
-      }
-    }));
+      include: {
+        users: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            course_modules: true,
+          },
+        },
+      },
+      orderBy: [
+        { featured: 'desc' },
+        { updated_at: 'desc' },
+      ],
+    });
 
     return NextResponse.json({ courses })
   } catch (error) {
