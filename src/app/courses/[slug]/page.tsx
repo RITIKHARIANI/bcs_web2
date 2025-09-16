@@ -8,7 +8,7 @@ async function getCourse(slug: string) {
       ? `https://${process.env.VERCEL_URL}` 
       : process.env.NEXTAUTH_URL || 'http://localhost:3000';
     
-    const response = await fetch(`${baseUrl}/api/public/courses/${slug}`, {
+    const response = await fetch(`${baseUrl}/api/courses/by-slug/${slug}`, {
       cache: 'no-store',
     });
     
