@@ -34,7 +34,7 @@ interface Module {
   createdAt: string
   updatedAt: string
   tags: string[]
-  author: {
+  users: {
     name: string
   }
   parentModule: {
@@ -73,7 +73,7 @@ export function ModuleCatalog() {
     const matchesSearch = 
       module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       module.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (module.author?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+      (module.users?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
       (module.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
     
     const matchesRoot = !showRootOnly || !module.parentModule
@@ -221,7 +221,7 @@ export function ModuleCatalog() {
                       <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                         <div className="flex items-center">
                           <User className="mr-1 h-3 w-3" />
-                          {module.author?.name || 'Unknown'}
+                          {module.users?.name || 'Unknown'}
                         </div>
                         <div className="flex items-center">
                           <Layers className="mr-1 h-3 w-3" />
@@ -371,7 +371,7 @@ export function ModuleCatalog() {
                       <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                         <div className="flex items-center">
                           <User className="mr-1 h-3 w-3" />
-                          {module.author?.name || 'Unknown'}
+                          {module.users?.name || 'Unknown'}
                         </div>
                         <div className="flex items-center">
                           <Layers className="mr-1 h-3 w-3" />
