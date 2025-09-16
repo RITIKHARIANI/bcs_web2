@@ -205,31 +205,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ courses })
     }
 
-    // Public course listing
-    const courses = await withDatabaseRetry(async () => {
-      return await prisma.courses.findMany({
-        where: {
-          status: 'published',
-          ...(featured === 'true' && { featured: true }),
-        },
-        include: {
-          users: {
-            select: {
-              name: true,
-            },
-          },
-          _count: {
-            select: {
-              course_modules: true,
-            },
+    // Public course listing - simple approach without retry to avoid prepared statement conflicts
+    const courses = await prisma.courses.findMany({
+      where: {
+        status: 'published',
+        ...(featured === 'true' && { featured: true }),
+      },
+      include: {
+        users: {
+          select: {
+            name: true,
           },
         },
-        orderBy: [
-          { featured: 'desc' },
-          { updated_at: 'desc' },
-        ],
-      });
-    }, { maxAttempts: 2, baseDelayMs: 500 });
+        _count: {
+          select: {
+            course_modules: true,
+          },
+        },
+      },
+      orderBy: [
+        { featured: 'desc' },
+        { updated_at: 'desc' },
+      ],
+    });
 
     return NextResponse.json({ courses })
   } catch (error) {

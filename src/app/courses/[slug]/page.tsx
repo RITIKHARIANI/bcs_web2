@@ -6,52 +6,50 @@ import { withDatabaseRetry } from '@/lib/retry';
 
 async function getCourse(slug: string) {
   try {
-    const course = await withDatabaseRetry(async () => {
-      return await prisma.courses.findFirst({
-        where: {
-          slug,
-          status: 'published', // Only show published courses publicly
-        },
-        include: {
-          users: {
-            select: {
-              name: true,
-              email: true,
-            },
-          },
-          course_modules: {
-            include: {
-              modules: {
-                select: {
-                  id: true,
-                  title: true,
-                  slug: true,
-                  description: true,
-                  content: true,
-                  status: true,
-                  parent_module_id: true,
-                  sort_order: true,
-                  created_at: true,
-                  updated_at: true,
-                },
-              },
-            },
-            where: {
-              modules: {
-                status: 'published', // Only include published modules
-              },
-            },
-            orderBy: {
-              sort_order: 'asc',
-            },
-          },
-          _count: {
-            select: {
-              course_modules: true,
-            },
+    const course = await prisma.courses.findFirst({
+      where: {
+        slug,
+        status: 'published', // Only show published courses publicly
+      },
+      include: {
+        users: {
+          select: {
+            name: true,
+            email: true,
           },
         },
-      });
+        course_modules: {
+          include: {
+            modules: {
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+                description: true,
+                content: true,
+                status: true,
+                parent_module_id: true,
+                sort_order: true,
+                created_at: true,
+                updated_at: true,
+              },
+            },
+          },
+          where: {
+            modules: {
+              status: 'published', // Only include published modules
+            },
+          },
+          orderBy: {
+            sort_order: 'asc',
+          },
+        },
+        _count: {
+          select: {
+            course_modules: true,
+          },
+        },
+      },
     });
 
     if (!course) {
