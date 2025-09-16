@@ -15,9 +15,10 @@ function getServerlessOptimizedUrl(): string {
     // Parse the URL to add serverless parameters
     const url = new URL(baseUrl)
     
-    // Add parameters to prevent prepared statement conflicts in serverless
-    url.searchParams.set('prepared', 'false')
+    // Add Supabase-specific parameters for serverless
+    url.searchParams.set('sslmode', 'require')
     url.searchParams.set('connection_limit', '1')
+    url.searchParams.set('pool_timeout', '20')
     
     const finalUrl = url.toString()
     console.log('Database URL configured for serverless with prepared statements disabled')
