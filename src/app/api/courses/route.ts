@@ -205,10 +205,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ courses })
     }
 
-    // Public course listing with enhanced error logging
-    let courses;
-    try {
-      courses = await prisma.courses.findMany({
+    // Public course listing
+    const courses = await withDatabaseRetry(async () => {
+      return await prisma.courses.findMany({
         where: {
           status: 'published',
           ...(featured === 'true' && { featured: true }),
@@ -230,16 +229,7 @@ export async function GET(request: NextRequest) {
           { updated_at: 'desc' },
         ],
       });
-      console.log('Fetched courses successfully:', courses.length);
-    } catch (dbError) {
-      console.error('Database error details:', {
-        message: dbError.message,
-        code: dbError.code,
-        meta: dbError.meta,
-        stack: dbError.stack
-      });
-      throw dbError;
-    }
+    }, { maxAttempts: 2, baseDelayMs: 500 });
 
     return NextResponse.json({ courses })
   } catch (error) {

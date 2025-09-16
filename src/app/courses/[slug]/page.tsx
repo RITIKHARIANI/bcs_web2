@@ -6,61 +6,57 @@ import { withDatabaseRetry } from '@/lib/retry';
 
 async function getCourse(slug: string) {
   try {
-    // Try direct database query first
-    console.log('Fetching course with slug:', slug);
-    
-    const course = await prisma.courses.findFirst({
-      where: {
-        slug,
-        status: 'published', // Only show published courses publicly
-      },
-      include: {
-        users: {
-          select: {
-            name: true,
-            email: true,
-          },
+    const course = await withDatabaseRetry(async () => {
+      return await prisma.courses.findFirst({
+        where: {
+          slug,
+          status: 'published', // Only show published courses publicly
         },
-        course_modules: {
-          include: {
-            modules: {
-              select: {
-                id: true,
-                title: true,
-                slug: true,
-                description: true,
-                content: true,
-                status: true,
-                parent_module_id: true,
-                sort_order: true,
-                created_at: true,
-                updated_at: true,
+        include: {
+          users: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+          course_modules: {
+            include: {
+              modules: {
+                select: {
+                  id: true,
+                  title: true,
+                  slug: true,
+                  description: true,
+                  content: true,
+                  status: true,
+                  parent_module_id: true,
+                  sort_order: true,
+                  created_at: true,
+                  updated_at: true,
+                },
               },
             },
-          },
-          where: {
-            modules: {
-              status: 'published', // Only include published modules
+            where: {
+              modules: {
+                status: 'published', // Only include published modules
+              },
+            },
+            orderBy: {
+              sort_order: 'asc',
             },
           },
-          orderBy: {
-            sort_order: 'asc',
+          _count: {
+            select: {
+              course_modules: true,
+            },
           },
         },
-        _count: {
-          select: {
-            course_modules: true,
-          },
-        },
-      },
+      });
     });
 
     if (!course) {
-      console.log('Course not found in database');
       return null;
     }
-
-    console.log('Course found, transforming data:', course.title);
 
     // Transform data structure to match component expectations
     return {
@@ -96,32 +92,7 @@ async function getCourse(slug: string) {
       },
     };
   } catch (error) {
-    console.error('Database error in getCourse:', {
-      message: error.message,
-      stack: error.stack,
-      code: error.code
-    });
-    
-    // Fallback to API call if direct DB fails
-    try {
-      console.log('Trying fallback API call...');
-      const baseUrl = process.env.VERCEL_URL 
-        ? `https://${process.env.VERCEL_URL}` 
-        : process.env.NEXTAUTH_URL || 'http://localhost:3000';
-      
-      const response = await fetch(`${baseUrl}/api/courses/by-slug/${slug}`, {
-        cache: 'no-store',
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Fallback API call successful');
-        return data.course;
-      }
-    } catch (apiError) {
-      console.error('API fallback also failed:', apiError.message);
-    }
-    
+    console.error('Error fetching course:', error);
     return null;
   }
 }
