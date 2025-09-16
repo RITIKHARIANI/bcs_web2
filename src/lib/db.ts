@@ -11,15 +11,25 @@ function getServerlessOptimizedUrl(): string {
     throw new Error('DATABASE_URL is not defined')
   }
   
-  // Parse the URL to add serverless parameters
-  const url = new URL(baseUrl)
-  
-  // Add parameters to prevent prepared statement conflicts in serverless
-  url.searchParams.set('prepared', 'false')
-  url.searchParams.set('connection_limit', '1')
-  url.searchParams.set('sslmode', 'require')
-  
-  return url.toString()
+  try {
+    // Parse the URL to add serverless parameters
+    const url = new URL(baseUrl)
+    
+    // Add parameters to prevent prepared statement conflicts in serverless
+    url.searchParams.set('prepared', 'false')
+    url.searchParams.set('connection_limit', '1')
+    
+    const finalUrl = url.toString()
+    console.log('Database URL configured for serverless with prepared statements disabled')
+    return finalUrl
+  } catch (error) {
+    console.error('Error parsing DATABASE_URL:', error)
+    // Fallback to simple string concatenation if URL parsing fails
+    const separator = baseUrl.includes('?') ? '&' : '?'
+    const fallbackUrl = `${baseUrl}${separator}prepared=false&connection_limit=1`
+    console.log('Using fallback URL construction method')
+    return fallbackUrl
+  }
 }
 
 // Create Prisma client with serverless-optimized URL

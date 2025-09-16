@@ -231,17 +231,28 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ courses })
   } catch (error) {
+    console.error('=== DETAILED ERROR ANALYSIS ===')
     console.error('Error fetching courses - Full details:', {
       message: error.message,
       stack: error.stack,
       name: error.name,
-      cause: error.cause
+      cause: error.cause,
+      code: error.code || 'N/A'
+    })
+    
+    // Log environment info (without sensitive data)
+    console.error('Environment info:', {
+      nodeEnv: process.env.NODE_ENV,
+      hasDatabaseUrl: !!process.env.DATABASE_URL,
+      databaseUrlPrefix: process.env.DATABASE_URL?.slice(0, 20) + '...',
     })
     
     return NextResponse.json(
       { 
         error: 'Failed to fetch courses', 
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+        errorType: error.name,
+        errorCode: error.code || 'UNKNOWN',
+        details: process.env.NODE_ENV === 'development' ? error.message : 'Check server logs for details'
       },
       { status: 500 }
     )
