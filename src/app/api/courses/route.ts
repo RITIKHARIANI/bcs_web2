@@ -161,51 +161,54 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
 
-      const courses = await prisma.courses.findMany({
-        where: {
-          author_id: session.user.id,
-          ...(status && { status }),
-        },
-        include: {
-          users: {
-            select: {
-              name: true,
-              email: true,
-            },
+      const courses = await withDatabaseRetry(async () => {
+        return await prisma.courses.findMany({
+          where: {
+            author_id: session.user.id,
+            ...(status && { status }),
           },
-          course_modules: {
-            include: {
-              modules: {
-                select: {
-                  id: true,
-                  title: true,
-                  slug: true,
-                  description: true,
-                  status: true,
-                },
+          include: {
+            users: {
+              select: {
+                name: true,
+                email: true,
               },
             },
-            orderBy: {
-              sort_order: 'asc',
+            course_modules: {
+              include: {
+                modules: {
+                  select: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    description: true,
+                    status: true,
+                  },
+                },
+              },
+              orderBy: {
+                sort_order: 'asc',
+              },
+            },
+            _count: {
+              select: {
+                course_modules: true,
+              },
             },
           },
-          _count: {
-            select: {
-              course_modules: true,
-            },
+          orderBy: {
+            updated_at: 'desc',
           },
-        },
-        orderBy: {
-          updated_at: 'desc',
-        },
-      })
+        });
+      }, { maxAttempts: 3, baseDelayMs: 500 })
 
       return NextResponse.json({ courses })
     }
 
-    // Public course listing with retry mechanism
-    const courses = await withDatabaseRetry(async () => {
-      return await prisma.courses.findMany({
+    // Public course listing with enhanced error logging
+    let courses;
+    try {
+      courses = await prisma.courses.findMany({
         where: {
           status: 'published',
           ...(featured === 'true' && { featured: true }),
@@ -227,13 +230,31 @@ export async function GET(request: NextRequest) {
           { updated_at: 'desc' },
         ],
       });
-    }, { maxAttempts: 5, baseDelayMs: 1000 });
+      console.log('Fetched courses successfully:', courses.length);
+    } catch (dbError) {
+      console.error('Database error details:', {
+        message: dbError.message,
+        code: dbError.code,
+        meta: dbError.meta,
+        stack: dbError.stack
+      });
+      throw dbError;
+    }
 
     return NextResponse.json({ courses })
   } catch (error) {
-    console.error('Error fetching courses:', error)
+    console.error('Error fetching courses - Full details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      cause: error.cause
+    })
+    
     return NextResponse.json(
-      { error: 'Failed to fetch courses' },
+      { 
+        error: 'Failed to fetch courses', 
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      },
       { status: 500 }
     )
   }
