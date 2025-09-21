@@ -82,28 +82,32 @@ function PublicNetworkVisualizationContent() {
         throw new Error('Invalid data structure received');
       }
 
-      // Generate nodes with DEFAULT types and INLINE styling (like working comparison)
+      // Generate elegant course nodes with interactive functionality
       const courseNodes: Node[] = (data.courses || []).map((course, index) => ({
         id: `course-${course.id}`,
-        type: 'default', // ✅ Use DEFAULT type like working comparison
+        type: 'default',
         position: { 
-          x: 100, // Fixed left column for courses
-          y: 50 + (index * 200) // Vertical spacing for courses
+          x: 50, // Left column for courses
+          y: 80 + (index * 180) // Better vertical spacing
         },
         data: {
-          label: `📚 ${course.title} (${course.courseModules?.length || 0} modules)`,
+          label: course.title,
+          courseData: course, // Store full data for interactions
         },
         style: {
-          // ✅ INLINE styling like working comparison
-          background: '#3B82F6', // Blue for courses
+          background: 'linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%)',
           color: 'white',
-          border: '2px solid #1E40AF',
-          borderRadius: '8px',
-          padding: '10px',
-          fontSize: '12px',
-          fontWeight: 'bold',
-          minWidth: '160px',
-          textAlign: 'center' as const
+          border: '3px solid rgba(59, 130, 246, 0.3)',
+          borderRadius: '12px',
+          padding: '16px 12px',
+          fontSize: '13px',
+          fontWeight: '600',
+          minWidth: '200px',
+          maxWidth: '220px',
+          textAlign: 'center' as const,
+          boxShadow: '0 4px 12px rgba(59, 130, 246, 0.25)',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease'
         }
       }));
 
@@ -112,52 +116,62 @@ function PublicNetworkVisualizationContent() {
       const childModules = (data.modules || []).filter(m => m.parentModuleId);
 
       const moduleNodes: Node[] = [
-        // Root modules in middle column
+        // Root modules in middle column - elegant design
         ...rootModules.map((module, index) => ({
           id: `module-${module.id}`,
-          type: 'default', // ✅ Use DEFAULT type like working comparison
+          type: 'default',
           position: { 
-            x: 400, // Middle column for root modules
-            y: 50 + (index * 180)
+            x: 350, // Middle column for root modules
+            y: 80 + (index * 160)
           },
           data: {
-            label: `🔗 ${module.title} (Root)`,
+            label: module.title,
+            moduleData: module, // Store full data for interactions
+            isRoot: true
           },
           style: {
-            // ✅ INLINE styling like working comparison
-            background: '#10B981', // Green for root modules
+            background: 'linear-gradient(135deg, #10B981 0%, #047857 100%)',
             color: 'white',
-            border: '2px solid #047857',
-            borderRadius: '8px',
-            padding: '8px',
-            fontSize: '11px',
-            fontWeight: 'bold',
-            minWidth: '140px',
-            textAlign: 'center' as const
+            border: '3px solid rgba(16, 185, 129, 0.3)',
+            borderRadius: '10px',
+            padding: '12px 10px',
+            fontSize: '12px',
+            fontWeight: '600',
+            minWidth: '170px',
+            maxWidth: '190px',
+            textAlign: 'center' as const,
+            boxShadow: '0 3px 10px rgba(16, 185, 129, 0.25)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
           }
         })),
-        // Child modules in right column
+        // Child modules in right column - elegant design
         ...childModules.map((module, index) => ({
           id: `module-${module.id}`,
-          type: 'default', // ✅ Use DEFAULT type like working comparison
+          type: 'default',
           position: { 
-            x: 700, // Right column for child modules
-            y: 50 + (index * 160)
+            x: 620, // Right column for child modules
+            y: 80 + (index * 140)
           },
           data: {
-            label: `⚡ ${module.title} (Sub)`,
+            label: module.title,
+            moduleData: module, // Store full data for interactions
+            isRoot: false
           },
           style: {
-            // ✅ INLINE styling like working comparison
-            background: '#8B5CF6', // Purple for sub modules
+            background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)',
             color: 'white',
-            border: '2px solid #6D28D9',
-            borderRadius: '8px',
-            padding: '8px',
-            fontSize: '11px',
-            fontWeight: 'bold',
-            minWidth: '140px',
-            textAlign: 'center' as const
+            border: '3px solid rgba(139, 92, 246, 0.3)',
+            borderRadius: '10px',
+            padding: '12px 10px',
+            fontSize: '12px',
+            fontWeight: '600',
+            minWidth: '160px',
+            maxWidth: '180px',
+            textAlign: 'center' as const,
+            boxShadow: '0 3px 10px rgba(139, 92, 246, 0.25)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
           }
         }))
       ];
@@ -165,7 +179,7 @@ function PublicNetworkVisualizationContent() {
       const courseModuleEdges: Edge[] = [];
       const moduleParentEdges: Edge[] = [];
 
-      // Create edges between courses and modules
+      // Create elegant edges between courses and modules
       (data.courses || []).forEach((course) => {
         (course.courseModules || []).forEach((cm) => {
           if (cm.module?.id) {
@@ -173,36 +187,37 @@ function PublicNetworkVisualizationContent() {
               id: `course-${course.id}-module-${cm.module.id}`,
               source: `course-${course.id}`,
               target: `module-${cm.module.id}`,
-              type: 'straight',  // Changed from smoothstep - test edge uses default/straight
-              animated: false,
+              type: 'smoothstep',
+              animated: true,
               style: { 
-                stroke: '#FF0000',        // BRIGHT RED - same as working test
-                strokeWidth: 6,           // THICK - same as working test
-                strokeOpacity: 1,
-                zIndex: 1000             // Force to front
+                stroke: 'rgba(99, 102, 241, 0.8)', // Elegant indigo
+                strokeWidth: 3,
+                strokeOpacity: 0.9,
+                strokeDasharray: '0' // Solid line
               },
-              label: 'TEST EDGE',         // Clear label
+              label: 'contains',
               labelStyle: { 
-                fontSize: 14,             // Larger font
-                fill: '#FF0000',         // Red text
-                fontWeight: 'bold'
+                fontSize: 11,
+                fill: '#6366f1',
+                fontWeight: '500',
+                fontFamily: 'system-ui, sans-serif'
               },
               labelBgStyle: { 
-                fill: '#FFFF00',         // Yellow background for visibility
-                fillOpacity: 1
+                fill: 'rgba(255, 255, 255, 0.9)',
+                fillOpacity: 0.95
               },
               markerEnd: {
                 type: MarkerType.ArrowClosed,
-                width: 20,               // Larger arrow
-                height: 20,
-                color: '#FF0000'         // Red arrow
+                width: 12,
+                height: 12,
+                color: '#6366f1'
               }
             });
           }
         });
       });
 
-      // Create edges between parent and child modules
+      // Create elegant parent-child module edges
       (data.modules || []).forEach((module) => {
         if (module.parentModuleId) {
           moduleParentEdges.push({
@@ -210,25 +225,28 @@ function PublicNetworkVisualizationContent() {
             source: `module-${module.parentModuleId}`,
             target: `module-${module.id}`,
             type: 'smoothstep',
+            animated: false,
             style: { 
-              stroke: '#8B5CF6', 
-              strokeWidth: 2, 
-              strokeDasharray: '5,5' 
+              stroke: 'rgba(139, 92, 246, 0.7)',
+              strokeWidth: 2.5,
+              strokeDasharray: '8,4',
+              strokeOpacity: 0.8
             },
-            label: 'parent-child',
+            label: 'extends',
             labelStyle: { 
-              fontSize: 11, 
-              fill: '#6B7280',
-              fontWeight: 'bold' 
+              fontSize: 10,
+              fill: '#8B5CF6',
+              fontWeight: '500',
+              fontFamily: 'system-ui, sans-serif'
             },
             labelBgStyle: { 
-              fill: '#ffffff', 
-              fillOpacity: 0.8 
+              fill: 'rgba(255, 255, 255, 0.95)',
+              fillOpacity: 0.95
             },
             markerEnd: {
               type: MarkerType.ArrowClosed,
-              width: 12,
-              height: 12,
+              width: 10,
+              height: 10,
               color: '#8B5CF6'
             }
           });
@@ -238,45 +256,7 @@ function PublicNetworkVisualizationContent() {
       const allNodes = [...courseNodes, ...moduleNodes];
       const allEdges = [...courseModuleEdges, ...moduleParentEdges];
 
-      console.log(`Generated ${courseNodes.length} course nodes, ${moduleNodes.length} module nodes`);
-      console.log(`Generated ${courseModuleEdges.length} course-module edges, ${moduleParentEdges.length} parent-child edges`);
-      console.log('Course-module edges:', courseModuleEdges.map(e => `${e.source} -> ${e.target}`));
-      console.log('Parent-child edges:', moduleParentEdges.map(e => `${e.source} -> ${e.target}`));
-      
-      // DETAILED DEBUG: Log the exact data received
-      console.log('=== DETAILED NETWORK VISUALIZATION DEBUG ===');
-      console.log('Raw data courses:', data.courses?.length || 0);
-      console.log('Raw data modules:', data.modules?.length || 0);
-      
-      if (data.courses && data.courses.length > 0) {
-        console.log('First course details:', {
-          id: data.courses[0].id,
-          title: data.courses[0].title,
-          status: data.courses[0].status,
-          courseModules: data.courses[0].courseModules?.length || 0,
-          courseModulesDetails: data.courses[0].courseModules?.map(cm => ({
-            moduleId: cm.module?.id,
-            moduleTitle: cm.module?.title,
-            moduleStatus: cm.module?.status,
-          }))
-        });
-      }
-      
-      console.log('Generated nodes:', allNodes.map(n => ({ id: n.id, type: n.type, position: n.position })));
-      console.log('Generated edges:', allEdges.map(e => ({ id: e.id, source: e.source, target: e.target, type: e.type, style: e.style })));
-      
-      // CRITICAL: Check if source/target nodes actually exist
-      allEdges.forEach(edge => {
-        const sourceNode = allNodes.find(n => n.id === edge.source);
-        const targetNode = allNodes.find(n => n.id === edge.target);
-        console.log(`Edge ${edge.id}:`);
-        console.log(`  Source ${edge.source}: ${sourceNode ? 'FOUND' : 'MISSING!'}`);
-        console.log(`  Target ${edge.target}: ${targetNode ? 'FOUND' : 'MISSING!'}`);
-        if (sourceNode) console.log(`  Source position:`, sourceNode.position);
-        if (targetNode) console.log(`  Target position:`, targetNode.position);
-      });
-      
-      console.log('=== END DETAILED DEBUG ===');
+      console.log(`✨ Network generated: ${courseNodes.length} courses, ${moduleNodes.length} modules, ${allEdges.length} connections`);
 
       setNodes(allNodes);
       setEdges(allEdges);
@@ -304,6 +284,56 @@ function PublicNetworkVisualizationContent() {
     (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
+
+  // Handle node clicks for navigation
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    const data = node.data;
+    
+    if (data.courseData) {
+      // Navigate to course page
+      window.open(`/courses/${data.courseData.slug}`, '_blank');
+    } else if (data.moduleData) {
+      // Navigate to module page
+      window.open(`/modules/${data.moduleData.slug}`, '_blank');
+    }
+  }, []);
+
+  // Handle node hover effects
+  const onNodeMouseEnter = useCallback((event: React.MouseEvent, node: Node) => {
+    // Add hover effect by updating node style
+    setNodes((nodes) =>
+      nodes.map((n) =>
+        n.id === node.id
+          ? {
+              ...n,
+              style: {
+                ...n.style,
+                transform: 'scale(1.05)',
+                zIndex: 1000,
+              },
+            }
+          : n
+      )
+    );
+  }, [setNodes]);
+
+  const onNodeMouseLeave = useCallback((event: React.MouseEvent, node: Node) => {
+    // Remove hover effect
+    setNodes((nodes) =>
+      nodes.map((n) =>
+        n.id === node.id
+          ? {
+              ...n,
+              style: {
+                ...n.style,
+                transform: 'scale(1)',
+                zIndex: 1,
+              },
+            }
+          : n
+      )
+    );
+  }, [setNodes]);
 
   if (isLoading) {
     return (
@@ -338,136 +368,157 @@ function PublicNetworkVisualizationContent() {
   }
 
   return (
-    <div className="h-screen bg-background relative">
-      {/* Force edge visibility with CSS overrides */}
-      <style>{`
-        .react-flow__edge-path {
-          stroke: #FF0000 !important;
-          stroke-width: 6px !important;
-          stroke-opacity: 1 !important;
-          z-index: 1000 !important;
-        }
-        .react-flow__edge {
-          pointer-events: all !important;
-          z-index: 1000 !important;
-        }
-        .react-flow__edge-label {
-          fill: #FF0000 !important;
-          font-weight: bold !important;
-          font-size: 14px !important;
-        }
-      `}</style>
+    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
+      {/* Elegant background pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(16, 185, 129, 0.1) 0%, transparent 50%)'
+        }}></div>
+      </div>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeClick={onNodeClick}
+        onNodeMouseEnter={onNodeMouseEnter}
+        onNodeMouseLeave={onNodeMouseLeave}
         connectionMode={ConnectionMode.Loose}
         fitView
         fitViewOptions={{
-          padding: 0.15,
-          maxZoom: 1.0,
-          minZoom: 0.4,
+          padding: 0.1,
+          maxZoom: 1.2,
+          minZoom: 0.3,
           includeHiddenNodes: false
         }}
         defaultViewport={{
           x: 0,
           y: 0, 
-          zoom: 0.8
+          zoom: 0.7
         }}
         defaultEdgeOptions={{
-          type: 'straight',
+          type: 'smoothstep',
           style: { 
-            strokeWidth: 6,
-            stroke: '#FF0000',
-            strokeOpacity: 1,
-            zIndex: 1000
+            strokeWidth: 2,
+            strokeOpacity: 0.8
           }
         }}
         deleteKeyCode={null}
         multiSelectionKeyCode={null}
+        selectNodesOnDrag={false}
         attributionPosition="bottom-left"
         proOptions={{ hideAttribution: true }}
       >
-        <Background />
+        <Background 
+          gap={20} 
+          size={1} 
+          color="rgba(148, 163, 184, 0.3)"
+        />
         <Controls 
           position="top-right" 
           showZoom={true}
           showFitView={true}
           showInteractive={false}
-          className="bg-card border border-border shadow-lg"
+          className="bg-card/95 backdrop-blur border border-border/50 shadow-xl rounded-lg"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.95)'
+          }}
         />
         <MiniMap 
           position="bottom-right"
           zoomable
           pannable
           nodeColor={(node) => {
-            if (node.type === 'course') return '#3B82F6';
+            const data = node.data;
+            if (data.courseData) return '#3B82F6';
+            if (data.isRoot) return '#10B981';
             return '#8B5CF6';
           }}
-          className="!bg-card !border-border shadow-lg"
+          className="!bg-card/95 !backdrop-blur !border-border/50 shadow-xl rounded-lg overflow-hidden"
           style={{ 
-            backgroundColor: 'hsl(var(--card))',
-            width: 200, 
-            height: 150 
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            width: 220, 
+            height: 160 
           }}
         />
         
-        {/* Info Panel */}
+        {/* Elegant Info Panel */}
         <Panel position="top-left">
-          <Card className="w-72 sm:w-80 max-w-[90vw]">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Network className="h-5 w-5 text-neural-primary" />
-                <h3 className="font-semibold">Course Network Visualization</h3>
+          <Card className="w-80 sm:w-96 max-w-[90vw] bg-card/95 backdrop-blur border-border/50 shadow-xl">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
+                  <Network className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">Course Network</h3>
+                  <p className="text-xs text-muted-foreground">Brain & Cognitive Sciences</p>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                Explore how published courses and modules are interconnected in our Brain & Cognitive Sciences curriculum. This view shows only publicly available content.
+              
+              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                Explore the interconnected relationships between courses and modules. Click any node to open its content page.
               </p>
               
-              {/* Statistics */}
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                <div className="text-center">
-                  <div className="text-lg font-bold text-neural-primary">{stats.courses}</div>
-                  <div className="text-xs text-muted-foreground">Courses</div>
+              {/* Enhanced Statistics */}
+              <div className="grid grid-cols-3 gap-3 mb-5">
+                <div className="text-center p-3 rounded-lg bg-gradient-to-b from-blue-50 to-blue-100/50 border border-blue-200/50">
+                  <div className="text-xl font-bold text-blue-600">{stats.courses}</div>
+                  <div className="text-xs text-blue-600/70 font-medium">Courses</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-synapse-primary">{stats.modules}</div>
-                  <div className="text-xs text-muted-foreground">Modules</div>
+                <div className="text-center p-3 rounded-lg bg-gradient-to-b from-green-50 to-green-100/50 border border-green-200/50">
+                  <div className="text-xl font-bold text-green-600">{stats.modules}</div>
+                  <div className="text-xs text-green-600/70 font-medium">Modules</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-cognition-teal">{stats.connections}</div>
-                  <div className="text-xs text-muted-foreground">Connections</div>
+                <div className="text-center p-3 rounded-lg bg-gradient-to-b from-purple-50 to-purple-100/50 border border-purple-200/50">
+                  <div className="text-xl font-bold text-purple-600">{stats.connections}</div>
+                  <div className="text-xs text-purple-600/70 font-medium">Links</div>
                 </div>
               </div>
 
-              {/* Legend */}
-              <div className="space-y-2">
-                <div className="text-xs font-medium text-muted-foreground mb-2">Legend:</div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-3 h-3 rounded bg-neural-primary/20 border-2 border-neural-primary"></div>
-                  <span>Courses</span>
+              {/* Enhanced Legend */}
+              <div className="space-y-2.5">
+                <div className="text-sm font-semibold text-foreground mb-3 border-b border-border/30 pb-2">Visual Guide</div>
+                
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm"></div>
+                  <span className="font-medium">Courses</span>
+                  <span className="text-xs text-muted-foreground ml-auto">Click to explore</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-3 h-3 rounded bg-cognition-teal/20 border-2 border-cognition-teal"></div>
-                  <span>Root Modules</span>
+                
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm"></div>
+                  <span className="font-medium">Root Modules</span>
+                  <span className="text-xs text-muted-foreground ml-auto">Primary topics</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-3 h-3 rounded bg-synapse-primary/20 border-2 border-synapse-primary"></div>
-                  <span>Sub-modules</span>
+                
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 shadow-sm"></div>
+                  <span className="font-medium">Sub-modules</span>
+                  <span className="text-xs text-muted-foreground ml-auto">Detailed content</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-8 h-0.5" style={{ backgroundColor: '#3B82F6' }}></div>
-                  <span>Course-Module</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-8 h-0.5" style={{ 
-                    backgroundColor: '#8B5CF6',
-                    backgroundImage: 'repeating-linear-gradient(to right, #8B5CF6 0px, #8B5CF6 4px, transparent 4px, transparent 8px)',
-                    backgroundSize: '8px 100%'
-                  }}></div>
-                  <span>Parent-Child</span>
+                
+                <div className="pt-2 space-y-2">
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="flex items-center">
+                      <div className="w-6 h-0.5 bg-indigo-500 rounded-full"></div>
+                      <div className="w-0 h-0 border-l-[4px] border-l-indigo-500 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent ml-0.5"></div>
+                    </div>
+                    <span className="font-medium">Contains</span>
+                    <span className="text-xs text-muted-foreground ml-auto">Course → Module</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="flex items-center">
+                      <div className="w-6 h-0.5 bg-purple-500 rounded-full" style={{
+                        backgroundImage: 'repeating-linear-gradient(90deg, #8B5CF6 0px, #8B5CF6 3px, transparent 3px, transparent 6px)',
+                      }}></div>
+                      <div className="w-0 h-0 border-l-[4px] border-l-purple-500 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent ml-0.5"></div>
+                    </div>
+                    <span className="font-medium">Extends</span>
+                    <span className="text-xs text-muted-foreground ml-auto">Parent → Child</span>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -485,3 +536,4 @@ export function PublicNetworkVisualization() {
     </ReactFlowProvider>
   );
 }
+
