@@ -22,7 +22,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log('Received in API:', body);
     const validatedData = createModuleSchema.parse(body)
+    console.log('Validated data:', validatedData);
 
     // Check if slug is unique for this author (with retry)
     const existingModule = await withDatabaseRetry(async () => {

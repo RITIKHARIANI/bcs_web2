@@ -72,6 +72,8 @@ async function createModule(data: CreateModuleFormData & { content?: string }) {
     parentModuleId: undefined
   }
 
+  console.log('Sending to API:', apiData);
+
   const response = await fetch('/api/modules', {
     method: 'POST',
     headers: {
@@ -139,6 +141,7 @@ export function CreateModuleForm() {
 
   const watchedTitle = watch('title')
   const watchedStatus = watch('status')
+  const watchedParentModuleId = watch('parentModuleId')
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -155,12 +158,19 @@ export function CreateModuleForm() {
 
   const onSubmit = async (data: CreateModuleFormData) => {
     try {
+      console.log('Submitting module data:', {
+        ...data,
+        tags,
+        content: content ? 'Content provided' : 'No content'
+      });
+      
       await createModuleMutation.mutateAsync({
         ...data,
         tags,
         content,
       })
     } catch (error) {
+      console.error('Error in onSubmit:', error);
       // Error is handled by mutation
     }
   }
@@ -286,7 +296,11 @@ export function CreateModuleForm() {
                 <div className="space-y-2">
                   <Label htmlFor="parentModule">Parent Module</Label>
                   <Select 
-                    onValueChange={(value) => setValue('parentModuleId', value === 'none' ? undefined : value)}
+                    value={watchedParentModuleId || 'none'}
+                    onValueChange={(value) => {
+                      console.log('Parent module selected:', value);
+                      setValue('parentModuleId', value === 'none' ? undefined : value);
+                    }}
                   >
                     <SelectTrigger className="border-neural-light/30 focus:border-neural-primary">
                       <SelectValue placeholder="Select parent module (optional)" />
@@ -394,6 +408,8 @@ export function CreateModuleForm() {
                   onChange={setContent}
                   placeholder="Start writing your module content here. Use the toolbar above to format your text, add headings, lists, images, and more..."
                   className="min-h-[600px]"
+                  autoSave={false}
+                  onSave={undefined}
                 />
 
                 {!content && (

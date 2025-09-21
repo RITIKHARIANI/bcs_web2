@@ -64,6 +64,7 @@ export function NeuralRichTextEditor({
     extensions: [
       StarterKit.configure({
         heading: false, // We'll use our custom heading extension
+        link: false, // We'll use our custom link extension to avoid duplicates
       }),
       Heading.configure({
         levels: [1, 2, 3],
