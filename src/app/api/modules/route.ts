@@ -160,37 +160,19 @@ export async function GET(request: NextRequest) {
       whereClause.status = 'published'
     }
     
-    // Debug parent filtering
-    console.log('Parent filtering debug:', {
-      parentId,
-      parent_module_id,
-      parentId_type: typeof parentId,
-      parent_module_id_type: typeof parent_module_id
-    })
-
-    if (parentId) {
-      if (parentId === 'root') {
-        console.log('Filtering for ROOT modules only')
-        whereClause.parent_module_id = null
-      } else if (parentId === 'sub') {
-        console.log('Filtering for SUB-modules only')
-        // Filter for sub-modules (modules that have a parent)
-        whereClause.parent_module_id = { not: null }
-      } else {
-        console.log('Filtering for specific parent:', parentId)
-        whereClause.parent_module_id = parentId
-      }
-    } else if (parent_module_id !== undefined) {
-      console.log('Using parent_module_id parameter:', parent_module_id)
-      if (parent_module_id === 'null' || parent_module_id === null) {
-        console.log('❌ BUG: Setting to root modules when we want ALL!')
-        whereClause.parent_module_id = null
-      } else {
-        whereClause.parent_module_id = parent_module_id
-      }
-    } else {
-      console.log('✅ No parent filtering - showing ALL modules')
+    // Parent filtering logic - FIXED
+    if (parentId === 'root') {
+      // Only show root modules (no parent)
+      whereClause.parent_module_id = null
+    } else if (parentId === 'sub') {
+      // Only show sub-modules (has parent)
+      whereClause.parent_module_id = { not: null }
+    } else if (parentId && parentId !== 'all') {
+      // Show modules with specific parent ID
+      whereClause.parent_module_id = parentId
     }
+    // ✅ IMPORTANT: When parentId is undefined or 'all', we DON'T add any parent filtering
+    // This allows the query to return ALL modules (both root and sub-modules)
     
     // Apply status filter for faculty (public access already has status set)
     if (status && session?.user?.role === 'faculty') {
