@@ -158,11 +158,32 @@ export function ModuleLibrary() {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
   }
 
+  // Debug logging
+  console.log('=== FRONTEND MODULE DEBUG ===')
+  console.log('Total modules received:', modules.length)
+  console.log('Sample modules with parent info:', modules.slice(0, 3).map(m => ({
+    id: m.id,
+    title: m.title,
+    hasParentModule: !!m.parentModule,
+    parentModule: m.parentModule
+  })))
+  console.log('Current filters:', { statusFilter, parentFilter })
+  console.log('==============================')
+
   // Calculate statistics based on current filters
   const filteredRootModules = modules.filter(module => !module.parentModule)
   const filteredSubModules = modules.filter(module => module.parentModule)
   const filteredPublishedCount = modules.filter(m => m.status === 'published').length
   const filteredDraftCount = modules.filter(m => m.status === 'draft').length
+
+  // Debug stats
+  console.log('Stats calculation:', {
+    total: modules.length,
+    rootModules: filteredRootModules.length,
+    subModules: filteredSubModules.length,
+    published: filteredPublishedCount,
+    draft: filteredDraftCount
+  })
 
   if (isLoading) {
     return (
