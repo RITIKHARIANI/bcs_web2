@@ -334,16 +334,24 @@ export async function GET(request: NextRequest) {
       allUserTags = []
     }
 
-    // Debug logging
+    // Debug logging - expanded
     console.log('=== API MODULE DEBUG ===')
-    console.log('Total modules fetched:', modules.length)
-    console.log('Sample modules with parent info:', modules.slice(0, 3).map(m => ({
-      id: m.id,
-      title: m.title,
-      parent_module_id: m.parent_module_id,
-      hasParentModuleData: !!m.modules,
-      parentModuleData: m.modules
-    })))
+    console.log('Where clause used in query:', JSON.stringify(whereClause, null, 2))
+    console.log('Total modules fetched from database:', modules.length)
+    
+    if (modules.length > 0) {
+      console.log('ALL modules with parent details:')
+      modules.forEach((m, i) => {
+        console.log(`API Module ${i + 1}:`, {
+          id: m.id,
+          title: m.title,
+          parent_module_id: m.parent_module_id,
+          hasParentModuleData: !!m.modules,
+          parentModuleData: m.modules,
+          status: m.status
+        })
+      })
+    }
     console.log('========================')
 
     // Transform the data to match frontend interface expectations
