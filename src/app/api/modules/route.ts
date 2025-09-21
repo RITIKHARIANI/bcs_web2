@@ -273,6 +273,23 @@ export async function GET(request: NextRequest) {
                 email: true,
               },
             },
+            modules: {
+              select: {
+                id: true,
+                title: true,
+              },
+            },
+            other_modules: {
+              select: {
+                id: true,
+                title: true,
+                status: true,
+                created_at: true,
+              },
+              orderBy: {
+                sort_order: 'asc',
+              },
+            },
             _count: {
               select: {
                 other_modules: true,
@@ -317,7 +334,35 @@ export async function GET(request: NextRequest) {
       allUserTags = []
     }
 
-    return NextResponse.json({ modules, availableTags: allUserTags })
+    // Transform the data to match frontend interface expectations
+    const transformedModules = modules.map(module => ({
+      id: module.id,
+      title: module.title,
+      slug: module.slug,
+      description: module.description,
+      content: module.content,
+      status: module.status,
+      tags: module.tags,
+      createdAt: module.created_at,
+      updatedAt: module.updated_at,
+      parentModuleId: module.parent_module_id,
+      // Transform 'modules' to 'parentModule' (parent relationship)
+      parentModule: module.modules ? {
+        id: module.modules.id,
+        title: module.modules.title,
+      } : null,
+      // Transform 'other_modules' to 'subModules' (children relationship) 
+      subModules: module.other_modules || [],
+      // Transform users (author info)
+      author: module.users,
+      // Transform counts
+      _count: {
+        subModules: module._count?.other_modules || 0,
+        courseModules: module._count?.course_modules || 0,
+      },
+    }))
+
+    return NextResponse.json({ modules: transformedModules, availableTags: allUserTags })
   } catch (error) {
     console.error('Error fetching modules:', error)
     console.error('Error details:', {

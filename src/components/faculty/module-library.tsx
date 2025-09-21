@@ -265,55 +265,65 @@ export function ModuleLibrary() {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          {/* Enhanced Stats Dashboard */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <Card className="cognitive-card">
               <CardContent className="p-4">
-                <div className="flex items-center">
-                  <FileText className="h-8 w-8 text-neural-primary" />
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-muted-foreground">Total Modules</p>
-                    <p className="text-2xl font-bold text-foreground">{modules.length}</p>
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-neural-primary to-neural-deep">
+                    <Brain className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-neural-primary">{modules.length}</div>
+                    <div className="text-xs text-muted-foreground">Total Modules</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
-
+            
             <Card className="cognitive-card">
               <CardContent className="p-4">
-                <div className="flex items-center">
-                  <CheckCircle className="h-8 w-8 text-green-500" />
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-muted-foreground">Published</p>
-                    <p className="text-2xl font-bold text-foreground">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-synapse-primary to-synapse-deep">
+                    <BookOpen className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-synapse-primary">
+                      {rootModules.length}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Root Modules</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-cognition-teal to-cognition-deep">
+                    <Layers className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-cognition-teal">
+                      {subModules.length}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Sub-modules</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600">
+                    <CheckCircle className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">
                       {publishedCount}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="cognitive-card">
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <Edit className="h-8 w-8 text-orange-500" />
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-muted-foreground">Drafts</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {draftCount}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="cognitive-card">
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <Layers className="h-8 w-8 text-synapse-primary" />
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-muted-foreground">Root Modules</p>
-                    <p className="text-2xl font-bold text-foreground">{rootModules.length}</p>
+                    </div>
+                    <div className="text-xs text-muted-foreground">Published</div>
                   </div>
                 </div>
               </CardContent>
@@ -502,73 +512,6 @@ export function ModuleLibrary() {
       </header>
 
       <main className="container mx-auto px-6 py-8">
-        {/* Module Statistics */}
-        {modules.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="cognitive-card">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-neural-primary to-neural-deep">
-                    <Brain className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-neural-primary">{modules.length}</div>
-                    <div className="text-xs text-muted-foreground">Total Modules</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="cognitive-card">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-synapse-primary to-synapse-deep">
-                    <BookOpen className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-synapse-primary">
-                      {modules.filter(m => !m.parentModule).length}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Root Modules</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="cognitive-card">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-cognition-teal to-cognition-deep">
-                    <Layers className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-cognition-teal">
-                      {modules.filter(m => m.parentModule).length}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Sub-modules</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="cognitive-card">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600">
-                    <CheckCircle className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-green-600">
-                      {modules.filter(m => m.status === 'published').length}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Published</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
         {/* Active Filters Display */}
         {(statusFilter !== 'all' || parentFilter !== 'all' || selectedTags.length > 0 || searchTerm.trim()) && (
           <div className="mb-6">
