@@ -189,28 +189,29 @@ function PublicNetworkVisualizationContent() {
               id: `course-${course.id}-module-${cm.module.id}`,
               source: `course-${course.id}`,
               target: `module-${cm.module.id}`,
-              type: 'smoothstep',
+              type: 'straight',  // Changed from smoothstep - test edge uses default/straight
               animated: false,
               style: { 
-                stroke: '#3B82F6',
-                strokeWidth: 3,
-                strokeOpacity: 1
+                stroke: '#FF0000',        // BRIGHT RED - same as working test
+                strokeWidth: 6,           // THICK - same as working test
+                strokeOpacity: 1,
+                zIndex: 1000             // Force to front
               },
-              label: 'contains',
+              label: 'TEST EDGE',         // Clear label
               labelStyle: { 
-                fontSize: 12, 
-                fill: '#6B7280',
+                fontSize: 14,             // Larger font
+                fill: '#FF0000',         // Red text
                 fontWeight: 'bold'
               },
               labelBgStyle: { 
-                fill: '#ffffff', 
-                fillOpacity: 0.8 
+                fill: '#FFFF00',         // Yellow background for visibility
+                fillOpacity: 1
               },
               markerEnd: {
                 type: MarkerType.ArrowClosed,
-                width: 15,
-                height: 15,
-                color: '#3B82F6'
+                width: 20,               // Larger arrow
+                height: 20,
+                color: '#FF0000'         // Red arrow
               }
             });
           }
@@ -342,6 +343,24 @@ function PublicNetworkVisualizationContent() {
 
   return (
     <div className="h-screen bg-background relative">
+      {/* Force edge visibility with CSS overrides */}
+      <style>{`
+        .react-flow__edge-path {
+          stroke: #FF0000 !important;
+          stroke-width: 6px !important;
+          stroke-opacity: 1 !important;
+          z-index: 1000 !important;
+        }
+        .react-flow__edge {
+          pointer-events: all !important;
+          z-index: 1000 !important;
+        }
+        .react-flow__edge-label {
+          fill: #FF0000 !important;
+          font-weight: bold !important;
+          font-size: 14px !important;
+        }
+      `}</style>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -363,8 +382,13 @@ function PublicNetworkVisualizationContent() {
           zoom: 0.8
         }}
         defaultEdgeOptions={{
-          type: 'smoothstep',
-          style: { strokeWidth: 2 }
+          type: 'straight',
+          style: { 
+            strokeWidth: 6,
+            stroke: '#FF0000',
+            strokeOpacity: 1,
+            zIndex: 1000
+          }
         }}
         deleteKeyCode={null}
         multiSelectionKeyCode={null}
