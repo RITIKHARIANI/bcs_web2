@@ -125,36 +125,38 @@ function PublicNetworkVisualizationContent() {
         throw new Error('Invalid data structure received');
       }
 
-      // Generate nodes with proper positioning
-      const courseNodes: Node[] = (data.courses || []).map((course, index) => ({
-        id: `course-${course.id}`,
-        type: 'course',
-        position: { 
-          x: 200 + (index % 2) * 400, 
-          y: 100 + Math.floor(index / 2) * 300 
-        },
-        data: {
-          label: course.title,
-          status: course.status,
-          moduleCount: course.courseModules?.length || 0,
+      // Generate nodes with clear positioning for edge visibility  
+      const courseNodes: Node[] = (data.courses || []).map((course, index) => {
+        const position = { x: 100, y: 100 };
+        console.log(`Course ${course.id} positioned at:`, position);
+        return {
+          id: `course-${course.id}`,
           type: 'course',
-        },
-      }));
+          position,
+          data: {
+            label: course.title,
+            status: course.status,
+            moduleCount: course.courseModules?.length || 0,
+            type: 'course',
+          },
+        };
+      });
 
-      const moduleNodes: Node[] = (data.modules || []).map((module, index) => ({
-        id: `module-${module.id}`,
-        type: 'module',
-        position: { 
-          x: 600 + (index % 3) * 250, 
-          y: 300 + Math.floor(index / 3) * 200 
-        },
-        data: {
-          label: module.title,
-          status: module.status,
-          isRoot: !module.parentModuleId,
+      const moduleNodes: Node[] = (data.modules || []).map((module, index) => {
+        const position = { x: 500, y: 200 };
+        console.log(`Module ${module.id} positioned at:`, position);
+        return {
+          id: `module-${module.id}`,
           type: 'module',
-        },
-      }));
+          position,
+          data: {
+            label: module.title,
+            status: module.status,
+            isRoot: !module.parentModuleId,
+            type: 'module',
+          },
+        };
+      });
 
       const courseModuleEdges: Edge[] = [];
       const moduleParentEdges: Edge[] = [];
@@ -170,28 +172,29 @@ function PublicNetworkVisualizationContent() {
               id: `course-${course.id}-module-${cm.module.id}`,
               source: `course-${course.id}`,
               target: `module-${cm.module.id}`,
-              type: 'smoothstep',
-              animated: false,
+              type: 'straight',
+              animated: true,
               style: { 
-                stroke: '#3B82F6', 
-                strokeWidth: 3,
-                strokeOpacity: 1
+                stroke: '#FF0000',  // Bright red for debugging
+                strokeWidth: 6,     // Thick for visibility
+                strokeOpacity: 1,
+                strokeDasharray: 'none'
               },
-              label: 'contains',
+              label: 'CONTAINS',
               labelStyle: { 
-                fontSize: 12, 
-                fill: '#6B7280',
+                fontSize: 14, 
+                fill: '#FF0000',
                 fontWeight: 'bold'
               },
               labelBgStyle: { 
-                fill: '#ffffff', 
-                fillOpacity: 0.8 
+                fill: '#FFFF00', 
+                fillOpacity: 1
               },
               markerEnd: {
                 type: MarkerType.ArrowClosed,
-                width: 15,
-                height: 15,
-                color: '#3B82F6'
+                width: 20,
+                height: 20,
+                color: '#FF0000'
               }
             });
           }
@@ -309,7 +312,18 @@ function PublicNetworkVisualizationContent() {
   }
 
   return (
-    <div className="h-screen bg-background">
+    <div className="h-screen bg-background relative">
+      {/* Debug CSS to force edge visibility */}
+      <style>{`
+        .react-flow__edge-path {
+          stroke: #FF0000 !important;
+          stroke-width: 6px !important;
+          stroke-opacity: 1 !important;
+        }
+        .react-flow__edge {
+          pointer-events: all !important;
+        }
+      `}</style>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -320,13 +334,18 @@ function PublicNetworkVisualizationContent() {
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{
-          padding: 0.2,
-          maxZoom: 1.5,
-          minZoom: 0.1
+          padding: 0.3,
+          maxZoom: 2,
+          minZoom: 0.2
         }}
         defaultEdgeOptions={{
-          type: 'smoothstep',
-          style: { strokeWidth: 2 }
+          type: 'straight',
+          animated: true,
+          style: { 
+            strokeWidth: 6,
+            stroke: '#FF0000',
+            strokeOpacity: 1
+          }
         }}
         deleteKeyCode={null}
         multiSelectionKeyCode={null}
@@ -334,11 +353,12 @@ function PublicNetworkVisualizationContent() {
         proOptions={{ hideAttribution: true }}
       >
         <Background />
-        <Controls />
+        <Controls position="bottom-right" />
         <MiniMap 
+          position="bottom-left"
           nodeColor={(node) => {
-            if (node.type === 'course') return 'hsl(var(--neural-primary))';
-            return 'hsl(var(--synapse-primary))';
+            if (node.type === 'course') return '#3B82F6';
+            return '#8B5CF6';
           }}
           className="!bg-background !border-border"
         />
