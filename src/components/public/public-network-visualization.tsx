@@ -15,6 +15,7 @@ import ReactFlow, {
   ReactFlowProvider,
   Panel,
   NodeTypes,
+  MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { withDatabaseRetry } from '@/lib/retry';
@@ -124,13 +125,13 @@ function PublicNetworkVisualizationContent() {
         throw new Error('Invalid data structure received');
       }
 
-      // Generate nodes with better positioning
+      // Generate nodes with forced positioning for maximum edge visibility
       const courseNodes: Node[] = (data.courses || []).map((course, index) => ({
         id: `course-${course.id}`,
         type: 'course',
         position: { 
-          x: 200 + (index % 2) * 400, 
-          y: 100 + Math.floor(index / 2) * 300 
+          x: 100,  // Fixed left position
+          y: 100   // Fixed top position
         },
         data: {
           label: course.title,
@@ -138,14 +139,21 @@ function PublicNetworkVisualizationContent() {
           moduleCount: course.courseModules?.length || 0,
           type: 'course',
         },
+        style: {
+          background: '#3B82F6',
+          color: 'white',
+          border: '3px solid #1E40AF',
+          width: 200,
+          height: 80
+        }
       }));
 
       const moduleNodes: Node[] = (data.modules || []).map((module, index) => ({
         id: `module-${module.id}`,
         type: 'module',
         position: { 
-          x: 600 + (index % 3) * 250, 
-          y: 300 + Math.floor(index / 3) * 200 
+          x: 500,  // Fixed right position - should create clear line
+          y: 200   // Slightly offset for edge visibility
         },
         data: {
           label: module.title,
@@ -153,6 +161,13 @@ function PublicNetworkVisualizationContent() {
           isRoot: !module.parentModuleId,
           type: 'module',
         },
+        style: {
+          background: '#8B5CF6',
+          color: 'white',
+          border: '3px solid #7C3AED',
+          width: 180,
+          height: 70
+        }
       }));
 
       const courseModuleEdges: Edge[] = [];
@@ -169,22 +184,32 @@ function PublicNetworkVisualizationContent() {
               id: `course-${course.id}-module-${cm.module.id}`,
               source: `course-${course.id}`,
               target: `module-${cm.module.id}`,
-              type: 'smoothstep',
+              type: 'straight',
+              animated: true,
               style: { 
-                stroke: '#3B82F6', 
-                strokeWidth: 3,
+                stroke: '#FF0000',           // Bright red for maximum visibility
+                strokeWidth: 8,              // Very thick
+                strokeOpacity: 1,
                 strokeDasharray: 'none'
               },
-              label: 'contains',
+              label: 'CONTAINS',
               labelStyle: { 
-                fontSize: 12, 
-                fill: '#6B7280',
+                fontSize: 14, 
+                fill: '#FF0000',
                 fontWeight: 'bold'
               },
               labelBgStyle: { 
-                fill: '#ffffff', 
-                fillOpacity: 0.8 
+                fill: '#FFFF00', 
+                fillOpacity: 1.0
               },
+              labelShowBg: true,
+              labelBgPadding: [8, 4],
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+                width: 20,
+                height: 20,
+                color: '#FF0000'
+              }
             });
           }
         });
@@ -227,6 +252,12 @@ function PublicNetworkVisualizationContent() {
       console.log('Course nodes:', courseNodes.map(n => `${n.id} at (${n.position.x}, ${n.position.y})`));
       console.log('Module nodes:', moduleNodes.map(n => `${n.id} at (${n.position.x}, ${n.position.y})`));
       console.log('All edges:', allEdges);
+      console.log('Edge details:');
+      allEdges.forEach(edge => {
+        console.log(`  Edge ${edge.id}: ${edge.source} -> ${edge.target}`);
+        console.log(`    Type: ${edge.type}, Style:`, edge.style);
+        console.log(`    Animated: ${edge.animated}, Label: ${edge.label}`);
+      });
       console.log(`=== END DEBUG ===`);
 
       setNodes(allNodes);
@@ -290,6 +321,29 @@ function PublicNetworkVisualizationContent() {
 
   return (
     <div className="h-screen bg-background">
+      {/* Force edge visibility with CSS overrides */}
+      <style jsx global>{`
+        .react-flow__edge-path {
+          stroke: #FF0000 !important;
+          stroke-width: 8px !important;
+          stroke-opacity: 1 !important;
+          fill: none !important;
+          z-index: 1000 !important;
+        }
+        .react-flow__edge {
+          pointer-events: all !important;
+          z-index: 1000 !important;
+        }
+        .react-flow__edge-label {
+          fill: #FF0000 !important;
+          font-weight: bold !important;
+          font-size: 14px !important;
+        }
+        .react-flow__edge-labelBg {
+          fill: #FFFF00 !important;
+          fill-opacity: 1 !important;
+        }
+      `}</style>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -305,9 +359,18 @@ function PublicNetworkVisualizationContent() {
           minZoom: 0.1
         }}
         defaultEdgeOptions={{
-          type: 'smoothstep',
-          style: { strokeWidth: 2 }
+          type: 'straight',
+          animated: true,
+          style: { 
+            strokeWidth: 5,
+            stroke: '#FF0000',
+            strokeOpacity: 1,
+            zIndex: 1000
+          }
         }}
+        edgesUpdatable={false}
+        edgesFocusable={true}
+        elementsSelectable={true}
         deleteKeyCode={null}
         multiSelectionKeyCode={null}
         attributionPosition="bottom-left"
