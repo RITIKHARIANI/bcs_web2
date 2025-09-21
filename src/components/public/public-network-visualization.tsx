@@ -14,14 +14,12 @@ import ReactFlow, {
   MiniMap,
   ReactFlowProvider,
   Panel,
-  NodeTypes,
   MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { withDatabaseRetry } from '@/lib/retry';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { BookOpen, Users, Network, Layers, Info, RefreshCw, AlertCircle } from 'lucide-react';
+import { Network, RefreshCw, AlertCircle } from 'lucide-react';
 import { NeuralButton } from '@/components/ui/neural-button';
 
 interface CourseData {
@@ -53,49 +51,8 @@ interface VisualizationData {
   modules: ModuleData[];
 }
 
-// Custom node types
-const CourseNode = ({ data }: { data: any }) => (
-  <div className="px-4 py-3 shadow-lg rounded-lg border-2 border-neural-primary bg-gradient-to-br from-neural-primary/10 to-neural-primary/5 min-w-[180px]">
-    <div className="flex items-center gap-2 mb-2">
-      <BookOpen className="h-4 w-4 text-neural-primary" />
-      <div className="font-medium text-sm text-neural-primary">Course</div>
-    </div>
-    <div className="font-bold text-foreground text-sm leading-tight">{data.label}</div>
-    <div className="flex items-center gap-2 mt-2">
-      <Badge variant="outline" className="text-xs px-2 py-0">
-        {data.status}
-      </Badge>
-      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-        <Layers className="h-3 w-3" />
-        {data.moduleCount}
-      </div>
-    </div>
-  </div>
-);
-
-const ModuleNode = ({ data }: { data: any }) => (
-  <div className={`px-3 py-2 shadow-md rounded border-2 min-w-[140px] ${
-    data.isRoot 
-      ? 'border-cognition-teal bg-gradient-to-br from-cognition-teal/10 to-cognition-teal/5' 
-      : 'border-synapse-primary bg-gradient-to-br from-synapse-primary/10 to-synapse-primary/5'
-  }`}>
-    <div className="flex items-center gap-2 mb-1">
-      <Network className={`h-3 w-3 ${data.isRoot ? 'text-cognition-teal' : 'text-synapse-primary'}`} />
-      <div className={`text-xs font-medium ${data.isRoot ? 'text-cognition-teal' : 'text-synapse-primary'}`}>
-        {data.isRoot ? 'Root Module' : 'Module'}
-      </div>
-    </div>
-    <div className="font-semibold text-foreground text-xs leading-tight">{data.label}</div>
-    <Badge variant="secondary" className="text-xs px-2 py-0 mt-1">
-      {data.status}
-    </Badge>
-  </div>
-);
-
-const nodeTypes: NodeTypes = {
-  course: CourseNode,
-  module: ModuleNode,
-};
+// ✅ REMOVED: Custom node components that were preventing edge rendering
+// Using default ReactFlow nodes with inline styling for guaranteed compatibility
 
 async function fetchVisualizationData(): Promise<VisualizationData> {
   const response = await fetch('/api/public/network-visualization')
@@ -125,20 +82,29 @@ function PublicNetworkVisualizationContent() {
         throw new Error('Invalid data structure received');
       }
 
-      // Generate nodes with improved systematic positioning
+      // Generate nodes with DEFAULT types and INLINE styling (like working comparison)
       const courseNodes: Node[] = (data.courses || []).map((course, index) => ({
         id: `course-${course.id}`,
-        type: 'course',
+        type: 'default', // ✅ Use DEFAULT type like working comparison
         position: { 
           x: 100, // Fixed left column for courses
           y: 50 + (index * 200) // Vertical spacing for courses
         },
         data: {
-          label: course.title,
-          status: course.status,
-          moduleCount: course.courseModules?.length || 0,
-          type: 'course',
+          label: `📚 ${course.title} (${course.courseModules?.length || 0} modules)`,
         },
+        style: {
+          // ✅ INLINE styling like working comparison
+          background: '#3B82F6', // Blue for courses
+          color: 'white',
+          border: '2px solid #1E40AF',
+          borderRadius: '8px',
+          padding: '10px',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          minWidth: '160px',
+          textAlign: 'center' as const
+        }
       }));
 
       // Separate root modules from child modules for better positioning
@@ -149,32 +115,50 @@ function PublicNetworkVisualizationContent() {
         // Root modules in middle column
         ...rootModules.map((module, index) => ({
           id: `module-${module.id}`,
-          type: 'module',
+          type: 'default', // ✅ Use DEFAULT type like working comparison
           position: { 
             x: 400, // Middle column for root modules
             y: 50 + (index * 180)
           },
           data: {
-            label: module.title,
-            status: module.status,
-            isRoot: true,
-            type: 'module',
+            label: `🔗 ${module.title} (Root)`,
           },
+          style: {
+            // ✅ INLINE styling like working comparison
+            background: '#10B981', // Green for root modules
+            color: 'white',
+            border: '2px solid #047857',
+            borderRadius: '8px',
+            padding: '8px',
+            fontSize: '11px',
+            fontWeight: 'bold',
+            minWidth: '140px',
+            textAlign: 'center' as const
+          }
         })),
         // Child modules in right column
         ...childModules.map((module, index) => ({
           id: `module-${module.id}`,
-          type: 'module',
+          type: 'default', // ✅ Use DEFAULT type like working comparison
           position: { 
             x: 700, // Right column for child modules
             y: 50 + (index * 160)
           },
           data: {
-            label: module.title,
-            status: module.status,
-            isRoot: false,
-            type: 'module',
+            label: `⚡ ${module.title} (Sub)`,
           },
+          style: {
+            // ✅ INLINE styling like working comparison
+            background: '#8B5CF6', // Purple for sub modules
+            color: 'white',
+            border: '2px solid #6D28D9',
+            borderRadius: '8px',
+            padding: '8px',
+            fontSize: '11px',
+            fontWeight: 'bold',
+            minWidth: '140px',
+            textAlign: 'center' as const
+          }
         }))
       ];
 
@@ -380,7 +364,6 @@ function PublicNetworkVisualizationContent() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         connectionMode={ConnectionMode.Loose}
-        nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{
           padding: 0.15,
