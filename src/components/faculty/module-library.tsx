@@ -158,51 +158,11 @@ export function ModuleLibrary() {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
   }
 
-  // Debug logging - expanded
-  console.log('=== FRONTEND MODULE DEBUG ===')
-  console.log('Total modules received:', modules.length)
-  
-  if (modules.length > 0) {
-    console.log('Sample modules with parent info:')
-    modules.slice(0, 3).forEach((m, i) => {
-      console.log(`Module ${i + 1}:`, {
-        id: m.id,
-        title: m.title,
-        hasParentModule: !!m.parentModule,
-        parentModule: m.parentModule,
-        status: m.status
-      })
-    })
-  }
-  
-  console.log('Current filters:')
-  console.log('- statusFilter:', statusFilter)
-  console.log('- parentFilter:', parentFilter)
-  console.log('==============================')
-
   // Calculate statistics based on current filters
   const filteredRootModules = modules.filter(module => !module.parentModule)
   const filteredSubModules = modules.filter(module => module.parentModule)
   const filteredPublishedCount = modules.filter(m => m.status === 'published').length
   const filteredDraftCount = modules.filter(m => m.status === 'draft').length
-
-  // Debug stats - expanded
-  console.log('Stats calculation breakdown:')
-  console.log('- Total modules:', modules.length)
-  console.log('- Root modules (no parent):', filteredRootModules.length)
-  console.log('- Sub-modules (has parent):', filteredSubModules.length)
-  console.log('- Published count:', filteredPublishedCount)
-  console.log('- Draft count:', filteredDraftCount)
-  
-  if (filteredSubModules.length > 0) {
-    console.log('Sub-modules found:', filteredSubModules.map(m => ({
-      id: m.id,
-      title: m.title,
-      parentModule: m.parentModule
-    })))
-  } else {
-    console.log('❌ NO SUB-MODULES FOUND - this is the issue!')
-  }
 
   if (isLoading) {
     return (
