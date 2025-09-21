@@ -109,8 +109,8 @@ function PublicNetworkVisualizationContent() {
           cursor: 'pointer',
           transition: 'box-shadow 0.2s ease, border-color 0.2s ease'
         },
-        // Add hover effect via CSS
-        className: 'hover:shadow-lg hover:shadow-blue-900/30'
+        // Add hover and selection effects via CSS  
+        className: 'hover:shadow-lg hover:shadow-blue-900/30 transition-all duration-200'
       }));
 
       // Separate root modules from child modules for better positioning
@@ -146,7 +146,7 @@ function PublicNetworkVisualizationContent() {
             cursor: 'pointer',
             transition: 'box-shadow 0.2s ease, border-color 0.2s ease'
           },
-          className: 'hover:shadow-lg hover:shadow-orange-600/30'
+          className: 'hover:shadow-lg hover:shadow-orange-600/30 transition-all duration-200'
         })),
         // Child modules in right column - elegant design
         ...childModules.map((module, index) => ({
@@ -176,7 +176,7 @@ function PublicNetworkVisualizationContent() {
             cursor: 'pointer',
             transition: 'box-shadow 0.2s ease, border-color 0.2s ease'
           },
-          className: 'hover:shadow-lg hover:shadow-cyan-500/30'
+          className: 'hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-200'
         }))
       ];
 
@@ -343,6 +343,28 @@ function PublicNetworkVisualizationContent() {
           backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(19, 41, 75, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(232, 74, 39, 0.1) 0%, transparent 50%)'
         }}></div>
       </div>
+      
+      {/* Enhanced node interaction styles */}
+      <style jsx>{`
+        .react-flow .react-flow__node.selected {
+          outline: 3px solid rgba(19, 41, 75, 0.6) !important;
+          outline-offset: 2px;
+        }
+        
+        .react-flow .react-flow__node.dragging {
+          transform: scale(1.05) !important;
+          z-index: 1000 !important;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .react-flow .react-flow__node:active {
+          cursor: grabbing !important;
+        }
+        
+        .react-flow .react-flow__node {
+          cursor: grab;
+        }
+      `}</style>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -372,10 +394,10 @@ function PublicNetworkVisualizationContent() {
         }}
         deleteKeyCode={null}
         multiSelectionKeyCode={null}
-        selectNodesOnDrag={false}
-        nodesDraggable={false}
+        selectNodesOnDrag={true}
+        nodesDraggable={true}
         nodesConnectable={false}
-        elementsSelectable={false}
+        elementsSelectable={true}
         attributionPosition="bottom-left"
         proOptions={{ hideAttribution: true }}
       >
@@ -429,7 +451,7 @@ function PublicNetworkVisualizationContent() {
               </div>
               
               <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                Explore the interconnected relationships between courses and modules. Click any node to open its content page.
+                Explore the interconnected relationships between courses and modules. Click any node to open its content page, or drag nodes to reorganize the layout.
               </p>
               
               {/* Enhanced Statistics */}
@@ -466,7 +488,7 @@ function PublicNetworkVisualizationContent() {
                     background: 'linear-gradient(135deg, #13294B 0%, #0F1B33 100%)'
                   }}></div>
                   <span className="font-medium">Courses</span>
-                  <span className="text-xs text-muted-foreground ml-auto">Click to explore</span>
+                  <span className="text-xs text-muted-foreground ml-auto">Click • Drag • Explore</span>
                 </div>
                 
                 <div className="flex items-center gap-3 text-sm">
@@ -512,6 +534,16 @@ function PublicNetworkVisualizationContent() {
                     </div>
                     <span className="font-medium">Extends</span>
                     <span className="text-xs text-muted-foreground ml-auto">Parent → Child</span>
+                  </div>
+                </div>
+                
+                {/* Interactive Tips */}
+                <div className="mt-4 pt-3 border-t border-border/30">
+                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-900 to-orange-600 opacity-60"></div>
+                      <span>Drag nodes to reorganize • Click to navigate</span>
+                    </div>
                   </div>
                 </div>
               </div>
