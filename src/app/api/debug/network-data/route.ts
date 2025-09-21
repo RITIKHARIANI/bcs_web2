@@ -4,31 +4,129 @@ export async function GET(request: NextRequest) {
   try {
     console.log('=== NETWORK VISUALIZATION DATA DEBUG ===')
     
-    // Fetch the same data that the network visualization component uses
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    // Skip the fetch call and directly query the API logic to avoid auth issues
+    // Import the same logic used by the public network API
+    const { prisma } = require('@/lib/db')
+    const { withDatabaseRetry } = require('@/lib/retry')
     
-    const response = await fetch(`${baseUrl}/api/public/network-visualization`, {
-      cache: 'no-store',
-    })
+    console.log('Directly querying database for network data...')
     
-    if (!response.ok) {
-      console.error('Network API failed:', response.status, response.statusText)
-      const errorText = await response.text()
-      console.error('Error response:', errorText)
-      
-      return NextResponse.json({
-        error: 'Network API failed',
-        status: response.status,
-        statusText: response.statusText,
-        errorText,
-      }, { status: response.status })
+    // Replicate the exact same query logic from /api/public/network-visualization
+    const [modules, courses] = await Promise.all([
+      withDatabaseRetry(async () =>
+        prisma.modules.findMany({
+          where: {
+            status: 'published', // Only published modules
+          },
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            description: true,
+            status: true,
+            parent_module_id: true,
+            sort_order: true,
+            created_at: true,
+            users: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: {
+            sort_order: 'asc',
+          },
+        }), { maxAttempts: 5 }
+      ),
+      withDatabaseRetry(async () =>
+        prisma.courses.findMany({
+          where: {
+            status: 'published', // Only published courses
+          },
+          include: {
+            users: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+            course_modules: {
+              include: {
+                modules: {
+                  select: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    description: true,
+                    status: true,
+                    parent_module_id: true,
+                    sort_order: true,
+                  },
+                },
+              },
+              orderBy: {
+                sort_order: 'asc',
+              },
+            },
+            _count: {
+              select: {
+                course_modules: true,
+              },
+            },
+          },
+          orderBy: {
+            created_at: 'desc',
+          },
+        }), { maxAttempts: 5 }
+      ),
+    ])
+    
+    console.log(`Direct DB query results: ${modules.length} modules, ${courses.length} courses`)
+    
+    // Transform field names to match frontend expectations (same as API)
+    const transformedModules = modules.map(module => ({
+      ...module,
+      parentModuleId: module.parent_module_id,
+      sortOrder: module.sort_order,
+      createdAt: module.created_at?.toISOString(),
+      author: module.users,
+    }))
+
+    const transformedCourses = courses.map(course => ({
+      ...course,
+      author: course.users,
+      courseModules: course.course_modules
+        ?.filter(cm => cm.modules && cm.modules.status === 'published')
+        .map(cm => ({
+          ...cm,
+          module: {
+            ...cm.modules,
+            parentModuleId: cm.modules.parent_module_id,
+            sortOrder: cm.modules.sort_order,
+          }
+        })) || [],
+      _count: {
+        courseModules: course.course_modules?.filter(cm => cm.modules && cm.modules.status === 'published').length || 0,
+      }
+    }))
+
+    // Filter out courses with no published modules
+    const coursesWithModules = transformedCourses.filter(course => course.courseModules.length > 0)
+    
+    const data = {
+      type: 'public',
+      modules: transformedModules,
+      courses: coursesWithModules,
+      stats: {
+        totalCourses: coursesWithModules.length,
+        totalModules: transformedModules.length,
+        rootModules: transformedModules.filter(m => !m.parentModuleId).length,
+        subModules: transformedModules.filter(m => m.parentModuleId).length,
+      }
     }
     
-    const data = await response.json()
-    
-    console.log('Network API Response:', {
+    console.log('Successfully constructed network data:', {
       modules: data.modules?.length || 0,
       courses: data.courses?.length || 0,
       stats: data.stats,
