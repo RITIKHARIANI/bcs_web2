@@ -163,6 +163,9 @@ export async function GET(request: NextRequest) {
     if (parentId) {
       if (parentId === 'root') {
         whereClause.parent_module_id = null
+      } else if (parentId === 'sub') {
+        // Filter for sub-modules (modules that have a parent)
+        whereClause.parent_module_id = { not: null }
       } else {
         whereClause.parent_module_id = parentId
       }

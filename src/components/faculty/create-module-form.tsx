@@ -65,11 +65,10 @@ async function fetchModules(): Promise<{ modules: Module[], availableTags: strin
 
 async function createModule(data: CreateModuleFormData & { content?: string }) {
   // Transform parentModuleId to parent_module_id for API
+  const { parentModuleId, ...rest } = data;
   const apiData = {
-    ...data,
-    parent_module_id: data.parentModuleId,
-    // Remove the camelCase version
-    parentModuleId: undefined
+    ...rest,
+    parent_module_id: parentModuleId,
   }
 
   console.log('Sending to API:', apiData);
@@ -408,8 +407,7 @@ export function CreateModuleForm() {
                   onChange={setContent}
                   placeholder="Start writing your module content here. Use the toolbar above to format your text, add headings, lists, images, and more..."
                   className="min-h-[600px]"
-                  autoSave={false}
-                  onSave={undefined}
+                  autoSave={true}
                 />
 
                 {!content && (

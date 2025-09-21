@@ -502,6 +502,125 @@ export function ModuleLibrary() {
       </header>
 
       <main className="container mx-auto px-6 py-8">
+        {/* Module Statistics */}
+        {modules.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-neural-primary to-neural-deep">
+                    <Brain className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-neural-primary">{modules.length}</div>
+                    <div className="text-xs text-muted-foreground">Total Modules</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-synapse-primary to-synapse-deep">
+                    <BookOpen className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-synapse-primary">
+                      {modules.filter(m => !m.parentModule).length}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Root Modules</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-cognition-teal to-cognition-deep">
+                    <Layers className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-cognition-teal">
+                      {modules.filter(m => m.parentModule).length}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Sub-modules</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600">
+                    <CheckCircle className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {modules.filter(m => m.status === 'published').length}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Published</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Active Filters Display */}
+        {(statusFilter !== 'all' || parentFilter !== 'all' || selectedTags.length > 0 || searchTerm.trim()) && (
+          <div className="mb-6">
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <Filter className="h-4 w-4 text-neural-primary" />
+                      <span className="text-sm font-medium">Active filters:</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {searchTerm.trim() && (
+                        <Badge variant="outline" className="text-neural-primary border-neural-primary/30">
+                          Search: &quot;{searchTerm}&quot;
+                        </Badge>
+                      )}
+                      {statusFilter !== 'all' && (
+                        <Badge variant="outline" className="text-neural-primary border-neural-primary/30">
+                          Status: {statusFilter}
+                        </Badge>
+                      )}
+                      {parentFilter !== 'all' && (
+                        <Badge variant="outline" className="text-neural-primary border-neural-primary/30">
+                          Type: {parentFilter === 'root' ? 'Root modules' : 'Sub-modules'}
+                        </Badge>
+                      )}
+                      {selectedTags.map((tag) => (
+                        <Badge key={tag} variant="default" className="pr-1">
+                          {tag}
+                          <X
+                            className="h-3 w-3 ml-1 cursor-pointer hover:bg-white hover:text-black rounded-full"
+                            onClick={() => removeTag(tag)}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <NeuralButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAllFilters}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Clear all
+                  </NeuralButton>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {modules.length > 0 ? (
           <div className={viewMode === 'grid' 
             ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
@@ -577,17 +696,25 @@ export function ModuleLibrary() {
                       <Calendar className="mr-1 h-3 w-3" />
                       {new Date(module.updatedAt).toLocaleDateString()}
                     </div>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-4">
                       {module._count.subModules > 0 && (
-                        <div className="flex items-center">
+                        <div className="flex items-center text-synapse-primary">
                           <Layers className="mr-1 h-3 w-3" />
-                          {module._count.subModules}
+                          <span className="font-medium">{module._count.subModules}</span>
+                          <span className="ml-1">sub{module._count.subModules === 1 ? '' : 's'}</span>
                         </div>
                       )}
                       {module._count.courseModules > 0 && (
-                        <div className="flex items-center">
-                          <Users className="mr-1 h-3 w-3" />
-                          {module._count.courseModules}
+                        <div className="flex items-center text-neural-primary">
+                          <BookOpen className="mr-1 h-3 w-3" />
+                          <span className="font-medium">{module._count.courseModules}</span>
+                          <span className="ml-1">course{module._count.courseModules === 1 ? '' : 's'}</span>
+                        </div>
+                      )}
+                      {module.parentModule && (
+                        <div className="flex items-center text-cognition-teal">
+                          <div className="w-2 h-2 bg-cognition-teal rounded-full mr-1"></div>
+                          <span className="text-xs font-medium">Sub-module</span>
                         </div>
                       )}
                     </div>
