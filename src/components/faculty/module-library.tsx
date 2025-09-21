@@ -134,7 +134,19 @@ export function ModuleLibrary() {
     retry: 5, // Increased from 2 to 5 for better reliability
   })
 
+  // Fetch all modules for stats (unfiltered)
+  const { 
+    data: allModulesData = { modules: [], availableTags: [] }
+  } = useQuery({
+    queryKey: ['modules', 'all'],
+    queryFn: () => fetchModules({ sortBy: 'title', sortOrder: 'asc' }), // Fetch all modules for stats
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    gcTime: 1000 * 60 * 15, // Keep in cache for 15 minutes
+    retry: 5,
+  })
+
   const { modules, availableTags } = data
+  const allModules = allModulesData.modules
 
   // Helper functions for tag management
   const addTag = (tag: string) => {
@@ -158,11 +170,11 @@ export function ModuleLibrary() {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
   }
 
-  // Calculate statistics
-  const rootModules = modules.filter(module => !module.parentModule)
-  const subModules = modules.filter(module => module.parentModule)
-  const publishedCount = modules.filter(m => m.status === 'published').length
-  const draftCount = modules.filter(m => m.status === 'draft').length
+  // Calculate statistics from ALL modules (unfiltered)
+  const allRootModules = allModules.filter(module => !module.parentModule)
+  const allSubModules = allModules.filter(module => module.parentModule)
+  const allPublishedCount = allModules.filter(m => m.status === 'published').length
+  const allDraftCount = allModules.filter(m => m.status === 'draft').length
 
   if (isLoading) {
     return (
@@ -266,7 +278,7 @@ export function ModuleLibrary() {
           </div>
 
           {/* Enhanced Stats Dashboard */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             <Card className="cognitive-card">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-3">
@@ -274,7 +286,7 @@ export function ModuleLibrary() {
                     <Brain className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-neural-primary">{modules.length}</div>
+                    <div className="text-2xl font-bold text-neural-primary">{allModules.length}</div>
                     <div className="text-xs text-muted-foreground">Total Modules</div>
                   </div>
                 </div>
@@ -289,7 +301,7 @@ export function ModuleLibrary() {
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-synapse-primary">
-                      {rootModules.length}
+                      {allRootModules.length}
                     </div>
                     <div className="text-xs text-muted-foreground">Root Modules</div>
                   </div>
@@ -305,7 +317,7 @@ export function ModuleLibrary() {
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-cognition-teal">
-                      {subModules.length}
+                      {allSubModules.length}
                     </div>
                     <div className="text-xs text-muted-foreground">Sub-modules</div>
                   </div>
@@ -321,9 +333,25 @@ export function ModuleLibrary() {
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-green-600">
-                      {publishedCount}
+                      {allPublishedCount}
                     </div>
                     <div className="text-xs text-muted-foreground">Published</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600">
+                    <Edit className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      {allDraftCount}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Drafts</div>
                   </div>
                 </div>
               </CardContent>
