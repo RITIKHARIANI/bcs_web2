@@ -64,12 +64,20 @@ async function fetchModules(): Promise<{ modules: Module[], availableTags: strin
 }
 
 async function createModule(data: CreateModuleFormData & { content?: string }) {
+  // Transform parentModuleId to parent_module_id for API
+  const apiData = {
+    ...data,
+    parent_module_id: data.parentModuleId,
+    // Remove the camelCase version
+    parentModuleId: undefined
+  }
+
   const response = await fetch('/api/modules', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(apiData),
   })
 
   if (!response.ok) {
@@ -107,7 +115,8 @@ export function CreateModuleForm() {
     onSuccess: (data) => {
       toast.success('Module created successfully!')
       queryClient.invalidateQueries({ queryKey: ['modules'] })
-      router.push(`/faculty/modules/edit/${data.module.id}`)
+      // Redirect to the module view page instead of edit
+      router.push(`/modules/${data.module.slug}`)
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to create module')
