@@ -125,13 +125,13 @@ function PublicNetworkVisualizationContent() {
         throw new Error('Invalid data structure received');
       }
 
-      // Generate nodes with proper positioning
+      // Generate nodes with improved systematic positioning
       const courseNodes: Node[] = (data.courses || []).map((course, index) => ({
         id: `course-${course.id}`,
         type: 'course',
         position: { 
-          x: 200 + (index % 2) * 400, 
-          y: 100 + Math.floor(index / 2) * 300 
+          x: 100, // Fixed left column for courses
+          y: 50 + (index * 200) // Vertical spacing for courses
         },
         data: {
           label: course.title,
@@ -141,20 +141,42 @@ function PublicNetworkVisualizationContent() {
         },
       }));
 
-      const moduleNodes: Node[] = (data.modules || []).map((module, index) => ({
-        id: `module-${module.id}`,
-        type: 'module',
-        position: { 
-          x: 600 + (index % 3) * 250, 
-          y: 300 + Math.floor(index / 3) * 200 
-        },
-        data: {
-          label: module.title,
-          status: module.status,
-          isRoot: !module.parentModuleId,
+      // Separate root modules from child modules for better positioning
+      const rootModules = (data.modules || []).filter(m => !m.parentModuleId);
+      const childModules = (data.modules || []).filter(m => m.parentModuleId);
+
+      const moduleNodes: Node[] = [
+        // Root modules in middle column
+        ...rootModules.map((module, index) => ({
+          id: `module-${module.id}`,
           type: 'module',
-        },
-      }));
+          position: { 
+            x: 400, // Middle column for root modules
+            y: 50 + (index * 180)
+          },
+          data: {
+            label: module.title,
+            status: module.status,
+            isRoot: true,
+            type: 'module',
+          },
+        })),
+        // Child modules in right column
+        ...childModules.map((module, index) => ({
+          id: `module-${module.id}`,
+          type: 'module',
+          position: { 
+            x: 700, // Right column for child modules
+            y: 50 + (index * 160)
+          },
+          data: {
+            label: module.title,
+            status: module.status,
+            isRoot: false,
+            type: 'module',
+          },
+        }))
+      ];
 
       const courseModuleEdges: Edge[] = [];
       const moduleParentEdges: Edge[] = [];
@@ -233,6 +255,8 @@ function PublicNetworkVisualizationContent() {
 
       console.log(`Generated ${courseNodes.length} course nodes, ${moduleNodes.length} module nodes`);
       console.log(`Generated ${courseModuleEdges.length} course-module edges, ${moduleParentEdges.length} parent-child edges`);
+      console.log('Course-module edges:', courseModuleEdges.map(e => `${e.source} -> ${e.target}`));
+      console.log('Parent-child edges:', moduleParentEdges.map(e => `${e.source} -> ${e.target}`));
 
       setNodes(allNodes);
       setEdges(allEdges);
@@ -305,9 +329,15 @@ function PublicNetworkVisualizationContent() {
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{
-          padding: 0.3,
-          maxZoom: 2,
-          minZoom: 0.2
+          padding: 0.15,
+          maxZoom: 1.0,
+          minZoom: 0.4,
+          includeHiddenNodes: false
+        }}
+        defaultViewport={{
+          x: 0,
+          y: 0, 
+          zoom: 0.8
         }}
         defaultEdgeOptions={{
           type: 'smoothstep',
@@ -319,14 +349,27 @@ function PublicNetworkVisualizationContent() {
         proOptions={{ hideAttribution: true }}
       >
         <Background />
-        <Controls position="bottom-right" />
+        <Controls 
+          position="top-right" 
+          showZoom={true}
+          showFitView={true}
+          showInteractive={false}
+          className="bg-card border border-border shadow-lg"
+        />
         <MiniMap 
-          position="bottom-left"
+          position="bottom-right"
+          zoomable
+          pannable
           nodeColor={(node) => {
             if (node.type === 'course') return '#3B82F6';
             return '#8B5CF6';
           }}
-          className="!bg-background !border-border"
+          className="!bg-card !border-border shadow-lg"
+          style={{ 
+            backgroundColor: 'hsl(var(--card))',
+            width: 200, 
+            height: 150 
+          }}
         />
         
         {/* Info Panel */}
