@@ -257,6 +257,29 @@ function PublicNetworkVisualizationContent() {
       console.log(`Generated ${courseModuleEdges.length} course-module edges, ${moduleParentEdges.length} parent-child edges`);
       console.log('Course-module edges:', courseModuleEdges.map(e => `${e.source} -> ${e.target}`));
       console.log('Parent-child edges:', moduleParentEdges.map(e => `${e.source} -> ${e.target}`));
+      
+      // DETAILED DEBUG: Log the exact data received
+      console.log('=== DETAILED NETWORK VISUALIZATION DEBUG ===');
+      console.log('Raw data courses:', data.courses?.length || 0);
+      console.log('Raw data modules:', data.modules?.length || 0);
+      
+      if (data.courses && data.courses.length > 0) {
+        console.log('First course details:', {
+          id: data.courses[0].id,
+          title: data.courses[0].title,
+          status: data.courses[0].status,
+          courseModules: data.courses[0].courseModules?.length || 0,
+          courseModulesDetails: data.courses[0].courseModules?.map(cm => ({
+            moduleId: cm.module?.id,
+            moduleTitle: cm.module?.title,
+            moduleStatus: cm.module?.status,
+          }))
+        });
+      }
+      
+      console.log('Generated nodes:', allNodes.map(n => ({ id: n.id, type: n.type, position: n.position })));
+      console.log('Generated edges:', allEdges.map(e => ({ id: e.id, source: e.source, target: e.target, type: e.type, style: e.style })));
+      console.log('=== END DETAILED DEBUG ===');
 
       setNodes(allNodes);
       setEdges(allEdges);
