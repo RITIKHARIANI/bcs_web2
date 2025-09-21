@@ -280,6 +280,18 @@ function PublicNetworkVisualizationContent() {
       
       console.log('Generated nodes:', allNodes.map(n => ({ id: n.id, type: n.type, position: n.position })));
       console.log('Generated edges:', allEdges.map(e => ({ id: e.id, source: e.source, target: e.target, type: e.type, style: e.style })));
+      
+      // CRITICAL: Check if source/target nodes actually exist
+      allEdges.forEach(edge => {
+        const sourceNode = allNodes.find(n => n.id === edge.source);
+        const targetNode = allNodes.find(n => n.id === edge.target);
+        console.log(`Edge ${edge.id}:`);
+        console.log(`  Source ${edge.source}: ${sourceNode ? 'FOUND' : 'MISSING!'}`);
+        console.log(`  Target ${edge.target}: ${targetNode ? 'FOUND' : 'MISSING!'}`);
+        if (sourceNode) console.log(`  Source position:`, sourceNode.position);
+        if (targetNode) console.log(`  Target position:`, targetNode.position);
+      });
+      
       console.log('=== END DETAILED DEBUG ===');
 
       setNodes(allNodes);
