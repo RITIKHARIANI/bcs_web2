@@ -3,6 +3,7 @@ import { Montserrat, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/providers";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // University of Illinois Official Typography
 const montserrat = Montserrat({
@@ -67,6 +68,7 @@ export default function RootLayout({
           {children}
         </Providers>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
