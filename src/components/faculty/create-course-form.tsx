@@ -27,6 +27,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { NeuralButton } from '@/components/ui/neural-button'
+import { TagsInput } from '@/components/ui/tags-input'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -59,6 +60,7 @@ const createCourseSchema = z.object({
   description: z.string().optional(),
   status: z.enum(['draft', 'published']).default('draft'),
   featured: z.boolean().default(false),
+  tags: z.array(z.string()).default([]),
 })
 
 type CreateCourseFormData = z.infer<typeof createCourseSchema>
@@ -158,13 +160,13 @@ function SortableModuleItem({ item, onRemove }: { item: SelectedModule; onRemove
   )
 }
 
-async function fetchModules(): Promise<Module[]> {
+async function fetchModules(): Promise<{ modules: Module[], availableTags: string[] }> {
   const response = await fetch('/api/modules')
   if (!response.ok) {
     throw new Error('Failed to fetch modules')
   }
   const data = await response.json()
-  return data.modules
+  return { modules: data.modules, availableTags: data.availableTags || [] }
 }
 
 async function createCourse(data: CreateCourseFormData & { modules: { moduleId: string; order: number }[] }) {
@@ -190,6 +192,8 @@ export function CreateCourseForm() {
   const [selectedModules, setSelectedModules] = useState<SelectedModule[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [showModuleSelector, setShowModuleSelector] = useState(false)
+  const [tags, setTags] = useState<string[]>([])
+  const [availableTags, setAvailableTags] = useState<string[]>([])
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -198,10 +202,19 @@ export function CreateCourseForm() {
     })
   )
 
-  const { data: modules = [], isLoading: isLoadingModules } = useQuery({
+  const { data: moduleData, isLoading: isLoadingModules } = useQuery({
     queryKey: ['modules'],
     queryFn: fetchModules,
   })
+
+  const modules = moduleData?.modules || []
+
+  // Update available tags when data changes
+  useEffect(() => {
+    if (moduleData?.availableTags) {
+      setAvailableTags(moduleData.availableTags)
+    }
+  }, [moduleData?.availableTags])
 
   const createCourseMutation = useMutation({
     mutationFn: createCourse,
@@ -226,6 +239,7 @@ export function CreateCourseForm() {
     defaultValues: {
       status: 'draft',
       featured: false,
+      tags: [],
     },
   })
 
@@ -303,6 +317,7 @@ export function CreateCourseForm() {
     try {
       await createCourseMutation.mutateAsync({
         ...data,
+        tags,
         modules: selectedModules.map(({ moduleId, order }) => ({ moduleId, order })),
       })
     } catch (error) {
@@ -404,6 +419,16 @@ export function CreateCourseForm() {
                     className="border-neural-light/30 focus:border-neural-primary"
                   />
                 </div>
+
+                <TagsInput
+                  value={tags}
+                  onChange={setTags}
+                  label="Tags"
+                  placeholder="Add tags to categorize this course..."
+                  suggestions={availableTags}
+                  maxTags={10}
+                  id="tags"
+                />
 
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>

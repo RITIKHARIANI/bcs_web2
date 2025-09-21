@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
+import { withDatabaseRetry } from '@/lib/retry'
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,96 +15,142 @@ export async function GET(request: NextRequest) {
 
     if (courseId) {
       // Get specific course structure
-      const course = await prisma.courses.findFirst({
-        where: {
-          id: courseId,
-          author_id: session.user.id,
-        },
-        include: {
-          course_modules: {
-            include: {
-              modules: {
-                select: {
-                  id: true,
-                  title: true,
-                  slug: true,
-                  description: true,
-                  status: true,
-                  parent_module_id: true,
-                  sort_order: true,
+      const course = await withDatabaseRetry(async () =>
+        prisma.courses.findFirst({
+          where: {
+            id: courseId,
+            author_id: session.user.id,
+          },
+          include: {
+            course_modules: {
+              include: {
+                modules: {
+                  select: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    description: true,
+                    status: true,
+                    parent_module_id: true,
+                    sort_order: true,
+                  },
                 },
               },
-            },
-            orderBy: {
-              sort_order: 'asc',
+              orderBy: {
+                sort_order: 'asc',
+              },
             },
           },
-        },
-      })
+        })
+      )
 
       if (!course) {
         return NextResponse.json({ error: 'Course not found' }, { status: 404 })
       }
 
+      // Transform field names to match frontend expectations
+      const transformedCourse = {
+        ...course,
+        courseModules: course.course_modules.map(cm => ({
+          ...cm,
+          module: {
+            ...cm.modules,
+            parentModuleId: cm.modules.parent_module_id,
+            sortOrder: cm.modules.sort_order,
+          }
+        }))
+      }
+
       return NextResponse.json({ 
         type: 'course',
-        course,
-        modules: course.course_modules.map(cm => cm.modules)
+        course: transformedCourse,
+        modules: course.course_modules.map(cm => ({
+          ...cm.modules,
+          parentModuleId: cm.modules.parent_module_id,
+          sortOrder: cm.modules.sort_order,
+        }))
       })
     } else {
       // Get all user's modules and courses for full structure view
       const [modules, courses] = await Promise.all([
-        prisma.modules.findMany({
-          where: {
-            author_id: session.user.id,
-          },
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            description: true,
-            status: true,
-            parent_module_id: true,
-            sort_order: true,
-            created_at: true,
-          },
-          orderBy: {
-            sort_order: 'asc',
-          },
-        }),
-        prisma.courses.findMany({
-          where: {
-            author_id: session.user.id,
-          },
-          include: {
-                      course_modules: {
+        withDatabaseRetry(async () =>
+          prisma.modules.findMany({
+            where: {
+              author_id: session.user.id,
+            },
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              description: true,
+              status: true,
+              parent_module_id: true,
+              sort_order: true,
+              created_at: true,
+            },
+            orderBy: {
+              sort_order: 'asc',
+            },
+          })
+        ),
+        withDatabaseRetry(async () =>
+          prisma.courses.findMany({
+            where: {
+              author_id: session.user.id,
+            },
             include: {
-              modules: {
+              course_modules: {
+                include: {
+                  modules: {
+                    select: {
+                      id: true,
+                      title: true,
+                      slug: true,
+                      description: true,
+                      status: true,
+                      parent_module_id: true,
+                      sort_order: true,
+                    },
+                  },
+                },
+              },
+              _count: {
                 select: {
-                  id: true,
-                  title: true,
-                  slug: true,
-                  description: true,
-                  status: true,
-                  parent_module_id: true,
-                  sort_order: true,
+                  course_modules: true,
                 },
               },
             },
-          },
-            _count: {
-              select: {
-                course_modules: true,
-              },
-            },
-          },
-        }),
+          })
+        ),
       ])
+
+      // Transform field names to match frontend expectations
+      const transformedModules = modules.map(module => ({
+        ...module,
+        parentModuleId: module.parent_module_id,
+        sortOrder: module.sort_order,
+        createdAt: module.created_at?.toISOString(),
+      }))
+
+      const transformedCourses = courses.map(course => ({
+        ...course,
+        courseModules: course.course_modules?.map(cm => ({
+          ...cm,
+          module: {
+            ...cm.modules,
+            parentModuleId: cm.modules.parent_module_id,
+            sortOrder: cm.modules.sort_order,
+          }
+        })) || [],
+        _count: {
+          courseModules: course._count.course_modules,
+        }
+      }))
 
       return NextResponse.json({
         type: 'full',
-        modules,
-        courses,
+        modules: transformedModules,
+        courses: transformedCourses,
       })
     }
   } catch (error) {

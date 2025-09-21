@@ -234,7 +234,7 @@ export function ModuleViewer({ moduleId }: ModuleViewerProps) {
 
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Author:</span>
-                  <span className="font-medium">{module.author.name}</span>
+                  <span className="font-medium">{module.author?.name || 'Unknown'}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -253,13 +253,13 @@ export function ModuleViewer({ moduleId }: ModuleViewerProps) {
 
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Sub-modules:</span>
-                  <span className="font-medium">{module.subModules.length}</span>
+                  <span className="font-medium">{module.subModules?.length || 0}</span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Hierarchy */}
-            {(module.parentModule || module.subModules.length > 0) && (
+            {(module.parentModule || (module.subModules?.length || 0) > 0) && (
               <Card className="cognitive-card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-sm">
@@ -280,11 +280,11 @@ export function ModuleViewer({ moduleId }: ModuleViewerProps) {
                     </div>
                   )}
 
-                  {module.subModules.length > 0 && (
+                  {(module.subModules?.length || 0) > 0 && (
                     <div>
                       <p className="text-xs text-muted-foreground mb-2">Sub-modules:</p>
                       <div className="space-y-1">
-                        {module.subModules.map((subModule) => (
+                        {(module.subModules || []).map((subModule) => (
                           <Link key={subModule.id} href={`/faculty/modules/${subModule.id}`}>
                             <div className="flex items-center p-2 rounded border hover:bg-muted/50 transition-colors">
                               <Layers className="h-4 w-4 text-synapse-primary mr-2" />

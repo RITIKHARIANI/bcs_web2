@@ -29,7 +29,7 @@ export async function generateMetadata({
   
   if (!course) {
     return {
-      title: "Course Not Found - NeuroLearn",
+      title: "Course Not Found - Brain & Cognitive Sciences",
       description: "The requested course could not be found.",
     };
   }
@@ -41,23 +41,23 @@ export async function generateMetadata({
 
   if (!foundModule) {
     return {
-      title: `${course.title} - NeuroLearn`,
+      title: `${course.title} - Brain & Cognitive Sciences`,
       description: course.description || `Learn about ${course.title} through interactive modules.`,
     };
   }
 
   return {
-    title: `${foundModule.title} - ${course.title} - NeuroLearn`,
+    title: `${foundModule.title} - ${course.title} - Brain & Cognitive Sciences`,
     description: foundModule.description || `Learn about ${foundModule.title} in the ${course.title} course.`,
     keywords: ["neuroscience", "cognitive science", "brain", "learning", course.title, foundModule.title],
     openGraph: {
-      title: `${foundModule.title} - ${course.title} - NeuroLearn`,
+      title: `${foundModule.title} - ${course.title} - Brain & Cognitive Sciences`,
       description: foundModule.description || `Learn about ${foundModule.title} in the ${course.title} course.`,
       type: "article",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${foundModule.title} - ${course.title} - NeuroLearn`,
+      title: `${foundModule.title} - ${course.title} - Brain & Cognitive Sciences`,
       description: foundModule.description || `Learn about ${foundModule.title} in the ${course.title} course.`,
     },
   };

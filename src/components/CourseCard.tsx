@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Clock, Users, BookOpen, ArrowRight, Star } from "lucide-react"
+import { Clock, Users, BookOpen, ArrowRight, Star, GraduationCap } from "lucide-react"
 import { NeuralButton } from "./ui/neural-button"
 import { Badge } from "./ui/badge"
 
@@ -11,7 +11,7 @@ interface CourseCardProps {
   students: number
   rating: number
   level: "Beginner" | "Intermediate" | "Advanced"
-  image: string
+  image?: string
   topics: string[]
 }
 
@@ -36,12 +36,27 @@ export function CourseCard({
     <div className="cognitive-card group cursor-pointer overflow-hidden">
       {/* Course Image */}
       <div className="relative h-48 overflow-hidden">
-        <Image
-          src={image}
-          alt={`${title} course visualization`}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
-        />
+        {image ? (
+          <Image
+            src={image}
+            alt={`${title} course visualization`}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            onError={(e) => {
+              // Hide the image if it fails to load
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        ) : null}
+        
+        {/* Default background with icon when no image or image fails */}
+        <div className="absolute inset-0 bg-gradient-to-br from-neural-primary/10 via-synapse-primary/5 to-cognition-teal/10 flex items-center justify-center">
+          <div className="text-center">
+            <GraduationCap className="h-16 w-16 text-neural-primary/30 mx-auto mb-2" />
+            <div className="text-xs text-neural-primary/50 font-medium">Brain & Cognitive Sciences</div>
+          </div>
+        </div>
+        
         <div className="absolute inset-0 bg-gradient-to-t from-neural-deep/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <Badge className={`absolute top-3 left-3 ${levelColors[level]}`}>
           {level}

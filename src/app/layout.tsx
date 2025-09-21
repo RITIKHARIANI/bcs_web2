@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Montserrat, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/providers";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // University of Illinois Official Typography
 const montserrat = Montserrat({
@@ -51,6 +53,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#13294B" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="UI BCS E-Textbook" />
@@ -64,6 +67,8 @@ export default function RootLayout({
           </div>
           {children}
         </Providers>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

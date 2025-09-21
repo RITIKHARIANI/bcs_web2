@@ -62,31 +62,19 @@ export function Hero() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <NeuralButton size="lg" className="min-w-[200px]">
-            Start Exploring
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </NeuralButton>
+          <Link href="/courses">
+            <NeuralButton size="lg" className="min-w-[200px]">
+              Start Exploring
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </NeuralButton>
+          </Link>
           
-          <NeuralButton variant="cognitive" size="lg" className="min-w-[200px]">
-            <Play className="mr-2 h-5 w-5" />
-            Watch Demo
-          </NeuralButton>
-        </div>
-
-        {/* Stats */}
-        <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-3">
-          <div className="cognitive-card p-6 text-center">
-            <div className="text-3xl font-bold text-neural-primary mb-2">500+</div>
-            <div className="text-sm text-muted-foreground">Research Papers</div>
-          </div>
-          <div className="cognitive-card p-6 text-center">
-            <div className="text-3xl font-bold text-synapse-primary mb-2">50+</div>
-            <div className="text-sm text-muted-foreground">Expert Faculty</div>
-          </div>
-          <div className="cognitive-card p-6 text-center">
-            <div className="text-3xl font-bold text-cognition-teal mb-2">10K+</div>
-            <div className="text-sm text-muted-foreground">Active Learners</div>
-          </div>
+          <Link href="/network">
+            <NeuralButton variant="cognitive" size="lg" className="min-w-[200px]">
+              <Play className="mr-2 h-5 w-5" />
+              Explore Network
+            </NeuralButton>
+          </Link>
         </div>
       </div>
     </section>

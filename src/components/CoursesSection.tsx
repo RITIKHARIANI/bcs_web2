@@ -103,7 +103,7 @@ export function CoursesSection() {
                 rating={4.8} // Default rating for now
                 students={0} // Will be calculated later
                 duration="Varies" // Will be calculated based on modules
-                image="/placeholder.svg" // Will use placeholder for now
+                // No image prop - will use default background
                 topics={course.tags} 
               />
             ))}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
+import { withDatabaseRetry } from '@/lib/retry'
 import { z } from 'zod'
 
 const createCourseSchema = z.object({
@@ -13,6 +14,7 @@ const createCourseSchema = z.object({
   })).optional().default([]),
   status: z.enum(['draft', 'published']).default('draft'),
   featured: z.boolean().default(false),
+  tags: z.array(z.string().min(1).max(50)).max(20).default([]),
 })
 
 export async function POST(request: NextRequest) {
@@ -58,6 +60,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Clean and validate tags
+    const cleanTags = validatedData.tags
+      .map(tag => tag.trim().toLowerCase())
+      .filter((tag, index, arr) => tag.length > 0 && arr.indexOf(tag) === index) // Remove duplicates and empty tags
+
     // Create course with modules in a transaction
     const newCourse = await prisma.$transaction(async (tx) => {
       const course = await tx.courses.create({
@@ -68,6 +75,7 @@ export async function POST(request: NextRequest) {
           description: validatedData.description,
           status: validatedData.status,
           featured: validatedData.featured,
+          tags: cleanTags,
           author_id: session.user.id,
         },
       })
@@ -153,49 +161,51 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
 
-      const courses = await prisma.courses.findMany({
-        where: {
-          author_id: session.user.id,
-          ...(status && { status }),
-        },
-        include: {
-          users: {
-            select: {
-              name: true,
-              email: true,
-            },
+      const courses = await withDatabaseRetry(async () => {
+        return await prisma.courses.findMany({
+          where: {
+            author_id: session.user.id,
+            ...(status && { status }),
           },
-          course_modules: {
-            include: {
-              modules: {
-                select: {
-                  id: true,
-                  title: true,
-                  slug: true,
-                  description: true,
-                  status: true,
-                },
+          include: {
+            users: {
+              select: {
+                name: true,
+                email: true,
               },
             },
-            orderBy: {
-              sort_order: 'asc',
+            course_modules: {
+              include: {
+                modules: {
+                  select: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    description: true,
+                    status: true,
+                  },
+                },
+              },
+              orderBy: {
+                sort_order: 'asc',
+              },
+            },
+            _count: {
+              select: {
+                course_modules: true,
+              },
             },
           },
-          _count: {
-            select: {
-              course_modules: true,
-            },
+          orderBy: {
+            updated_at: 'desc',
           },
-        },
-        orderBy: {
-          updated_at: 'desc',
-        },
-      })
+        });
+      }, { maxAttempts: 3, baseDelayMs: 500 })
 
       return NextResponse.json({ courses })
     }
 
-    // Public course listing
+    // Public course listing with proper PgBouncer configuration
     const courses = await prisma.courses.findMany({
       where: {
         status: 'published',
@@ -217,13 +227,33 @@ export async function GET(request: NextRequest) {
         { featured: 'desc' },
         { updated_at: 'desc' },
       ],
-    })
+    });
 
     return NextResponse.json({ courses })
   } catch (error) {
-    console.error('Error fetching courses:', error)
+    console.error('=== DETAILED ERROR ANALYSIS ===')
+    console.error('Error fetching courses - Full details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      cause: error.cause,
+      code: error.code || 'N/A'
+    })
+    
+    // Log environment info (without sensitive data)
+    console.error('Environment info:', {
+      nodeEnv: process.env.NODE_ENV,
+      hasDatabaseUrl: !!process.env.DATABASE_URL,
+      databaseUrlPrefix: process.env.DATABASE_URL?.slice(0, 20) + '...',
+    })
+    
     return NextResponse.json(
-      { error: 'Failed to fetch courses' },
+      { 
+        error: 'Failed to fetch courses', 
+        errorType: error.name,
+        errorCode: error.code || 'UNKNOWN',
+        details: process.env.NODE_ENV === 'development' ? error.message : 'Check server logs for details'
+      },
       { status: 500 }
     )
   }

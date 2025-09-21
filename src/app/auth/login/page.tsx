@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
+import { PublicLayout } from "@/components/layouts/app-layout";
 
 function LoginContent() {
   return <LoginForm />;
@@ -7,8 +8,10 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <LoginContent />
-    </Suspense>
+    <PublicLayout showFooter={false}>
+      <Suspense fallback={<div>Loading...</div>}>
+        <LoginContent />
+      </Suspense>
+    </PublicLayout>
   );
 }

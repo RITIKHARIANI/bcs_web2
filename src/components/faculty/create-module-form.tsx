@@ -9,6 +9,7 @@ import { z } from 'zod'
 import Link from 'next/link'
 import { NeuralRichTextEditor } from '@/components/editor/neural-rich-text-editor'
 import { NeuralButton } from '@/components/ui/neural-button'
+import { TagsInput } from '@/components/ui/tags-input'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -38,6 +39,7 @@ const createModuleSchema = z.object({
   description: z.string().optional(),
   parentModuleId: z.string().optional(),
   status: z.enum(['draft', 'published']).default('draft'),
+  tags: z.array(z.string()).default([]),
 })
 
 type CreateModuleFormData = z.infer<typeof createModuleSchema>
@@ -52,22 +54,30 @@ interface Module {
   }
 }
 
-async function fetchModules(): Promise<Module[]> {
+async function fetchModules(): Promise<{ modules: Module[], availableTags: string[] }> {
   const response = await fetch('/api/modules')
   if (!response.ok) {
     throw new Error('Failed to fetch modules')
   }
   const data = await response.json()
-  return data.modules
+  return { modules: data.modules, availableTags: data.availableTags || [] }
 }
 
 async function createModule(data: CreateModuleFormData & { content?: string }) {
+  // Transform parentModuleId to parent_module_id for API
+  const apiData = {
+    ...data,
+    parent_module_id: data.parentModuleId,
+    // Remove the camelCase version
+    parentModuleId: undefined
+  }
+
   const response = await fetch('/api/modules', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(apiData),
   })
 
   if (!response.ok) {
@@ -83,18 +93,30 @@ export function CreateModuleForm() {
   const queryClient = useQueryClient()
   const [content, setContent] = useState('')
   const [isPreviewMode, setIsPreviewMode] = useState(false)
+  const [tags, setTags] = useState<string[]>([])
+  const [availableTags, setAvailableTags] = useState<string[]>([])
 
-  const { data: modules = [], isLoading: isLoadingModules } = useQuery({
+  const { data: moduleData, isLoading: isLoadingModules } = useQuery({
     queryKey: ['modules'],
     queryFn: fetchModules,
   })
+
+  const modules = moduleData?.modules || []
+  
+  // Update available tags when data changes
+  useEffect(() => {
+    if (moduleData?.availableTags) {
+      setAvailableTags(moduleData.availableTags)
+    }
+  }, [moduleData?.availableTags])
 
   const createModuleMutation = useMutation({
     mutationFn: createModule,
     onSuccess: (data) => {
       toast.success('Module created successfully!')
       queryClient.invalidateQueries({ queryKey: ['modules'] })
-      router.push(`/faculty/modules/edit/${data.module.id}`)
+      // Redirect to the module view page instead of edit
+      router.push(`/modules/${data.module.slug}`)
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to create module')
@@ -111,6 +133,7 @@ export function CreateModuleForm() {
     resolver: zodResolver(createModuleSchema),
     defaultValues: {
       status: 'draft',
+      tags: [],
     },
   })
 
@@ -134,6 +157,7 @@ export function CreateModuleForm() {
     try {
       await createModuleMutation.mutateAsync({
         ...data,
+        tags,
         content,
       })
     } catch (error) {
@@ -248,6 +272,16 @@ export function CreateModuleForm() {
                     className="border-neural-light/30 focus:border-neural-primary"
                   />
                 </div>
+
+                <TagsInput
+                  value={tags}
+                  onChange={setTags}
+                  label="Tags"
+                  placeholder="Add tags to categorize this module..."
+                  suggestions={availableTags}
+                  maxTags={10}
+                  id="tags"
+                />
 
                 <div className="space-y-2">
                   <Label htmlFor="parentModule">Parent Module</Label>
