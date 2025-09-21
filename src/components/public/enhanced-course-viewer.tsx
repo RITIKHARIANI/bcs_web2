@@ -35,10 +35,8 @@ import {
   Minimize2,
   Eye,
   FileText,
-  Navigation,
-  Network
+  Navigation
 } from 'lucide-react'
-import { IntegratedGraphSystem } from '../visualization/integrated-graph-system'
 
 interface Module {
   id: string
@@ -479,20 +477,82 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
                   </CardContent>
                 </Card>
 
-                {/* Course Structure Visualization */}
+                {/* Course Modules Overview */}
                 <Card className="cognitive-card">
                   <CardHeader>
                     <CardTitle className="flex items-center text-lg">
-                      <Network className="mr-3 h-5 w-5 text-neural-primary" />
-                      Course Structure
+                      <List className="mr-3 h-5 w-5 text-neural-primary" />
+                      All Course Modules
+                      <Badge variant="outline" className="ml-3">
+                        {course.courseModules.length} modules
+                      </Badge>
                     </CardTitle>
+                    <CardDescription>
+                      Explore all modules in this course. Click on any module to jump directly to its content.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <IntegratedGraphSystem
-                      mode="public"
-                      course={course}
-                      className="h-96"
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {course.courseModules.map((courseModule, index) => {
+                        const currentModule = courseModule.module
+                        const isCurrentModule = selectedModuleId === currentModule.id
+                        
+                        return (
+                          <button
+                            key={currentModule.id}
+                            onClick={() => handleModuleSelect(currentModule)}
+                            className={`group relative p-4 rounded-lg border text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-neural-primary focus:ring-offset-2 ${
+                              isCurrentModule 
+                                ? 'border-neural-primary bg-neural-primary/10 shadow-md' 
+                                : 'border-border hover:border-neural-light hover:shadow-sm'
+                            }`}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-medium ${
+                                isCurrentModule 
+                                  ? 'bg-neural-primary text-white' 
+                                  : 'bg-muted text-muted-foreground group-hover:bg-neural-primary group-hover:text-white'
+                              } transition-colors`}>
+                                {index + 1}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className={`font-semibold text-sm ${
+                                  isCurrentModule ? 'text-neural-primary' : 'text-foreground group-hover:text-neural-primary'
+                                } transition-colors`}>
+                                  {currentModule.title}
+                                </h3>
+                                {currentModule.description && (
+                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                    {currentModule.description}
+                                  </p>
+                                )}
+                                <div className="flex items-center justify-between mt-2">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {Math.ceil(currentModule.content.split(' ').length / 200)} min read
+                                  </Badge>
+                                  {isCurrentModule && (
+                                    <Badge className="bg-neural-primary text-white text-xs">
+                                      Current
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            {/* Click to navigate indicator */}
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <ChevronRight className="h-4 w-4 text-neural-primary" />
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    
+                    {/* Quick navigation hint */}
+                    <div className="mt-6 pt-4 border-t border-border/50">
+                      <p className="text-xs text-muted-foreground text-center">
+                        💡 Tip: Use keyboard arrows (← →) to navigate between modules, or click any module above to jump directly to it
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
 

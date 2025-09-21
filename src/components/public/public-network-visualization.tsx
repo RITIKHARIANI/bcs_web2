@@ -124,13 +124,13 @@ function PublicNetworkVisualizationContent() {
         throw new Error('Invalid data structure received');
       }
 
-      // Generate nodes and edges
+      // Generate nodes with better positioning
       const courseNodes: Node[] = (data.courses || []).map((course, index) => ({
         id: `course-${course.id}`,
         type: 'course',
         position: { 
-          x: 100 + (index % 3) * 300, 
-          y: 100 + Math.floor(index / 3) * 200 
+          x: 200 + (index % 2) * 400, 
+          y: 100 + Math.floor(index / 2) * 300 
         },
         data: {
           label: course.title,
@@ -144,8 +144,8 @@ function PublicNetworkVisualizationContent() {
         id: `module-${module.id}`,
         type: 'module',
         position: { 
-          x: 500 + (index % 4) * 200, 
-          y: 300 + Math.floor(index / 4) * 150 
+          x: 600 + (index % 3) * 250, 
+          y: 300 + Math.floor(index / 3) * 200 
         },
         data: {
           label: module.title,
@@ -170,9 +170,21 @@ function PublicNetworkVisualizationContent() {
               source: `course-${course.id}`,
               target: `module-${cm.module.id}`,
               type: 'smoothstep',
-              style: { stroke: 'hsl(var(--neural-primary))', strokeWidth: 2 },
+              style: { 
+                stroke: '#3B82F6', 
+                strokeWidth: 3,
+                strokeDasharray: 'none'
+              },
               label: 'contains',
-              labelStyle: { fontSize: 10, fill: 'hsl(var(--muted-foreground))' },
+              labelStyle: { 
+                fontSize: 12, 
+                fill: '#6B7280',
+                fontWeight: 'bold'
+              },
+              labelBgStyle: { 
+                fill: '#ffffff', 
+                fillOpacity: 0.8 
+              },
             });
           }
         });
@@ -187,9 +199,21 @@ function PublicNetworkVisualizationContent() {
             source: `module-${module.parentModuleId}`,
             target: `module-${module.id}`,
             type: 'smoothstep',
-            style: { stroke: 'hsl(var(--synapse-primary))', strokeWidth: 2, strokeDasharray: '5,5' },
+            style: { 
+              stroke: '#8B5CF6', 
+              strokeWidth: 2, 
+              strokeDasharray: '8,4' 
+            },
             label: 'parent-child',
-            labelStyle: { fontSize: 10, fill: 'hsl(var(--muted-foreground))' },
+            labelStyle: { 
+              fontSize: 11, 
+              fill: '#6B7280',
+              fontWeight: 'bold' 
+            },
+            labelBgStyle: { 
+              fill: '#ffffff', 
+              fillOpacity: 0.8 
+            },
           });
         }
       });
@@ -197,9 +221,13 @@ function PublicNetworkVisualizationContent() {
       const allNodes = [...courseNodes, ...moduleNodes];
       const allEdges = [...courseModuleEdges, ...moduleParentEdges];
 
+      console.log(`=== NETWORK VISUALIZATION DEBUG ===`);
       console.log(`Generated ${courseNodes.length} course nodes, ${moduleNodes.length} module nodes`);
       console.log(`Generated ${courseModuleEdges.length} course-module edges, ${moduleParentEdges.length} parent-child edges`);
+      console.log('Course nodes:', courseNodes.map(n => `${n.id} at (${n.position.x}, ${n.position.y})`));
+      console.log('Module nodes:', moduleNodes.map(n => `${n.id} at (${n.position.x}, ${n.position.y})`));
       console.log('All edges:', allEdges);
+      console.log(`=== END DEBUG ===`);
 
       setNodes(allNodes);
       setEdges(allEdges);
@@ -271,7 +299,19 @@ function PublicNetworkVisualizationContent() {
         connectionMode={ConnectionMode.Loose}
         nodeTypes={nodeTypes}
         fitView
+        fitViewOptions={{
+          padding: 0.2,
+          maxZoom: 1.5,
+          minZoom: 0.1
+        }}
+        defaultEdgeOptions={{
+          type: 'smoothstep',
+          style: { strokeWidth: 2 }
+        }}
+        deleteKeyCode={null}
+        multiSelectionKeyCode={null}
         attributionPosition="bottom-left"
+        proOptions={{ hideAttribution: true }}
       >
         <Background />
         <Controls />
@@ -327,11 +367,15 @@ function PublicNetworkVisualizationContent() {
                   <span>Sub-modules</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
-                  <div className="w-8 h-0.5 bg-neural-primary"></div>
+                  <div className="w-8 h-0.5" style={{ backgroundColor: '#3B82F6' }}></div>
                   <span>Course-Module</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
-                  <div className="w-8 h-0.5 bg-synapse-primary" style={{ backgroundImage: 'repeating-linear-gradient(to right, transparent, transparent 2px, hsl(var(--synapse-primary)) 2px, hsl(var(--synapse-primary)) 4px)' }}></div>
+                  <div className="w-8 h-0.5" style={{ 
+                    backgroundColor: '#8B5CF6',
+                    backgroundImage: 'repeating-linear-gradient(to right, #8B5CF6 0px, #8B5CF6 4px, transparent 4px, transparent 8px)',
+                    backgroundSize: '8px 100%'
+                  }}></div>
                   <span>Parent-Child</span>
                 </div>
               </div>
