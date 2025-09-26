@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, KeyboardEvent, useRef, useEffect } from 'react'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
+import { Input } from './input'
+import { Badge } from './badge'
+import { Label } from './label'
 import { X, Tag, Plus } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '../../lib/utils'
 
 interface TagsInputProps {
   value: string[]
