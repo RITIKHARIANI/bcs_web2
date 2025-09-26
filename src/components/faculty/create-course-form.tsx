@@ -26,16 +26,16 @@ import {
   useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { NeuralButton } from '@/components/ui/neural-button'
-import { TagsInput } from '@/components/ui/tags-input'
+import { NeuralButton } from '../ui/neural-button'
+import { TagsInput } from '../ui/tags-input'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Input } from '../ui/input'
+import { Label } from '../ui/label'
+import { Textarea } from '../ui/textarea'
+import { Badge } from '../ui/badge'
+import { Alert, AlertDescription } from '../ui/alert'
+import { Separator } from '../ui/separator'
 import { toast } from 'sonner'
 import { 
   Save, 
