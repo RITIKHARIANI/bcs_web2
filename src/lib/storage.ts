@@ -10,31 +10,56 @@ interface StorageConfig {
   allowedTypes: string[];
   uploadDir: string;
   useCloudStorage: boolean;
-  cloudProvider?: 'aws' | 'cloudinary' | 'vercel';
+  cloudProvider?: 'aws' | 'cloudinary' | 'vercel' | 'supabase';
 }
 
 // Get storage configuration from environment
 const getStorageConfig = (): StorageConfig => ({
   maxFileSize: parseInt(process.env.NEXT_PUBLIC_UPLOAD_MAX_SIZE || '52428800'), // 50MB default
   allowedTypes: process.env.NEXT_PUBLIC_ALLOWED_FILE_TYPES?.split(',') || [
+    // Images
     'image/jpeg',
     'image/jpg', 
     'image/png',
     'image/webp',
     'image/gif',
+    'image/svg+xml',
+    // Videos
     'video/mp4',
     'video/webm',
-    'application/pdf'
+    'video/avi',
+    'video/mov',
+    'video/quicktime',
+    // Audio
+    'audio/mp3',
+    'audio/mpeg',
+    'audio/wav',
+    'audio/ogg',
+    'audio/aac',
+    'audio/m4a',
+    // Documents
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain',
+    'text/csv',
+    // Archives
+    'application/zip',
+    'application/x-rar-compressed'
   ],
   uploadDir: process.env.UPLOAD_DIR || './uploads',
   useCloudStorage: process.env.NODE_ENV === 'production' && (
     !!process.env.AWS_S3_BUCKET_NAME || 
     !!process.env.CLOUDINARY_CLOUD_NAME ||
-    !!process.env.VERCEL_BLOB_READ_WRITE_TOKEN
+    !!process.env.VERCEL_BLOB_READ_WRITE_TOKEN ||
+    !!process.env.NEXT_PUBLIC_SUPABASE_URL
   ),
   cloudProvider: process.env.AWS_S3_BUCKET_NAME ? 'aws' : 
                  process.env.CLOUDINARY_CLOUD_NAME ? 'cloudinary' :
-                 process.env.VERCEL_BLOB_READ_WRITE_TOKEN ? 'vercel' : undefined
+                 process.env.VERCEL_BLOB_READ_WRITE_TOKEN ? 'vercel' :
+                 process.env.NEXT_PUBLIC_SUPABASE_URL ? 'supabase' : undefined
 });
 
 // File validation
@@ -199,6 +224,56 @@ const saveFileToVercelBlob = async (file: File): Promise<{ url: string; path: st
   }
 };
 
+// Supabase Storage (requires @supabase/supabase-js)
+const saveFileToSupabase = async (file: File): Promise<{ url: string; path: string }> => {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Supabase configuration missing');
+  }
+
+  try {
+    // Dynamic import to avoid bundle bloat if not using Supabase
+    const supabase = await import('@supabase/supabase-js').catch((err: Error) => {
+      console.warn('Supabase SDK not available:', err.message);
+      throw new Error('Supabase SDK not installed. Run: npm install @supabase/supabase-js');
+    });
+    
+    const { createClient } = supabase;
+    
+    const supabaseClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: { persistSession: false }
+      }
+    );
+
+    const fileName = generateFileName(file.name);
+    const bucketName = process.env.SUPABASE_STORAGE_BUCKET || 'media';
+    
+    // Upload file to Supabase Storage
+    const { data, error } = await supabaseClient.storage
+      .from(bucketName)
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    // Get public URL
+    const { data: urlData } = supabaseClient.storage
+      .from(bucketName)
+      .getPublicUrl(fileName);
+
+    return { url: urlData.publicUrl, path: fileName };
+  } catch (error) {
+    console.error('Supabase upload error:', error);
+    throw new Error(`Failed to upload to Supabase: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
 // Main file upload function
 export const uploadFile = async (file: File): Promise<{ url: string; path: string }> => {
   const config = getStorageConfig();
@@ -218,6 +293,8 @@ export const uploadFile = async (file: File): Promise<{ url: string; path: strin
         return await saveFileToCloudinary(file);
       case 'vercel':
         return await saveFileToVercelBlob(file);
+      case 'supabase':
+        return await saveFileToSupabase(file);
       default:
         throw new Error('Cloud storage provider not configured');
     }

@@ -547,6 +547,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                   onChange={(html) => setValue('content', html)}
                   placeholder="Start writing your module content..."
                   autoSave={true}
+                  moduleId={module.id}
                   onSave={(html) => setValue('content', html)}
                 />
                 {errors.content && (
