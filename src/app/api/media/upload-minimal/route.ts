@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth/config';
-import { uploadFile } from '@/lib/storage-simple';
+import { auth } from '../../../../lib/auth/config';
+import { uploadFile } from '../../../../lib/storage-simple';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';

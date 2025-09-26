@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/db'
-import { generateToken, sendEmail, emailTemplates } from '@/lib/email'
+import { prisma } from '../../../../lib/db'
+import { generateToken, sendEmail, emailTemplates } from '../../../../lib/email'
 import { z } from 'zod'
 
 // Enhanced validation schema

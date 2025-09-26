@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth/config';
-import { prisma } from '@/lib/db';
-import { executePythonCode } from '@/lib/python-engine';
+import { auth } from '../../../../../lib/auth/config';
+import { prisma } from '../../../../../lib/db';
+import { executePythonCode } from '../../../../../lib/python-engine';
 import { z } from 'zod';
 
 const executeSchema = z.object({

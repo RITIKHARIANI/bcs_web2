@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth/config';
-import { uploadFile, validateFile } from '@/lib/storage-simple';
-import { prisma } from '@/lib/db';
+import { auth } from '../../../../lib/auth/config';
+import { uploadFile, validateFile } from '../../../../lib/storage-simple';
+import { prisma } from '../../../../lib/db';
 
 // Use Edge Runtime for smaller bundle size - DISABLED for now due to file system limitations
 // export const runtime = 'edge';
