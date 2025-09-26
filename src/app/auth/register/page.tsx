@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { RegisterForm } from "@/components/auth/register-form";
+import { RegisterForm } from "../../../components/auth/register-form";
 
 function RegisterContent() {
   return <RegisterForm />;
