@@ -16,11 +16,11 @@ import ReactFlow, {
   ReactFlowProvider
 } from 'reactflow'
 import { useQuery } from '@tanstack/react-query'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { NeuralButton } from '@/components/ui/neural-button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Loading } from '@/components/ui/loading'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { NeuralButton } from '../ui/neural-button'
+import { Badge } from '../ui/badge'
+import { Input } from '../ui/input'
+import { Loading } from '../ui/loading'
 import { 
   Network, 
   Search, 

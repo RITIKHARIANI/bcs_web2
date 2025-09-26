@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { NeuralButton } from '@/components/ui/neural-button'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { NeuralButton } from '../ui/neural-button'
+import { Badge } from '../ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import { 
   Network, 
   BookOpen, 

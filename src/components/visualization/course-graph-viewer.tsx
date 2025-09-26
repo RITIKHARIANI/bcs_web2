@@ -16,11 +16,11 @@ import ReactFlow, {
   ReactFlowProvider,
   MarkerType
 } from 'reactflow'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { NeuralButton } from '@/components/ui/neural-button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { NeuralButton } from '../ui/neural-button'
+import { Badge } from '../ui/badge'
+import { Input } from '../ui/input'
+import { Separator } from '../ui/separator'
 import { 
   ZoomIn, 
   ZoomOut, 
