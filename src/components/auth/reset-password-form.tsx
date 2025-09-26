@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { NeuralButton } from "@/components/ui/neural-button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { NeuralButton } from "../ui/neural-button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { AlertCircle, CheckCircle, Eye, EyeOff, ArrowLeft, Shield } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "../ui/alert";
 
 interface UserInfo {
   email: string;
