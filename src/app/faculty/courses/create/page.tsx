@@ -1,6 +1,6 @@
-import { auth } from "@/lib/auth/config";
+import { auth } from "../../../../lib/auth/config";
 import { redirect } from "next/navigation";
-import { CreateCourseForm } from "@/components/faculty/create-course-form";
+import { CreateCourseForm } from "../../../../components/faculty/create-course-form";
 
 export default async function CreateCoursePage() {
   const session = await auth();

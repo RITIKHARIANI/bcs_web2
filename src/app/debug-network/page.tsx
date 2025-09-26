@@ -1,4 +1,4 @@
-import { DebugNetwork } from '@/components/debug-network';
+import { DebugNetwork } from '../../components/debug-network';
 
 export default function DebugNetworkPage() {
   return (
