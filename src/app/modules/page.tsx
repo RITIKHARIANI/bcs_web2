@@ -6,10 +6,17 @@ export const metadata = {
   description: "Explore individual learning modules in Brain and Cognitive Sciences. Interactive educational content created by expert faculty.",
 };
 
-export default function ModulesPage() {
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function ModulesPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const initialSearch = typeof params.search === 'string' ? params.search : '';
+
   return (
     <PublicLayout>
-      <ModuleCatalog />
+      <ModuleCatalog initialSearch={initialSearch} />
     </PublicLayout>
   );
 }

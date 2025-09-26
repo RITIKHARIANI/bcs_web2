@@ -48,8 +48,12 @@ async function fetchPublicCourses(): Promise<Course[]> {
   return data.courses
 }
 
-export function CourseCatalog() {
-  const [searchTerm, setSearchTerm] = useState('')
+type CourseCatalogProps = {
+  initialSearch?: string;
+};
+
+export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
+  const [searchTerm, setSearchTerm] = useState(initialSearch)
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
