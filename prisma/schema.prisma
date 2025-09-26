@@ -73,24 +73,25 @@ model module_media {
 }
 
 model modules {
-  id               String           @id
+  id               String               @id
   title            String
   slug             String
   content          String?
   description      String?
   author_id        String
   parent_module_id String?
-  sort_order       Int              @default(0)
+  sort_order       Int                  @default(0)
   module_number    String?
-  status           String           @default("draft")
-  tags             String[]         @default([])
-  created_at       DateTime         @default(now())
-  updated_at       DateTime         @updatedAt
+  status           String               @default("draft")
+  tags             String[]             @default([])
+  created_at       DateTime             @default(now())
+  updated_at       DateTime             @updatedAt
   course_modules   course_modules[]
   module_media     module_media[]
-  users            users            @relation(fields: [author_id], references: [id])
-  modules          modules?         @relation("modulesTomodules", fields: [parent_module_id], references: [id])
-  other_modules    modules[]        @relation("modulesTomodules")
+  python_playgrounds python_playgrounds[]
+  users            users                @relation(fields: [author_id], references: [id])
+  modules          modules?             @relation("modulesTomodules", fields: [parent_module_id], references: [id])
+  other_modules    modules[]            @relation("modulesTomodules")
 
   @@unique([parent_module_id, sort_order])
   @@index([author_id])
@@ -108,21 +109,64 @@ model sessions {
   users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
+model python_playgrounds {
+  id           String                  @id @default(cuid())
+  title        String
+  description  String?
+  code         String
+  author_id    String
+  module_id    String?
+  is_template  Boolean                 @default(false)
+  packages     String[]                @default([])
+  settings     Json?
+  status       String                  @default("draft")
+  created_at   DateTime                @default(now())
+  updated_at   DateTime                @updatedAt
+  users        users                   @relation(fields: [author_id], references: [id])
+  modules      modules?                @relation(fields: [module_id], references: [id], onDelete: SetNull)
+  playground_executions playground_executions[]
+
+  @@index([author_id])
+  @@index([module_id])
+  @@index([is_template])
+  @@index([status])
+}
+
+model playground_executions {
+  id           String             @id @default(cuid())
+  playground_id String
+  code         String
+  output       String?
+  error        String?
+  execution_time Float
+  packages_used String[]         @default([])
+  executed_by  String?
+  created_at   DateTime          @default(now())
+  playgrounds  python_playgrounds @relation(fields: [playground_id], references: [id], onDelete: Cascade)
+  users        users?            @relation(fields: [executed_by], references: [id], onDelete: SetNull)
+
+  @@index([playground_id])
+  @@index([executed_by])
+  @@index([created_at])
+}
+
 model users {
-  id                     String        @id
-  email                  String        @unique
+  id                     String                  @id
+  email                  String                  @unique
   password_hash          String
   name                   String
-  role                   String        @default("faculty")
-  email_verified         Boolean       @default(false)
+  role                   String                  @default("faculty")
+  email_verified         Boolean                 @default(false)
   email_verified_at      DateTime?
-  email_verification_token String?     @unique
-  password_reset_token   String?       @unique
+  email_verification_token String?               @unique
+  password_reset_token   String?                 @unique
   password_reset_expires DateTime?
-  created_at             DateTime      @default(now())
-  updated_at             DateTime      @updatedAt
+  created_at             DateTime                @default(now())
+  updated_at             DateTime                @updatedAt
   courses                courses[]
   media_files            media_files[]
   modules                modules[]
   sessions               sessions[]
+  python_playgrounds     python_playgrounds[]
+  playground_executions  playground_executions[]
 }

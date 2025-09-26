@@ -34,9 +34,12 @@ import {
   Type,
   FileText,
   Upload,
-  X
+  X,
+  Play,
+  Terminal
 } from 'lucide-react'
 import { MediaUpload } from '@/components/ui/media-upload'
+import { PythonPlaygroundExtension, insertPythonPlayground } from './python-playground-extension'
 
 interface NeuralRichTextEditorProps {
   content?: string
@@ -89,6 +92,7 @@ export function NeuralRichTextEditor({
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
+      PythonPlaygroundExtension,
     ],
     content,
     immediatelyRender: false,
@@ -164,6 +168,12 @@ export function NeuralRichTextEditor({
     const url = window.prompt('Enter image URL:')
     if (url && editor) {
       editor.chain().focus().setImage({ src: url }).run()
+    }
+  }, [editor])
+
+  const addPythonPlayground = useCallback(() => {
+    if (editor) {
+      insertPythonPlayground(editor)
     }
   }, [editor])
 
@@ -314,6 +324,7 @@ export function NeuralRichTextEditor({
               variant="ghost"
               size="sm"
               onClick={addLink}
+              title="Add Link"
             >
               <LinkIcon className="h-4 w-4" />
             </NeuralButton>
@@ -321,8 +332,17 @@ export function NeuralRichTextEditor({
               variant="ghost"
               size="sm"
               onClick={addImage}
+              title="Add Image"
             >
               <ImageIcon className="h-4 w-4" />
+            </NeuralButton>
+            <NeuralButton
+              variant="ghost"
+              size="sm"
+              onClick={addPythonPlayground}
+              title="Add Python Playground"
+            >
+              <Terminal className="h-4 w-4" />
             </NeuralButton>
           </div>
 
