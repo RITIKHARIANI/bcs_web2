@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { CourseViewer } from "@/components/public/course-viewer";
-import { PublicLayout } from "@/components/layouts/app-layout";
-import { prisma } from '@/lib/db';
-import { withDatabaseRetry } from '@/lib/retry';
+import { CourseViewer } from "../../../components/public/course-viewer";
+import { PublicLayout } from "../../../components/layouts/app-layout";
+import { prisma } from '../../../lib/db';
+import { withDatabaseRetry } from '../../../lib/retry';
 
 async function getCourse(slug: string) {
   try {
