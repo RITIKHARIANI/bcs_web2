@@ -17,10 +17,10 @@ import ReactFlow, {
   MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { withDatabaseRetry } from '@/lib/retry';
-import { Card, CardContent } from '@/components/ui/card';
+import { withDatabaseRetry } from '../../lib/retry';
+import { Card, CardContent } from '../ui/card';
 import { Network, RefreshCw, AlertCircle } from 'lucide-react';
-import { NeuralButton } from '@/components/ui/neural-button';
+import { NeuralButton } from '../ui/neural-button';
 
 interface CourseData {
   id: string;

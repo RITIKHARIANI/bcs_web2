@@ -3,12 +3,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { NeuralButton } from '@/components/ui/neural-button'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { Loading } from '@/components/ui/loading'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Badge } from '../ui/badge'
+import { NeuralButton } from '../ui/neural-button'
+import { Input } from '../ui/input'
+import { Separator } from '../ui/separator'
+import { Loading } from '../ui/loading'
 import { 
   ArrowLeft, 
   BookOpen, 

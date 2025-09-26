@@ -13,10 +13,10 @@ import {
   ChevronRight,
   ChevronLeft
 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { NeuralButton } from '@/components/ui/neural-button'
-import { Separator } from '@/components/ui/separator'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Badge } from '../ui/badge'
+import { NeuralButton } from '../ui/neural-button'
+import { Separator } from '../ui/separator'
 
 interface StandaloneModuleProps {
   module: {

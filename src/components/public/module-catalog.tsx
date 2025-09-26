@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { NeuralButton } from '@/components/ui/neural-button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Input } from '../ui/input'
+import { Badge } from '../ui/badge'
+import { NeuralButton } from '../ui/neural-button'
 import { 
   Search, 
   BookOpen, 
