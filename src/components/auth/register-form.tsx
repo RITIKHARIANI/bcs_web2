@@ -88,9 +88,17 @@ export function RegisterForm() {
       }
 
       setSuccess(true);
-      setTimeout(() => {
-        router.push("/auth/login?message=Registration successful! Please sign in.");
-      }, 2000);
+      
+      // Check if email verification is required
+      if (data.requiresVerification) {
+        setTimeout(() => {
+          router.push("/auth/login?message=Registration successful! Please check your email to verify your account before signing in.");
+        }, 3000);
+      } else {
+        setTimeout(() => {
+          router.push("/auth/login?message=Registration successful! You can now sign in.");
+        }, 2000);
+      }
 
     } catch (error) {
       setError(error instanceof Error ? error.message : "Registration failed");
@@ -110,7 +118,7 @@ export function RegisterForm() {
                 Registration Successful!
               </CardTitle>
               <CardDescription className="text-center">
-                Your faculty account has been created. Redirecting to login...
+                Your faculty account has been created. Please check your email to verify your account before signing in. Redirecting...
               </CardDescription>
             </CardHeader>
           </Card>

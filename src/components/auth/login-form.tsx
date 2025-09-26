@@ -70,9 +70,22 @@ export function LoginForm() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {message && (
-                <Alert className="border-green-200 bg-green-50 text-green-800">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <AlertDescription>{message}</AlertDescription>
+                <Alert className={`${
+                  message.includes('verified') || message.includes('reset') || message.includes('success')
+                    ? 'border-green-200 bg-green-50 text-green-800'
+                    : message.includes('error') || message.includes('invalid') || message.includes('expired')
+                    ? 'border-red-200 bg-red-50 text-red-800'
+                    : 'border-blue-200 bg-blue-50 text-blue-800'
+                }`}>
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    {message === 'email_verified' && 'Your email has been verified successfully! You can now log in.'}
+                    {message === 'already_verified' && 'Your email is already verified. You can log in.'}
+                    {message === 'password_reset' && 'Your password has been reset successfully! You can now log in with your new password.'}
+                    {message === 'invalid_token' && 'Invalid or expired verification link. Please request a new one.'}
+                    {message === 'verification_failed' && 'Email verification failed. Please try again or request a new verification link.'}
+                    {!['email_verified', 'already_verified', 'password_reset', 'invalid_token', 'verification_failed'].includes(message) && message}
+                  </AlertDescription>
                 </Alert>
               )}
 
