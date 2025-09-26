@@ -1,5 +1,5 @@
-import { ModuleCatalog } from "@/components/public/module-catalog";
-import { PublicLayout } from "@/components/layouts/app-layout";
+import { ModuleCatalog } from "../../components/public/module-catalog";
+import { PublicLayout } from "../../components/layouts/app-layout";
 
 export const metadata = {
   title: "Module Catalog - BCS Interactive Platform",

@@ -1,6 +1,6 @@
-import { auth } from "@/lib/auth/config";
+import { auth } from "../../../lib/auth/config";
 import { redirect } from "next/navigation";
-import { DatabaseDebugViewer } from "@/components/debug/database-debug-viewer";
+import { DatabaseDebugViewer } from "../../../components/debug/database-debug-viewer";
 
 export default async function DatabaseDebugPage() {
   const session = await auth();

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
-import { Providers } from "@/components/providers/providers";
+import { Providers } from "../components/providers/providers";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 

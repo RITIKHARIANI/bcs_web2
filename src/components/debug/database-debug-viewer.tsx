@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { NeuralButton } from '@/components/ui/neural-button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Badge } from '../ui/badge'
+import { Alert, AlertDescription } from '../ui/alert'
+import { NeuralButton } from '../ui/neural-button'
 import { 
   Database, 
   RefreshCw, 

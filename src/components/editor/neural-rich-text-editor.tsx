@@ -7,9 +7,9 @@ import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
 import { useCallback, useEffect, useState, useRef } from 'react'
-import { NeuralButton } from '@/components/ui/neural-button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { NeuralButton } from '../ui/neural-button'
+import { Card, CardContent } from '../ui/card'
+import { Separator } from '../ui/separator'
 import { toast } from 'sonner'
 import { 
   Bold, 

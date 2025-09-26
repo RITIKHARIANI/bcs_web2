@@ -3,14 +3,14 @@
 import React, { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { NeuralButton } from '@/components/ui/neural-button'
-import { withFetchRetry } from '@/lib/retry'
+import { NeuralButton } from '../ui/neural-button'
+import { withFetchRetry } from '../../lib/retry'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Input } from '../ui/input'
+import { Badge } from '../ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { Separator } from '../ui/separator'
 import { 
   Plus, 
   Search, 
