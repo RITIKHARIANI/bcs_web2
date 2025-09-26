@@ -124,7 +124,8 @@ const saveFileToS3 = async (file: File): Promise<{ url: string; path: string }> 
 
   try {
     // Dynamic import to avoid bundle bloat if not using S3
-    const awsSdk = await import('@aws-sdk/client-s3' as any).catch((err: Error) => {
+    const awsSdkPath = '@aws-sdk/client-s3';
+    const awsSdk = await import(awsSdkPath).catch((err: Error) => {
       console.warn('AWS SDK not available:', err.message);
       throw new Error('AWS SDK not installed. Run: npm install @aws-sdk/client-s3');
     });
@@ -168,7 +169,8 @@ const saveFileToCloudinary = async (file: File): Promise<{ url: string; path: st
 
   try {
     // Dynamic import to avoid bundle bloat if not using Cloudinary
-    const cloudinary = await import('cloudinary' as any).catch((err: Error) => {
+    const cloudinaryPath = 'cloudinary';
+    const cloudinary = await import(cloudinaryPath).catch((err: Error) => {
       console.warn('Cloudinary SDK not available:', err.message);
       throw new Error('Cloudinary SDK not installed. Run: npm install cloudinary');
     });
@@ -204,7 +206,8 @@ const saveFileToVercelBlob = async (file: File): Promise<{ url: string; path: st
 
   try {
     // Dynamic import to avoid bundle bloat if not using Vercel Blob
-    const vercelBlob = await import('@vercel/blob' as any).catch((err: Error) => {
+    const vercelBlobPath = '@vercel/blob';
+    const vercelBlob = await import(vercelBlobPath).catch((err: Error) => {
       console.warn('Vercel Blob SDK not available:', err.message);
       throw new Error('Vercel Blob SDK not installed. Run: npm install @vercel/blob');
     });
@@ -232,7 +235,8 @@ const saveFileToSupabase = async (file: File): Promise<{ url: string; path: stri
 
   try {
     // Dynamic import to avoid bundle bloat if not using Supabase
-    const supabase = await import('@supabase/supabase-js').catch((err: Error) => {
+    const supabasePath = '@supabase/supabase-js';
+    const supabase = await import(supabasePath).catch((err: Error) => {
       console.warn('Supabase SDK not available:', err.message);
       throw new Error('Supabase SDK not installed. Run: npm install @supabase/supabase-js');
     });

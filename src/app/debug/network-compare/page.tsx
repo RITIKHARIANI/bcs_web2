@@ -101,7 +101,7 @@ function NetworkCompareContent() {
       .catch(err => {
         console.error('Failed to load network data:', err);
       });
-  }, []);
+  }, [setNodes, setEdges]);
 
   return (
     <div className="h-screen bg-background">

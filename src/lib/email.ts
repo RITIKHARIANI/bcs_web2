@@ -199,4 +199,5 @@ export const emailTemplates = {
   })
 };
 
-export default { generateToken, hashToken, sendEmail, emailTemplates };
+const emailUtils = { generateToken, hashToken, sendEmail, emailTemplates };
+export default emailUtils;
