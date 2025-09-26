@@ -160,8 +160,34 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // Experimental features for production
+  // Output file tracing to reduce serverless function size
   experimental: {
+    // Enable optimized package imports
+    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
+    
+    // Output file tracing (moved to experimental)
+    outputFileTracingExcludes: {
+      // Exclude large files from all API routes
+      '*': [
+        'node_modules/@swc/core-linux-x64-gnu',
+        'node_modules/@swc/core-linux-x64-musl', 
+        'node_modules/@esbuild/**',
+        'node_modules/webpack/**',
+        'node_modules/@webassemblyjs/**',
+        'node_modules/caniuse-lite/**',
+      ],
+      // Specifically for media upload API
+      '/api/media/upload': [
+        'node_modules/@aws-sdk/**',
+        'node_modules/cloudinary/**',
+        'node_modules/@vercel/blob/**', 
+        'src/lib/storage.ts', // Use storage-simple instead
+        'docs/**',
+        'scripts/**',
+        '.next/cache/**',
+      ],
+    },
+    
     // Note: optimizeCss removed due to critters dependency issues
     // Can be re-enabled once the issue is resolved
   },

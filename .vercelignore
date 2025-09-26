@@ -1,0 +1,107 @@
+# Vercel ignore file to reduce deployment size
+
+# ========================================
+# CRITICAL: Exclude large build artifacts
+# ========================================
+.next/cache/
+.next/cache/webpack/
+.turbo/
+node_modules/.cache/
+
+# ========================================
+# Development files
+# ========================================
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.example
+
+# Debug and test files
+debug-*.sql
+debug-*.js
+src/app/debug/
+test-*.html
+__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# ========================================
+# Documentation and guides
+# ========================================
+docs/
+*.md
+README.md
+professor-handover-guide.md
+SETUP_GUIDE.md
+supabase-deployment-guide.md
+vercel-deployment.md
+AI_Validation_Guide.md
+Application_Development_Prompt.md
+BCS_Interactive_Platform_Project_Plan.md
+Complete_Prompting_Sequence.md
+Development_Guide.md
+Educational_Platform_Requirements.md
+Phase_1_Scope.md
+Tasks/
+
+# ========================================
+# Heavy dependencies not needed in serverless
+# ========================================
+# TypeScript (already compiled)
+node_modules/typescript/
+node_modules/@types/
+
+# ESLint and dev tools
+node_modules/eslint/
+node_modules/@eslint/
+node_modules/prettier/
+
+# Build tools (heavy and not needed at runtime)
+node_modules/@swc/
+node_modules/@esbuild/
+node_modules/webpack/
+node_modules/@webassemblyjs/
+node_modules/terser/
+node_modules/caniuse-lite/
+
+# Optional cloud storage packages (using simple local storage)
+node_modules/@aws-sdk/
+node_modules/cloudinary/
+node_modules/@vercel/blob/
+
+# ========================================
+# Development scripts and configs
+# ========================================
+scripts/
+.git/
+.gitignore
+tsconfig.json
+tailwind.config.ts
+eslint.config.js
+postcss.config.js
+
+# ========================================
+# Database files not needed in production
+# ========================================
+database_backup.sql
+prisma/migrations/
+*.sqlite
+*.db
+
+# ========================================
+# Large original storage file (using simplified version)
+# ========================================
+src/lib/storage.ts
+
+# ========================================
+# Logs and temporary files
+# ========================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+*.tsbuildinfo

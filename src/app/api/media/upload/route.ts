@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/config';
-import { uploadFile, validateFile } from '@/lib/storage';
+import { uploadFile, validateFile } from '@/lib/storage-simple';
 import { prisma } from '@/lib/db';
+
+// Use Edge Runtime for smaller bundle size - DISABLED for now due to file system limitations
+// export const runtime = 'edge';
+export const runtime = 'nodejs';
+export const maxDuration = 60; // 60 seconds for file uploads
 
 export const config = {
   api: {
