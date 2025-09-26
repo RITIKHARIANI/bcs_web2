@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/config'
-import { prisma } from '@/lib/db'
-import { withDatabaseRetry } from '@/lib/retry'
+import { auth } from '../../../lib/auth/config'
+import { prisma } from '../../../lib/db'
+import { withDatabaseRetry } from '../../../lib/retry'
 import { z } from 'zod'
 
 const createCourseSchema = z.object({

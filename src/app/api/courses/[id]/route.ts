@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/config'
-import { prisma } from '@/lib/db'
+import { auth } from '../../../../lib/auth/config'
+import { prisma } from '../../../../lib/db'
 import { z } from 'zod'
 
 const updateCourseSchema = z.object({

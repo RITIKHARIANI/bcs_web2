@@ -6,8 +6,8 @@ export async function GET(request: NextRequest) {
     
     // Skip the fetch call and directly query the API logic to avoid auth issues
     // Import the same logic used by the public network API
-    const { prisma } = require('@/lib/db')
-    const { withDatabaseRetry } = require('@/lib/retry')
+    const { prisma } = require('../../../../lib/db')
+    const { withDatabaseRetry } = require('../../../../lib/retry')
     
     console.log('Directly querying database for network data...')
     
