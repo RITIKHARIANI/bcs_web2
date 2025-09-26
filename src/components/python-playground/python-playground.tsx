@@ -2,13 +2,13 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { PythonCodeEditor } from './python-code-editor';
-import { pythonEngine, PythonExecutionResult } from '@/lib/python-engine';
-import { NeuralButton } from '@/components/ui/neural-button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { pythonEngine, PythonExecutionResult } from '../../lib/python-engine';
+import { NeuralButton } from '../ui/neural-button';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Alert, AlertDescription } from '../ui/alert';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import {
   Play,
   Square,
@@ -99,8 +99,8 @@ print(f"Square root of 16 is {math.sqrt(16)}")
       }
 
       try {
-        // Use dynamic import to avoid bundling issues during build
-        import('@/lib/python-engine').then(module => {
+    // Use dynamic import to avoid bundling issues during build
+    import('../../lib/python-engine').then(module => {
           const packages = module.detectPythonPackages(code);
           setDetectedPackages(packages);
         }).catch(error => {

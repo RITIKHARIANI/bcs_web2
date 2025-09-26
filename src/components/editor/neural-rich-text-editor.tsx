@@ -38,7 +38,7 @@ import {
   Play,
   Terminal
 } from 'lucide-react'
-import { MediaUpload } from '@/components/ui/media-upload'
+import { MediaUpload } from '../ui/media-upload'
 import { PythonPlaygroundExtension, insertPythonPlayground } from './python-playground-extension'
 
 interface NeuralRichTextEditorProps {

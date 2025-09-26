@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { PythonPlayground } from '@/components/python-playground/python-playground';
-import { NeuralButton } from '@/components/ui/neural-button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { PythonPlayground } from '../../../components/python-playground/python-playground';
+import { NeuralButton } from '../../../components/ui/neural-button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Badge } from '../../../components/ui/badge';
+import { Input } from '../../../components/ui/input';
 import { 
   Plus,
   Search,
