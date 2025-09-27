@@ -4,12 +4,12 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { NeuralButton } from '@/components/ui/neural-button'
+import { NeuralButton } from '../ui/neural-button'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Badge } from '../ui/badge'
+import { Separator } from '../ui/separator'
+import { Alert, AlertDescription } from '../ui/alert'
 import { 
   ArrowLeft, 
   Edit, 

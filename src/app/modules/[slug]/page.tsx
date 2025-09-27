@@ -1,9 +1,9 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { prisma } from '@/lib/db'
-import { StandaloneModuleViewer } from '@/components/public/standalone-module-viewer'
-import { PublicLayout } from '@/components/layouts/app-layout'
+import { prisma } from '../../../lib/db'
+import { StandaloneModuleViewer } from '../../../components/public/standalone-module-viewer'
+import { PublicLayout } from '../../../components/layouts/app-layout'
 
 interface ModulePageProps {
   params: Promise<{ slug: string }>

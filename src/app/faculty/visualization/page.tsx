@@ -1,8 +1,8 @@
-import { auth } from "@/lib/auth/config";
+import { auth } from "../../../lib/auth/config";
 import { redirect } from "next/navigation";
-import { NetworkVisualization } from "@/components/faculty/network-visualization";
-import { IntegratedGraphSystem } from "@/components/visualization/integrated-graph-system";
-import { AuthenticatedLayout } from "@/components/layouts/app-layout";
+import { NetworkVisualization } from "../../../components/faculty/network-visualization";
+import { IntegratedGraphSystem } from "../../../components/visualization/integrated-graph-system";
+import { AuthenticatedLayout } from "../../../components/layouts/app-layout";
 
 export const metadata = {
   title: "Content Structure Visualization - BCS Faculty",

@@ -1,6 +1,6 @@
-import { auth } from "@/lib/auth/config";
+import { auth } from "../../../../../lib/auth/config";
 import { redirect } from "next/navigation";
-import { EditModuleForm } from "@/components/faculty/edit-module-form";
+import { EditModuleForm } from "../../../../../components/faculty/edit-module-form";
 
 export default async function EditModulePage({
   params,

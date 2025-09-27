@@ -1,5 +1,5 @@
-import { PublicLayout } from "@/components/layouts/app-layout";
-import { PublicNetworkVisualization } from "@/components/public/public-network-visualization";
+import { PublicLayout } from "../../components/layouts/app-layout";
+import { PublicNetworkVisualization } from "../../components/public/public-network-visualization";
 
 export const metadata = {
   title: "Course Network Visualization - Brain & Cognitive Sciences",

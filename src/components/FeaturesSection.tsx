@@ -1,5 +1,5 @@
 import { Brain, BookOpen, Users, Zap, Target, Layers } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 
 const features = [
   {

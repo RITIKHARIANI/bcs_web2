@@ -2,8 +2,8 @@
 
 import React from "react";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
-import { NeuralButton } from "@/components/ui/neural-button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { NeuralButton } from "../ui/neural-button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
 interface ErrorBoundaryState {
   hasError: boolean;

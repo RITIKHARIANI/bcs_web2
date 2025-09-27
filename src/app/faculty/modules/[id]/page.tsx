@@ -1,6 +1,6 @@
-import { auth } from "@/lib/auth/config";
+import { auth } from "../../../../lib/auth/config";
 import { redirect } from "next/navigation";
-import { ModuleViewer } from "@/components/faculty/module-viewer";
+import { ModuleViewer } from "../../../../components/faculty/module-viewer";
 
 export default async function ModuleViewPage({
   params,

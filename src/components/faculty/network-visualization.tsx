@@ -15,9 +15,9 @@ import ReactFlow, {
   Position,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { NeuralButton } from '@/components/ui/neural-button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Badge } from '../ui/badge'
+import { NeuralButton } from '../ui/neural-button'
 import { 
   BookOpen, 
   Brain, 
@@ -31,7 +31,7 @@ import {
   Filter,
   Search
 } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Input } from '../ui/input'
 import Link from 'next/link'
 
 // Custom Node Components

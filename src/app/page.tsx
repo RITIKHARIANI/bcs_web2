@@ -1,8 +1,8 @@
-import { Header } from "@/components/Header";
-import { Hero } from "@/components/Hero";
-import { CoursesSection } from "@/components/CoursesSection";
-import { FeaturesSection } from "@/components/FeaturesSection";
-import { Footer } from "@/components/Footer";
+import { Header } from "../components/Header";
+import { Hero } from "../components/Hero";
+import { CoursesSection } from "../components/CoursesSection";
+import { FeaturesSection } from "../components/FeaturesSection";
+import { Footer } from "../components/Footer";
 
 export default function HomePage() {
   return (
