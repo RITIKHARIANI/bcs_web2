@@ -232,12 +232,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ courses })
   } catch (error) {
     console.error('=== DETAILED ERROR ANALYSIS ===')
+    const errorObj = error as Error & { code?: string; cause?: unknown }
     console.error('Error fetching courses - Full details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
-      cause: error.cause,
-      code: error.code || 'N/A'
+      message: errorObj.message,
+      stack: errorObj.stack,
+      name: errorObj.name,
+      cause: errorObj.cause,
+      code: errorObj.code || 'N/A'
     })
     
     // Log environment info (without sensitive data)
@@ -250,9 +251,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         error: 'Failed to fetch courses', 
-        errorType: error.name,
-        errorCode: error.code || 'UNKNOWN',
-        details: process.env.NODE_ENV === 'development' ? error.message : 'Check server logs for details'
+        errorType: errorObj.name,
+        errorCode: errorObj.code || 'UNKNOWN',
+        details: process.env.NODE_ENV === 'development' ? errorObj.message : 'Check server logs for details'
       },
       { status: 500 }
     )

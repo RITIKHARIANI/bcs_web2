@@ -45,12 +45,12 @@ export async function GET(request: NextRequest) {
     
     // Detailed analysis
     console.log('Courses with modules:')
-    data.courses?.forEach((course, idx) => {
+    data.courses?.forEach((course: any, idx: number) => {
       console.log(`  ${idx + 1}. ${course.title} (${course.id})`)
       console.log(`     Status: ${course.status}`)
       console.log(`     Modules: ${course.courseModules?.length || 0}`)
       
-      course.courseModules?.forEach((cm, cmIdx) => {
+      course.courseModules?.forEach((cm: any, cmIdx: number) => {
         console.log(`       ${cmIdx + 1}. ${cm.module?.title} (${cm.module?.id})`)
         console.log(`          Module Status: ${cm.module?.status}`)
         console.log(`          Parent: ${cm.module?.parentModuleId || 'ROOT'}`)
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     })
     
     console.log('All modules:')
-    data.modules?.forEach((module, idx) => {
+    data.modules?.forEach((module: any, idx: number) => {
       console.log(`  ${idx + 1}. ${module.title} (${module.id})`)
       console.log(`     Status: ${module.status}`)
       console.log(`     Parent: ${module.parentModuleId || 'ROOT'}`)
@@ -74,10 +74,10 @@ export async function GET(request: NextRequest) {
       analysis: {
         coursesFound: data.courses?.length || 0,
         modulesFound: data.modules?.length || 0,
-        coursesWithModules: data.courses?.filter(c => c.courseModules?.length > 0).length || 0,
-        totalCourseModuleRelationships: data.courses?.reduce((sum, c) => sum + (c.courseModules?.length || 0), 0) || 0,
-        rootModules: data.modules?.filter(m => !m.parentModuleId).length || 0,
-        childModules: data.modules?.filter(m => m.parentModuleId).length || 0,
+        coursesWithModules: data.courses?.filter((c: any) => c.courseModules?.length > 0).length || 0,
+        totalCourseModuleRelationships: data.courses?.reduce((sum: number, c: any) => sum + (c.courseModules?.length || 0), 0) || 0,
+        rootModules: data.modules?.filter((m: any) => !m.parentModuleId).length || 0,
+        childModules: data.modules?.filter((m: any) => m.parentModuleId).length || 0,
       }
     })
     

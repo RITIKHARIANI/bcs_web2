@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Try to get recent activity, but don't fail if this errors
-    let recentActivity = []
+    let recentActivity: any[] = []
     
     try {
       // Get recent modules (simplified query)

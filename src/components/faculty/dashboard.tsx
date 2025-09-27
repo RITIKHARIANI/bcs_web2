@@ -280,9 +280,9 @@ export function FacultyDashboard({ user }: FacultyDashboardProps) {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               Recent Activity
-              {dashboardData?.recentActivity.length > 0 && (
+              {(dashboardData?.recentActivity?.length || 0) > 0 && (
                 <Badge variant="outline">
-                  {dashboardData.recentActivity.length} items
+                  {dashboardData?.recentActivity?.length} items
                 </Badge>
               )}
             </CardTitle>
@@ -395,7 +395,7 @@ export function FacultyDashboard({ user }: FacultyDashboardProps) {
                   </div>
                 ))}
                 
-                {dashboardData?.recentActivity.length > 5 && (
+                {(dashboardData?.recentActivity?.length || 0) > 5 && (
                   <div className="text-center pt-4">
                     <Link href="/faculty/modules">
                       <NeuralButton variant="outline" size="sm">

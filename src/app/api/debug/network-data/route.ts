@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
     console.log(`Direct DB query results: ${modules.length} modules, ${courses.length} courses`)
     
     // Transform field names to match frontend expectations (same as API)
-    const transformedModules = modules.map(module => ({
+    const transformedModules = modules.map((module: any) => ({
       ...module,
       parentModuleId: module.parent_module_id,
       sortOrder: module.sort_order,
@@ -93,12 +93,12 @@ export async function GET(request: NextRequest) {
       author: module.users,
     }))
 
-    const transformedCourses = courses.map(course => ({
+    const transformedCourses = courses.map((course: any) => ({
       ...course,
       author: course.users,
       courseModules: course.course_modules
-        ?.filter(cm => cm.modules && cm.modules.status === 'published')
-        .map(cm => ({
+        ?.filter((cm: any) => cm.modules && cm.modules.status === 'published')
+        .map((cm: any) => ({
           ...cm,
           module: {
             ...cm.modules,
@@ -107,12 +107,12 @@ export async function GET(request: NextRequest) {
           }
         })) || [],
       _count: {
-        courseModules: course.course_modules?.filter(cm => cm.modules && cm.modules.status === 'published').length || 0,
+        courseModules: course.course_modules?.filter((cm: any) => cm.modules && cm.modules.status === 'published').length || 0,
       }
     }))
 
     // Filter out courses with no published modules
-    const coursesWithModules = transformedCourses.filter(course => course.courseModules.length > 0)
+    const coursesWithModules = transformedCourses.filter((course: any) => course.courseModules.length > 0)
     
     const data = {
       type: 'public',
@@ -121,8 +121,8 @@ export async function GET(request: NextRequest) {
       stats: {
         totalCourses: coursesWithModules.length,
         totalModules: transformedModules.length,
-        rootModules: transformedModules.filter(m => !m.parentModuleId).length,
-        subModules: transformedModules.filter(m => m.parentModuleId).length,
+        rootModules: transformedModules.filter((m: any) => !m.parentModuleId).length,
+        subModules: transformedModules.filter((m: any) => m.parentModuleId).length,
       }
     }
     
@@ -134,20 +134,20 @@ export async function GET(request: NextRequest) {
     
     // Analyze the data structure for edge creation
     const edgeAnalysis = {
-      courseModuleEdges: [],
-      parentChildEdges: [],
-      issues: [],
+      courseModuleEdges: [] as any[],
+      parentChildEdges: [] as any[],
+      issues: [] as any[],
     }
     
     // Check course-module relationships
     if (data.courses && Array.isArray(data.courses)) {
-      data.courses.forEach(course => {
+      data.courses.forEach((course: any) => {
         console.log(`Course: ${course.title} (${course.id})`)
         console.log(`  Status: ${course.status}`)
         console.log(`  Course modules:`, course.courseModules?.length || 0)
         
         if (course.courseModules && Array.isArray(course.courseModules)) {
-          course.courseModules.forEach(cm => {
+          course.courseModules.forEach((cm: any) => {
             console.log(`    Module: ${cm.module?.title} (${cm.module?.id})`)
             console.log(`    Module status: ${cm.module?.status}`)
             
@@ -173,13 +173,13 @@ export async function GET(request: NextRequest) {
     
     // Check parent-child module relationships
     if (data.modules && Array.isArray(data.modules)) {
-      data.modules.forEach(module => {
+      data.modules.forEach((module: any) => {
         console.log(`Module: ${module.title} (${module.id})`)
         console.log(`  Status: ${module.status}`)
         console.log(`  Parent: ${module.parentModuleId || 'ROOT'}`)
         
         if (module.parentModuleId) {
-          const parentExists = data.modules.find(m => m.id === module.parentModuleId)
+          const parentExists = data.modules.find((m: any) => m.id === module.parentModuleId)
           if (parentExists) {
             edgeAnalysis.parentChildEdges.push({
               parentId: module.parentModuleId,

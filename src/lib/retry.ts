@@ -97,7 +97,7 @@ export async function withRetry<T>(
       }
       
       console.warn(`Retry attempt ${attempt}/${opts.maxAttempts} failed:`, {
-        error: error?.message || error,
+        error: (error as Error)?.message || error,
         nextRetryIn: `${Math.round(delay)}ms`,
       });
       

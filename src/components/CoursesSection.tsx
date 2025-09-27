@@ -99,6 +99,7 @@ export function CoursesSection() {
               <CourseCard 
                 key={course.id} 
                 {...course}
+                description={course.description || ''} // Handle null description
                 level="Beginner" // Default level for now
                 rating={4.8} // Default rating for now
                 students={0} // Will be calculated later

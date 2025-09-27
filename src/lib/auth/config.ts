@@ -59,14 +59,14 @@ export const authConfig = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
         token.role = user.role
         token.emailVerified = user.emailVerified
       }
       return token
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token?: any }) {
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as string

@@ -84,6 +84,7 @@ export default async function ModulePage({ params }: ModulePageProps) {
   // Type cast the module data to ensure proper TypeScript types
   const moduleData = {
     ...foundModule,
+    content: foundModule.content || '', // Handle null content
     status: foundModule.status as 'draft' | 'published',
     createdAt: foundModule.created_at.toISOString(),
     updatedAt: foundModule.updated_at.toISOString(),

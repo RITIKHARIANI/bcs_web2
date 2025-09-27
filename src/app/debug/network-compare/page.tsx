@@ -39,7 +39,7 @@ function NetworkCompareContent() {
           setNetworkData(data.apiResponse);
           
           // Create nodes using THE SAME logic as network visualization
-          const courseNodes = data.apiResponse.courses.map((course, index) => ({
+          const courseNodes = data.apiResponse.courses.map((course: any, index: number) => ({
             id: `course-${course.id}`,
             type: 'default', // Use default instead of custom types
             position: { x: 100, y: 100 },
@@ -47,7 +47,7 @@ function NetworkCompareContent() {
             style: { background: '#3B82F6', color: 'white' }
           }));
 
-          const moduleNodes = data.apiResponse.modules.map((module, index) => ({
+          const moduleNodes = data.apiResponse.modules.map((module: any, index: number) => ({
             id: `module-${module.id}`,
             type: 'default', // Use default instead of custom types  
             position: { x: 400, y: 150 },
@@ -56,9 +56,9 @@ function NetworkCompareContent() {
           }));
 
           // Create edges using THE SAME logic as network visualization
-          const courseModuleEdges = [];
-          data.apiResponse.courses.forEach(course => {
-            (course.courseModules || []).forEach(cm => {
+          const courseModuleEdges: any[] = [];
+          data.apiResponse.courses.forEach((course: any) => {
+            (course.courseModules || []).forEach((cm: any) => {
               if (cm.module?.id) {
                 console.log(`Creating edge: course-${course.id} -> module-${cm.module.id}`);
                 courseModuleEdges.push({
@@ -87,10 +87,10 @@ function NetworkCompareContent() {
           console.log('Created edges:', courseModuleEdges);
           
           // Verify source/target exist
-          courseModuleEdges.forEach(edge => {
+          courseModuleEdges.forEach((edge: any) => {
             const allNodes = courseNodes.concat(moduleNodes);
-            const sourceExists = allNodes.find(n => n.id === edge.source);
-            const targetExists = allNodes.find(n => n.id === edge.target);
+            const sourceExists = allNodes.find((n: any) => n.id === edge.source);
+            const targetExists = allNodes.find((n: any) => n.id === edge.target);
             console.log(`Edge ${edge.id}: source ${sourceExists ? 'EXISTS' : 'MISSING'}, target ${targetExists ? 'EXISTS' : 'MISSING'}`);
           });
 
