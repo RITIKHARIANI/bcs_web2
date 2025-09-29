@@ -32,8 +32,11 @@ import {
   Redo,
   Save,
   Type,
-  FileText
+  FileText,
+  Upload,
+  X
 } from 'lucide-react'
+import { MediaUpload } from '@/components/ui/media-upload'
 
 interface NeuralRichTextEditorProps {
   content?: string
@@ -43,6 +46,7 @@ interface NeuralRichTextEditorProps {
   autoSave?: boolean
   autoSaveDelay?: number
   className?: string
+  moduleId?: string
 }
 
 export function NeuralRichTextEditor({
@@ -53,11 +57,13 @@ export function NeuralRichTextEditor({
   autoSave = true,
   autoSaveDelay = 2000,
   className = '',
+  moduleId
 }: NeuralRichTextEditorProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [wordCount, setWordCount] = useState(0)
   const [characterCount, setCharacterCount] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
+  const [showMediaUpload, setShowMediaUpload] = useState(false)
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const editor = useEditor({
@@ -140,6 +146,21 @@ export function NeuralRichTextEditor({
   }, [editor, onSave])
 
   const addImage = useCallback(() => {
+    setShowMediaUpload(true)
+  }, [])
+
+  const handleMediaSelect = useCallback((file: any) => {
+    if (file.mimeType.startsWith('image/')) {
+      editor?.chain().focus().setImage({
+        src: file.url,
+        alt: file.originalName,
+        title: file.originalName
+      }).run()
+    }
+    setShowMediaUpload(false)
+  }, [editor])
+
+  const addImageFromUrl = useCallback(() => {
     const url = window.prompt('Enter image URL:')
     if (url && editor) {
       editor.chain().focus().setImage({ src: url }).run()
@@ -300,8 +321,9 @@ export function NeuralRichTextEditor({
               variant="ghost"
               size="sm"
               onClick={addImage}
+              title="Add Image"
             >
-              <ImageIcon className="h-4 w-4" />
+              <Upload className="h-4 w-4" />
             </NeuralButton>
           </div>
 
@@ -379,6 +401,43 @@ export function NeuralRichTextEditor({
           </div>
         )}
       </div>
+
+      {/* Media Upload Dialog */}
+      {showMediaUpload && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Upload Media</h3>
+              <NeuralButton
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowMediaUpload(false)}
+              >
+                <X className="h-4 w-4" />
+              </NeuralButton>
+            </div>
+
+            <MediaUpload
+              onFileSelect={handleMediaSelect}
+              moduleId={moduleId}
+              maxFiles={1}
+              showPreview={true}
+              className="mb-4"
+            />
+
+            <div className="border-t pt-4">
+              <p className="text-sm text-muted-foreground mb-2">Or add image from URL:</p>
+              <NeuralButton
+                variant="outline"
+                onClick={addImageFromUrl}
+                className="w-full"
+              >
+                Add Image from URL
+              </NeuralButton>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   )
 }
