@@ -10,8 +10,6 @@ const BRAITENBERG_CODE = `# Braitenberg Vehicles - Web Version
 import random
 import math
 import time
-import js
-from pyodide import create_proxy
 
 # Global state for the simulation
 simulation_state = {
@@ -22,172 +20,112 @@ simulation_state = {
     'animation_id': None
 }
 
-class HeatSource:
-    def __init__(self, turtle, id_number, canvas_size):
-        self.turtle = turtle
-        self.id_number = id_number
-        self.canvas_size = canvas_size
-
-        # Configure heat source appearance
-        self.turtle.shape('circle')
-        self.turtle.color('orange', 'orange')
-        self.turtle.turtlesize(1.5)
-        self.turtle.penup()
-
-        # Place randomly
-        self.place()
-        self.turtle.showturtle()
-
-        # Enable dragging
-        self.turtle.ondrag(self.drag_heat_source)
-
-    def place(self):
-        max_location = self.canvas_size / 2 - 20
-        x = random.randint(-max_location, max_location)
-        y = random.randint(-max_location, max_location)
-        self.turtle.goto(x, y)
-
-    def drag_heat_source(self, x, y):
-        self.turtle.goto(x, y)
-
-class Vehicle:
-    def __init__(self, turtle, id_number, canvas_size):
-        self.speed_params = [20, 0.2, 6]
-        self.turn_parameters = [20]
-        self.turtle = turtle
-        self.id_number = id_number
-        self.canvas_size = canvas_size
-        self.max_location = canvas_size / 2 - 20
-
-        # Random vehicle type
-        self.type = random.choice(["crossed", "direct"])
-
-        # Configure appearance
-        self.turtle.shape('turtle')
-        self.turtle.turtlesize(1)
-        self.turtle.penup()
-
-        if self.type == 'crossed':
-            self.turtle.color('red', '#ffdddd')
-        else:
-            self.turtle.color('blue', '#ddddff')
-
-        # Place randomly
-        self.place()
-        self.turtle.showturtle()
-
-    def place(self):
-        x = random.randint(-self.max_location, self.max_location)
-        y = random.randint(-self.max_location, self.max_location)
-        self.turtle.goto(x, y)
-        self.turtle.setheading(random.randint(0, 360))
-
-    def move(self):
-        cumulative_speed = 0
-        cumulative_turn_amount = 0
-
-        for heat_source in simulation_state['heat_sources']:
-            # Calculate input from this heat source
-            input_distance = self.turtle.distance(heat_source.turtle.pos())
-            input_angle = self.turtle.heading() - self.turtle.towards(heat_source.turtle.pos())
-
-            # Simulate left and right sensors
-            sin_angle = math.sin(math.radians(input_angle))
-            left_sensor_distance = input_distance - sin_angle
-            right_sensor_distance = input_distance + sin_angle
-
-            # Compute speeds
-            left_speed, right_speed, combined_speed = self.compute_speed(
-                left_sensor_distance, right_sensor_distance
-            )
-
-            turn_amount = self.turn_parameters[0] * (right_speed - left_speed)
-            cumulative_speed += combined_speed
-            cumulative_turn_amount += turn_amount
-
-        # Handle complex numbers (shouldn't happen, but safety check)
-        if isinstance(cumulative_turn_amount, complex):
-            cumulative_turn_amount = 0
-
-        if cumulative_speed < 0:
-            cumulative_speed = 0
-
-        # Apply movement
-        self.turtle.right(cumulative_turn_amount)
-        self.turtle.forward(cumulative_speed)
-        self.check_border_collision()
-
-    def check_border_collision(self):
-        x, y = self.turtle.xcor(), self.turtle.ycor()
-
-        # Simple boundary handling - reverse direction when hitting walls
-        if abs(x) > self.max_location or abs(y) > self.max_location:
-            self.turtle.right(180)
-            # Move back into bounds
-            if abs(x) > self.max_location:
-                self.turtle.goto(
-                    self.max_location if x > 0 else -self.max_location,
-                    y
-                )
-            if abs(y) > self.max_location:
-                self.turtle.goto(
-                    x,
-                    self.max_location if y > 0 else -self.max_location
-                )
-
-    def compute_speed(self, left_distance, right_distance):
-        if self.type == 'crossed':
-            # Crossed connections - left sensor controls right motor
-            left_speed = (self.speed_params[0] / (right_distance ** self.speed_params[1])) - self.speed_params[2]
-            right_speed = (self.speed_params[0] / (left_distance ** self.speed_params[1])) - self.speed_params[2]
-        else:
-            # Direct connections - left sensor controls left motor
-            left_speed = (self.speed_params[0] / (left_distance ** self.speed_params[1])) - self.speed_params[2]
-            right_speed = (self.speed_params[0] / (right_distance ** self.speed_params[1])) - self.speed_params[2]
-
-        combined_speed = (left_speed + right_speed) / 2
-        return left_speed, right_speed, combined_speed
+# Utility functions for Braitenberg vehicle simulation
 
 def create_simulation():
     """Initialize the simulation with vehicles and heat sources"""
-    import web_turtle
+    print("Creating Braitenberg Vehicle Simulation...")
+    print("Note: This is a simplified simulation for demonstration.")
+    print("In the full implementation, this would create interactive graphics.")
 
     # Clear any existing simulation
     simulation_state['vehicles'] = []
     simulation_state['heat_sources'] = []
 
-    # Get the main turtle (we'll create separate turtles for each object)
-    main_turtle = web_turtle.create_turtle()
-    main_turtle.clear()
-
-    print("Creating Braitenberg Vehicle Simulation...")
-
-    # Create heat sources (we'll simulate multiple turtles using position tracking)
+    # Create heat sources with position data
     num_heat_sources = 3
     for i in range(num_heat_sources):
-        # For simplicity, we'll use the main turtle and track positions
-        # In a full implementation, we'd create separate turtle objects
-        heat_source = HeatSource(main_turtle, i, simulation_state['canvas_size'])
+        heat_source = {
+            'id': i,
+            'x': random.randint(-200, 200),
+            'y': random.randint(-150, 150),
+            'color': 'orange'
+        }
         simulation_state['heat_sources'].append(heat_source)
-        print(f"Created heat source {i+1}")
+        print(f"Created heat source {i+1} at ({heat_source['x']}, {heat_source['y']})")
 
-    # Create vehicles
+    # Create vehicles with initial positions
     num_vehicles = 3
     for i in range(num_vehicles):
-        vehicle = Vehicle(main_turtle, i, simulation_state['canvas_size'])
+        vehicle_type = random.choice(["crossed", "direct"])
+        vehicle = {
+            'id': i,
+            'x': random.randint(-200, 200),
+            'y': random.randint(-150, 150),
+            'heading': random.randint(0, 360),
+            'type': vehicle_type,
+            'color': 'red' if vehicle_type == 'crossed' else 'blue',
+            'speed_params': [20, 0.2, 6],
+            'turn_params': [20]
+        }
         simulation_state['vehicles'].append(vehicle)
-        print(f"Created vehicle {i+1} (type: {vehicle.type})")
+        print(f"Created vehicle {i+1} (type: {vehicle['type']}) at ({vehicle['x']}, {vehicle['y']})")
 
     print("\\nSimulation created!")
     print("- Red vehicles have CROSSED connections (approach behavior)")
     print("- Blue vehicles have DIRECT connections (avoidance behavior)")
-    print("- Orange circles are heat sources (drag them around!)")
+    print("- Orange circles are heat sources")
     print("\\nRun start_simulation() to begin!")
+
+def distance(x1, y1, x2, y2):
+    """Calculate distance between two points"""
+    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+def move_vehicle(vehicle):
+    """Move a single vehicle based on Braitenberg vehicle logic"""
+    cumulative_speed = 0
+    cumulative_turn = 0
+
+    for heat_source in simulation_state['heat_sources']:
+        # Calculate distance to heat source
+        dist = distance(vehicle['x'], vehicle['y'], heat_source['x'], heat_source['y'])
+
+        # Simulate left and right sensors
+        left_distance = dist + random.uniform(-5, 5)  # Add sensor noise
+        right_distance = dist + random.uniform(-5, 5)
+
+        # Calculate motor speeds based on vehicle type
+        if vehicle['type'] == 'crossed':
+            # Crossed connections: left sensor -> right motor
+            left_speed = max(0, (vehicle['speed_params'][0] / max(1, right_distance ** vehicle['speed_params'][1])) - vehicle['speed_params'][2])
+            right_speed = max(0, (vehicle['speed_params'][0] / max(1, left_distance ** vehicle['speed_params'][1])) - vehicle['speed_params'][2])
+        else:
+            # Direct connections: left sensor -> left motor
+            left_speed = max(0, (vehicle['speed_params'][0] / max(1, left_distance ** vehicle['speed_params'][1])) - vehicle['speed_params'][2])
+            right_speed = max(0, (vehicle['speed_params'][0] / max(1, right_distance ** vehicle['speed_params'][1])) - vehicle['speed_params'][2])
+
+        combined_speed = (left_speed + right_speed) / 2
+        turn_amount = vehicle['turn_params'][0] * (right_speed - left_speed)
+
+        cumulative_speed += combined_speed
+        cumulative_turn += turn_amount
+
+    # Update vehicle position and heading
+    vehicle['heading'] = (vehicle['heading'] + cumulative_turn) % 360
+
+    # Move forward
+    radians = math.radians(vehicle['heading'])
+    vehicle['x'] += cumulative_speed * math.cos(radians)
+    vehicle['y'] += cumulative_speed * math.sin(radians)
+
+    # Keep within bounds
+    vehicle['x'] = max(-250, min(250, vehicle['x']))
+    vehicle['y'] = max(-200, min(200, vehicle['y']))
 
 def move_all_vehicles():
     """Move all vehicles one step"""
     for vehicle in simulation_state['vehicles']:
-        vehicle.move()
+        move_vehicle(vehicle)
+
+def print_simulation_state():
+    """Print current positions of all vehicles and heat sources"""
+    print("\\n=== Simulation State ===")
+    for i, vehicle in enumerate(simulation_state['vehicles']):
+        print(f"Vehicle {i+1} ({vehicle['type']}): x={vehicle['x']:.1f}, y={vehicle['y']:.1f}, heading={vehicle['heading']:.1f}°")
+
+    for i, heat_source in enumerate(simulation_state['heat_sources']):
+        print(f"Heat Source {i+1}: x={heat_source['x']}, y={heat_source['y']}")
+    print("========================\\n")
 
 def start_simulation():
     """Start the simulation"""
@@ -196,17 +134,25 @@ def start_simulation():
         return
 
     simulation_state['running'] = True
-    print("Simulation started! Vehicles will move towards or away from heat sources.")
-    print("Try dragging the orange heat sources around!")
+    print("Simulation started! Running 20 steps...")
+    print("Watch how vehicles move based on their connections:")
 
-    # Run a few simulation steps
-    for step in range(50):  # Limited steps to avoid infinite loops
+    # Run simulation steps
+    for step in range(20):
         if not simulation_state['running']:
             break
-        move_all_vehicles()
-        print(f"Step {step + 1}/50", end='\\r')
 
-    print("\\nSimulation complete!")
+        move_all_vehicles()
+
+        if step % 5 == 0:  # Print state every 5 steps
+            print(f"\\nStep {step + 1}:")
+            print_simulation_state()
+
+    print("Simulation complete!")
+    print("\\nTry:")
+    print("- print_simulation_state() to see current positions")
+    print("- move_all_vehicles() to advance one step")
+    print("- reset_simulation() to restart")
 
 def stop_simulation():
     """Stop the simulation"""
@@ -216,10 +162,7 @@ def stop_simulation():
 def reset_simulation():
     """Reset the simulation"""
     stop_simulation()
-    for vehicle in simulation_state['vehicles']:
-        vehicle.place()
-    for heat_source in simulation_state['heat_sources']:
-        heat_source.place()
+    create_simulation()
     print("Simulation reset!")
 
 # Create the simulation when the code runs
@@ -271,11 +214,9 @@ export function BraitenbergDemo() {
       <PythonPlayground
         initialCode={BRAITENBERG_CODE}
         title="Braitenberg Vehicles Simulation"
-        description="Interactive demonstration of autonomous agents with emergent behavior"
+        description="Computational demonstration of autonomous agents with emergent behavior"
         height={500}
-        showCanvas={true}
-        canvasWidth={600}
-        canvasHeight={500}
+        showCanvas={false}
       />
 
       <div className="prose max-w-none">

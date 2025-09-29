@@ -33,64 +33,69 @@ print(f"Uppercase: {text.upper()}")
 print(f"Reversed: {text[::-1]}")
 print(f"Words: {text.split()}")`;
 
-  const graphicsExampleCode = `# Graphics and Turtle Examples
+  const graphicsExampleCode = `# Graphics and Visual Examples
 
-import web_turtle
+# Note: Full turtle graphics are still being integrated
+# For now, let's create some visual patterns with text and math
+
 import random
 import math
 
-# Get turtle instance
-turtle = web_turtle.create_turtle()
-turtle.clear()
+print("Creating Visual Patterns with Math!")
+print("=====================================")
 
-print("Drawing colorful patterns...")
+# 1. ASCII Art Spiral Pattern
+print("\\n1. ASCII Spiral Pattern:")
+size = 10
+for i in range(size):
+    spaces = " " * i
+    stars = "*" * (size - i)
+    print(f"{spaces}{stars}")
 
-# 1. Colorful spiral
-turtle.penup()
-turtle.goto(0, 0)
-turtle.pendown()
+print("\\n" + " " * (size-1) + "*")  # Center point
 
-colors = ['red', 'blue', 'green', 'purple', 'orange']
-for i in range(100):
-    turtle.color(colors[i % len(colors)])
-    turtle.forward(i * 2)
-    turtle.right(91)
+# 2. Mathematical Wave Pattern
+print("\\n2. Mathematical Wave:")
+width = 50
+for y in range(15):
+    line = ""
+    for x in range(width):
+        # Create a sine wave pattern
+        value = math.sin(x * 0.3) * 5 + 7
+        if abs(y - value) < 1:
+            line += "*"
+        else:
+            line += " "
+    print(line)
 
-print("Spiral complete!")
+# 3. Random Pattern Generation
+print("\\n3. Random Pattern:")
+patterns = ['●', '○', '■', '□', '♦', '♢']
+for row in range(8):
+    line = ""
+    for col in range(20):
+        if random.random() > 0.7:
+            line += random.choice(patterns)
+        else:
+            line += " "
+    print(line)
 
-# 2. Draw a house
-turtle.penup()
-turtle.goto(-150, -50)
-turtle.pendown()
-turtle.color('brown', 'brown')
+# 4. Geometric Calculations
+print("\\n4. Geometric Calculations:")
+print("Circle areas for different radii:")
+for r in range(1, 6):
+    area = math.pi * r * r
+    print(f"Radius {r}: Area = {area:.2f}")
 
-# House base
-for _ in range(4):
-    turtle.forward(100)
-    turtle.right(90)
+print("\\n5. Coordinate System Demo:")
+print("Plotting points in a coordinate system:")
+points = [(0, 0), (3, 4), (-2, 1), (5, -3), (-4, -2)]
+for i, (x, y) in enumerate(points):
+    distance = math.sqrt(x*x + y*y)
+    print(f"Point {i+1}: ({x}, {y}) - Distance from origin: {distance:.2f}")
 
-# Roof
-turtle.color('red', 'red')
-turtle.goto(-150, 50)
-turtle.goto(-100, 100)
-turtle.goto(-50, 50)
-turtle.goto(-150, 50)
-
-print("House drawn!")
-
-# 3. Random dots
-turtle.penup()
-for _ in range(20):
-    x = random.randint(-200, 200)
-    y = random.randint(-150, 150)
-    turtle.goto(x, y)
-    turtle.color(random.choice(colors))
-    turtle.begin_fill()
-    turtle.circle(5)
-    turtle.end_fill()
-
-print("Random dots scattered!")
-print("\\nTry modifying the code to create your own patterns!")`;
+print("\\nTry modifying the patterns above!")
+print("You can change the math functions, ranges, or characters used.")`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neural-light via-background to-cognition-teal/20">
@@ -206,12 +211,10 @@ print("\\nTry modifying the code to create your own patterns!")`;
 
             <PythonPlayground
               initialCode={graphicsExampleCode}
-              title="Turtle Graphics Examples"
-              description="Create interactive visual programs with turtle graphics"
+              title="Visual Patterns Examples"
+              description="Create visual patterns and mathematical graphics with Python"
               height={500}
-              showCanvas={true}
-              canvasWidth={600}
-              canvasHeight={400}
+              showCanvas={false}
             />
           </TabsContent>
 
