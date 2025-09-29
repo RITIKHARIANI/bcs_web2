@@ -119,8 +119,8 @@ export function PythonPlayground({
     try {
       const pyodide = (window as any).pyodide;
 
-      // Clear canvas if turtle graphics are being used
-      if (webTurtle && code.includes('turtle') || code.includes('WebTurtle')) {
+      // Clear canvas if turtle graphics are being used and canvas is available
+      if (webTurtle && showCanvas && (code.includes('turtle') || code.includes('WebTurtle'))) {
         webTurtle.clear();
       }
 
@@ -137,16 +137,16 @@ export function PythonPlayground({
     } finally {
       setIsRunning(false);
     }
-  }, [code, pyodideReady, webTurtle]);
+  }, [code, pyodideReady, webTurtle, showCanvas]);
 
   const resetCode = useCallback(() => {
     setCode(initialCode);
     setOutput('');
     setError('');
-    if (webTurtle) {
+    if (webTurtle && showCanvas) {
       webTurtle.clear();
     }
-  }, [initialCode, webTurtle]);
+  }, [initialCode, webTurtle, showCanvas]);
 
   const stopExecution = useCallback(() => {
     setIsRunning(false);
