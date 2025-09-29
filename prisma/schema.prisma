@@ -109,15 +109,20 @@ model sessions {
 }
 
 model users {
-  id            String        @id
-  email         String        @unique
-  password_hash String
-  name          String
-  role          String        @default("faculty")
-  created_at    DateTime      @default(now())
-  updated_at    DateTime      @updatedAt
-  courses       courses[]
-  media_files   media_files[]
-  modules       modules[]
-  sessions      sessions[]
+  id                     String        @id
+  email                  String        @unique
+  password_hash          String
+  name                   String
+  role                   String        @default("faculty")
+  email_verified         Boolean       @default(false)
+  email_verified_at      DateTime?
+  email_verification_token String?     @unique
+  password_reset_token   String?       @unique
+  password_reset_expires DateTime?
+  created_at             DateTime      @default(now())
+  updated_at             DateTime      @updatedAt
+  courses                courses[]
+  media_files            media_files[]
+  modules                modules[]
+  sessions               sessions[]
 }
