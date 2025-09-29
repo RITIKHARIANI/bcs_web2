@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Play, Square, RotateCcw, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { loadPyodide, loadScientificPackages, setupPythonEnvironment, executePythonCode, isPyodideReady } from '@/lib/pyodide-loader';
 import { WebTurtle } from '@/lib/web-turtle';
+import { TurtleManager } from '@/lib/turtle-manager';
 
 interface PythonPlaygroundProps {
   initialCode?: string;
@@ -40,6 +41,7 @@ export function PythonPlayground({
   const [isRunning, setIsRunning] = useState(false);
   const [pyodideReady, setPyodideReady] = useState(false);
   const [webTurtle, setWebTurtle] = useState<WebTurtle | null>(null);
+  const [turtleManager, setTurtleManager] = useState<TurtleManager | null>(null);
 
   // Initialize Pyodide on component mount
   useEffect(() => {
@@ -67,13 +69,39 @@ export function PythonPlayground({
 
         // Setup WebTurtle integration if canvas is enabled
         if (showCanvas && canvasRef.current) {
-          const turtle = new WebTurtle(canvasRef.current);
-          setWebTurtle(turtle);
+          const manager = new TurtleManager(canvasRef.current);
+          const mainTurtle = manager.createTurtle('main', 'vehicle');
 
-          // Register WebTurtle with Python
-          pyodide.registerJsModule('web_turtle', {
-            WebTurtle: turtle,
-            create_turtle: () => turtle,
+          setTurtleManager(manager);
+          setWebTurtle(mainTurtle);
+
+          // Setup interactivity
+          manager.setupInteractivity();
+
+          // Register enhanced turtle system with Python
+          pyodide.registerJsModule('turtle_graphics', {
+            // Main turtle for simple graphics
+            turtle: mainTurtle,
+            create_turtle: () => mainTurtle,
+
+            // Advanced multi-turtle system for simulations
+            manager: manager,
+            create_vehicle: (id: string, vehicleType: string) => {
+              return manager.createTurtle(id, 'vehicle', { type: vehicleType });
+            },
+            create_heat_source: (id: string, x?: number, y?: number) => {
+              const heatSource = manager.createTurtle(id, 'heat_source');
+              if (x !== undefined && y !== undefined) {
+                heatSource.goto(x, y);
+              }
+              return heatSource;
+            },
+            start_animation: () => manager.startAnimation(),
+            stop_animation: () => manager.stopAnimation(),
+            clear_all: () => manager.clearAll(),
+            get_turtle: (id: string) => manager.getTurtle(id),
+            update_entity_data: (id: string, data: any) => manager.updateEntityData(id, data),
+            set_animation_callback: (callback: () => void) => manager.setAnimationCallback(callback),
           });
         }
 

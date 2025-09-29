@@ -4,177 +4,265 @@ import React from 'react';
 import { PythonPlayground } from './python-playground';
 
 // Web-compatible version of the Braitenberg Vehicle demo
-const BRAITENBERG_CODE = `# Braitenberg Vehicles - Web Version
-# Adapted for browser execution using WebTurtle graphics
+const BRAITENBERG_CODE = `# Braitenberg Vehicles - Interactive Web Graphics Version
+# Full visual implementation with moving vehicles and draggable heat sources
 
 import random
 import math
-import time
+import turtle_graphics
 
 # Global state for the simulation
 simulation_state = {
     'running': False,
-    'vehicles': [],
-    'heat_sources': [],
-    'canvas_size': 500,
-    'animation_id': None
+    'vehicles': {},  # Dict of vehicle_id -> turtle instance
+    'heat_sources': {},  # Dict of heat_source_id -> turtle instance
+    'vehicle_data': {},  # Vehicle behavior data
+    'step_count': 0,
+    'animation_active': False
 }
 
-# Utility functions for Braitenberg vehicle simulation
-
 def create_simulation():
-    """Initialize the simulation with vehicles and heat sources"""
-    print("Creating Braitenberg Vehicle Simulation...")
-    print("Note: This is a simplified simulation for demonstration.")
-    print("In the full implementation, this would create interactive graphics.")
+    """Initialize the simulation with visual vehicles and heat sources"""
+    print("Creating Interactive Braitenberg Vehicle Simulation...")
+    print("🎯 Full visual implementation with moving graphics!")
 
     # Clear any existing simulation
-    simulation_state['vehicles'] = []
-    simulation_state['heat_sources'] = []
+    turtle_graphics.clear_all()
+    simulation_state['vehicles'] = {}
+    simulation_state['heat_sources'] = {}
+    simulation_state['vehicle_data'] = {}
+    simulation_state['step_count'] = 0
 
-    # Create heat sources with position data
+    # Create visual heat sources (draggable orange circles)
     num_heat_sources = 3
     for i in range(num_heat_sources):
-        heat_source = {
-            'id': i,
-            'x': random.randint(-200, 200),
-            'y': random.randint(-150, 150),
-            'color': 'orange'
-        }
-        simulation_state['heat_sources'].append(heat_source)
-        print(f"Created heat source {i+1} at ({heat_source['x']}, {heat_source['y']})")
+        heat_id = f"heat_{i}"
+        x = random.randint(-200, 200)
+        y = random.randint(-150, 150)
 
-    # Create vehicles with initial positions
-    num_vehicles = 3
+        # Create visual heat source
+        heat_source = turtle_graphics.create_heat_source(heat_id, x, y)
+        simulation_state['heat_sources'][heat_id] = heat_source
+        print(f"🔥 Created draggable heat source {i+1} at ({x}, {y})")
+
+    # Create visual vehicles with behavior
+    num_vehicles = 4
+    vehicle_types = ["crossed", "direct", "crossed", "direct"]
+
     for i in range(num_vehicles):
-        vehicle_type = random.choice(["crossed", "direct"])
-        vehicle = {
-            'id': i,
-            'x': random.randint(-200, 200),
-            'y': random.randint(-150, 150),
-            'heading': random.randint(0, 360),
-            'type': vehicle_type,
-            'color': 'red' if vehicle_type == 'crossed' else 'blue',
-            'speed_params': [20, 0.2, 6],
-            'turn_params': [20]
-        }
-        simulation_state['vehicles'].append(vehicle)
-        print(f"Created vehicle {i+1} (type: {vehicle['type']}) at ({vehicle['x']}, {vehicle['y']})")
+        vehicle_id = f"vehicle_{i}"
+        vehicle_type = vehicle_types[i % len(vehicle_types)]
+        x = random.randint(-150, 150)
+        y = random.randint(-100, 100)
+        heading = random.randint(0, 360)
 
-    print("\\nSimulation created!")
-    print("- Red vehicles have CROSSED connections (approach behavior)")
-    print("- Blue vehicles have DIRECT connections (avoidance behavior)")
-    print("- Orange circles are heat sources")
-    print("\\nRun start_simulation() to begin!")
+        # Create visual vehicle
+        vehicle = turtle_graphics.create_vehicle(vehicle_id, vehicle_type)
+        vehicle.goto(x, y)
+        vehicle.setheading(heading)
+
+        # Store vehicle and its behavioral data
+        simulation_state['vehicles'][vehicle_id] = vehicle
+        simulation_state['vehicle_data'][vehicle_id] = {
+            'type': vehicle_type,
+            'speed_params': [15, 0.3, 3],  # base_speed, distance_factor, threshold
+            'turn_params': [8],  # turn_sensitivity
+            'sensor_range': 200,
+            'max_speed': 3
+        }
+
+        color = "red" if vehicle_type == "crossed" else "blue"
+        print(f"🚗 Created {color} vehicle {i+1} (type: {vehicle_type}) at ({x}, {y})")
+
+    print("\\n✅ Interactive simulation created!")
+    print("🔴 Red vehicles: CROSSED connections (attraction/approach behavior)")
+    print("🔵 Blue vehicles: DIRECT connections (avoidance behavior)")
+    print("🟠 Orange circles: Draggable heat sources (try dragging them!)")
+    print("\\n🎮 Controls:")
+    print("- start_visual_simulation() - Start animated simulation")
+    print("- stop_simulation() - Stop animation")
+    print("- step_simulation() - Move one step manually")
 
 def distance(x1, y1, x2, y2):
     """Calculate distance between two points"""
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
-def move_vehicle(vehicle):
-    """Move a single vehicle based on Braitenberg vehicle logic"""
-    cumulative_speed = 0
-    cumulative_turn = 0
+def get_sensor_readings(vehicle_turtle, vehicle_data):
+    """Get left and right sensor readings for a vehicle"""
+    vehicle_pos = vehicle_turtle.pos()
+    vehicle_heading = vehicle_turtle.heading()
 
-    for heat_source in simulation_state['heat_sources']:
-        # Calculate distance to heat source
-        dist = distance(vehicle['x'], vehicle['y'], heat_source['x'], heat_source['y'])
+    # Calculate sensor positions (offset from vehicle center)
+    sensor_offset = 8
+    left_angle = math.radians(vehicle_heading + 45)  # Left sensor 45° left
+    right_angle = math.radians(vehicle_heading - 45)  # Right sensor 45° right
 
-        # Simulate left and right sensors
-        left_distance = dist + random.uniform(-5, 5)  # Add sensor noise
-        right_distance = dist + random.uniform(-5, 5)
+    left_sensor_x = vehicle_pos[0] + sensor_offset * math.cos(left_angle)
+    left_sensor_y = vehicle_pos[1] + sensor_offset * math.sin(left_angle)
+    right_sensor_x = vehicle_pos[0] + sensor_offset * math.cos(right_angle)
+    right_sensor_y = vehicle_pos[1] + sensor_offset * math.sin(right_angle)
 
-        # Calculate motor speeds based on vehicle type
-        if vehicle['type'] == 'crossed':
-            # Crossed connections: left sensor -> right motor
-            left_speed = max(0, (vehicle['speed_params'][0] / max(1, right_distance ** vehicle['speed_params'][1])) - vehicle['speed_params'][2])
-            right_speed = max(0, (vehicle['speed_params'][0] / max(1, left_distance ** vehicle['speed_params'][1])) - vehicle['speed_params'][2])
-        else:
-            # Direct connections: left sensor -> left motor
-            left_speed = max(0, (vehicle['speed_params'][0] / max(1, left_distance ** vehicle['speed_params'][1])) - vehicle['speed_params'][2])
-            right_speed = max(0, (vehicle['speed_params'][0] / max(1, right_distance ** vehicle['speed_params'][1])) - vehicle['speed_params'][2])
+    # Calculate total sensor activation from all heat sources
+    left_activation = 0
+    right_activation = 0
 
-        combined_speed = (left_speed + right_speed) / 2
-        turn_amount = vehicle['turn_params'][0] * (right_speed - left_speed)
+    for heat_source in simulation_state['heat_sources'].values():
+        heat_pos = heat_source.pos()
 
-        cumulative_speed += combined_speed
-        cumulative_turn += turn_amount
+        # Distance from sensors to heat source
+        left_dist = distance(left_sensor_x, left_sensor_y, heat_pos[0], heat_pos[1])
+        right_dist = distance(right_sensor_x, right_sensor_y, heat_pos[0], heat_pos[1])
 
-    # Update vehicle position and heading
-    vehicle['heading'] = (vehicle['heading'] + cumulative_turn) % 360
+        # Convert distance to activation (closer = higher activation)
+        sensor_range = vehicle_data['sensor_range']
+        if left_dist < sensor_range:
+            left_activation += max(0, (sensor_range - left_dist) / sensor_range)
+        if right_dist < sensor_range:
+            right_activation += max(0, (sensor_range - right_dist) / sensor_range)
 
-    # Move forward
-    radians = math.radians(vehicle['heading'])
-    vehicle['x'] += cumulative_speed * math.cos(radians)
-    vehicle['y'] += cumulative_speed * math.sin(radians)
+    # Add small random noise to sensors
+    left_activation += random.uniform(-0.1, 0.1)
+    right_activation += random.uniform(-0.1, 0.1)
 
-    # Keep within bounds
-    vehicle['x'] = max(-250, min(250, vehicle['x']))
-    vehicle['y'] = max(-200, min(200, vehicle['y']))
+    return max(0, left_activation), max(0, right_activation)
+
+def move_vehicle(vehicle_id):
+    """Move a single vehicle based on Braitenberg logic"""
+    vehicle = simulation_state['vehicles'][vehicle_id]
+    vehicle_data = simulation_state['vehicle_data'][vehicle_id]
+
+    # Get sensor readings
+    left_activation, right_activation = get_sensor_readings(vehicle, vehicle_data)
+
+    # Calculate motor speeds based on vehicle type
+    base_speed = vehicle_data['speed_params'][0]
+
+    if vehicle_data['type'] == 'crossed':
+        # Crossed connections: left sensor -> right motor, right sensor -> left motor
+        left_motor = base_speed * right_activation
+        right_motor = base_speed * left_activation
+    else:
+        # Direct connections: left sensor -> left motor, right sensor -> right motor
+        left_motor = base_speed * left_activation
+        right_motor = base_speed * right_activation
+
+    # Calculate movement
+    avg_speed = (left_motor + right_motor) / 2
+    turn_amount = vehicle_data['turn_params'][0] * (right_motor - left_motor)
+
+    # Apply speed limits
+    avg_speed = min(avg_speed, vehicle_data['max_speed'])
+    turn_amount = max(-30, min(30, turn_amount))  # Limit turning
+
+    # Move the vehicle
+    if avg_speed > 0.1:  # Only move if there's significant speed
+        vehicle.right(turn_amount)
+        vehicle.forward(avg_speed)
+
+    # Keep within canvas bounds
+    pos = vehicle.pos()
+    if abs(pos[0]) > 280 or abs(pos[1]) > 180:
+        # Turn around if hitting boundary
+        vehicle.right(random.randint(120, 240))
 
 def move_all_vehicles():
     """Move all vehicles one step"""
-    for vehicle in simulation_state['vehicles']:
-        move_vehicle(vehicle)
+    simulation_state['step_count'] += 1
 
-def print_simulation_state():
-    """Print current positions of all vehicles and heat sources"""
-    print("\\n=== Simulation State ===")
-    for i, vehicle in enumerate(simulation_state['vehicles']):
-        print(f"Vehicle {i+1} ({vehicle['type']}): x={vehicle['x']:.1f}, y={vehicle['y']:.1f}, heading={vehicle['heading']:.1f}°")
+    for vehicle_id in simulation_state['vehicles']:
+        move_vehicle(vehicle_id)
 
-    for i, heat_source in enumerate(simulation_state['heat_sources']):
-        print(f"Heat Source {i+1}: x={heat_source['x']}, y={heat_source['y']}")
-    print("========================\\n")
-
-def start_simulation():
-    """Start the simulation"""
+def step_simulation():
+    """Manually advance simulation by one step"""
     if not simulation_state['vehicles']:
-        print("No simulation created. Run create_simulation() first!")
+        print("❌ No simulation created. Run create_simulation() first!")
+        return
+
+    move_all_vehicles()
+    print(f"📈 Step {simulation_state['step_count']} completed")
+
+def animation_step():
+    """Single animation frame - called by the animation loop"""
+    if simulation_state['running'] and simulation_state['animation_active']:
+        move_all_vehicles()
+
+        # Continue animation
+        if simulation_state['running']:
+            # Schedule next frame (approximately 60 FPS)
+            pass  # The animation loop in turtle_graphics handles this
+
+def start_visual_simulation():
+    """Start the animated visual simulation"""
+    if not simulation_state['vehicles']:
+        print("❌ No simulation created. Run create_simulation() first!")
+        return
+
+    if simulation_state['running']:
+        print("⚠️ Simulation already running!")
         return
 
     simulation_state['running'] = True
-    print("Simulation started! Running 20 steps...")
-    print("Watch how vehicles move based on their connections:")
+    simulation_state['animation_active'] = True
 
-    # Run simulation steps
-    for step in range(20):
-        if not simulation_state['running']:
-            break
+    print("🎬 Starting animated simulation...")
+    print("🎮 Try dragging the orange heat sources while vehicles are moving!")
+    print("⏹️ Use stop_simulation() to stop")
 
-        move_all_vehicles()
+    # Create animation callback function
+    def animation_callback():
+        if simulation_state['running'] and simulation_state['animation_active']:
+            move_all_vehicles()
 
-        if step % 5 == 0:  # Print state every 5 steps
-            print(f"\\nStep {step + 1}:")
-            print_simulation_state()
+    # Register the animation callback with the graphics system
+    turtle_graphics.set_animation_callback(animation_callback)
 
-    print("Simulation complete!")
-    print("\\nTry:")
-    print("- print_simulation_state() to see current positions")
-    print("- move_all_vehicles() to advance one step")
-    print("- reset_simulation() to restart")
+    # Start the animation loop
+    turtle_graphics.start_animation()
 
 def stop_simulation():
     """Stop the simulation"""
     simulation_state['running'] = False
-    print("Simulation stopped!")
+    simulation_state['animation_active'] = False
+    turtle_graphics.stop_animation()
+    print("⏹️ Simulation stopped!")
 
 def reset_simulation():
-    """Reset the simulation"""
+    """Reset the simulation with new random positions"""
     stop_simulation()
+    print("🔄 Resetting simulation...")
     create_simulation()
-    print("Simulation reset!")
 
-# Create the simulation when the code runs
+def clear_simulation():
+    """Clear all graphics and reset"""
+    stop_simulation()
+    turtle_graphics.clear_all()
+    simulation_state['vehicles'] = {}
+    simulation_state['heat_sources'] = {}
+    simulation_state['vehicle_data'] = {}
+    simulation_state['step_count'] = 0
+    print("🧹 Simulation cleared!")
+
+def print_help():
+    """Show available commands"""
+    print("\\n🎮 Braitenberg Vehicle Simulation Commands:")
+    print("================================")
+    print("🎬 start_visual_simulation() - Start animated simulation")
+    print("⏹️ stop_simulation() - Stop animation")
+    print("📈 step_simulation() - Move one step manually")
+    print("🔄 reset_simulation() - Reset with new positions")
+    print("🧹 clear_simulation() - Clear all graphics")
+    print("❓ print_help() - Show this help")
+    print("\\n🎯 Interactive Features:")
+    print("• Drag orange heat sources with your mouse")
+    print("• Watch vehicles respond in real-time")
+    print("• Red vehicles are attracted, blue vehicles avoid")
+
+# Initialize the simulation
 create_simulation()
 
-print("\\nBraitenberg Vehicle Simulation Ready!")
-print("\\nCommands:")
-print("- start_simulation() - Start the simulation")
-print("- stop_simulation() - Stop the simulation")
-print("- reset_simulation() - Reset positions")
-print("- move_all_vehicles() - Move vehicles one step")
-print("\\nTry: start_simulation()")`;
+print("\\n🎉 Interactive Braitenberg Vehicle Simulation Ready!")
+print("\\n🚀 Quick Start: start_visual_simulation()")
+print("❓ Need help? Run: print_help()")`;
 
 export function BraitenbergDemo() {
   return (
@@ -214,9 +302,11 @@ export function BraitenbergDemo() {
       <PythonPlayground
         initialCode={BRAITENBERG_CODE}
         title="Braitenberg Vehicles Simulation"
-        description="Computational demonstration of autonomous agents with emergent behavior"
+        description="Interactive visual demonstration of autonomous agents with emergent behavior"
         height={500}
-        showCanvas={false}
+        showCanvas={true}
+        canvasWidth={600}
+        canvasHeight={400}
       />
 
       <div className="prose max-w-none">
