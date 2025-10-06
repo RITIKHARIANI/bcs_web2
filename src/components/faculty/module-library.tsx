@@ -11,15 +11,15 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Grid, 
-  List, 
-  BookOpen, 
-  FileText, 
-  Clock, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Grid,
+  List,
+  BookOpen,
+  FileText,
+  Clock,
   Eye,
   Edit,
   Brain,
@@ -34,7 +34,9 @@ import {
   SortDesc,
   X,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 
 interface Module {
@@ -60,9 +62,17 @@ interface Module {
   }
 }
 
+interface PaginationData {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+}
+
 interface ModulesResponse {
   modules: Module[]
   availableTags: string[]
+  pagination?: PaginationData
 }
 
 async function fetchModules(params: {
@@ -72,27 +82,30 @@ async function fetchModules(params: {
   parentId?: string
   sortBy?: string
   sortOrder?: string
+  page?: number
+  limit?: number
 }): Promise<ModulesResponse> {
   return withFetchRetry(async () => {
     const searchParams = new URLSearchParams()
-    
+
     Object.entries(params).forEach(([key, value]) => {
-      if (value && value.trim() !== '') {
-        searchParams.append(key, value)
+      if (value !== undefined && value !== null && String(value).trim() !== '') {
+        searchParams.append(key, String(value))
       }
     })
-    
+
     const url = `/api/modules?${searchParams.toString()}`
     const response = await fetch(url)
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: Failed to fetch modules`)
     }
-    
+
     const data = await response.json()
     return {
       modules: data.modules || [],
-      availableTags: data.availableTags || []
+      availableTags: data.availableTags || [],
+      pagination: data.pagination
     }
   }, {
     maxAttempts: 5, // Increased from 3 to 5
@@ -109,6 +122,8 @@ export function ModuleLibrary() {
   const [sortBy, setSortBy] = useState<string>('title')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 50
 
   // Memoize query params to prevent unnecessary re-fetches
   const queryParams = useMemo(() => ({
@@ -117,13 +132,15 @@ export function ModuleLibrary() {
     tags: selectedTags.length > 0 ? selectedTags.join(',') : undefined,
     parentId: parentFilter === 'root' ? 'root' : parentFilter === 'sub' ? 'sub' : undefined,
     sortBy,
-    sortOrder
-  }), [searchTerm, statusFilter, selectedTags, parentFilter, sortBy, sortOrder])
+    sortOrder,
+    page: currentPage,
+    limit: itemsPerPage
+  }), [searchTerm, statusFilter, selectedTags, parentFilter, sortBy, sortOrder, currentPage, itemsPerPage])
 
-  const { 
-    data = { modules: [], availableTags: [] }, 
-    isLoading, 
-    error, 
+  const {
+    data = { modules: [], availableTags: [] },
+    isLoading,
+    error,
     refetch,
     isFetching
   } = useQuery({
@@ -134,7 +151,7 @@ export function ModuleLibrary() {
     retry: 5, // Increased from 2 to 5 for better reliability
   })
 
-  const { modules, availableTags } = data
+  const { modules, availableTags, pagination } = data
 
   // Helper functions for tag management
   const addTag = (tag: string) => {
@@ -739,6 +756,67 @@ export function ModuleLibrary() {
               )}
             </CardContent>
           </Card>
+        )}
+
+        {/* Pagination Controls */}
+        {modules.length > 0 && pagination && pagination.totalPages > 1 && (
+          <div className="mt-12 flex flex-col items-center gap-4">
+            <div className="flex items-center justify-center gap-2">
+              <NeuralButton
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </NeuralButton>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(7, pagination.totalPages) }, (_, i) => {
+                  let pageNum: number;
+
+                  // Smart pagination display logic
+                  if (pagination.totalPages <= 7) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 4) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= pagination.totalPages - 3) {
+                    pageNum = pagination.totalPages - 6 + i;
+                  } else {
+                    pageNum = currentPage - 3 + i;
+                  }
+
+                  return (
+                    <NeuralButton
+                      key={pageNum}
+                      variant={currentPage === pageNum ? 'neural' : 'outline'}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNum)}
+                      className="min-w-[2.5rem]"
+                    >
+                      {pageNum}
+                    </NeuralButton>
+                  );
+                })}
+              </div>
+
+              <NeuralButton
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
+                disabled={currentPage === pagination.totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </NeuralButton>
+            </div>
+
+            {/* Page Info */}
+            <div className="text-center text-sm text-muted-foreground">
+              Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, pagination.totalCount)} of {pagination.totalCount} modules
+            </div>
+          </div>
         )}
       </main>
     </div>

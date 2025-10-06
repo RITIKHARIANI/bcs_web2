@@ -66,8 +66,12 @@ interface Course {
   createdAt: string
   updatedAt: string
   author: {
+    id: string
     name: string
     email: string
+    avatar_url?: string | null
+    speciality?: string | null
+    university?: string | null
   }
   courseModules: CourseModule[]
   _count: {
@@ -324,9 +328,81 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
       </header>
 
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        <div className={`grid grid-cols-1 ${isFullscreen ? 'lg:grid-cols-1' : 'lg:grid-cols-4'} gap-4 sm:gap-8`}>
-          {/* Course Navigation Sidebar */}
-          <div className={`${isFullscreen ? 'hidden' : 'lg:col-span-1'} ${showMobileSidebar ? 'fixed inset-0 z-30 bg-background lg:relative lg:inset-auto lg:bg-transparent' : 'hidden lg:block'}`}>
+        {/* Course Overview Section */}
+        {!selectedModule && (
+          <div className="mb-8 space-y-6">
+            {/* Course Description */}
+            <Card className="cognitive-card">
+              <CardHeader>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <BookOpen className="h-6 w-6 text-neural-primary" />
+                  Course Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="prose prose-sm max-w-none text-muted-foreground">
+                  {course.description || 'This course provides comprehensive coverage of key concepts through interactive modules and hands-on learning.'}
+                </div>
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-4 w-4" />
+                    <span>{course.courseModules.length} Modules</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>Updated {new Date(course.updatedAt).toLocaleDateString()}</span>
+                  </div>
+                  {course.featured && (
+                    <div className="flex items-center gap-2 text-cognition-orange">
+                      <Star className="h-4 w-4" />
+                      <span>Featured Course</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Instructor Section */}
+            <Card className="cognitive-card">
+              <CardHeader>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <User className="h-6 w-6 text-neural-primary" />
+                  Instructor
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Link href={`/profile/${course.author.id}`} className="flex items-center gap-4 hover:bg-muted/50 p-4 rounded-lg transition-colors">
+                  {course.author.avatar_url ? (
+                    <img
+                      src={course.author.avatar_url}
+                      alt={course.author.name}
+                      className="w-16 h-16 rounded-full border-2 border-neural-primary object-cover"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full border-2 border-neural-primary bg-gradient-to-br from-neural-primary to-synapse-primary flex items-center justify-center text-white text-2xl font-bold">
+                      {course.author.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg text-foreground hover:text-neural-primary transition-colors">
+                      {course.author.name}
+                    </h3>
+                    {course.author.speciality && (
+                      <p className="text-sm text-muted-foreground">{course.author.speciality}</p>
+                    )}
+                    {course.author.university && (
+                      <p className="text-sm text-muted-foreground">{course.author.university}</p>
+                    )}
+                  </div>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <div className={`grid grid-cols-1 ${isFullscreen ? 'lg:grid-cols-1' : 'lg:grid-cols-[280px_1fr]'} gap-4 sm:gap-8`}>
+          {/* Course Navigation Sidebar - Fixed width for better content space */}
+          <div className={`${isFullscreen ? 'hidden' : ''} ${showMobileSidebar ? 'fixed inset-0 z-30 bg-background lg:relative lg:inset-auto lg:bg-transparent' : 'hidden lg:block'}`}>
             {showMobileSidebar && (
               <div className="lg:hidden absolute top-4 right-4 z-40">
                 <NeuralButton 
@@ -423,8 +499,8 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
             </div>
           </div>
 
-          {/* Module Content */}
-          <div className={`${isFullscreen ? 'lg:col-span-1 max-w-4xl mx-auto' : 'lg:col-span-3'}`}>
+          {/* Module Content - Uses full remaining width */}
+          <div className={`${isFullscreen ? 'max-w-5xl mx-auto' : 'max-w-full'}`}>
             {selectedModule ? (
               <div className="space-y-6">
                 {/* Module Header */}
@@ -469,9 +545,10 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
 
                 {/* Module Content */}
                 <Card className="cognitive-card">
-                  <CardContent className={`${isFullscreen ? 'p-12' : 'p-6 sm:p-8'}`}>
-                    <article 
-                      className="neural-content reading-interface prose prose-sm sm:prose-lg prose-neural max-w-none"
+                  <CardContent className={`${isFullscreen ? 'p-12' : 'p-6 sm:p-8 lg:p-12'}`}>
+                    <article
+                      className="neural-content reading-interface prose prose-sm sm:prose-base lg:prose-lg prose-neural max-w-none mx-auto"
+                      style={{ maxWidth: '90ch' }}
                       dangerouslySetInnerHTML={{ __html: selectedModule.content }}
                     />
                   </CardContent>

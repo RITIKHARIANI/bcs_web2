@@ -18,16 +18,40 @@ simulation_state = {
     'heat_sources': {},  # Dict of heat_source_id -> turtle instance
     'vehicle_data': {},  # Vehicle behavior data
     'step_count': 0,
-    'animation_active': False
+    'animation_active': False,
+    'animation_callback': None  # Store the callback proxy
 }
+
+def check_graphics_ready():
+    """Check if the graphics system is ready"""
+    try:
+        # Test if manager is available
+        if hasattr(turtle_graphics, 'manager') and turtle_graphics.manager:
+            return True
+        return False
+    except:
+        return False
 
 def create_simulation():
     """Initialize the simulation with visual vehicles and heat sources"""
     print("Creating Interactive Braitenberg Vehicle Simulation...")
     print("🎯 Full visual implementation with moving graphics!")
 
+    # Check if graphics are ready
+    graphics_ready = check_graphics_ready()
+    if graphics_ready:
+        print("✅ Graphics system is ready!")
+    else:
+        print("⚠️  Graphics system initializing...")
+
     # Clear any existing simulation
-    turtle_graphics.clear_all()
+    try:
+        if graphics_ready:
+            turtle_graphics.clear_all()
+    except Exception as e:
+        print(f"⚠️  Canvas not fully ready yet: {e}")
+        print("🔄 Graphics will initialize when you start the simulation")
+
     simulation_state['vehicles'] = {}
     simulation_state['heat_sources'] = {}
     simulation_state['vehicle_data'] = {}
@@ -40,10 +64,20 @@ def create_simulation():
         x = random.randint(-200, 200)
         y = random.randint(-150, 150)
 
-        # Create visual heat source
-        heat_source = turtle_graphics.create_heat_source(heat_id, x, y)
-        simulation_state['heat_sources'][heat_id] = heat_source
-        print(f"🔥 Created draggable heat source {i+1} at ({x}, {y})")
+        if graphics_ready:
+            try:
+                # Create visual heat source
+                heat_source = turtle_graphics.create_heat_source(heat_id, x, y)
+                simulation_state['heat_sources'][heat_id] = heat_source
+                print(f"🔥 Created draggable heat source {i+1} at ({x}, {y})")
+            except Exception as e:
+                print(f"⚠️  Could not create heat source {i+1}: {e}")
+                # Store placeholder data for computational simulation
+                simulation_state['heat_sources'][heat_id] = {'x': x, 'y': y, 'id': heat_id}
+        else:
+            # Store placeholder data for computational simulation
+            simulation_state['heat_sources'][heat_id] = {'x': x, 'y': y, 'id': heat_id}
+            print(f"📊 Created heat source {i+1} data at ({x}, {y}) - graphics will load later")
 
     # Create visual vehicles with behavior
     num_vehicles = 4
@@ -56,23 +90,48 @@ def create_simulation():
         y = random.randint(-100, 100)
         heading = random.randint(0, 360)
 
-        # Create visual vehicle
-        vehicle = turtle_graphics.create_vehicle(vehicle_id, vehicle_type)
-        vehicle.goto(x, y)
-        vehicle.setheading(heading)
+        if graphics_ready:
+            try:
+                # Create visual vehicle
+                vehicle = turtle_graphics.create_vehicle(vehicle_id, vehicle_type)
+                vehicle.goto(x, y)
+                vehicle.setheading(heading)
 
-        # Store vehicle and its behavioral data
-        simulation_state['vehicles'][vehicle_id] = vehicle
-        simulation_state['vehicle_data'][vehicle_id] = {
-            'type': vehicle_type,
-            'speed_params': [15, 0.3, 3],  # base_speed, distance_factor, threshold
-            'turn_params': [8],  # turn_sensitivity
-            'sensor_range': 200,
-            'max_speed': 3
-        }
+                # Store vehicle and its behavioral data
+                simulation_state['vehicles'][vehicle_id] = vehicle
+                simulation_state['vehicle_data'][vehicle_id] = {
+                    'type': vehicle_type,
+                    'speed_params': [15, 0.3, 3],  # base_speed, distance_factor, threshold
+                    'turn_params': [8],  # turn_sensitivity
+                    'sensor_range': 200,
+                    'max_speed': 3
+                }
 
-        color = "red" if vehicle_type == "crossed" else "blue"
-        print(f"🚗 Created {color} vehicle {i+1} (type: {vehicle_type}) at ({x}, {y})")
+                color = "red" if vehicle_type == "crossed" else "blue"
+                print(f"🚗 Created {color} vehicle {i+1} (type: {vehicle_type}) at ({x}, {y})")
+            except Exception as e:
+                print(f"⚠️  Could not create vehicle {i+1}: {e}")
+                # Store placeholder data for computational simulation
+                simulation_state['vehicles'][vehicle_id] = {'x': x, 'y': y, 'heading': heading, 'type': vehicle_type}
+                simulation_state['vehicle_data'][vehicle_id] = {
+                    'type': vehicle_type,
+                    'speed_params': [15, 0.3, 3],
+                    'turn_params': [8],
+                    'sensor_range': 200,
+                    'max_speed': 3
+                }
+        else:
+            # Store placeholder data for computational simulation
+            simulation_state['vehicles'][vehicle_id] = {'x': x, 'y': y, 'heading': heading, 'type': vehicle_type}
+            simulation_state['vehicle_data'][vehicle_id] = {
+                'type': vehicle_type,
+                'speed_params': [15, 0.3, 3],
+                'turn_params': [8],
+                'sensor_range': 200,
+                'max_speed': 3
+            }
+            color = "red" if vehicle_type == "crossed" else "blue"
+            print(f"📊 Created {color} vehicle {i+1} data (type: {vehicle_type}) at ({x}, {y}) - graphics will load later")
 
     print("\\n✅ Interactive simulation created!")
     print("🔴 Red vehicles: CROSSED connections (attraction/approach behavior)")
@@ -89,50 +148,77 @@ def distance(x1, y1, x2, y2):
 
 def get_sensor_readings(vehicle_turtle, vehicle_data):
     """Get left and right sensor readings for a vehicle"""
-    vehicle_pos = vehicle_turtle.pos()
-    vehicle_heading = vehicle_turtle.heading()
+    try:
+        vehicle_pos = vehicle_turtle.pos()
+        vehicle_heading = vehicle_turtle.heading()
 
-    # Calculate sensor positions (offset from vehicle center)
-    sensor_offset = 8
-    left_angle = math.radians(vehicle_heading + 45)  # Left sensor 45° left
-    right_angle = math.radians(vehicle_heading - 45)  # Right sensor 45° right
+        # Calculate sensor positions (offset from vehicle center)
+        sensor_offset = 8
+        left_angle = math.radians(vehicle_heading + 45)  # Left sensor 45° left
+        right_angle = math.radians(vehicle_heading - 45)  # Right sensor 45° right
 
-    left_sensor_x = vehicle_pos[0] + sensor_offset * math.cos(left_angle)
-    left_sensor_y = vehicle_pos[1] + sensor_offset * math.sin(left_angle)
-    right_sensor_x = vehicle_pos[0] + sensor_offset * math.cos(right_angle)
-    right_sensor_y = vehicle_pos[1] + sensor_offset * math.sin(right_angle)
+        left_sensor_x = vehicle_pos[0] + sensor_offset * math.cos(left_angle)
+        left_sensor_y = vehicle_pos[1] + sensor_offset * math.sin(left_angle)
+        right_sensor_x = vehicle_pos[0] + sensor_offset * math.cos(right_angle)
+        right_sensor_y = vehicle_pos[1] + sensor_offset * math.sin(right_angle)
 
-    # Calculate total sensor activation from all heat sources
-    left_activation = 0
-    right_activation = 0
+        # Calculate total sensor activation from all heat sources
+        left_activation = 0
+        right_activation = 0
 
-    for heat_source in simulation_state['heat_sources'].values():
-        heat_pos = heat_source.pos()
+        for heat_source in simulation_state['heat_sources'].values():
+            # Check if heat source is visual turtle or placeholder data
+            if hasattr(heat_source, 'pos') and callable(heat_source.pos):
+                heat_pos = heat_source.pos()
+                heat_x, heat_y = heat_pos[0], heat_pos[1]
+            else:
+                # Placeholder data
+                heat_x, heat_y = heat_source['x'], heat_source['y']
 
-        # Distance from sensors to heat source
-        left_dist = distance(left_sensor_x, left_sensor_y, heat_pos[0], heat_pos[1])
-        right_dist = distance(right_sensor_x, right_sensor_y, heat_pos[0], heat_pos[1])
+            # Distance from sensors to heat source
+            left_dist = distance(left_sensor_x, left_sensor_y, heat_x, heat_y)
+            right_dist = distance(right_sensor_x, right_sensor_y, heat_x, heat_y)
 
-        # Convert distance to activation (closer = higher activation)
-        sensor_range = vehicle_data['sensor_range']
-        if left_dist < sensor_range:
-            left_activation += max(0, (sensor_range - left_dist) / sensor_range)
-        if right_dist < sensor_range:
-            right_activation += max(0, (sensor_range - right_dist) / sensor_range)
+            # Convert distance to activation (closer = higher activation)
+            sensor_range = vehicle_data['sensor_range']
+            if left_dist < sensor_range:
+                left_activation += max(0, (sensor_range - left_dist) / sensor_range)
+            if right_dist < sensor_range:
+                right_activation += max(0, (sensor_range - right_dist) / sensor_range)
 
-    # Add small random noise to sensors
-    left_activation += random.uniform(-0.1, 0.1)
-    right_activation += random.uniform(-0.1, 0.1)
+        # Add small random noise to sensors
+        left_activation += random.uniform(-0.1, 0.1)
+        right_activation += random.uniform(-0.1, 0.1)
 
-    return max(0, left_activation), max(0, right_activation)
+        return max(0, left_activation), max(0, right_activation)
+    except Exception as e:
+        # Fallback to random values if there's any error
+        return random.uniform(0, 0.5), random.uniform(0, 0.5)
 
 def move_vehicle(vehicle_id):
     """Move a single vehicle based on Braitenberg logic"""
     vehicle = simulation_state['vehicles'][vehicle_id]
     vehicle_data = simulation_state['vehicle_data'][vehicle_id]
 
-    # Get sensor readings
-    left_activation, right_activation = get_sensor_readings(vehicle, vehicle_data)
+    # Check if this is a visual turtle or placeholder data
+    # Visual turtles have pos() method, dictionaries have 'x' key
+    is_visual_turtle = hasattr(vehicle, 'pos') and callable(vehicle.pos)
+    is_placeholder_dict = isinstance(vehicle, dict) and 'x' in vehicle
+
+    if is_visual_turtle:
+        # Get sensor readings for visual turtle
+        try:
+            left_activation, right_activation = get_sensor_readings(vehicle, vehicle_data)
+        except Exception as e:
+            print(f"Error getting sensor readings for {vehicle_id}: {e}")
+            return
+    elif is_placeholder_dict:
+        # Simple computational simulation for placeholder data
+        left_activation = random.uniform(0, 1)
+        right_activation = random.uniform(0, 1)
+    else:
+        print(f"Unknown vehicle type for {vehicle_id}: {type(vehicle)}")
+        return
 
     # Calculate motor speeds based on vehicle type
     base_speed = vehicle_data['speed_params'][0]
@@ -155,22 +241,48 @@ def move_vehicle(vehicle_id):
     turn_amount = max(-30, min(30, turn_amount))  # Limit turning
 
     # Move the vehicle
-    if avg_speed > 0.1:  # Only move if there's significant speed
-        vehicle.right(turn_amount)
-        vehicle.forward(avg_speed)
+    if is_visual_turtle:
+        # Visual turtle movement
+        if avg_speed > 0.1:  # Only move if there's significant speed
+            try:
+                vehicle.right(turn_amount)
+                vehicle.forward(avg_speed)
+            except Exception as e:
+                print(f"Error moving visual turtle {vehicle_id}: {e}")
+                return
 
-    # Keep within canvas bounds
-    pos = vehicle.pos()
-    if abs(pos[0]) > 280 or abs(pos[1]) > 180:
-        # Turn around if hitting boundary
-        vehicle.right(random.randint(120, 240))
+        # Keep within canvas bounds
+        try:
+            pos = vehicle.pos()
+            if abs(pos[0]) > 280 or abs(pos[1]) > 180:
+                # Turn around if hitting boundary
+                vehicle.right(random.randint(120, 240))
+        except Exception as e:
+            print(f"Error checking bounds for turtle {vehicle_id}: {e}")
+    elif is_placeholder_dict:
+        # Computational movement for placeholder data
+        if avg_speed > 0.1:
+            # Update placeholder position data
+            radians = math.radians(vehicle['heading'])
+            vehicle['x'] += avg_speed * math.cos(radians)
+            vehicle['y'] += avg_speed * math.sin(radians)
+            vehicle['heading'] = (vehicle['heading'] + turn_amount) % 360
+
+            # Keep within bounds
+            vehicle['x'] = max(-280, min(280, vehicle['x']))
+            vehicle['y'] = max(-180, min(180, vehicle['y']))
 
 def move_all_vehicles():
     """Move all vehicles one step"""
     simulation_state['step_count'] += 1
 
     for vehicle_id in simulation_state['vehicles']:
-        move_vehicle(vehicle_id)
+        try:
+            move_vehicle(vehicle_id)
+        except Exception as e:
+            print(f"Error moving vehicle {vehicle_id}: {e}")
+            # Skip this vehicle and continue with others
+            continue
 
 def step_simulation():
     """Manually advance simulation by one step"""
@@ -204,26 +316,75 @@ def start_visual_simulation():
     simulation_state['running'] = True
     simulation_state['animation_active'] = True
 
-    print("🎬 Starting animated simulation...")
-    print("🎮 Try dragging the orange heat sources while vehicles are moving!")
-    print("⏹️ Use stop_simulation() to stop")
+    print("🎬 Starting simulation...")
 
-    # Create animation callback function
-    def animation_callback():
-        if simulation_state['running'] and simulation_state['animation_active']:
+    # Check if graphics are available
+    graphics_ready = check_graphics_ready()
+    if graphics_ready:
+        print("✅ Full visual simulation with interactive graphics!")
+        print("🎮 Try dragging the orange heat sources while vehicles are moving!")
+
+        try:
+            # Import pyodide for creating stable proxies
+            import js
+            from pyodide.ffi import create_proxy
+
+            # Create animation callback function
+            def animation_callback():
+                if simulation_state['running'] and simulation_state['animation_active']:
+                    move_all_vehicles()
+
+            # Create a stable proxy for the callback to prevent auto-destruction
+            callback_proxy = create_proxy(animation_callback)
+
+            # Store the callback to prevent garbage collection
+            simulation_state['animation_callback'] = callback_proxy
+
+            # Register the animation callback with the graphics system
+            turtle_graphics.set_animation_callback(callback_proxy)
+
+            # Start the animation loop
+            turtle_graphics.start_animation()
+        except Exception as e:
+            print(f"⚠️ Graphics animation failed: {e}")
+            print("🔄 Falling back to computational simulation...")
+            graphics_ready = False
+
+    if not graphics_ready:
+        print("📊 Running computational simulation (no graphics)")
+        print("💡 Refresh the page to try loading graphics again")
+
+        # Run a simple computational simulation
+        print("\\n🔢 Running 10 simulation steps...")
+        for step in range(10):
+            if not simulation_state['running']:
+                break
             move_all_vehicles()
+            if step % 3 == 0:
+                print(f"Step {step + 1}: Vehicles moved")
 
-    # Register the animation callback with the graphics system
-    turtle_graphics.set_animation_callback(animation_callback)
+        print("✅ Computational simulation complete!")
 
-    # Start the animation loop
-    turtle_graphics.start_animation()
+    print("⏹️ Use stop_simulation() to stop")
 
 def stop_simulation():
     """Stop the simulation"""
     simulation_state['running'] = False
     simulation_state['animation_active'] = False
-    turtle_graphics.stop_animation()
+
+    try:
+        turtle_graphics.stop_animation()
+    except Exception as e:
+        print(f"⚠️ Error stopping animation: {e}")
+
+    # Clean up callback proxy
+    if simulation_state['animation_callback']:
+        try:
+            simulation_state['animation_callback'].destroy()
+        except:
+            pass
+        simulation_state['animation_callback'] = None
+
     print("⏹️ Simulation stopped!")
 
 def reset_simulation():
@@ -231,6 +392,56 @@ def reset_simulation():
     stop_simulation()
     print("🔄 Resetting simulation...")
     create_simulation()
+
+def reload_simulation():
+    """Reload the simulation with graphics if now available"""
+    was_running = simulation_state['running']
+    if was_running:
+        stop_simulation()
+
+    print("🔄 Reloading simulation with current graphics state...")
+
+    # Check if graphics are now available
+    if check_graphics_ready():
+        print("✅ Graphics are now available! Creating visual elements...")
+
+        # Convert existing placeholder data to visual elements
+        for heat_id, heat_data in list(simulation_state['heat_sources'].items()):
+            if isinstance(heat_data, dict) and 'x' in heat_data:
+                try:
+                    # Create visual heat source from placeholder data
+                    x, y = heat_data['x'], heat_data['y']
+                    heat_source = turtle_graphics.create_heat_source(heat_id, x, y)
+                    simulation_state['heat_sources'][heat_id] = heat_source
+                    print(f"🔥 Converted heat source {heat_id} to visual at ({x}, {y})")
+                except Exception as e:
+                    print(f"⚠️ Could not convert heat source {heat_id}: {e}")
+
+        for vehicle_id, vehicle_data in list(simulation_state['vehicles'].items()):
+            if isinstance(vehicle_data, dict) and 'x' in vehicle_data:
+                try:
+                    # Create visual vehicle from placeholder data
+                    x, y = vehicle_data['x'], vehicle_data['y']
+                    heading = vehicle_data['heading']
+                    vehicle_type = vehicle_data['type']
+
+                    vehicle = turtle_graphics.create_vehicle(vehicle_id, vehicle_type)
+                    vehicle.goto(x, y)
+                    vehicle.setheading(heading)
+                    simulation_state['vehicles'][vehicle_id] = vehicle
+
+                    color = "red" if vehicle_type == "crossed" else "blue"
+                    print(f"🚗 Converted {color} vehicle {vehicle_id} to visual at ({x}, {y})")
+                except Exception as e:
+                    print(f"⚠️ Could not convert vehicle {vehicle_id}: {e}")
+
+        print("✅ Visual simulation ready! Try start_visual_simulation() now.")
+    else:
+        print("⚠️ Graphics still not available.")
+
+    if was_running:
+        print("🔄 Restarting simulation...")
+        start_visual_simulation()
 
 def clear_simulation():
     """Clear all graphics and reset"""
@@ -242,6 +453,23 @@ def clear_simulation():
     simulation_state['step_count'] = 0
     print("🧹 Simulation cleared!")
 
+def status():
+    """Show simulation status"""
+    print("\\n📊 Simulation Status:")
+    print("===================")
+    print(f"Graphics ready: {'✅ Yes' if check_graphics_ready() else '❌ No'}")
+    print(f"Vehicles: {len(simulation_state['vehicles'])}")
+    print(f"Heat sources: {len(simulation_state['heat_sources'])}")
+    print(f"Running: {'✅ Yes' if simulation_state['running'] else '❌ No'}")
+    print(f"Step count: {simulation_state['step_count']}")
+
+    # Debug vehicle types
+    print("\\n🔍 Vehicle Types:")
+    for vehicle_id, vehicle in simulation_state['vehicles'].items():
+        is_visual = hasattr(vehicle, 'pos') and callable(vehicle.pos)
+        is_dict = isinstance(vehicle, dict)
+        print(f"  {vehicle_id}: {'Visual Turtle' if is_visual else 'Dict Data' if is_dict else 'Unknown'} ({type(vehicle).__name__})")
+
 def print_help():
     """Show available commands"""
     print("\\n🎮 Braitenberg Vehicle Simulation Commands:")
@@ -250,21 +478,57 @@ def print_help():
     print("⏹️ stop_simulation() - Stop animation")
     print("📈 step_simulation() - Move one step manually")
     print("🔄 reset_simulation() - Reset with new positions")
+    print("🔄 reload_simulation() - Convert to visual if graphics ready")
     print("🧹 clear_simulation() - Clear all graphics")
+    print("📊 status() - Show simulation status")
     print("❓ print_help() - Show this help")
     print("\\n🎯 Interactive Features:")
-    print("• Drag orange heat sources with your mouse")
+    print("• Drag orange heat sources with your mouse (if graphics available)")
     print("• Watch vehicles respond in real-time")
     print("• Red vehicles are attracted, blue vehicles avoid")
+    print("\\n💡 Tip: If you see empty canvas, try reload_simulation()")
 
 # Initialize the simulation
 create_simulation()
 
 print("\\n🎉 Interactive Braitenberg Vehicle Simulation Ready!")
 print("\\n🚀 Quick Start: start_visual_simulation()")
-print("❓ Need help? Run: print_help()")`;
+print("❓ Need help? Run: print_help()")
+
+# Auto-setup: Try to initialize graphics and start simulation
+print("\\n🔄 Auto-initializing graphics...")
+status()
+
+if check_graphics_ready():
+    print("✅ Graphics ready - starting visual simulation!")
+    start_visual_simulation()
+else:
+    print("⚠️ Graphics not ready yet. Trying to reload...")
+    # Wait a moment and try again
+    import time
+    try:
+        # Short delay to let graphics initialize
+        reload_simulation()
+        if check_graphics_ready():
+            print("✅ Graphics now ready - starting visual simulation!")
+            start_visual_simulation()
+        else:
+            print("📊 Running computational simulation instead")
+            print("💡 Try reload_simulation() manually if graphics become available")
+    except Exception as e:
+        print(f"⚠️ Auto-setup failed: {e}")
+        print("💡 Try running the commands manually:")`;
 
 export function BraitenbergDemo() {
+  const playgroundRef = React.useRef<any>(null);
+
+  // Function to execute Python commands
+  const runPythonCommand = (command: string) => {
+    if (playgroundRef.current?.runCode) {
+      playgroundRef.current.runCode(command);
+    }
+  };
+
   return (
     <div className="w-full space-y-6">
       <div className="prose max-w-none">
@@ -274,6 +538,60 @@ export function BraitenbergDemo() {
           complex behaviors through basic sensor-motor connections. The simulation has been adapted to run
           entirely in your browser using our Python playground.
         </p>
+
+        {/* Quick Action Buttons */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <h3 className="font-semibold text-blue-800 mb-3">🎮 Quick Controls</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <button
+              onClick={() => runPythonCommand('status()')}
+              className="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+            >
+              📊 Status
+            </button>
+            <button
+              onClick={() => runPythonCommand('reload_simulation()')}
+              className="px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+            >
+              🔄 Reload
+            </button>
+            <button
+              onClick={() => runPythonCommand('start_visual_simulation()')}
+              className="px-3 py-2 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors"
+            >
+              🎬 Start
+            </button>
+            <button
+              onClick={() => runPythonCommand('stop_simulation()')}
+              className="px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
+            >
+              ⏹️ Stop
+            </button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+            <button
+              onClick={() => runPythonCommand('step_simulation()')}
+              className="px-3 py-2 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors"
+            >
+              📈 Step
+            </button>
+            <button
+              onClick={() => runPythonCommand('reset_simulation()')}
+              className="px-3 py-2 bg-orange-600 text-white text-sm rounded hover:bg-orange-700 transition-colors"
+            >
+              🔄 Reset
+            </button>
+            <button
+              onClick={() => runPythonCommand('print_help()')}
+              className="px-3 py-2 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition-colors"
+            >
+              ❓ Help
+            </button>
+          </div>
+          <p className="text-blue-600 text-xs mt-2">
+            💡 Click these buttons to run commands instantly, or type them in the Python code editor below.
+          </p>
+        </div>
 
         <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
           <h3 className="font-semibold text-blue-800 mb-2">How it works:</h3>
@@ -300,6 +618,7 @@ export function BraitenbergDemo() {
       </div>
 
       <PythonPlayground
+        ref={playgroundRef}
         initialCode={BRAITENBERG_CODE}
         title="Braitenberg Vehicles Simulation"
         description="Interactive visual demonstration of autonomous agents with emergent behavior"

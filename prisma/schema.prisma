@@ -114,15 +114,107 @@ model users {
   password_hash          String
   name                   String
   role                   String        @default("faculty")
+
+  // Profile fields
+  about                  String?       @db.Text
+  speciality             String?
+  interested_fields      String[]      @default([])
+  university             String?
+  avatar_url             String?
+
+  // Email verification
   email_verified         Boolean       @default(false)
   email_verified_at      DateTime?
   email_verification_token String?     @unique
+
+  // Password reset
   password_reset_token   String?       @unique
   password_reset_expires DateTime?
+
   created_at             DateTime      @default(now())
   updated_at             DateTime      @updatedAt
+
   courses                courses[]
   media_files            media_files[]
   modules                modules[]
   sessions               sessions[]
+  playgrounds            playgrounds[]
+  playground_templates   playground_templates[]
+}
+
+// ==================== PLAYGROUND BUILDER MODELS ====================
+
+model playground_templates {
+  id                String   @id @default(cuid())
+  name              String
+  description       String
+  category          String   // neural_networks, physics, algorithms, etc.
+  thumbnail         String?
+
+  // Default configuration (stored as JSON)
+  default_controls       Json    // ControlConfig[]
+  default_visualization  Json    // VisualizationConfig
+  code_template          String  @db.Text
+
+  // Required libraries
+  python_libraries  String[]
+  js_libraries      String[]
+
+  // Metadata
+  author_id         String?
+  version           String   @default("1.0.0")
+  tags              String[]
+  is_public         Boolean  @default(true)
+
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  // Relations
+  author            users?   @relation(fields: [author_id], references: [id], onDelete: SetNull)
+  playgrounds       playgrounds[]
+
+  @@index([category])
+  @@index([author_id])
+  @@index([is_public])
+}
+
+model playgrounds {
+  id                String   @id @default(cuid())
+  title             String
+  description       String   @db.Text
+  category          String
+
+  // Ownership & Permissions
+  created_by        String
+  organization_id   String?
+  is_public         Boolean  @default(false)
+  share_url         String   @unique @default(cuid())
+
+  // Template & Configuration
+  template_id       String?
+  controls          Json     // ControlConfig[]
+  visualization     Json     // VisualizationConfig
+  code_config       Json     // CodeConfig (language, content, libraries)
+
+  // Metadata
+  published_at      DateTime?
+  version           Int      @default(1)
+
+  // Analytics
+  view_count        Int      @default(0)
+  fork_count        Int      @default(0)
+  rating            Float?
+
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  // Relations
+  author            users    @relation(fields: [created_by], references: [id], onDelete: Cascade)
+  template          playground_templates? @relation(fields: [template_id], references: [id], onDelete: SetNull)
+
+  @@index([created_by])
+  @@index([template_id])
+  @@index([category])
+  @@index([is_public])
+  @@index([share_url])
 }

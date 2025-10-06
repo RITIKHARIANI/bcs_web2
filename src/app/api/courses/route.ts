@@ -153,6 +153,13 @@ export async function GET(request: NextRequest) {
     const featured = searchParams.get('featured')
     const status = searchParams.get('status')
     const authorOnly = searchParams.get('authorOnly')
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const limit = parseInt(searchParams.get('limit') || '20', 10)
+
+    // Validate pagination parameters
+    const validPage = Math.max(1, page)
+    const validLimit = Math.min(Math.max(1, limit), 100) // Max 100 items per page
+    const skip = (validPage - 1) * validLimit
 
     // If authorOnly is specified, require authentication
     if (authorOnly === 'true') {
@@ -161,75 +168,105 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
 
-      const courses = await withDatabaseRetry(async () => {
-        return await prisma.courses.findMany({
-          where: {
-            author_id: session.user.id,
-            ...(status && { status }),
-          },
-          include: {
-            users: {
-              select: {
-                name: true,
-                email: true,
-              },
-            },
-            course_modules: {
-              include: {
-                modules: {
-                  select: {
-                    id: true,
-                    title: true,
-                    slug: true,
-                    description: true,
-                    status: true,
-                  },
+      const whereClause = {
+        author_id: session.user.id,
+        ...(status && { status }),
+      }
+
+      const [courses, totalCount] = await withDatabaseRetry(async () => {
+        return await Promise.all([
+          prisma.courses.findMany({
+            where: whereClause,
+            include: {
+              users: {
+                select: {
+                  name: true,
+                  email: true,
                 },
               },
-              orderBy: {
-                sort_order: 'asc',
+              course_modules: {
+                include: {
+                  modules: {
+                    select: {
+                      id: true,
+                      title: true,
+                      slug: true,
+                      description: true,
+                      status: true,
+                    },
+                  },
+                },
+                orderBy: {
+                  sort_order: 'asc',
+                },
+              },
+              _count: {
+                select: {
+                  course_modules: true,
+                },
               },
             },
-            _count: {
-              select: {
-                course_modules: true,
-              },
+            orderBy: {
+              updated_at: 'desc',
             },
-          },
-          orderBy: {
-            updated_at: 'desc',
-          },
-        });
+            skip,
+            take: validLimit,
+          }),
+          prisma.courses.count({ where: whereClause }),
+        ]);
       }, { maxAttempts: 3, baseDelayMs: 500 })
 
-      return NextResponse.json({ courses })
+      return NextResponse.json({
+        courses,
+        pagination: {
+          page: validPage,
+          limit: validLimit,
+          totalCount,
+          totalPages: Math.ceil(totalCount / validLimit),
+        }
+      })
     }
 
     // Public course listing with proper PgBouncer configuration
-    const courses = await prisma.courses.findMany({
-      where: {
-        status: 'published',
-        ...(featured === 'true' && { featured: true }),
-      },
-      include: {
-        users: {
-          select: {
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            course_modules: true,
-          },
-        },
-      },
-      orderBy: [
-        { featured: 'desc' },
-        { updated_at: 'desc' },
-      ],
-    });
+    const whereClause = {
+      status: 'published',
+      ...(featured === 'true' && { featured: true }),
+    }
 
-    return NextResponse.json({ courses })
+    const [courses, totalCount] = await Promise.all([
+      prisma.courses.findMany({
+        where: whereClause,
+        include: {
+          users: {
+            select: {
+              name: true,
+            },
+          },
+          _count: {
+            select: {
+              course_modules: true,
+            },
+          },
+        },
+        orderBy: [
+          { featured: 'desc' },
+          { updated_at: 'desc' },
+        ],
+        skip,
+        take: validLimit,
+      }),
+      prisma.courses.count({ where: whereClause }),
+    ]);
+
+    return NextResponse.json({
+      courses,
+      pagination: {
+        page: validPage,
+        limit: validLimit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / validLimit),
+      }
+    })
   } catch (error) {
     console.error('=== DETAILED ERROR ANALYSIS ===')
     console.error('Error fetching courses - Full details:', {

@@ -160,13 +160,8 @@ export async function setupPythonEnvironment(pyodide: PyodideInterface): Promise
   console.log('Setting up Python environment...');
 
   try {
-    // Setup matplotlib for web backend
+    // Setup output capture functions (required for all playgrounds)
     await pyodide.runPython(`
-      import matplotlib
-      matplotlib.use('Agg')  # Use non-interactive backend
-      import matplotlib.pyplot as plt
-      import numpy as np
-
       # Setup for capturing output
       import sys
       from io import StringIO

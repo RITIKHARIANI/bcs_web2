@@ -14,8 +14,12 @@ async function getCourse(slug: string) {
       include: {
         users: {
           select: {
+            id: true,
             name: true,
             email: true,
+            avatar_url: true,
+            speciality: true,
+            university: true,
           },
         },
         course_modules: {
@@ -67,8 +71,12 @@ async function getCourse(slug: string) {
       createdAt: course.created_at,
       updatedAt: course.updated_at,
       author: {
+        id: course.users.id,
         name: course.users.name,
         email: course.users.email,
+        avatar_url: course.users.avatar_url,
+        speciality: course.users.speciality,
+        university: course.users.university,
       },
       courseModules: course.course_modules.map(cm => ({
         sortOrder: cm.sort_order,

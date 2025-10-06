@@ -134,12 +134,19 @@ export async function GET(request: NextRequest) {
     const session = await auth()
     const { searchParams } = new URL(request.url)
     const parentId = searchParams.get('parentId')
-    const parent_module_id = searchParams.get('parent_module_id') 
+    const parent_module_id = searchParams.get('parent_module_id')
     const status = searchParams.get('status')
     const tags = searchParams.get('tags')
     const search = searchParams.get('search')
     const sortBy = searchParams.get('sortBy') || 'sort_order'
     const sortOrder = searchParams.get('sortOrder') || 'asc'
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const limit = parseInt(searchParams.get('limit') || '50', 10)
+
+    // Validate pagination parameters
+    const validPage = Math.max(1, page)
+    const validLimit = Math.min(Math.max(1, limit), 100) // Max 100 items per page
+    const skip = (validPage - 1) * validLimit
 
     // Handle different access patterns
     let whereClause: any = {}
@@ -219,83 +226,93 @@ export async function GET(request: NextRequest) {
         orderByClause = { sort_order: sortOrder }
     }
 
-    const modules = await withDatabaseRetry(async () => {
+    const [modules, totalCount] = await withDatabaseRetry(async () => {
       try {
         // Try the full query first
-        return await prisma.modules.findMany({
-          where: whereClause,
-          include: {
-            users: {
-              select: {
-                name: true,
-                email: true,
+        return await Promise.all([
+          prisma.modules.findMany({
+            where: whereClause,
+            include: {
+              users: {
+                select: {
+                  name: true,
+                  email: true,
+                },
+              },
+              modules: {
+                select: {
+                  id: true,
+                  title: true,
+                },
+              },
+              other_modules: {
+                select: {
+                  id: true,
+                  title: true,
+                  status: true,
+                  created_at: true,
+                },
+                orderBy: {
+                  sort_order: 'asc',
+                },
+              },
+              _count: {
+                select: {
+                  other_modules: true,
+                  course_modules: true,
+                },
               },
             },
-            modules: {
-              select: {
-                id: true,
-                title: true,
-              },
-            },
-            other_modules: {
-              select: {
-                id: true,
-                title: true,
-                status: true,
-                created_at: true,
-              },
-              orderBy: {
-                sort_order: 'asc',
-              },
-            },
-            _count: {
-              select: {
-                other_modules: true,
-                course_modules: true,
-              },
-            },
-          },
-          orderBy: orderByClause,
-        })
+            orderBy: orderByClause,
+            skip,
+            take: validLimit,
+          }),
+          prisma.modules.count({ where: whereClause }),
+        ])
       } catch (complexQueryError) {
         console.warn('Complex query failed, trying simplified query:', complexQueryError)
-        
+
         // Fallback to simpler query without complex includes
-        return await prisma.modules.findMany({
-          where: whereClause,
-          include: {
-            users: {
-              select: {
-                name: true,
-                email: true,
+        return await Promise.all([
+          prisma.modules.findMany({
+            where: whereClause,
+            include: {
+              users: {
+                select: {
+                  name: true,
+                  email: true,
+                },
+              },
+              modules: {
+                select: {
+                  id: true,
+                  title: true,
+                },
+              },
+              other_modules: {
+                select: {
+                  id: true,
+                  title: true,
+                  status: true,
+                  created_at: true,
+                },
+                orderBy: {
+                  sort_order: 'asc',
+                },
+              },
+              _count: {
+                select: {
+                  other_modules: true,
+                  course_modules: true,
+                },
               },
             },
-            modules: {
-              select: {
-                id: true,
-                title: true,
-              },
-            },
-            other_modules: {
-              select: {
-                id: true,
-                title: true,
-                status: true,
-                created_at: true,
-              },
-              orderBy: {
-                sort_order: 'asc',
-              },
-            },
-            _count: {
-              select: {
-                other_modules: true,
-                course_modules: true,
-              },
-            },
-          },
-          orderBy: orderByClause,
-        })
+            orderBy: orderByClause,
+            skip,
+            take: validLimit,
+          }),
+          prisma.modules.count({ where: whereClause }),
+        ])
       }
     })
 
@@ -360,7 +377,16 @@ export async function GET(request: NextRequest) {
       },
     }))
 
-    return NextResponse.json({ modules: transformedModules, availableTags: allUserTags })
+    return NextResponse.json({
+      modules: transformedModules,
+      availableTags: allUserTags,
+      pagination: {
+        page: validPage,
+        limit: validLimit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / validLimit),
+      }
+    })
   } catch (error) {
     console.error('Error fetching modules:', error)
     console.error('Error details:', {

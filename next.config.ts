@@ -79,11 +79,11 @@ const nextConfig: NextConfig = {
           key: 'Content-Security-Policy',
           value: [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://va.vercel-scripts.com",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "img-src 'self' data: blob: https:",
             "font-src 'self' https://fonts.gstatic.com",
-            "connect-src 'self' https://www.google-analytics.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com",
+            "connect-src 'self' https://www.google-analytics.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://va.vercel-scripts.com",
             "media-src 'self' blob:",
             "object-src 'none'",
             "base-uri 'self'",

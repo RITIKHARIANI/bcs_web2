@@ -22,7 +22,7 @@ interface PythonPlaygroundProps {
   canvasHeight?: number;
 }
 
-export function PythonPlayground({
+export const PythonPlayground = React.forwardRef<any, PythonPlaygroundProps>(({
   initialCode = '# Python Playground\n\nprint("Hello, World!")\n\n# Try some basic math\nx = 5\ny = 10\nprint(f"x + y = {x + y}")',
   title = 'Python Playground',
   description = 'Write and execute Python code in your browser',
@@ -31,7 +31,7 @@ export function PythonPlayground({
   showCanvas = false,
   canvasWidth = 600,
   canvasHeight = 400,
-}: PythonPlaygroundProps) {
+}: PythonPlaygroundProps, ref) => {
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [code, setCode] = useState(initialCode);
@@ -67,43 +67,71 @@ export function PythonPlayground({
 
         if (!mounted) return;
 
+        // Always register turtle_graphics module, but enhance it if canvas is enabled
+        let manager: TurtleManager | null = null;
+        let mainTurtle: WebTurtle | null = null;
+
         // Setup WebTurtle integration if canvas is enabled
         if (showCanvas && canvasRef.current) {
-          const manager = new TurtleManager(canvasRef.current);
-          const mainTurtle = manager.createTurtle('main', 'vehicle');
+          console.log('Setting up turtle graphics with canvas:', canvasRef.current);
+          manager = new TurtleManager(canvasRef.current);
+          mainTurtle = manager.createTurtle('main', 'vehicle');
 
           setTurtleManager(manager);
           setWebTurtle(mainTurtle);
 
           // Setup interactivity
           manager.setupInteractivity();
-
-          // Register enhanced turtle system with Python
-          pyodide.registerJsModule('turtle_graphics', {
-            // Main turtle for simple graphics
-            turtle: mainTurtle,
-            create_turtle: () => mainTurtle,
-
-            // Advanced multi-turtle system for simulations
-            manager: manager,
-            create_vehicle: (id: string, vehicleType: string) => {
-              return manager.createTurtle(id, 'vehicle', { type: vehicleType });
-            },
-            create_heat_source: (id: string, x?: number, y?: number) => {
-              const heatSource = manager.createTurtle(id, 'heat_source');
-              if (x !== undefined && y !== undefined) {
-                heatSource.goto(x, y);
-              }
-              return heatSource;
-            },
-            start_animation: () => manager.startAnimation(),
-            stop_animation: () => manager.stopAnimation(),
-            clear_all: () => manager.clearAll(),
-            get_turtle: (id: string) => manager.getTurtle(id),
-            update_entity_data: (id: string, data: any) => manager.updateEntityData(id, data),
-            set_animation_callback: (callback: () => void) => manager.setAnimationCallback(callback),
-          });
+          console.log('Turtle manager initialized successfully');
+        } else {
+          console.log('Canvas not available during setup. showCanvas:', showCanvas, 'canvasRef.current:', !!canvasRef.current);
         }
+
+        // Register turtle_graphics module (always available, enhanced if canvas exists)
+        pyodide.registerJsModule('turtle_graphics', {
+          // Main turtle for simple graphics
+          turtle: mainTurtle,
+          create_turtle: () => mainTurtle,
+
+          // Advanced multi-turtle system for simulations (only if manager exists)
+          manager: manager,
+          create_vehicle: (id: string, vehicleType: string) => {
+            if (!manager) throw new Error('Canvas not available. Enable showCanvas to use advanced graphics.');
+            return manager.createTurtle(id, 'vehicle', { type: vehicleType });
+          },
+          create_heat_source: (id: string, x?: number, y?: number) => {
+            if (!manager) throw new Error('Canvas not available. Enable showCanvas to use advanced graphics.');
+            const heatSource = manager.createTurtle(id, 'heat_source');
+            if (x !== undefined && y !== undefined) {
+              heatSource.goto(x, y);
+            }
+            return heatSource;
+          },
+          start_animation: () => {
+            if (!manager) throw new Error('Canvas not available. Enable showCanvas to use animations.');
+            return manager.startAnimation();
+          },
+          stop_animation: () => {
+            if (!manager) throw new Error('Canvas not available. Enable showCanvas to use animations.');
+            return manager.stopAnimation();
+          },
+          clear_all: () => {
+            if (!manager) throw new Error('Canvas not available. Enable showCanvas to use advanced graphics.');
+            return manager.clearAll();
+          },
+          get_turtle: (id: string) => {
+            if (!manager) throw new Error('Canvas not available. Enable showCanvas to use advanced graphics.');
+            return manager.getTurtle(id);
+          },
+          update_entity_data: (id: string, data: any) => {
+            if (!manager) throw new Error('Canvas not available. Enable showCanvas to use advanced graphics.');
+            return manager.updateEntityData(id, data);
+          },
+          set_animation_callback: (callback: () => void) => {
+            if (!manager) throw new Error('Canvas not available. Enable showCanvas to use animations.');
+            return manager.setAnimationCallback(callback);
+          },
+        });
 
         setPyodideReady(true);
         console.log('Python environment ready!');
@@ -129,12 +157,135 @@ export function PythonPlayground({
   // Setup canvas when it becomes available
   useEffect(() => {
     if (showCanvas && canvasRef.current && !webTurtle && pyodideReady) {
+      console.log('Setting up WebTurtle for single turtle graphics');
       const turtle = new WebTurtle(canvasRef.current);
       setWebTurtle(turtle);
     }
   }, [showCanvas, pyodideReady, webTurtle]);
 
-  const runCode = useCallback(async () => {
+  // Setup TurtleManager when canvas becomes available (delayed to ensure canvas is rendered)
+  useEffect(() => {
+    if (showCanvas && canvasRef.current && pyodideReady && !turtleManager) {
+      console.log('Setting up TurtleManager...');
+
+      // Add a small delay to ensure canvas is fully rendered
+      const timer = setTimeout(() => {
+        if (canvasRef.current) {
+          console.log('Creating TurtleManager with canvas:', canvasRef.current);
+          const manager = new TurtleManager(canvasRef.current);
+          const mainTurtle = manager.createTurtle('main', 'vehicle');
+
+          setTurtleManager(manager);
+          setWebTurtle(mainTurtle);
+
+          // Setup interactivity
+          manager.setupInteractivity();
+          console.log('TurtleManager created successfully');
+
+          // Re-register the module with the new manager
+          const pyodide = (window as any).pyodide;
+          if (pyodide) {
+            try {
+              pyodide.registerJsModule('turtle_graphics', {
+                turtle: mainTurtle,
+                create_turtle: () => mainTurtle,
+                manager: manager,
+                create_vehicle: (id: string, vehicleType: string) => {
+                  return manager.createTurtle(id, 'vehicle', { type: vehicleType });
+                },
+                create_heat_source: (id: string, x?: number, y?: number) => {
+                  const heatSource = manager.createTurtle(id, 'heat_source');
+                  if (x !== undefined && y !== undefined) {
+                    heatSource.goto(x, y);
+                  }
+                  return heatSource;
+                },
+                start_animation: () => manager.startAnimation(),
+                stop_animation: () => manager.stopAnimation(),
+                clear_all: () => manager.clearAll(),
+                get_turtle: (id: string) => manager.getTurtle(id),
+                update_entity_data: (id: string, data: any) => manager.updateEntityData(id, data),
+                set_animation_callback: (callback: () => void) => manager.setAnimationCallback(callback),
+                reload_graphics: () => {
+                  console.log('Graphics system is now ready! You can recreate the visual simulation.');
+                  return true;
+                }
+              });
+              console.log('🎯 Graphics system ready! turtle_graphics module updated');
+            } catch (error) {
+              console.error('Failed to update turtle_graphics module:', error);
+            }
+          }
+        }
+      }, 500); // 500ms delay to ensure canvas is rendered
+
+      return () => clearTimeout(timer);
+    }
+  }, [showCanvas, pyodideReady, turtleManager]);
+
+  // Re-register turtle_graphics module when canvas becomes available
+  useEffect(() => {
+    if (pyodideReady && showCanvas && canvasRef.current && turtleManager) {
+      const pyodide = (window as any).pyodide;
+      if (pyodide) {
+        try {
+          // Re-register with the fully initialized manager
+          pyodide.registerJsModule('turtle_graphics', {
+            // Main turtle for simple graphics
+            turtle: webTurtle,
+            create_turtle: () => webTurtle,
+
+            // Advanced multi-turtle system for simulations
+            manager: turtleManager,
+            create_vehicle: (id: string, vehicleType: string) => {
+              return turtleManager.createTurtle(id, 'vehicle', { type: vehicleType });
+            },
+            create_heat_source: (id: string, x?: number, y?: number) => {
+              const heatSource = turtleManager.createTurtle(id, 'heat_source');
+              if (x !== undefined && y !== undefined) {
+                heatSource.goto(x, y);
+              }
+              return heatSource;
+            },
+            start_animation: () => turtleManager.startAnimation(),
+            stop_animation: () => turtleManager.stopAnimation(),
+            clear_all: () => turtleManager.clearAll(),
+            get_turtle: (id: string) => turtleManager.getTurtle(id),
+            update_entity_data: (id: string, data: any) => turtleManager.updateEntityData(id, data),
+            set_animation_callback: (callback: () => void) => turtleManager.setAnimationCallback(callback),
+            // Add function to reload graphics for existing simulation
+            reload_graphics: () => {
+              console.log('Graphics system is now ready! You can recreate the visual simulation.');
+              return true;
+            }
+          });
+          console.log('turtle_graphics module updated with canvas support');
+
+          // Trigger a console message to let user know graphics are ready
+          setTimeout(() => {
+            console.log('🎯 Graphics system ready! Run reload_simulation() to create visual elements.');
+          }, 100);
+        } catch (error) {
+          console.error('Failed to update turtle_graphics module:', error);
+        }
+      }
+    }
+  }, [pyodideReady, showCanvas, turtleManager, webTurtle]);
+
+  // Expose methods to parent components via ref
+  React.useImperativeHandle(ref, () => ({
+    runCode: async (customCode?: string) => {
+      if (customCode) {
+        setCode(customCode);
+        // Wait for state update then run
+        setTimeout(() => runCodeInternal(), 0);
+      } else {
+        runCodeInternal();
+      }
+    }
+  }));
+
+  const runCodeInternal = useCallback(async () => {
     if (!pyodideReady || !isPyodideReady()) {
       setError('Python environment is not ready yet. Please wait...');
       return;
@@ -166,6 +317,8 @@ export function PythonPlayground({
       setIsRunning(false);
     }
   }, [code, pyodideReady, webTurtle, showCanvas]);
+
+  const runCode = runCodeInternal;
 
   const resetCode = useCallback(() => {
     setCode(initialCode);
@@ -363,4 +516,6 @@ print(f"Min value: {y.min():.2f}")`}
       </CardContent>
     </Card>
   );
-}
+});
+
+PythonPlayground.displayName = 'PythonPlayground';
