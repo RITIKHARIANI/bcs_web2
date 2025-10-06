@@ -94,14 +94,14 @@ export function VerifyEmailForm() {
           </CardHeader>
           <CardContent>
             {isSuccess ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <Alert className="border-green-200 bg-green-50 text-green-800">
                   <CheckCircle className="h-4 w-4 text-green-600" />
                   <AlertDescription>{message}</AlertDescription>
                 </Alert>
 
-                <div className="text-center space-y-4">
-                  <p className="text-sm text-muted-foreground">
+                <div className="text-center space-y-6">
+                  <p className="text-sm text-muted-foreground pt-2">
                     Redirecting to login page...
                   </p>
 
