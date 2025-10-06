@@ -58,7 +58,7 @@ const generateEmailTemplate = (title: string, content: string, actionUrl?: strin
           ${actionUrl && actionText ? `<div style="text-align: center; margin: 30px 0;"><a href="${actionUrl}" class="button">${actionText}</a></div>` : ''}
         </div>
         <div class="footer">
-          <p>University of Illinois Computer Science Department</p>
+          <p>BCS E-Textbook Platform</p>
           <p>This is an automated message. Please do not reply to this email.</p>
         </div>
       </div>
