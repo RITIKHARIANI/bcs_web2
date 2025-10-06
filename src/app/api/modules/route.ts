@@ -22,7 +22,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log('Received in API:', body);
     const validatedData = createModuleSchema.parse(body)
+    console.log('Validated data:', validatedData);
 
     // Check if slug is unique for this author (with retry)
     const existingModule = await withDatabaseRetry(async () => {
@@ -132,12 +134,19 @@ export async function GET(request: NextRequest) {
     const session = await auth()
     const { searchParams } = new URL(request.url)
     const parentId = searchParams.get('parentId')
-    const parent_module_id = searchParams.get('parent_module_id') 
+    const parent_module_id = searchParams.get('parent_module_id')
     const status = searchParams.get('status')
     const tags = searchParams.get('tags')
     const search = searchParams.get('search')
     const sortBy = searchParams.get('sortBy') || 'sort_order'
     const sortOrder = searchParams.get('sortOrder') || 'asc'
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const limit = parseInt(searchParams.get('limit') || '50', 10)
+
+    // Validate pagination parameters
+    const validPage = Math.max(1, page)
+    const validLimit = Math.min(Math.max(1, limit), 100) // Max 100 items per page
+    const skip = (validPage - 1) * validLimit
 
     // Handle different access patterns
     let whereClause: any = {}
@@ -158,19 +167,19 @@ export async function GET(request: NextRequest) {
       whereClause.status = 'published'
     }
     
-    if (parentId) {
-      if (parentId === 'root') {
-        whereClause.parent_module_id = null
-      } else {
-        whereClause.parent_module_id = parentId
-      }
-    } else if (parent_module_id !== undefined) {
-      if (parent_module_id === 'null' || parent_module_id === null) {
-        whereClause.parent_module_id = null
-      } else {
-        whereClause.parent_module_id = parent_module_id
-      }
+    // Parent filtering logic - FIXED
+    if (parentId === 'root') {
+      // Only show root modules (no parent)
+      whereClause.parent_module_id = null
+    } else if (parentId === 'sub') {
+      // Only show sub-modules (has parent)
+      whereClause.parent_module_id = { not: null }
+    } else if (parentId && parentId !== 'all') {
+      // Show modules with specific parent ID
+      whereClause.parent_module_id = parentId
     }
+    // ✅ IMPORTANT: When parentId is undefined or 'all', we DON'T add any parent filtering
+    // This allows the query to return ALL modules (both root and sub-modules)
     
     // Apply status filter for faculty (public access already has status set)
     if (status && session?.user?.role === 'faculty') {
@@ -217,66 +226,93 @@ export async function GET(request: NextRequest) {
         orderByClause = { sort_order: sortOrder }
     }
 
-    const modules = await withDatabaseRetry(async () => {
+    const [modules, totalCount] = await withDatabaseRetry(async () => {
       try {
         // Try the full query first
-        return await prisma.modules.findMany({
-          where: whereClause,
-          include: {
-            users: {
-              select: {
-                name: true,
-                email: true,
+        return await Promise.all([
+          prisma.modules.findMany({
+            where: whereClause,
+            include: {
+              users: {
+                select: {
+                  name: true,
+                  email: true,
+                },
+              },
+              modules: {
+                select: {
+                  id: true,
+                  title: true,
+                },
+              },
+              other_modules: {
+                select: {
+                  id: true,
+                  title: true,
+                  status: true,
+                  created_at: true,
+                },
+                orderBy: {
+                  sort_order: 'asc',
+                },
+              },
+              _count: {
+                select: {
+                  other_modules: true,
+                  course_modules: true,
+                },
               },
             },
-            modules: {
-              select: {
-                id: true,
-                title: true,
-              },
-            },
-            other_modules: {
-              select: {
-                id: true,
-                title: true,
-                status: true,
-                created_at: true,
-              },
-              orderBy: {
-                sort_order: 'asc',
-              },
-            },
-            _count: {
-              select: {
-                other_modules: true,
-                course_modules: true,
-              },
-            },
-          },
-          orderBy: orderByClause,
-        })
+            orderBy: orderByClause,
+            skip,
+            take: validLimit,
+          }),
+          prisma.modules.count({ where: whereClause }),
+        ])
       } catch (complexQueryError) {
         console.warn('Complex query failed, trying simplified query:', complexQueryError)
-        
+
         // Fallback to simpler query without complex includes
-        return await prisma.modules.findMany({
-          where: whereClause,
-          include: {
-            users: {
-              select: {
-                name: true,
-                email: true,
+        return await Promise.all([
+          prisma.modules.findMany({
+            where: whereClause,
+            include: {
+              users: {
+                select: {
+                  name: true,
+                  email: true,
+                },
+              },
+              modules: {
+                select: {
+                  id: true,
+                  title: true,
+                },
+              },
+              other_modules: {
+                select: {
+                  id: true,
+                  title: true,
+                  status: true,
+                  created_at: true,
+                },
+                orderBy: {
+                  sort_order: 'asc',
+                },
+              },
+              _count: {
+                select: {
+                  other_modules: true,
+                  course_modules: true,
+                },
               },
             },
-            _count: {
-              select: {
-                other_modules: true,
-                course_modules: true,
-              },
-            },
-          },
-          orderBy: orderByClause,
-        })
+            orderBy: orderByClause,
+            skip,
+            take: validLimit,
+          }),
+          prisma.modules.count({ where: whereClause }),
+        ])
       }
     })
 
@@ -312,7 +348,45 @@ export async function GET(request: NextRequest) {
       allUserTags = []
     }
 
-    return NextResponse.json({ modules, availableTags: allUserTags })
+
+    // Transform the data to match frontend interface expectations
+    const transformedModules = modules.map(module => ({
+      id: module.id,
+      title: module.title,
+      slug: module.slug,
+      description: module.description,
+      content: module.content,
+      status: module.status,
+      tags: module.tags,
+      createdAt: module.created_at,
+      updatedAt: module.updated_at,
+      parentModuleId: module.parent_module_id,
+      // Transform 'modules' to 'parentModule' (parent relationship)
+      parentModule: module.modules ? {
+        id: module.modules.id,
+        title: module.modules.title,
+      } : null,
+      // Transform 'other_modules' to 'subModules' (children relationship) 
+      subModules: module.other_modules || [],
+      // Transform users (author info)
+      author: module.users,
+      // Transform counts
+      _count: {
+        subModules: module._count?.other_modules || 0,
+        courseModules: module._count?.course_modules || 0,
+      },
+    }))
+
+    return NextResponse.json({
+      modules: transformedModules,
+      availableTags: allUserTags,
+      pagination: {
+        page: validPage,
+        limit: validLimit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / validLimit),
+      }
+    })
   } catch (error) {
     console.error('Error fetching modules:', error)
     console.error('Error details:', {

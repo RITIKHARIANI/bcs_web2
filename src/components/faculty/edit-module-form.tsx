@@ -100,12 +100,21 @@ async function fetchParentModules(): Promise<{ modules: ParentModule[], availabl
 }
 
 async function updateModule(id: string, data: EditModuleFormData) {
+  // Transform parentModuleId to parent_module_id for API consistency
+  const { parentModuleId, ...rest } = data;
+  const apiData = {
+    ...rest,
+    parent_module_id: parentModuleId,
+  }
+
+  console.log('Updating module with data:', apiData);
+
   const response = await fetch(`/api/modules/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(apiData),
   })
 
   if (!response.ok) {

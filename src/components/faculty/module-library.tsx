@@ -11,15 +11,15 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Grid, 
-  List, 
-  BookOpen, 
-  FileText, 
-  Clock, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Grid,
+  List,
+  BookOpen,
+  FileText,
+  Clock,
   Eye,
   Edit,
   Brain,
@@ -34,7 +34,9 @@ import {
   SortDesc,
   X,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 
 interface Module {
@@ -60,9 +62,17 @@ interface Module {
   }
 }
 
+interface PaginationData {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+}
+
 interface ModulesResponse {
   modules: Module[]
   availableTags: string[]
+  pagination?: PaginationData
 }
 
 async function fetchModules(params: {
@@ -72,27 +82,30 @@ async function fetchModules(params: {
   parentId?: string
   sortBy?: string
   sortOrder?: string
+  page?: number
+  limit?: number
 }): Promise<ModulesResponse> {
   return withFetchRetry(async () => {
     const searchParams = new URLSearchParams()
-    
+
     Object.entries(params).forEach(([key, value]) => {
-      if (value && value.trim() !== '') {
-        searchParams.append(key, value)
+      if (value !== undefined && value !== null && String(value).trim() !== '') {
+        searchParams.append(key, String(value))
       }
     })
-    
+
     const url = `/api/modules?${searchParams.toString()}`
     const response = await fetch(url)
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: Failed to fetch modules`)
     }
-    
+
     const data = await response.json()
     return {
       modules: data.modules || [],
-      availableTags: data.availableTags || []
+      availableTags: data.availableTags || [],
+      pagination: data.pagination
     }
   }, {
     maxAttempts: 5, // Increased from 3 to 5
@@ -109,6 +122,8 @@ export function ModuleLibrary() {
   const [sortBy, setSortBy] = useState<string>('title')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 50
 
   // Memoize query params to prevent unnecessary re-fetches
   const queryParams = useMemo(() => ({
@@ -117,13 +132,15 @@ export function ModuleLibrary() {
     tags: selectedTags.length > 0 ? selectedTags.join(',') : undefined,
     parentId: parentFilter === 'root' ? 'root' : parentFilter === 'sub' ? 'sub' : undefined,
     sortBy,
-    sortOrder
-  }), [searchTerm, statusFilter, selectedTags, parentFilter, sortBy, sortOrder])
+    sortOrder,
+    page: currentPage,
+    limit: itemsPerPage
+  }), [searchTerm, statusFilter, selectedTags, parentFilter, sortBy, sortOrder, currentPage, itemsPerPage])
 
-  const { 
-    data = { modules: [], availableTags: [] }, 
-    isLoading, 
-    error, 
+  const {
+    data = { modules: [], availableTags: [] },
+    isLoading,
+    error,
     refetch,
     isFetching
   } = useQuery({
@@ -134,7 +151,7 @@ export function ModuleLibrary() {
     retry: 5, // Increased from 2 to 5 for better reliability
   })
 
-  const { modules, availableTags } = data
+  const { modules, availableTags, pagination } = data
 
   // Helper functions for tag management
   const addTag = (tag: string) => {
@@ -158,11 +175,11 @@ export function ModuleLibrary() {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
   }
 
-  // Calculate statistics
-  const rootModules = modules.filter(module => !module.parentModule)
-  const subModules = modules.filter(module => module.parentModule)
-  const publishedCount = modules.filter(m => m.status === 'published').length
-  const draftCount = modules.filter(m => m.status === 'draft').length
+  // Calculate statistics based on current filters
+  const filteredRootModules = modules.filter(module => !module.parentModule)
+  const filteredSubModules = modules.filter(module => module.parentModule)
+  const filteredPublishedCount = modules.filter(m => m.status === 'published').length
+  const filteredDraftCount = modules.filter(m => m.status === 'draft').length
 
   if (isLoading) {
     return (
@@ -265,15 +282,65 @@ export function ModuleLibrary() {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          {/* Enhanced Stats Dashboard */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             <Card className="cognitive-card">
               <CardContent className="p-4">
-                <div className="flex items-center">
-                  <FileText className="h-8 w-8 text-neural-primary" />
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-muted-foreground">Total Modules</p>
-                    <p className="text-2xl font-bold text-foreground">{modules.length}</p>
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-neural-primary to-neural-deep">
+                    <Brain className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-neural-primary">{modules.length}</div>
+                    <div className="text-xs text-muted-foreground">Total Modules</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-synapse-primary to-synapse-deep">
+                    <BookOpen className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-synapse-primary">
+                      {filteredRootModules.length}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Root Modules</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-cognition-teal to-cognition-deep">
+                    <Layers className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-cognition-teal">
+                      {filteredSubModules.length}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Sub-modules</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600">
+                    <CheckCircle className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {filteredPublishedCount}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Published</div>
                   </div>
                 </div>
               </CardContent>
@@ -281,39 +348,15 @@ export function ModuleLibrary() {
 
             <Card className="cognitive-card">
               <CardContent className="p-4">
-                <div className="flex items-center">
-                  <CheckCircle className="h-8 w-8 text-green-500" />
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-muted-foreground">Published</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {publishedCount}
-                    </p>
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600">
+                    <Edit className="h-5 w-5 text-white" />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="cognitive-card">
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <Edit className="h-8 w-8 text-orange-500" />
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-muted-foreground">Drafts</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {draftCount}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="cognitive-card">
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <Layers className="h-8 w-8 text-synapse-primary" />
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-muted-foreground">Root Modules</p>
-                    <p className="text-2xl font-bold text-foreground">{rootModules.length}</p>
+                  <div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      {filteredDraftCount}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Drafts</div>
                   </div>
                 </div>
               </CardContent>
@@ -502,6 +545,58 @@ export function ModuleLibrary() {
       </header>
 
       <main className="container mx-auto px-6 py-8">
+        {/* Active Filters Display */}
+        {(statusFilter !== 'all' || parentFilter !== 'all' || selectedTags.length > 0 || searchTerm.trim()) && (
+          <div className="mb-6">
+            <Card className="cognitive-card">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <Filter className="h-4 w-4 text-neural-primary" />
+                      <span className="text-sm font-medium">Active filters:</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {searchTerm.trim() && (
+                        <Badge variant="outline" className="text-neural-primary border-neural-primary/30">
+                          Search: &quot;{searchTerm}&quot;
+                        </Badge>
+                      )}
+                      {statusFilter !== 'all' && (
+                        <Badge variant="outline" className="text-neural-primary border-neural-primary/30">
+                          Status: {statusFilter}
+                        </Badge>
+                      )}
+                      {parentFilter !== 'all' && (
+                        <Badge variant="outline" className="text-neural-primary border-neural-primary/30">
+                          Type: {parentFilter === 'root' ? 'Root modules' : 'Sub-modules'}
+                        </Badge>
+                      )}
+                      {selectedTags.map((tag) => (
+                        <Badge key={tag} variant="default" className="pr-1">
+                          {tag}
+                          <X
+                            className="h-3 w-3 ml-1 cursor-pointer hover:bg-white hover:text-black rounded-full"
+                            onClick={() => removeTag(tag)}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <NeuralButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAllFilters}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Clear all
+                  </NeuralButton>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {modules.length > 0 ? (
           <div className={viewMode === 'grid' 
             ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
@@ -577,17 +672,25 @@ export function ModuleLibrary() {
                       <Calendar className="mr-1 h-3 w-3" />
                       {new Date(module.updatedAt).toLocaleDateString()}
                     </div>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-4">
                       {module._count.subModules > 0 && (
-                        <div className="flex items-center">
+                        <div className="flex items-center text-synapse-primary">
                           <Layers className="mr-1 h-3 w-3" />
-                          {module._count.subModules}
+                          <span className="font-medium">{module._count.subModules}</span>
+                          <span className="ml-1">sub{module._count.subModules === 1 ? '' : 's'}</span>
                         </div>
                       )}
                       {module._count.courseModules > 0 && (
-                        <div className="flex items-center">
-                          <Users className="mr-1 h-3 w-3" />
-                          {module._count.courseModules}
+                        <div className="flex items-center text-neural-primary">
+                          <BookOpen className="mr-1 h-3 w-3" />
+                          <span className="font-medium">{module._count.courseModules}</span>
+                          <span className="ml-1">course{module._count.courseModules === 1 ? '' : 's'}</span>
+                        </div>
+                      )}
+                      {module.parentModule && (
+                        <div className="flex items-center text-cognition-teal">
+                          <div className="w-2 h-2 bg-cognition-teal rounded-full mr-1"></div>
+                          <span className="text-xs font-medium">Sub-module</span>
                         </div>
                       )}
                     </div>
@@ -653,6 +756,67 @@ export function ModuleLibrary() {
               )}
             </CardContent>
           </Card>
+        )}
+
+        {/* Pagination Controls */}
+        {modules.length > 0 && pagination && pagination.totalPages > 1 && (
+          <div className="mt-12 flex flex-col items-center gap-4">
+            <div className="flex items-center justify-center gap-2">
+              <NeuralButton
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </NeuralButton>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(7, pagination.totalPages) }, (_, i) => {
+                  let pageNum: number;
+
+                  // Smart pagination display logic
+                  if (pagination.totalPages <= 7) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 4) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= pagination.totalPages - 3) {
+                    pageNum = pagination.totalPages - 6 + i;
+                  } else {
+                    pageNum = currentPage - 3 + i;
+                  }
+
+                  return (
+                    <NeuralButton
+                      key={pageNum}
+                      variant={currentPage === pageNum ? 'neural' : 'outline'}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNum)}
+                      className="min-w-[2.5rem]"
+                    >
+                      {pageNum}
+                    </NeuralButton>
+                  );
+                })}
+              </div>
+
+              <NeuralButton
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
+                disabled={currentPage === pagination.totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </NeuralButton>
+            </div>
+
+            {/* Page Info */}
+            <div className="text-center text-sm text-muted-foreground">
+              Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, pagination.totalCount)} of {pagination.totalCount} modules
+            </div>
+          </div>
         )}
       </main>
     </div>

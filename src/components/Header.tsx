@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { useRouter } from 'next/navigation';
 import { Brain, Search, User, BookOpen, Menu, LogOut, X, Home, BarChart3, Settings, Plus } from "lucide-react";
 import { NeuralButton } from "./ui/neural-button";
 import { Input } from "./ui/input";
@@ -46,10 +47,28 @@ const navigationConfig = {
 
 export function Header() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleSignOut = () => {
     signOut({ callbackUrl: "/" });
+  };
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (searchTerm.trim()) {
+      // For now, search courses by default, but we can make this smarter later
+      // TODO: Create a unified search page or smart routing
+      router.push(`/courses?search=${encodeURIComponent(searchTerm.trim())}`);
+      setMobileMenuOpen(false); // Close mobile menu if search from mobile
+    }
+  };
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   // Get navigation items based on user role
@@ -138,15 +157,18 @@ export function Header() {
           <div className="flex items-center space-x-2">
             {/* Desktop Search */}
             <div className="hidden lg:block">
-              <div className="relative">
+              <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
                   placeholder="Search courses..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={handleSearchKeyPress}
                   className="h-9 w-[300px] bg-background pl-10 border-neural-light/30 focus:border-neural-primary"
                   aria-label="Search courses and topics"
                   role="searchbox"
                 />
-              </div>
+              </form>
             </div>
 
             {/* Action Buttons */}
@@ -247,14 +269,17 @@ export function Header() {
           <div className="lg:hidden border-t border-border/40 bg-background/95 backdrop-blur">
             <div className="px-4 py-4 space-y-4 max-h-96 overflow-y-auto">
               {/* Mobile Search */}
-              <div className="relative">
+              <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search courses..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={handleSearchKeyPress}
                   className="h-9 w-full bg-background pl-10 border-neural-light/30 focus:border-neural-primary"
                   aria-label="Search courses and topics"
                 />
-              </div>
+              </form>
 
               {/* Mobile Navigation */}
               <nav className="flex flex-col space-y-1" role="navigation" aria-label="Mobile navigation">

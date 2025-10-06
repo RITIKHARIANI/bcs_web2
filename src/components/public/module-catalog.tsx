@@ -55,8 +55,12 @@ async function fetchPublicModules(): Promise<Module[]> {
   return data.modules
 }
 
-export function ModuleCatalog() {
-  const [searchTerm, setSearchTerm] = useState('')
+type ModuleCatalogProps = {
+  initialSearch?: string;
+};
+
+export function ModuleCatalog({ initialSearch = '' }: ModuleCatalogProps) {
+  const [searchTerm, setSearchTerm] = useState(initialSearch)
   const [showRootOnly, setShowRootOnly] = useState(false)
   const [selectedTag, setSelectedTag] = useState<string>('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')

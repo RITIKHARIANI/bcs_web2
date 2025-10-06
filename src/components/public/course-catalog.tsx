@@ -7,9 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { NeuralButton } from '@/components/ui/neural-button'
-import { 
-  Search, 
-  BookOpen, 
+import {
+  Search,
+  BookOpen,
   User,
   Calendar,
   Layers,
@@ -20,7 +20,9 @@ import {
   Grid,
   List,
   Clock,
-  CheckCircle
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 
 interface Course {
@@ -39,33 +41,54 @@ interface Course {
   }
 }
 
-async function fetchPublicCourses(): Promise<Course[]> {
-  const response = await fetch('/api/courses')
+interface PaginationData {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+interface CoursesResponse {
+  courses: Course[];
+  pagination: PaginationData;
+}
+
+async function fetchPublicCourses(page: number = 1, limit: number = 20): Promise<CoursesResponse> {
+  const response = await fetch(`/api/courses?page=${page}&limit=${limit}`)
   if (!response.ok) {
     throw new Error('Failed to fetch courses')
   }
   const data = await response.json()
-  return data.courses
+  return data
 }
 
-export function CourseCatalog() {
-  const [searchTerm, setSearchTerm] = useState('')
+type CourseCatalogProps = {
+  initialSearch?: string;
+};
+
+export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
+  const [searchTerm, setSearchTerm] = useState(initialSearch)
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 20
 
-  const { data: courses = [], isLoading, error } = useQuery({
-    queryKey: ['publicCourses'],
-    queryFn: fetchPublicCourses,
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['publicCourses', currentPage, itemsPerPage],
+    queryFn: () => fetchPublicCourses(currentPage, itemsPerPage),
   })
 
+  const courses = data?.courses || []
+  const pagination = data?.pagination
+
   const filteredCourses = courses.filter(course => {
-    const matchesSearch = 
+    const matchesSearch =
       course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       course.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (course.users?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
-    
+
     const matchesFeatured = !showFeaturedOnly || course.featured
-    
+
     return matchesSearch && matchesFeatured
   })
 
@@ -265,58 +288,121 @@ export function CourseCatalog() {
           </div>
 
           {filteredCourses.length > 0 ? (
-            <div className={viewMode === 'grid' 
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
-              : "space-y-4"
-            }>
-              {filteredCourses.map((course) => (
-                <Link key={course.id} href={`/courses/${course.slug}`}>
-                  <Card className="cognitive-card group cursor-pointer h-full hover:shadow-lg transition-all duration-300">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="flex items-start text-lg">
-                          <BookOpen className="mr-2 h-5 w-5 text-neural-primary mt-1 flex-shrink-0" />
-                          <span className="group-hover:text-neural-primary transition-colors">
-                            {course.title}
-                          </span>
-                        </CardTitle>
-                        {course.featured && (
-                          <Badge variant="secondary" className="ml-2">
-                            <Star className="h-3 w-3 mr-1" />
-                            Featured
-                          </Badge>
-                        )}
-                      </div>
-                      <CardDescription className="mt-2 line-clamp-3">
-                        {course.description || 'Explore this comprehensive course covering important concepts and practical applications in brain and cognitive sciences.'}
-                      </CardDescription>
-                    </CardHeader>
-                    
-                    <CardContent>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center">
-                          <User className="mr-1 h-3 w-3" />
-                          {course.users?.name || 'Unknown'}
+            <>
+              <div className={viewMode === 'grid'
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                : "space-y-4"
+              }>
+                {filteredCourses.map((course) => (
+                  <Link key={course.id} href={`/courses/${course.slug}`}>
+                    <Card className="cognitive-card group cursor-pointer h-full hover:shadow-lg transition-all duration-300">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <CardTitle className="flex items-start text-lg">
+                            <BookOpen className="mr-2 h-5 w-5 text-neural-primary mt-1 flex-shrink-0" />
+                            <span className="group-hover:text-neural-primary transition-colors">
+                              {course.title}
+                            </span>
+                          </CardTitle>
+                          {course.featured && (
+                            <Badge variant="secondary" className="ml-2">
+                              <Star className="h-3 w-3 mr-1" />
+                              Featured
+                            </Badge>
+                          )}
                         </div>
-                        <div className="flex items-center">
-                          <Layers className="mr-1 h-3 w-3" />
-                          {course._count.courseModules} modules
+                        <CardDescription className="mt-2 line-clamp-3">
+                          {course.description || 'Explore this comprehensive course covering important concepts and practical applications in brain and cognitive sciences.'}
+                        </CardDescription>
+                      </CardHeader>
+
+                      <CardContent>
+                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center">
+                            <User className="mr-1 h-3 w-3" />
+                            {course.users?.name || 'Unknown'}
+                          </div>
+                          <div className="flex items-center">
+                            <Layers className="mr-1 h-3 w-3" />
+                            {course._count.courseModules} modules
+                          </div>
+                          <div className="flex items-center">
+                            <Calendar className="mr-1 h-3 w-3" />
+                            {new Date(course.updatedAt).toLocaleDateString()}
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <Calendar className="mr-1 h-3 w-3" />
-                          {new Date(course.updatedAt).toLocaleDateString()}
-                        </div>
-                      </div>
-                      
-                      <NeuralButton variant="outline" size="sm" className="w-full group-hover:bg-neural-primary group-hover:text-white">
-                        Explore Course
-                        <ArrowRight className="ml-2 h-3 w-3" />
-                      </NeuralButton>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+
+                        <NeuralButton variant="outline" size="sm" className="w-full group-hover:bg-neural-primary group-hover:text-white">
+                          Explore Course
+                          <ArrowRight className="ml-2 h-3 w-3" />
+                        </NeuralButton>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {pagination && pagination.totalPages > 1 && (
+                <div className="mt-12 flex items-center justify-center gap-2">
+                  <NeuralButton
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous
+                  </NeuralButton>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(7, pagination.totalPages) }, (_, i) => {
+                      let pageNum: number;
+
+                      // Smart pagination display logic
+                      if (pagination.totalPages <= 7) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 4) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= pagination.totalPages - 3) {
+                        pageNum = pagination.totalPages - 6 + i;
+                      } else {
+                        pageNum = currentPage - 3 + i;
+                      }
+
+                      return (
+                        <NeuralButton
+                          key={pageNum}
+                          variant={currentPage === pageNum ? 'neural' : 'outline'}
+                          size="sm"
+                          onClick={() => setCurrentPage(pageNum)}
+                          className="min-w-[2.5rem]"
+                        >
+                          {pageNum}
+                        </NeuralButton>
+                      );
+                    })}
+                  </div>
+
+                  <NeuralButton
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
+                    disabled={currentPage === pagination.totalPages}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </NeuralButton>
+                </div>
+              )}
+
+              {/* Page Info */}
+              {pagination && (
+                <div className="mt-6 text-center text-sm text-muted-foreground">
+                  Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, pagination.totalCount)} of {pagination.totalCount} courses
+                </div>
+              )}
+            </>
           ) : (
             <Card className="cognitive-card">
               <CardContent className="p-12 text-center">
@@ -327,8 +413,8 @@ export function CourseCatalog() {
                 <p className="text-muted-foreground mb-6">
                   Try adjusting your search terms or check back later for new courses.
                 </p>
-                <NeuralButton 
-                  variant="neural" 
+                <NeuralButton
+                  variant="neural"
                   onClick={() => {
                     setSearchTerm('')
                     setShowFeaturedOnly(false)

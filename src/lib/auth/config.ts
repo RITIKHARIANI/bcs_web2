@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/db'
+import { prisma } from '../db'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 
 export const authConfig = {
@@ -36,11 +36,17 @@ export const authConfig = {
           return null
         }
 
+        // Check if email is verified (you can uncomment this to enforce verification)
+        // if (!user.email_verified) {
+        //   throw new Error('Please verify your email before signing in')
+        // }
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
+          emailVerified: user.email_verified,
         }
       }
     })
@@ -56,6 +62,7 @@ export const authConfig = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role
+        token.emailVerified = user.emailVerified
       }
       return token
     },
@@ -63,12 +70,14 @@ export const authConfig = {
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as string
+        session.user.emailVerified = token.emailVerified as boolean
       }
       return session
     },
   },
   pages: {
     signIn: '/auth/login',
+    signOut: '/',
     error: '/auth/error',
   },
 }
