@@ -36,10 +36,10 @@ export const authConfig = {
           return null
         }
 
-        // Check if email is verified (you can uncomment this to enforce verification)
-        // if (!user.email_verified) {
-        //   throw new Error('Please verify your email before signing in')
-        // }
+        // Check if email is verified
+        if (!user.email_verified) {
+          throw new Error('Please verify your email before signing in')
+        }
 
         return {
           id: user.id,

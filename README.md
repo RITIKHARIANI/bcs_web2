@@ -62,6 +62,10 @@ A modern, responsive, and feature-rich e-textbook platform designed specifically
    # - DATABASE_URL (PostgreSQL connection)
    # - NEXTAUTH_URL (http://localhost:3000)
    # - NEXTAUTH_SECRET (generate with: openssl rand -base64 32)
+   # - EMAIL_PROVIDER (console for dev, resend for production)
+   # - RESEND_API_KEY (get from https://resend.com)
+   # - EMAIL_FROM (onboarding@resend.dev for dev, verified domain for prod)
+   # - EMAIL_FROM_NAME (BCS E-Textbook)
    ```
 
 4. **Setup database**
@@ -86,6 +90,7 @@ A modern, responsive, and feature-rich e-textbook platform designed specifically
 
 ### **User Guides**
 - 📘 **[Faculty User Guide](./docs/FACULTY_USER_GUIDE.md)** - Complete guide for educators
+- 📧 **[Email Setup Guide](./docs/EMAIL_SETUP_GUIDE.md)** - Resend email configuration
 
 ### **Technical Documentation**
 - 🤖 **[CLAUDE.md](./CLAUDE.md)** - AI-assisted development guide
@@ -124,6 +129,7 @@ A modern, responsive, and feature-rich e-textbook platform designed specifically
 - **API**: Next.js API Routes (Edge & Serverless)
 - **Database**: PostgreSQL with Prisma ORM 6.14
 - **Authentication**: NextAuth.js v5 (beta.29)
+- **Email Service**: Resend (email verification & password reset)
 - **Session Management**: JWT-based sessions
 - **Data Fetching**: Server Components + API Routes
 
@@ -230,6 +236,10 @@ vercel --prod
 - `DATABASE_URL` - PostgreSQL connection (use port 6543 for serverless)
 - `NEXTAUTH_URL` - Production domain URL
 - `NEXTAUTH_SECRET` - Secure random string
+- `EMAIL_PROVIDER` - Email service (`resend` for production)
+- `RESEND_API_KEY` - API key from Resend dashboard
+- `EMAIL_FROM` - Verified sender email (e.g., `noreply@yourdomain.com`)
+- `EMAIL_FROM_NAME` - Sender display name (e.g., `BCS E-Textbook`)
 
 See [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) and [Production Guide](./docs/PRODUCTION_DEPLOYMENT_GUIDE.md) for detailed instructions.
 
