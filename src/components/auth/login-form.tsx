@@ -36,7 +36,10 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
+        // Display the actual error message from the backend
+        setError(result.error === "CredentialsSignin"
+          ? "Invalid email or password"
+          : result.error);
       } else {
         router.push(callbackUrl);
         router.refresh();
