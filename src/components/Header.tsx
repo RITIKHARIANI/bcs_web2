@@ -189,7 +189,16 @@ export function Header() {
                     </div>
                   </div>
                   <DropdownMenuSeparator />
-                  
+
+                  {/* My Profile */}
+                  <DropdownMenuItem asChild>
+                    <Link href={`/profile/${session.user.id}`} className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      My Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+
                   {/* User-specific actions */}
                   {session.user.role === "faculty" && (
                     <>
