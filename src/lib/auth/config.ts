@@ -2,7 +2,6 @@ import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from '../db'
-import { PrismaAdapter } from '@auth/prisma-adapter'
 
 export const authConfig = {
   providers: [
@@ -51,7 +50,6 @@ export const authConfig = {
       }
     })
   ],
-  adapter: PrismaAdapter(prisma),
   session: {
     strategy: 'jwt' as const,
   },
