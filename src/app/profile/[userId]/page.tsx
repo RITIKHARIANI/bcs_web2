@@ -2,18 +2,19 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/config'
+import Image from 'next/image'
+import { auth } from '@/lib/auth/config'
 
 interface ProfilePageProps {
-  params: {
+  params: Promise<{
     userId: string
-  }
+  }>
 }
 
 export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
+  const { userId } = await params
   const user = await prisma.users.findUnique({
-    where: { id: params.userId },
+    where: { id: userId },
     select: { name: true }
   })
 
@@ -23,10 +24,11 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
-  const session = await getServerSession(authOptions)
+  const { userId } = await params
+  const session = await auth()
 
   const user = await prisma.users.findUnique({
-    where: { id: params.userId },
+    where: { id: userId },
     select: {
       id: true,
       name: true,
@@ -69,9 +71,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               {/* Avatar */}
               <div className="mb-4 sm:mb-0 sm:mr-6">
                 {user.avatar_url ? (
-                  <img
+                  <Image
                     src={user.avatar_url}
                     alt={user.name}
+                    width={128}
+                    height={128}
                     className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
                   />
                 ) : (

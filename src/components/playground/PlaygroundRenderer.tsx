@@ -56,7 +56,7 @@ export function PlaygroundRenderer({ playground, onParameterChange }: Playground
     return () => {
       unsubscribe();
     };
-  }, [playground.controls]);
+  }, [playground.controls, onParameterChange]);
 
   // Initialize canvas/turtle if needed
   useEffect(() => {
@@ -136,6 +136,7 @@ export function PlaygroundRenderer({ playground, onParameterChange }: Playground
   // Auto-execute on mount
   useEffect(() => {
     executeCode();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Re-execute when parameters change (debounced)
@@ -147,7 +148,7 @@ export function PlaygroundRenderer({ playground, onParameterChange }: Playground
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [parameters]);
+  }, [parameters, executeCode, isRunning]);
 
   // Handle control changes
   const handleControlChange = useCallback((controlId: string, value: any) => {

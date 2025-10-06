@@ -19,7 +19,7 @@ export function Checkbox({ config, value, onChange }: CheckboxProps) {
     if (value !== undefined && value !== isChecked) {
       setIsChecked(value);
     }
-  }, [value]);
+  }, [value, isChecked]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.checked;

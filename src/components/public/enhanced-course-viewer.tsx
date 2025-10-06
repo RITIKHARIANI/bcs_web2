@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { NeuralButton } from '@/components/ui/neural-button'
@@ -373,9 +374,11 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
               <CardContent>
                 <Link href={`/profile/${course.author.id}`} className="flex items-center gap-4 hover:bg-muted/50 p-4 rounded-lg transition-colors">
                   {course.author.avatar_url ? (
-                    <img
+                    <Image
                       src={course.author.avatar_url}
                       alt={course.author.name}
+                      width={64}
+                      height={64}
                       className="w-16 h-16 rounded-full border-2 border-neural-primary object-cover"
                     />
                   ) : (
