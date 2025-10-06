@@ -107,34 +107,58 @@ import Image from 'next/image'
 
 ```
 src/
-├── app/                      # Next.js App Router
-│   ├── api/                  # API Routes
-│   │   ├── auth/            # Authentication endpoints
-│   │   ├── courses/         # Course CRUD
+├── app/                      # Next.js 15 App Router (26 pages)
+│   ├── api/                  # API Routes (17 endpoints)
+│   │   ├── auth/            # Authentication (login, register, verify-email, reset-password)
+│   │   ├── courses/         # Course CRUD + by-slug endpoint
 │   │   ├── modules/         # Module CRUD (supports pagination)
-│   │   ├── profile/         # User profile
-│   │   └── playgrounds/     # Interactive playgrounds
-│   ├── faculty/             # Faculty dashboard routes
+│   │   ├── profile/         # User profile (GET/PUT)
+│   │   ├── playgrounds/     # Playground CRUD
+│   │   └── public/          # Public API (network visualization)
+│   ├── faculty/             # Faculty dashboard
+│   │   ├── courses/         # Course management
+│   │   └── modules/         # Module management
 │   ├── courses/[slug]/      # Public course viewer
-│   ├── profile/[userId]/    # User profiles
-│   └── playgrounds/         # Playground builder & viewer
+│   │   └── [moduleSlug]/    # Module viewer
+│   ├── profile/             # User profiles
+│   │   ├── [userId]/        # View profile
+│   │   └── edit/            # Edit own profile
+│   ├── playgrounds/         # Interactive playgrounds
+│   │   ├── [id]/            # View playground
+│   │   └── builder/         # Builder interface
+│   ├── auth/                # Auth pages (login, register, etc.)
+│   ├── modules/[slug]/      # Public module viewer
+│   ├── network/             # Network visualization
+│   └── python/              # Python playground demo
 │
-├── components/
-│   ├── ui/                  # Radix UI + shadcn components
-│   ├── faculty/             # Faculty-specific components
-│   ├── public/              # Public-facing components
-│   ├── playground/          # Playground builder components
-│   └── python/              # Python execution components
+├── components/              # 65+ React components
+│   ├── ui/                  # Radix UI primitives + shadcn
+│   ├── faculty/             # Faculty dashboard components
+│   ├── public/              # Public-facing (course-catalog, course-viewer, etc.)
+│   ├── playground/          # Playground system
+│   │   ├── builder/         # Builder UI components
+│   │   └── controls/        # Interactive controls (Slider, Button, etc.)
+│   ├── python/              # Python execution components
+│   ├── visualization/       # React Flow network graphs
+│   ├── auth/                # Authentication forms
+│   └── layout/              # Layout components
 │
-├── lib/
-│   ├── auth/                # NextAuth configuration
-│   ├── playground/          # Playground execution engine
-│   ├── db.ts               # Prisma client instance
-│   ├── pyodide-loader.ts   # Python runtime loader
-│   └── turtle-manager.ts   # Canvas graphics manager
+├── lib/                     # Core utilities and services
+│   ├── auth/                # NextAuth v5 configuration
+│   ├── playground/          # Playground execution engine & parameter binder
+│   ├── db.ts               # Prisma client singleton
+│   ├── pyodide-loader.ts   # Python runtime (Pyodide) loader
+│   ├── turtle-manager.ts   # Canvas graphics for simulations
+│   ├── web-turtle.ts       # Basic turtle graphics
+│   ├── retry.ts            # Database retry logic for serverless
+│   └── email.ts            # Email sending utilities
+│
+├── templates/               # Playground templates
+│   ├── index.ts            # Template registry
+│   └── braitenberg-vehicles.ts  # Example template
 │
 └── types/
-    └── playground.ts        # Playground type definitions
+    └── playground.ts        # Playground TypeScript definitions
 ```
 
 ### Custom Design System
@@ -217,13 +241,23 @@ const data = await withDatabaseRetry(async () => {
 
 6. **Prisma Client**: Generated client is gitignored. Always run `prisma generate` after pulling schema changes.
 
-## Testing
+## Recent Features & Current Status
 
-The project doesn't currently have automated tests. When adding features:
-- Test manually in both development and production builds
-- Verify mobile responsiveness
-- Check authentication flows for both faculty and public users
-- Test with actual PostgreSQL database, not SQLite
+### Implemented (January 2025)
+1. **User Profile System** - Faculty profiles with custom fields (about, speciality, university, interested_fields, avatar)
+2. **Pagination** - Course catalog (20/page) and module library (50/page) with smart page controls
+3. **Enhanced Course View** - Overview section and instructor display when no module selected
+4. **Optimized Layouts** - Module content maximized with fixed 280px sidebar
+5. **Interactive Playgrounds** - Python execution with Pyodide, parameter binding, template system
+6. **Email Verification** - User account verification system
+7. **Password Reset** - Forgot password functionality
+
+### Testing Approach
+The project uses manual testing. When adding features:
+- Test in both development (`npm run dev`) and production builds (`npm run build && npm start`)
+- Verify mobile responsiveness across devices
+- Check authentication flows for faculty and public users
+- Test with PostgreSQL database (not SQLite)
 
 ## Deployment
 
@@ -252,10 +286,19 @@ The project doesn't currently have automated tests. When adding features:
 
 ## Documentation
 
-Key documentation files in `/docs`:
+**All documentation is in `/docs` directory** (not root). Key files:
+
 - `TECHNICAL_DOCUMENTATION.md` - Full architecture details
 - `FACULTY_USER_GUIDE.md` - End-user guide for educators
 - `PLAYGROUND_BUILDER_ARCHITECTURE.md` - Playground system design
+- `PLAYGROUND_QUICK_START.md` - Getting started with playgrounds
+- `PLAYGROUND_TESTING_GUIDE.md` - Testing interactive components
 - `IMPLEMENTATION_STATUS.md` - Current development status
+- `Development_Guide.md` - Developer onboarding
+- `DEPLOYMENT_GUIDE.md` - Deployment instructions
+- `PRODUCTION_DEPLOYMENT_GUIDE.md` - Production-specific guidance
+- `TESTING_GUIDE.md` - Testing procedures
+- `MOBILE_RESPONSIVENESS.md` - Mobile optimization details
+- `UNIVERSITY_OF_ILLINOIS_BRANDING.md` - Design guidelines
 
-Refer to these for detailed feature information before making changes.
+**Note**: Outdated files have been removed. All AI development prompts, task reports, and debug documentation have been cleaned up.

@@ -14,13 +14,17 @@ A modern, responsive, and feature-rich e-textbook platform designed specifically
 - **Interactive Visualizations**: Graph-based course structure design tools
 - **Drag-and-Drop Interface**: Intuitive course building experience
 - **Real-Time Preview**: See exactly how students will experience content
+- **User Profiles**: Customizable faculty profiles with specialties and portfolios
+- **Interactive Playgrounds**: Build Python-based interactive simulations (Braitenberg Vehicles, etc.)
 
-### 👥 **For Students**
+### 👥 **For Students & Public Users**
 - **Enhanced Reading Experience**: Optimized for learning and comprehension
 - **Mobile-First Design**: Perfect experience on all devices
 - **Interactive Navigation**: Breadcrumbs, progress tracking, and smart linking
-- **Course Structure Visualization**: Understand learning pathways
+- **Course Structure Visualization**: Understand learning pathways with network graphs
 - **Shareable Content**: Direct links to specific modules and sections
+- **Instructor Profiles**: View course creators and their expertise
+- **Paginated Browse**: Efficient browsing of large course catalogs
 
 ### 🔧 **Technical Excellence**
 - **Modern Architecture**: Next.js 15 with App Router and React 19
@@ -54,19 +58,21 @@ A modern, responsive, and feature-rich e-textbook platform designed specifically
 
 3. **Setup environment variables**
    ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your configuration
+   # Copy .env to .env.local and configure:
+   # - DATABASE_URL (PostgreSQL connection)
+   # - NEXTAUTH_URL (http://localhost:3000)
+   # - NEXTAUTH_SECRET (generate with: openssl rand -base64 32)
    ```
 
 4. **Setup database**
    ```bash
-   npx prisma migrate dev
-   npx prisma generate
+   npm run db:generate    # Generate Prisma Client
+   npm run db:push        # Push schema to database (use this, not migrate)
    ```
 
 5. **Start development server**
    ```bash
-   npm run dev
+   npm run dev            # Uses Turbopack for fast refresh
    ```
 
 6. **Open your browser**
@@ -79,18 +85,24 @@ A modern, responsive, and feature-rich e-textbook platform designed specifically
 ## 📖 Documentation
 
 ### **User Guides**
-- 📘 **[Faculty User Guide](./FACULTY_USER_GUIDE.md)** - Complete guide for educators
-- 📗 **[Student User Guide](./STUDENT_USER_GUIDE.md)** - Navigation and learning tips *(Coming Soon)*
+- 📘 **[Faculty User Guide](./docs/FACULTY_USER_GUIDE.md)** - Complete guide for educators
 
 ### **Technical Documentation**
-- 🔧 **[Technical Documentation](./TECHNICAL_DOCUMENTATION.md)** - Architecture and development details
-- 🚀 **[Deployment Guide](./DEPLOYMENT_GUIDE.md)** - Production deployment instructions
-- 🧪 **[Testing Guide](./TESTING_GUIDE.md)** - Comprehensive testing procedures
+- 🤖 **[CLAUDE.md](./CLAUDE.md)** - AI-assisted development guide
+- 🔧 **[Technical Documentation](./docs/TECHNICAL_DOCUMENTATION.md)** - Architecture and development details
+- 🚀 **[Deployment Guide](./docs/DEPLOYMENT_GUIDE.md)** - Production deployment instructions
+- 📋 **[Development Guide](./docs/Development_Guide.md)** - Developer onboarding
+- 🧪 **[Testing Guide](./docs/TESTING_GUIDE.md)** - Testing procedures
 
-### **Reports**
-- 📊 **[Test Execution Report](./TEST_EXECUTION_REPORT.md)** - Quality assurance results
-- 📱 **[Mobile Responsiveness Report](./MOBILE_RESPONSIVENESS.md)** - Cross-device compatibility
-- 📈 **[Performance Report](./TESTING_PERFORMANCE_REPORT.md)** - Speed and optimization metrics
+### **Playground System**
+- 🎮 **[Playground Architecture](./docs/PLAYGROUND_BUILDER_ARCHITECTURE.md)** - System design
+- 🚀 **[Quick Start Guide](./docs/PLAYGROUND_QUICK_START.md)** - Get started with playgrounds
+- 🧪 **[Playground Testing](./docs/PLAYGROUND_TESTING_GUIDE.md)** - Testing interactive components
+- 📊 **[Implementation Status](./docs/IMPLEMENTATION_STATUS.md)** - Current development status
+
+### **Additional Resources**
+- 📱 **[Mobile Responsiveness](./docs/MOBILE_RESPONSIVENESS.md)** - Cross-device compatibility
+- 🎨 **[University Branding](./docs/UNIVERSITY_OF_ILLINOIS_BRANDING.md)** - Design guidelines
 
 ---
 
@@ -99,25 +111,28 @@ A modern, responsive, and feature-rich e-textbook platform designed specifically
 ### **Frontend**
 - **Framework**: Next.js 15.5.0 with App Router
 - **UI Library**: React 19.1.0
-- **Styling**: Tailwind CSS 4.0 + Custom Neural Design System
-- **Components**: Radix UI + Custom Components
+- **Styling**: Tailwind CSS 3.4 + Custom Neural Design System
+- **Components**: Radix UI + shadcn/ui
 - **Icons**: Lucide React
 - **Rich Text**: Tiptap Editor
 - **Visualizations**: React Flow
 - **Forms**: React Hook Form + Zod Validation
+- **Python Runtime**: Pyodide (Python in browser)
+- **State Management**: Tanstack Query (React Query)
 
 ### **Backend**
-- **API**: Next.js API Routes
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: NextAuth.js v5
-- **File Storage**: Local + Cloud Storage Ready
-- **Validation**: Zod Schemas
+- **API**: Next.js API Routes (Edge & Serverless)
+- **Database**: PostgreSQL with Prisma ORM 6.14
+- **Authentication**: NextAuth.js v5 (beta.29)
+- **Session Management**: JWT-based sessions
+- **Data Fetching**: Server Components + API Routes
 
 ### **Development Tools**
-- **Language**: TypeScript 5.x
-- **Linting**: ESLint + Next.js Configuration
-- **Testing**: Jest + Playwright
+- **Language**: TypeScript 5.8
+- **Build Tool**: Turbopack (Next.js built-in)
+- **Linting**: ESLint 9 + typescript-eslint
 - **Package Manager**: npm
+- **Version Control**: Git + GitHub
 
 ---
 
@@ -175,11 +190,11 @@ Built with security as a foundation:
 
 ## 🧪 Quality Assurance
 
-### **Testing Coverage**
-- **Unit Tests**: 85% code coverage
-- **Integration Tests**: All API routes tested
-- **End-to-End Tests**: Critical user journeys automated
-- **Performance Tests**: Regular Lighthouse audits
+### **Code Quality**
+- **TypeScript**: Strict mode with comprehensive type coverage
+- **ESLint**: Zero warnings in production builds
+- **Code Review**: All changes reviewed before merge
+- **Performance**: Regular Lighthouse audits
 
 ### **Browser Support**
 - **Chrome**: Latest 2 versions ✅
@@ -197,30 +212,26 @@ Built with security as a foundation:
 
 ---
 
-## 🚀 Deployment Options
+## 🚀 Deployment
 
-### **Vercel (Recommended)**
-One-click deployment with optimal Next.js performance:
+### **Vercel (Production)**
+The platform is deployed on Vercel with automatic deployments from the `main` branch:
+
 ```bash
+# Deploy to production
+git push origin main  # Auto-deploys to Vercel
+
+# Manual deployment
 npm install -g vercel
 vercel --prod
 ```
 
-### **Docker**
-Containerized deployment for any environment:
-```bash
-docker build -t bcs-etextbook .
-docker run -p 3000:3000 bcs-etextbook
-```
+**Environment Variables Required**:
+- `DATABASE_URL` - PostgreSQL connection (use port 6543 for serverless)
+- `NEXTAUTH_URL` - Production domain URL
+- `NEXTAUTH_SECRET` - Secure random string
 
-### **Traditional VPS**
-PM2 process management for VPS deployments:
-```bash
-npm run build
-pm2 start ecosystem.config.js --env production
-```
-
-See [Deployment Guide](./DEPLOYMENT_GUIDE.md) for detailed instructions.
+See [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) and [Production Guide](./docs/PRODUCTION_DEPLOYMENT_GUIDE.md) for detailed instructions.
 
 ---
 
@@ -274,36 +285,35 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 ## 📊 Project Statistics
 
 ```
-Lines of Code: ~15,000
-Components: 45+
-API Routes: 12
-Database Tables: 4
-Test Coverage: 85%
-Documentation Pages: 8
-Development Time: 2 weeks
+Lines of Code: ~23,600
+TypeScript/React Files: 65+ components
+API Routes: 17 endpoints
+Database Models: 9 (users, courses, modules, playgrounds, etc.)
+Pages: 26 routes
+Documentation Files: 13
+Tech Stack: Next.js 15 + React 19 + PostgreSQL
 ```
 
 ---
 
-## 🎯 Future Roadmap
+## 🎯 Recent Updates
 
-### **Phase 2 Features (Q2 2025)**
-- [ ] **Student Progress Tracking**: Detailed analytics and progress visualization
+### **Latest Features (January 2025)**
+- ✅ **User Profile System**: Faculty profiles with portfolios, specialties, and course listings
+- ✅ **Pagination**: Efficient browsing for course catalog (20/page) and module library (50/page)
+- ✅ **Enhanced Course View**: Course overview and instructor sections with avatars
+- ✅ **Optimized Layouts**: Module pages maximized for content readability
+- ✅ **Interactive Playgrounds**: Python-based simulations with Pyodide runtime
+- ✅ **Email Verification**: Two-factor authentication for user accounts
+- ✅ **Password Reset**: Forgot password functionality
+
+### **Future Enhancements**
+- [ ] **Playground Templates**: Additional interactive simulation templates
+- [ ] **Student Progress Tracking**: Analytics and completion tracking
 - [ ] **Assessment Tools**: Built-in quizzes and evaluation features
-- [ ] **Collaboration Features**: Faculty collaboration and peer review
+- [ ] **Collaboration Features**: Faculty peer review and co-authoring
 - [ ] **Advanced Analytics**: Usage patterns and learning insights
-
-### **Phase 3 Features (Q3 2025)**
-- [ ] **Mobile Apps**: Native iOS and Android applications
-- [ ] **Offline Support**: Content caching and offline reading
-- [ ] **AI Integration**: Content recommendations and smart assistance
-- [ ] **Multi-Language**: Internationalization support
-
-### **Phase 4 Features (Q4 2025)**
-- [ ] **Virtual Reality**: Immersive 3D learning experiences
-- [ ] **Advanced Simulations**: Interactive brain and cognitive models
-- [ ] **Machine Learning**: Personalized learning path optimization
-- [ ] **Integration APIs**: LMS and third-party tool connections
+- [ ] **Mobile Apps**: Native applications for iOS and Android
 
 ---
 
@@ -323,9 +333,10 @@ Development Time: 2 weeks
 
 ---
 
-**Version**: 2.0.0  
-**Last Updated**: January 19, 2025  
+**Version**: 2.0.0
+**Last Updated**: January 2025
 **Status**: ✅ **Production Ready**
+**Repository**: [github.com/RITIKHARIANI/bcs_web2](https://github.com/RITIKHARIANI/bcs_web2)
 
 ---
 
