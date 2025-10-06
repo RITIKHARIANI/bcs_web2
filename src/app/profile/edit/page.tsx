@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { Header } from '@/components/Header'
 
 export default function EditProfilePage() {
   const { data: session, status } = useSession()
@@ -100,14 +101,19 @@ export default function EditProfilePage() {
 
   if (loading || status === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </div>
+      <>
+        <Header />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-gray-600">Loading...</div>
+        </div>
+      </>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <>
+      <Header />
+      <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow rounded-lg p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Profile</h1>
@@ -262,5 +268,6 @@ export default function EditProfilePage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

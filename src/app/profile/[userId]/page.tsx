@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import Link from 'next/link'
 import Image from 'next/image'
 import { auth } from '@/lib/auth/config'
+import { Header } from '@/components/Header'
 
 interface ProfilePageProps {
   params: Promise<{
@@ -61,7 +62,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const isOwnProfile = session?.user?.id === user.id
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <>
+      <Header />
+      <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Profile Header */}
         <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
@@ -176,5 +179,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         </div>
       </div>
     </div>
+    </>
   )
 }
