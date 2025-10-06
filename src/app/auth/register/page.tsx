@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { RegisterForm } from "@/components/auth/register-form";
+import { PublicLayout } from "@/components/layouts/app-layout";
 
 function RegisterContent() {
   return <RegisterForm />;
@@ -7,8 +8,10 @@ function RegisterContent() {
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <RegisterContent />
-    </Suspense>
+    <PublicLayout showFooter={false}>
+      <Suspense fallback={<div>Loading...</div>}>
+        <RegisterContent />
+      </Suspense>
+    </PublicLayout>
   );
 }
