@@ -144,8 +144,8 @@ export function VerifyEmailForm() {
                   <AlertDescription>{message}</AlertDescription>
                 </Alert>
 
-                <div className="text-center space-y-6">
-                  <p className="text-sm text-muted-foreground pt-2">
+                <div className="text-center space-y-8">
+                  <p className="text-sm text-muted-foreground pt-2 pb-4">
                     Redirecting to login page...
                   </p>
 
