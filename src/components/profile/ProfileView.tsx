@@ -11,7 +11,13 @@ import {
   Building2,
   GraduationCap,
   Mail,
-  Edit
+  Edit,
+  ExternalLink,
+  Globe,
+  Linkedin,
+  Twitter,
+  Github,
+  FlaskConical
 } from 'lucide-react'
 
 interface Course {
@@ -35,13 +41,18 @@ interface ProfileViewProps {
     role: string
     created_at: Date
     courses: Course[]
+    google_scholar_url: string | null
+    personal_website_url: string | null
+    linkedin_url: string | null
+    twitter_url: string | null
+    github_url: string | null
   }
   moduleCount: number
   isOwnProfile: boolean
 }
 
 export function ProfileView({ user, moduleCount, isOwnProfile }: ProfileViewProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'courses'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'publications' | 'research'>('overview')
 
   const stats = [
     {
@@ -73,6 +84,8 @@ export function ProfileView({ user, moduleCount, isOwnProfile }: ProfileViewProp
       bgColor: 'bg-indigo-50'
     }
   ]
+
+  const hasLinks = user.google_scholar_url || user.personal_website_url || user.linkedin_url || user.twitter_url || user.github_url
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -118,11 +131,19 @@ export function ProfileView({ user, moduleCount, isOwnProfile }: ProfileViewProp
                 )}
               </div>
 
-              {/* Name and Metadata */}
-              <div className="flex-1 text-center sm:text-left mt-4 sm:mt-8">
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              {/* Name, Email and Metadata */}
+              <div className="flex-1 text-center sm:text-left mt-4 sm:mt-6">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1">
                   {user.name}
                 </h1>
+
+                {/* Email */}
+                <div className="flex items-center justify-center sm:justify-start gap-2 text-gray-600 mb-3">
+                  <Mail className="h-4 w-4" />
+                  <a href={`mailto:${user.email}`} className="hover:text-blue-600 transition-colors">
+                    {user.email}
+                  </a>
+                </div>
 
                 {/* Role Badge */}
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 rounded-full text-sm font-medium mb-3">
@@ -131,7 +152,7 @@ export function ProfileView({ user, moduleCount, isOwnProfile }: ProfileViewProp
                 </div>
 
                 {/* University and Speciality */}
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 text-gray-600 text-sm">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 text-gray-600 text-sm mb-3">
                   {user.university && (
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
@@ -145,6 +166,74 @@ export function ProfileView({ user, moduleCount, isOwnProfile }: ProfileViewProp
                     </div>
                   )}
                 </div>
+
+                {/* Academic & Social Links */}
+                {hasLinks && (
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-4">
+                    {user.google_scholar_url && (
+                      <a
+                        href={user.google_scholar_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm transition-colors"
+                        title="Google Scholar"
+                      >
+                        <GraduationCap className="h-4 w-4" />
+                        <span className="hidden sm:inline">Scholar</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                    {user.personal_website_url && (
+                      <a
+                        href={user.personal_website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm transition-colors"
+                        title="Personal Website"
+                      >
+                        <Globe className="h-4 w-4" />
+                        <span className="hidden sm:inline">Website</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                    {user.linkedin_url && (
+                      <a
+                        href={user.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm transition-colors"
+                        title="LinkedIn"
+                      >
+                        <Linkedin className="h-4 w-4" />
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                    {user.twitter_url && (
+                      <a
+                        href={user.twitter_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-100 hover:bg-sky-200 text-sky-700 rounded-lg text-sm transition-colors"
+                        title="Twitter/X"
+                      >
+                        <Twitter className="h-4 w-4" />
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                    {user.github_url && (
+                      <a
+                        href={user.github_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-sm transition-colors"
+                        title="GitHub"
+                      >
+                        <Github className="h-4 w-4" />
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -187,6 +276,26 @@ export function ProfileView({ user, moduleCount, isOwnProfile }: ProfileViewProp
                 }`}
               >
                 Courses ({user.courses.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('publications')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'publications'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Publications
+              </button>
+              <button
+                onClick={() => setActiveTab('research')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'research'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Research
               </button>
             </nav>
           </div>
@@ -274,6 +383,38 @@ export function ProfileView({ user, moduleCount, isOwnProfile }: ProfileViewProp
                     <p className="text-gray-500">No published courses yet.</p>
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeTab === 'publications' && (
+              <div className="text-center py-12">
+                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Publications Coming Soon</h3>
+                <p className="text-gray-500 mb-4">
+                  The publications section is under development.
+                </p>
+                {user.google_scholar_url && (
+                  <a
+                    href={user.google_scholar_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <GraduationCap className="h-4 w-4" />
+                    View on Google Scholar
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'research' && (
+              <div className="text-center py-12">
+                <FlaskConical className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Research Section Coming Soon</h3>
+                <p className="text-gray-500">
+                  This section will showcase research projects, labs, and collaborations.
+                </p>
               </div>
             )}
           </div>

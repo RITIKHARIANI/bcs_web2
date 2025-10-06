@@ -22,7 +22,12 @@ export async function GET() {
         interested_fields: true,
         university: true,
         avatar_url: true,
-        role: true
+        role: true,
+        google_scholar_url: true,
+        personal_website_url: true,
+        linkedin_url: true,
+        twitter_url: true,
+        github_url: true
       }
     })
 
@@ -50,7 +55,19 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, about, speciality, university, interested_fields, avatar_url } = body
+    const {
+      name,
+      about,
+      speciality,
+      university,
+      interested_fields,
+      avatar_url,
+      google_scholar_url,
+      personal_website_url,
+      linkedin_url,
+      twitter_url,
+      github_url
+    } = body
 
     // Validate required fields
     if (!name || name.trim() === '') {
@@ -66,7 +83,12 @@ export async function PUT(request: NextRequest) {
         speciality: speciality?.trim() || null,
         university: university?.trim() || null,
         interested_fields: Array.isArray(interested_fields) ? interested_fields : [],
-        avatar_url: avatar_url?.trim() || null
+        avatar_url: avatar_url?.trim() || null,
+        google_scholar_url: google_scholar_url?.trim() || null,
+        personal_website_url: personal_website_url?.trim() || null,
+        linkedin_url: linkedin_url?.trim() || null,
+        twitter_url: twitter_url?.trim() || null,
+        github_url: github_url?.trim() || null
       },
       select: {
         id: true,
@@ -75,7 +97,12 @@ export async function PUT(request: NextRequest) {
         speciality: true,
         university: true,
         interested_fields: true,
-        avatar_url: true
+        avatar_url: true,
+        google_scholar_url: true,
+        personal_website_url: true,
+        linkedin_url: true,
+        twitter_url: true,
+        github_url: true
       }
     })
 

@@ -42,6 +42,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         avatar_url: true,
         role: true,
         created_at: true,
+        google_scholar_url: true,
+        personal_website_url: true,
+        linkedin_url: true,
+        twitter_url: true,
+        github_url: true,
         courses: {
           where: { status: 'published' },
           select: {

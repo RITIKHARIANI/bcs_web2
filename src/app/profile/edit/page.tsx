@@ -18,7 +18,12 @@ export default function EditProfilePage() {
     speciality: '',
     university: '',
     interested_fields: [] as string[],
-    avatar_url: ''
+    avatar_url: '',
+    google_scholar_url: '',
+    personal_website_url: '',
+    linkedin_url: '',
+    twitter_url: '',
+    github_url: ''
   })
 
   const [newField, setNewField] = useState('')
@@ -41,7 +46,12 @@ export default function EditProfilePage() {
               speciality: data.user.speciality || '',
               university: data.user.university || '',
               interested_fields: data.user.interested_fields || [],
-              avatar_url: data.user.avatar_url || ''
+              avatar_url: data.user.avatar_url || '',
+              google_scholar_url: data.user.google_scholar_url || '',
+              personal_website_url: data.user.personal_website_url || '',
+              linkedin_url: data.user.linkedin_url || '',
+              twitter_url: data.user.twitter_url || '',
+              github_url: data.user.github_url || ''
             })
           }
           setLoading(false)
@@ -245,6 +255,86 @@ export default function EditProfilePage() {
                 placeholder="https://example.com/avatar.jpg"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+            </div>
+
+            {/* Academic & Social Links Section */}
+            <div className="pt-4 border-t border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Academic & Social Links</h2>
+
+              {/* Google Scholar */}
+              <div className="mb-4">
+                <label htmlFor="google_scholar_url" className="block text-sm font-medium text-gray-700 mb-1">
+                  Google Scholar Profile
+                </label>
+                <input
+                  type="url"
+                  id="google_scholar_url"
+                  value={formData.google_scholar_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, google_scholar_url: e.target.value }))}
+                  placeholder="https://scholar.google.com/citations?user=..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Personal Website */}
+              <div className="mb-4">
+                <label htmlFor="personal_website_url" className="block text-sm font-medium text-gray-700 mb-1">
+                  Personal Website
+                </label>
+                <input
+                  type="url"
+                  id="personal_website_url"
+                  value={formData.personal_website_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, personal_website_url: e.target.value }))}
+                  placeholder="https://yourwebsite.com"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* LinkedIn */}
+              <div className="mb-4">
+                <label htmlFor="linkedin_url" className="block text-sm font-medium text-gray-700 mb-1">
+                  LinkedIn Profile
+                </label>
+                <input
+                  type="url"
+                  id="linkedin_url"
+                  value={formData.linkedin_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, linkedin_url: e.target.value }))}
+                  placeholder="https://linkedin.com/in/..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Twitter */}
+              <div className="mb-4">
+                <label htmlFor="twitter_url" className="block text-sm font-medium text-gray-700 mb-1">
+                  Twitter/X Profile
+                </label>
+                <input
+                  type="url"
+                  id="twitter_url"
+                  value={formData.twitter_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, twitter_url: e.target.value }))}
+                  placeholder="https://twitter.com/..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* GitHub */}
+              <div>
+                <label htmlFor="github_url" className="block text-sm font-medium text-gray-700 mb-1">
+                  GitHub Profile
+                </label>
+                <input
+                  type="url"
+                  id="github_url"
+                  value={formData.github_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, github_url: e.target.value }))}
+                  placeholder="https://github.com/..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
             </div>
 
             {/* Actions */}
