@@ -36,10 +36,15 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        // Display the actual error message from the backend
-        setError(result.error === "CredentialsSignin"
-          ? "Invalid email or password"
-          : result.error);
+        // Handle different NextAuth error codes
+        if (result.error === "CredentialsSignin") {
+          setError("Invalid email or password");
+        } else if (result.error === "Configuration") {
+          // Configuration error usually means email verification failed
+          setError("Please verify your email before signing in");
+        } else {
+          setError(result.error);
+        }
       } else {
         router.push(callbackUrl);
         router.refresh();
