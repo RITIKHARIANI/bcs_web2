@@ -93,12 +93,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  About BCS Platform
-                </Link>
-              </li>
-              <li>
-                <Link href="https://psychology.illinois.edu" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  University of Illinois
+                  About Platform
                 </Link>
               </li>
               <li>
@@ -117,7 +112,7 @@ export function Footer() {
 
         <div className="border-t border-border/40 mt-8 pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © 2025 Brain & Cognitive Sciences E-Textbook Platform. University of Illinois. All rights reserved.
+            © 2025 Brain & Cognitive Sciences E-Textbook Platform. All rights reserved.
           </p>
         </div>
       </div>
