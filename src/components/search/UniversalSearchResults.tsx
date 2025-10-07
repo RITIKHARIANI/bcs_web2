@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { SearchResultCard } from './SearchResultCard'
 import { Search, BookOpen, FileText, Users } from 'lucide-react'
 
@@ -68,7 +69,7 @@ export function UniversalSearchResults({
             Search Results
           </h1>
           <p className="text-gray-600">
-            Showing results for <span className="font-semibold">"{initialQuery}"</span>
+            Showing results for <span className="font-semibold">&ldquo;{initialQuery}&rdquo;</span>
           </p>
         </div>
 
@@ -113,9 +114,9 @@ export function UniversalSearchResults({
             </h2>
             <p className="text-gray-600">
               Try searching with different keywords or browse our{' '}
-              <a href="/courses" className="text-blue-600 hover:underline">
+              <Link href="/courses" className="text-blue-600 hover:underline">
                 course catalog
-              </a>
+              </Link>
             </p>
           </div>
         ) : (
@@ -176,7 +177,7 @@ export function UniversalSearchResults({
                   ))
                 ) : (
                   <div className="text-center py-12 text-gray-500">
-                    No courses found for "{initialQuery}"
+                    No courses found for &ldquo;{initialQuery}&rdquo;
                   </div>
                 )}
               </div>
@@ -191,7 +192,7 @@ export function UniversalSearchResults({
                   ))
                 ) : (
                   <div className="text-center py-12 text-gray-500">
-                    No modules found for "{initialQuery}"
+                    No modules found for &ldquo;{initialQuery}&rdquo;
                   </div>
                 )}
               </div>
@@ -206,7 +207,7 @@ export function UniversalSearchResults({
                   ))
                 ) : (
                   <div className="text-center py-12 text-gray-500">
-                    No people found for "{initialQuery}"
+                    No people found for &ldquo;{initialQuery}&rdquo;
                   </div>
                 )}
               </div>

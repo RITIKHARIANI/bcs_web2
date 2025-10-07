@@ -90,7 +90,7 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
     queryFn: () => fetchPublicCourses(currentPage, itemsPerPage),
   })
 
-  const courses = data?.courses || []
+  const courses = useMemo(() => data?.courses || [], [data?.courses])
   const pagination = data?.pagination
 
   // Extract unique tags and instructors

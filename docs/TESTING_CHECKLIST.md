@@ -27,13 +27,15 @@
 | User Profiles | 5 | ___ | ___ | ___ |
 | Course Catalog | 6 | ___ | ___ | ___ |
 | Enhanced Catalog Features | 9 | ___ | ___ | ___ |
+| Universal Search | 6 | ___ | ___ | ___ |
+| Profile Enhancements | 7 | ___ | ___ | ___ |
 | Course & Module Viewing | 7 | ___ | ___ | ___ |
 | Playgrounds | 6 | ___ | ___ | ___ |
 | Network Visualization | 3 | ___ | ___ | ___ |
 | API Endpoints | 5 | ___ | ___ | ___ |
 | Performance & Accessibility | 6 | ___ | ___ | ___ |
 | Error Handling | 5 | ___ | ___ | ___ |
-| **TOTAL** | **67** | **___** | **___** | **___** |
+| **TOTAL** | **80** | **___** | **___** | **___** |
 
 ---
 
@@ -1045,7 +1047,405 @@
 
 ---
 
-# 6. Course & Module Viewing
+# 6. Universal Search
+
+## TEST-SEARCH-001: Universal Search from Header
+
+**Feature**: Header Search Navigation
+**Priority**: Critical
+
+### Test Steps:
+1. Navigate to any page
+2. Type "cognitive" in header search bar
+3. Press Enter or click search icon
+4. Verify redirect to `/search?q=cognitive`
+
+### Expected Result:
+- ✅ Redirects to `/search` page
+- ✅ Query parameter passed correctly
+- ✅ Search results page loads
+- ✅ Search term displayed in results header
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-SEARCH-002: Search Across All Content Types
+
+**Feature**: Multi-Entity Search
+**Priority**: Critical
+
+### Test Steps:
+1. Navigate to `/search?q=neuroscience`
+2. Verify results in all tabs:
+   - All Results tab
+   - Courses tab
+   - Modules tab
+   - People tab
+3. Check that results include matching content from all types
+
+### Expected Result:
+- ✅ Courses matching "neuroscience" shown
+- ✅ Modules matching "neuroscience" shown
+- ✅ People with "neuroscience" in profile shown
+- ✅ Search works across title, description, tags, speciality
+- ✅ Result counts accurate in tab badges
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-SEARCH-003: Search Result Cards
+
+**Feature**: Search Result Card Display
+**Priority**: High
+
+### Test Steps:
+1. Perform search with results
+2. Verify course result cards show:
+   - Title, description
+   - Instructor name
+   - Module count
+   - Proper icon and styling
+3. Verify module result cards show:
+   - Title, description
+   - Author name
+   - Parent course (if applicable)
+4. Verify person result cards show:
+   - Avatar/initials
+   - Name, role badge
+   - University, speciality
+   - Course/module counts
+   - Interested fields tags
+
+### Expected Result:
+- ✅ All card types render correctly
+- ✅ Cards are clickable and link to correct pages
+- ✅ Hover states work
+- ✅ Information complete and accurate
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-SEARCH-004: Tabbed Results Navigation
+
+**Feature**: Search Results Tabs
+**Priority**: High
+
+### Test Steps:
+1. Perform search with mixed results
+2. Click "All Results" tab - verify all shown
+3. Click "Courses" tab - verify only courses
+4. Click "Modules" tab - verify only modules
+5. Click "People" tab - verify only people
+6. Check tab badges show correct counts
+
+### Expected Result:
+- ✅ Tab switching works smoothly
+- ✅ Only selected category shown per tab
+- ✅ Badge counts accurate
+- ✅ Active tab highlighted correctly
+- ✅ URL doesn't change on tab switch
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-SEARCH-005: Empty Search Results
+
+**Feature**: No Results Handling
+**Priority**: Medium
+
+### Test Steps:
+1. Search for gibberish: "xyzabc123nonexistent"
+2. Verify empty state message
+3. Click link to course catalog
+
+### Expected Result:
+- ✅ "No results found" message shown
+- ✅ Search icon displayed
+- ✅ Helpful message with course catalog link
+- ✅ Link navigates to `/courses`
+- ✅ No errors in console
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-SEARCH-006: Case-Insensitive Fuzzy Search
+
+**Feature**: Search Algorithm
+**Priority**: High
+
+### Test Steps:
+1. Search for "BRAIN" (all caps)
+2. Search for "brain" (lowercase)
+3. Search for "Brain" (mixed case)
+4. Verify all return same results
+5. Search for partial term "cogn"
+6. Verify matches "cognitive", "cognition", etc.
+
+### Expected Result:
+- ✅ Case-insensitive matching works
+- ✅ Partial matching works
+- ✅ Results consistent across case variations
+- ✅ Searches title, description, tags, content
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+# 7. Profile Enhancements
+
+## TEST-PROFILE-006: Instructor Badge Display
+
+**Feature**: Faculty Instructor Badge
+**Priority**: Medium
+
+### Test Steps:
+1. Navigate to faculty user profile
+2. Verify "Instructor" badge shown under role badge
+3. Navigate to student profile
+4. Verify no instructor badge shown
+
+### Expected Result:
+- ✅ Faculty profiles show "Instructor" badge
+- ✅ Badge has book icon
+- ✅ Emerald/teal color scheme
+- ✅ Student profiles don't show badge
+- ✅ Badge responsive on mobile
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-PROFILE-007: Email Display
+
+**Feature**: Profile Email Display
+**Priority**: High
+
+### Test Steps:
+1. Navigate to any user profile
+2. Verify email displayed with mail icon
+3. Click email link
+4. Verify mailto: link opens default email client
+
+### Expected Result:
+- ✅ Email shown below name
+- ✅ Mail icon displayed
+- ✅ Clicking opens mailto link
+- ✅ Email clickable and styled properly
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-PROFILE-008: Social & Academic Links
+
+**Feature**: Profile Link Buttons
+**Priority**: High
+
+### Test Steps:
+1. Navigate to profile with social links configured
+2. Verify presence of link buttons:
+   - Google Scholar (gray)
+   - Personal Website (gray)
+   - LinkedIn (blue)
+   - Twitter (sky blue)
+   - GitHub (dark gray)
+3. Click each link
+4. Verify opens in new tab with correct URL
+
+### Expected Result:
+- ✅ All configured links shown
+- ✅ Correct icons and colors per platform
+- ✅ External link icon displayed
+- ✅ Opens in new tab (target="_blank")
+- ✅ Proper noopener/noreferrer attributes
+- ✅ Hover states work
+- ✅ Links not shown if not configured
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-PROFILE-009: Publications Tab
+
+**Feature**: Publications Tab (Coming Soon)
+**Priority**: Low
+
+### Test Steps:
+1. Navigate to faculty profile
+2. Click "Publications" tab
+3. Verify placeholder message
+4. If Google Scholar link configured, verify button shown
+5. Click Google Scholar button
+
+### Expected Result:
+- ✅ Tab switches to Publications
+- ✅ "Coming Soon" message shown
+- ✅ Google Scholar link button displayed (if configured)
+- ✅ Button opens Google Scholar in new tab
+- ✅ Icon and styling correct
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-PROFILE-010: Research Tab
+
+**Feature**: Research Tab (Coming Soon)
+**Priority**: Low
+
+### Test Steps:
+1. Navigate to faculty profile
+2. Click "Research" tab
+3. Verify placeholder message shown
+
+### Expected Result:
+- ✅ Tab switches to Research
+- ✅ "Coming Soon" message shown
+- ✅ Flask icon displayed
+- ✅ Descriptive text about future features
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-PROFILE-011: Link Input in Edit Profile
+
+**Feature**: Social/Academic Link Editing
+**Priority**: High
+
+### Test Steps:
+1. Navigate to `/profile/edit`
+2. Scroll to "Academic & Social Links" section
+3. Enter URLs in all 5 link fields:
+   - Google Scholar URL
+   - Personal Website URL
+   - LinkedIn URL
+   - Twitter URL
+   - GitHub URL
+4. Click "Save Changes"
+5. Return to profile view
+6. Verify all links displayed correctly
+
+### Expected Result:
+- ✅ All 5 URL input fields present
+- ✅ Labels clear and correct
+- ✅ URL validation (optional but recommended)
+- ✅ Save successfully stores all links
+- ✅ Links appear on profile view
+- ✅ Can clear/remove links
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-PROFILE-012: Profile Banner Z-Index
+
+**Feature**: Profile Banner Layering
+**Priority**: Medium
+
+### Test Steps:
+1. Navigate to any user profile
+2. Verify gradient banner in background
+3. Verify profile card overlaps banner
+4. Verify name, avatar, and content clearly visible
+5. Test on mobile viewport
+
+### Expected Result:
+- ✅ Banner stays in background
+- ✅ Profile content in foreground
+- ✅ Name not hidden by banner
+- ✅ Avatar has proper z-index
+- ✅ All text readable
+- ✅ Works on all screen sizes
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+# 8. Course & Module Viewing
 
 ## TEST-VIEWING-001: Course Overview Display
 
@@ -1229,7 +1629,7 @@
 
 ---
 
-# 7. Interactive Playgrounds
+# 9. Interactive Playgrounds
 
 ## TEST-PLAYGROUND-001: View Playground
 
@@ -1403,7 +1803,7 @@
 
 ---
 
-# 8. Network Visualization
+# 10. Network Visualization
 
 ## TEST-NETWORK-001: Course Structure Graph
 
@@ -1485,7 +1885,7 @@
 
 ---
 
-# 9. API Endpoints
+# 11. API Endpoints
 
 ## TEST-API-001: Health Check
 
@@ -1608,7 +2008,7 @@
 
 ---
 
-# 10. Performance & Accessibility
+# 12. Performance & Accessibility
 
 ## TEST-PERF-001: Page Load Performance
 
@@ -1779,7 +2179,7 @@ Result:
 
 ---
 
-# 11. Edge Cases & Error Handling
+# 13. Edge Cases & Error Handling
 
 ## TEST-ERROR-001: 404 Page
 
@@ -1911,7 +2311,7 @@ Result:
 
 ## 📊 Test Completion Summary
 
-**Total Tests Completed**: _____ / 58
+**Total Tests Completed**: _____ / 80
 **Pass Rate**: _____%
 **Critical Issues Found**: _____
 **High Priority Issues**: _____

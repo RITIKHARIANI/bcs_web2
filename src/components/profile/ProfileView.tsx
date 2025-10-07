@@ -95,7 +95,7 @@ export function ProfileView({ user, moduleCount, isOwnProfile }: ProfileViewProp
 
         {/* Action Buttons */}
         {isOwnProfile && (
-          <div className="absolute top-6 right-6">
+          <div className="absolute top-6 right-6 z-10">
             <Link
               href="/profile/edit"
               className="flex items-center gap-2 px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors shadow-lg font-medium"
@@ -108,14 +108,14 @@ export function ProfileView({ user, moduleCount, isOwnProfile }: ProfileViewProp
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 pb-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 pb-12 relative z-20">
         {/* Profile Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Avatar and Basic Info */}
           <div className="px-6 pt-6 pb-4">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               {/* Avatar */}
-              <div className="relative">
+              <div className="relative z-30">
                 {user.avatar_url ? (
                   <Image
                     src={user.avatar_url}
@@ -132,7 +132,7 @@ export function ProfileView({ user, moduleCount, isOwnProfile }: ProfileViewProp
               </div>
 
               {/* Name, Email and Metadata */}
-              <div className="flex-1 text-center sm:text-left mt-4 sm:mt-6">
+              <div className="flex-1 text-center sm:text-left mt-4 sm:mt-6 relative z-30">
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1">
                   {user.name}
                 </h1>

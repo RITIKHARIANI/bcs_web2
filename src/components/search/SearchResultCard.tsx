@@ -102,10 +102,10 @@ export function SearchResultCard({ type, data }: SearchResultCardProps) {
   }
 
   if (type === 'module') {
-    const module = data as ModuleResult
+    const moduleData = data as ModuleResult
     return (
       <Link
-        href={`/modules/${module.slug}`}
+        href={`/modules/${moduleData.slug}`}
         className="block p-4 border border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition-all bg-white"
       >
         <div className="flex items-start gap-3">
@@ -114,22 +114,22 @@ export function SearchResultCard({ type, data }: SearchResultCardProps) {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-semibold text-gray-900 hover:text-purple-600 transition-colors mb-1">
-              {module.title}
+              {moduleData.title}
             </h3>
-            {module.description && (
+            {moduleData.description && (
               <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-                {module.description}
+                {moduleData.description}
               </p>
             )}
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <span className="flex items-center gap-1">
                 <User className="h-3 w-3" />
-                {module.users.name}
+                {moduleData.users.name}
               </span>
-              {module.modules && (
+              {moduleData.modules && (
                 <span className="flex items-center gap-1">
                   <BookOpen className="h-3 w-3" />
-                  Part of: {module.modules.title}
+                  Part of: {moduleData.modules.title}
                 </span>
               )}
             </div>
