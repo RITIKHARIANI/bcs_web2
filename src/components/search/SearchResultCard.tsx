@@ -176,7 +176,7 @@ export function SearchResultCard({ type, data }: SearchResultCardProps) {
                 <GraduationCap className="h-3 w-3" />
                 {person.role.charAt(0).toUpperCase() + person.role.slice(1)}
               </span>
-              {person.role === 'faculty' && (
+              {person.role === 'faculty' && person._count.courses > 0 && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
                   Instructor
                 </span>
