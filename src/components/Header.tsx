@@ -58,10 +58,9 @@ export function Header() {
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (searchTerm.trim()) {
-      // For now, search courses by default, but we can make this smarter later
-      // TODO: Create a unified search page or smart routing
-      router.push(`/courses?search=${encodeURIComponent(searchTerm.trim())}`);
+      router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
       setMobileMenuOpen(false); // Close mobile menu if search from mobile
+      setSearchTerm(''); // Clear search input after navigation
     }
   };
 
@@ -160,12 +159,12 @@ export function Header() {
               <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
-                  placeholder="Search courses..."
+                  placeholder="Search courses, modules, people..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleSearchKeyPress}
                   className="h-9 w-[300px] bg-background pl-10 border-neural-light/30 focus:border-neural-primary"
-                  aria-label="Search courses and topics"
+                  aria-label="Search courses, modules, and people"
                   role="searchbox"
                 />
               </form>
@@ -281,12 +280,12 @@ export function Header() {
               <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search courses..."
+                  placeholder="Search courses, modules, people..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleSearchKeyPress}
                   className="h-9 w-full bg-background pl-10 border-neural-light/30 focus:border-neural-primary"
-                  aria-label="Search courses and topics"
+                  aria-label="Search courses, modules, and people"
                 />
               </form>
 
