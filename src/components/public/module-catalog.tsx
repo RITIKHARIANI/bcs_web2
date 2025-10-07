@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { NeuralButton } from '@/components/ui/neural-button'
-import { 
-  Search, 
-  BookOpen, 
+import {
+  Search,
+  BookOpen,
   User,
   Calendar,
   Layers,
@@ -22,8 +23,12 @@ import {
   Clock,
   CheckCircle,
   FileText,
-  Play
+  Play,
+  Users,
+  FolderTree
 } from 'lucide-react'
+
+type SortOption = 'newest' | 'oldest' | 'a-z' | 'z-a' | 'submodules'
 
 interface Module {
   id: string
@@ -60,9 +65,12 @@ type ModuleCatalogProps = {
 };
 
 export function ModuleCatalog({ initialSearch = '' }: ModuleCatalogProps) {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState(initialSearch)
   const [showRootOnly, setShowRootOnly] = useState(false)
-  const [selectedTag, setSelectedTag] = useState<string>('')
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null)
+  const [sortBy, setSortBy] = useState<SortOption>('newest')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const { data: modules = [], isLoading, error } = useQuery({
@@ -70,23 +78,73 @@ export function ModuleCatalog({ initialSearch = '' }: ModuleCatalogProps) {
     queryFn: fetchPublicModules,
   })
 
-  // Get all unique tags from modules
-  const allTags = Array.from(new Set(modules.flatMap(module => module.tags || [])))
+  // Get all unique tags and authors
+  const allTags = useMemo(() => {
+    const tags = modules.flatMap(module => module.tags || [])
+    return Array.from(new Set(tags)).sort()
+  }, [modules])
 
-  const filteredModules = modules.filter(module => {
-    const matchesSearch = 
-      module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      module.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (module.users?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-      (module.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-    
-    const matchesRoot = !showRootOnly || !module.parentModule
-    const matchesTag = !selectedTag || (module.tags || []).includes(selectedTag)
-    
-    return matchesSearch && matchesRoot && matchesTag
-  })
+  const allAuthors = useMemo(() => {
+    const authors = modules.map(module => module.users?.name).filter(Boolean)
+    return Array.from(new Set(authors)).sort()
+  }, [modules])
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const rootModules = modules.filter(m => !m.parentModule)
+    const modulesWithSubs = modules.filter(m => m._count.subModules > 0)
+    return {
+      totalModules: modules.length,
+      totalAuthors: allAuthors.length,
+      rootModules: rootModules.length,
+      modulesWithSubmodules: modulesWithSubs.length
+    }
+  }, [modules, allAuthors])
+
+  // Filter and sort modules
+  const filteredModules = useMemo(() => {
+    let filtered = modules.filter(module => {
+      const matchesSearch =
+        module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        module.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (module.users?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+        (module.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+
+      const matchesRoot = !showRootOnly || !module.parentModule
+      const matchesTag = !selectedTag || (module.tags || []).includes(selectedTag)
+      const matchesAuthor = !selectedAuthor || module.users?.name === selectedAuthor
+
+      return matchesSearch && matchesRoot && matchesTag && matchesAuthor
+    })
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        case 'a-z':
+          return a.title.localeCompare(b.title)
+        case 'z-a':
+          return b.title.localeCompare(a.title)
+        case 'submodules':
+          return b._count.subModules - a._count.subModules
+        default:
+          return 0
+      }
+    })
+
+    return filtered
+  }, [modules, searchTerm, showRootOnly, selectedTag, selectedAuthor, sortBy])
 
   const rootModules = modules.filter(module => !module.parentModule)
+
+  const handleUniversalSearch = () => {
+    if (searchTerm.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -169,7 +227,70 @@ export function ModuleCatalog({ initialSearch = '' }: ModuleCatalogProps) {
                   className="pl-12 h-14 text-lg border-neural-light/30 focus:border-neural-primary bg-background/80 backdrop-blur"
                 />
               </div>
+              {searchTerm.trim() && (
+                <button
+                  onClick={handleUniversalSearch}
+                  className="text-sm text-blue-600 hover:text-blue-700 mt-2 hover:underline"
+                >
+                  Or search across all content (courses, modules, people) →
+                </button>
+              )}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-8 bg-gradient-to-r from-purple-50 to-blue-50">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-purple-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.totalModules}</div>
+                  <div className="text-sm text-gray-600">Total Modules</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <Users className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.totalAuthors}</div>
+                  <div className="text-sm text-gray-600">Authors</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-teal-100 flex items-center justify-center">
+                  <Star className="h-6 w-6 text-teal-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.rootModules}</div>
+                  <div className="text-sm text-gray-600">Root Modules</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
+                  <FolderTree className="h-6 w-6 text-orange-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.modulesWithSubmodules}</div>
+                  <div className="text-sm text-gray-600">With Submodules</div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -265,23 +386,35 @@ export function ModuleCatalog({ initialSearch = '' }: ModuleCatalogProps) {
             </div>
             
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              {/* Tag Filter */}
-              {allTags.length > 0 && (
-                <div className="flex items-center space-x-2">
-                  <label className="text-sm font-medium text-foreground">Tag:</label>
-                  <select 
-                    value={selectedTag}
-                    onChange={(e) => setSelectedTag(e.target.value)}
-                    className="bg-background border border-border rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-neural-primary"
-                  >
-                    <option value="">All Tags</option>
-                    {allTags.map((tag) => (
-                      <option key={tag} value={tag}>{tag}</option>
-                    ))}
-                  </select>
-                </div>
+              {/* Sort Dropdown */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="a-z">A-Z</option>
+                <option value="z-a">Z-A</option>
+                <option value="submodules">Most Submodules</option>
+              </select>
+
+              {/* Author Filter */}
+              {allAuthors.length > 0 && (
+                <select
+                  value={selectedAuthor || ''}
+                  onChange={(e) => setSelectedAuthor(e.target.value || null)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Authors</option>
+                  {allAuthors.map((author) => (
+                    <option key={author} value={author}>
+                      {author}
+                    </option>
+                  ))}
+                </select>
               )}
-              
+
               <NeuralButton
                 variant={showRootOnly ? 'neural' : 'ghost'}
                 size="sm"
@@ -290,7 +423,7 @@ export function ModuleCatalog({ initialSearch = '' }: ModuleCatalogProps) {
                 <Filter className="mr-2 h-4 w-4" />
                 {showRootOnly ? 'Show All' : 'Root Only'}
               </NeuralButton>
-              
+
               <div className="flex border border-border rounded-lg">
                 <NeuralButton
                   variant={viewMode === 'grid' ? 'neural' : 'ghost'}
@@ -311,6 +444,35 @@ export function ModuleCatalog({ initialSearch = '' }: ModuleCatalogProps) {
               </div>
             </div>
           </div>
+
+          {/* Tag Filter Pills */}
+          {allTags.length > 0 && (
+            <div className="mb-6 flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedTag(null)}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  selectedTag === null
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                All Tags
+              </button>
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(tag)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    selectedTag === tag
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
 
           {filteredModules.length > 0 ? (
             <div className={viewMode === 'grid' 
@@ -404,17 +566,18 @@ export function ModuleCatalog({ initialSearch = '' }: ModuleCatalogProps) {
                   No modules found
                 </h3>
                 <p className="text-muted-foreground mb-6">
-                  Try adjusting your search terms or filters, or check back later for new modules.
+                  Try adjusting your filters or search terms.
                 </p>
-                <NeuralButton 
-                  variant="neural" 
+                <NeuralButton
+                  variant="neural"
                   onClick={() => {
                     setSearchTerm('')
                     setShowRootOnly(false)
-                    setSelectedTag('')
+                    setSelectedTag(null)
+                    setSelectedAuthor(null)
                   }}
                 >
-                  Clear Search
+                  Clear All Filters
                 </NeuralButton>
               </CardContent>
             </Card>
