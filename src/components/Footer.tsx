@@ -33,82 +33,82 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Courses */}
+          {/* Explore */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Courses</h3>
+            <h3 className="font-semibold text-foreground">Explore</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/courses" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Browse All Courses
+                  Course Catalog
                 </Link>
               </li>
               <li>
-                <Link href="/courses" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Neuroscience Fundamentals
+                <Link href="/modules" className="text-muted-foreground hover:text-neural-primary transition-colors">
+                  Module Library
                 </Link>
               </li>
               <li>
-                <Link href="/courses" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Cognitive Psychology
+                <Link href="/network" className="text-muted-foreground hover:text-neural-primary transition-colors">
+                  Network Visualization
                 </Link>
               </li>
               <li>
-                <Link href="/courses" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Memory & Learning
+                <Link href="/playgrounds" className="text-muted-foreground hover:text-neural-primary transition-colors">
+                  Interactive Playgrounds
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* For Faculty */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Resources</h3>
+            <h3 className="font-semibold text-foreground">For Faculty</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Research Papers
+                <Link href="/auth/login" className="text-muted-foreground hover:text-neural-primary transition-colors">
+                  Sign In
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Study Guides
+                <Link href="/auth/register" className="text-muted-foreground hover:text-neural-primary transition-colors">
+                  Create Account
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Interactive Simulations
+                <Link href="/faculty/dashboard" className="text-muted-foreground hover:text-neural-primary transition-colors">
+                  Dashboard
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Discussion Forums
+                <Link href="/faculty/modules/create" className="text-muted-foreground hover:text-neural-primary transition-colors">
+                  Create Content
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Support */}
+          {/* About */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Support</h3>
+            <h3 className="font-semibold text-foreground">About</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Help Center
+                <Link href="/" className="text-muted-foreground hover:text-neural-primary transition-colors">
+                  About BCS Platform
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Contact Us
+                <Link href="https://psychology.illinois.edu" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-neural-primary transition-colors">
+                  University of Illinois
+                </Link>
+              </li>
+              <li>
+                <Link href="https://github.com/RITIKHARIANI/bcs_web2" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-neural-primary transition-colors">
+                  GitHub Repository
                 </Link>
               </li>
               <li>
                 <Link href="/auth/login" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Faculty Login
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-muted-foreground hover:text-neural-primary transition-colors">
-                  Privacy Policy
+                  Contact Support
                 </Link>
               </li>
             </ul>
@@ -117,7 +117,7 @@ export function Footer() {
 
         <div className="border-t border-border/40 mt-8 pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 Brain & Cognitive Sciences. All rights reserved. Built for advancing cognitive science education.
+            © 2025 Brain & Cognitive Sciences E-Textbook Platform. University of Illinois. All rights reserved.
           </p>
         </div>
       </div>
