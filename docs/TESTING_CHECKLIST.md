@@ -64,16 +64,21 @@
 
 ### Expected Result:
 - ✅ User account created successfully
-- ✅ Redirected to email verification page
+- ✅ Redirected to login page with message about email verification
 - ✅ Verification email sent (check email inbox)
+- ✅ Success message: "Registration successful! Please check your email to verify your account."
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested October 10, 2025)
+- Account created successfully
+- Redirected to login page with verification message
+- Verification email sent to inbox
+- Message correctly states: "Registration successful! Please check your email to verify your account."
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Registration flow correctly guides users to verify email before attempting login
 
 ---
 
@@ -103,11 +108,17 @@
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested October 10, 2025)
+- Verification page loaded correctly with "Verify My Email" button
+- Button click sent POST request (confirmed via network tab)
+- Email verified successfully
+- Success message: "Email verified successfully! You can now sign in."
+- Automatic redirect to login page after 3 seconds
+- Two-step process prevents auto-verification by email scanners
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**: Two-step verification prevents email scanners from auto-verifying accounts
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Two-step verification prevents email scanners from auto-verifying accounts. Works as designed.
 
 ---
 
@@ -130,15 +141,21 @@
 - ✅ Login successful
 - ✅ Redirected to faculty dashboard (`/faculty/dashboard`)
 - ✅ Session created (check browser cookies)
+- ✅ Session cookie name: `__Secure-authjs.session-token` (HTTPS) or `authjs.session-token` (HTTP)
 - ✅ JWT token contains user role and email verification status
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested October 10, 2025)
+- Login successful with verified account
+- Redirected to /faculty/dashboard
+- Session cookie created: __Secure-authjs.session-token
+- Cookie contains JWT with user id, role, and email verification status
+- Dashboard loads with user information displayed
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**: Email verification is required before login. Unverified users will be blocked (see TEST-AUTH-003A)
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Email verification is required before login. Unverified users will be blocked (see TEST-AUTH-003A). Session cookie uses NextAuth v5 naming convention.
 
 ---
 
@@ -163,11 +180,16 @@
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested October 10, 2025)
+- Login blocked for unverified account
+- Error message displayed: "Please verify your email before signing in"
+- User remains on login page
+- No session cookie created (verified in DevTools)
+- Email verification requirement successfully enforced
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**: Email verification is enforced at login to ensure valid email addresses
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Email verification is enforced at login to ensure valid email addresses. Security working as designed.
 
 ---
 
@@ -190,11 +212,16 @@
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested October 10, 2025)
+- Login failed with wrong password
+- Error message displayed correctly
+- User remains on login page
+- No session created
+- Invalid credentials handled properly
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Error handling for invalid credentials working correctly
 
 ---
 
