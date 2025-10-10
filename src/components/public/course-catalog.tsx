@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -22,7 +23,11 @@ import {
   Clock,
   CheckCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ArrowUpDown,
+  Users,
+  FileText,
+  Tag
 } from 'lucide-react'
 
 interface Course {
@@ -31,6 +36,7 @@ interface Course {
   slug: string
   description: string | null
   featured: boolean
+  tags: string[]
   createdAt: string
   updatedAt: string
   users: {
@@ -53,6 +59,8 @@ interface CoursesResponse {
   pagination: PaginationData;
 }
 
+type SortOption = 'newest' | 'oldest' | 'a-z' | 'z-a' | 'modules'
+
 async function fetchPublicCourses(page: number = 1, limit: number = 20): Promise<CoursesResponse> {
   const response = await fetch(`/api/courses?page=${page}&limit=${limit}`)
   if (!response.ok) {
@@ -67,10 +75,14 @@ type CourseCatalogProps = {
 };
 
 export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState(initialSearch)
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [currentPage, setCurrentPage] = useState(1)
+  const [sortBy, setSortBy] = useState<SortOption>('newest')
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const [selectedInstructor, setSelectedInstructor] = useState<string | null>(null)
   const itemsPerPage = 20
 
   const { data, isLoading, error } = useQuery({
@@ -78,21 +90,74 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
     queryFn: () => fetchPublicCourses(currentPage, itemsPerPage),
   })
 
-  const courses = data?.courses || []
+  const courses = useMemo(() => data?.courses || [], [data?.courses])
   const pagination = data?.pagination
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch =
-      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (course.users?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+  // Extract unique tags and instructors
+  const allTags = useMemo(() => {
+    const tags = courses.flatMap(course => course.tags || [])
+    return Array.from(new Set(tags)).sort()
+  }, [courses])
 
-    const matchesFeatured = !showFeaturedOnly || course.featured
+  const allInstructors = useMemo(() => {
+    const instructors = courses.map(course => course.users?.name).filter(Boolean)
+    return Array.from(new Set(instructors)).sort()
+  }, [courses])
 
-    return matchesSearch && matchesFeatured
-  })
+  // Calculate stats
+  const stats = useMemo(() => {
+    const totalModules = courses.reduce((sum, course) => sum + course._count.courseModules, 0)
+    return {
+      totalCourses: courses.length,
+      totalInstructors: allInstructors.length,
+      totalModules,
+      featuredCount: courses.filter(c => c.featured).length
+    }
+  }, [courses, allInstructors])
+
+  // Filter and sort courses
+  const filteredCourses = useMemo(() => {
+    let filtered = courses.filter(course => {
+      const matchesSearch =
+        course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        course.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (course.users?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+
+      const matchesFeatured = !showFeaturedOnly || course.featured
+      const matchesTag = !selectedTag || (course.tags || []).includes(selectedTag)
+      const matchesInstructor = !selectedInstructor || course.users?.name === selectedInstructor
+
+      return matchesSearch && matchesFeatured && matchesTag && matchesInstructor
+    })
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        case 'a-z':
+          return a.title.localeCompare(b.title)
+        case 'z-a':
+          return b.title.localeCompare(a.title)
+        case 'modules':
+          return b._count.courseModules - a._count.courseModules
+        default:
+          return 0
+      }
+    })
+
+    return filtered
+  }, [courses, searchTerm, showFeaturedOnly, selectedTag, selectedInstructor, sortBy])
 
   const featuredCourses = courses.filter(course => course.featured)
+
+  const handleUniversalSearch = () => {
+    if (searchTerm.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -159,11 +224,11 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
               </span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Explore cutting-edge educational content created by faculty experts. 
-              Dive deep into neuroscience, psychology, and cognitive science through 
+              Explore cutting-edge educational content created by faculty experts.
+              Dive deep into neuroscience, psychology, and cognitive science through
               interactive modules and comprehensive courses.
             </p>
-            
+
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto">
               <div className="relative">
@@ -175,7 +240,70 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
                   className="pl-12 h-14 text-lg border-neural-light/30 focus:border-neural-primary bg-background/80 backdrop-blur"
                 />
               </div>
+              {searchTerm.trim() && (
+                <button
+                  onClick={handleUniversalSearch}
+                  className="text-sm text-blue-600 hover:text-blue-700 mt-2 hover:underline"
+                >
+                  Or search across all content (courses, modules, people) →
+                </button>
+              )}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-8 bg-gradient-to-r from-purple-50 to-blue-50">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <BookOpen className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.totalCourses}</div>
+                  <div className="text-sm text-gray-600">Total Courses</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <Users className="h-6 w-6 text-purple-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.totalInstructors}</div>
+                  <div className="text-sm text-gray-600">Instructors</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-teal-100 flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-teal-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.totalModules}</div>
+                  <div className="text-sm text-gray-600">Total Modules</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
+                  <Star className="h-6 w-6 text-orange-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.featuredCount}</div>
+                  <div className="text-sm text-gray-600">Featured</div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -190,7 +318,7 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
                 <h2 className="text-3xl font-bold text-neural-primary">Featured Courses</h2>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredCourses.slice(0, 3).map((course) => (
                 <Link key={course.id} href={`/courses/${course.slug}`}>
@@ -212,7 +340,7 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
                         {course.description || 'Explore this comprehensive course covering important concepts and practical applications.'}
                       </CardDescription>
                     </CardHeader>
-                    
+
                     <CardContent>
                       <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                         <div className="flex items-center">
@@ -224,13 +352,13 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
                           {course._count.courseModules} modules
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div className="flex items-center text-xs text-muted-foreground">
                           <Clock className="mr-1 h-3 w-3" />
                           Updated {new Date(course.updatedAt).toLocaleDateString()}
                         </div>
-                        
+
                         <NeuralButton variant="neural" size="sm" className="group-hover:bg-neural-deep">
                           Start Learning
                           <ArrowRight className="ml-1 h-3 w-3" />
@@ -255,8 +383,37 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
                 {filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''} available
               </p>
             </div>
-            
-            <div className="flex items-center space-x-4">
+
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Sort Dropdown */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="a-z">A-Z</option>
+                <option value="z-a">Z-A</option>
+                <option value="modules">Most Modules</option>
+              </select>
+
+              {/* Instructor Filter */}
+              {allInstructors.length > 0 && (
+                <select
+                  value={selectedInstructor || ''}
+                  onChange={(e) => setSelectedInstructor(e.target.value || null)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Instructors</option>
+                  {allInstructors.map((instructor) => (
+                    <option key={instructor} value={instructor}>
+                      {instructor}
+                    </option>
+                  ))}
+                </select>
+              )}
+
               <NeuralButton
                 variant={showFeaturedOnly ? 'neural' : 'ghost'}
                 size="sm"
@@ -265,7 +422,7 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
                 <Filter className="mr-2 h-4 w-4" />
                 {showFeaturedOnly ? 'Show All' : 'Featured Only'}
               </NeuralButton>
-              
+
               <div className="flex border border-border rounded-lg">
                 <NeuralButton
                   variant={viewMode === 'grid' ? 'neural' : 'ghost'}
@@ -286,6 +443,35 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
               </div>
             </div>
           </div>
+
+          {/* Tag Filter Pills */}
+          {allTags.length > 0 && (
+            <div className="mb-6 flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedTag(null)}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  selectedTag === null
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                All Tags
+              </button>
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(tag)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    selectedTag === tag
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
 
           {filteredCourses.length > 0 ? (
             <>
@@ -332,6 +518,16 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
                           </div>
                         </div>
 
+                        {course.tags && course.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {course.tags.slice(0, 3).map((tag) => (
+                              <Badge key={tag} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+
                         <NeuralButton variant="outline" size="sm" className="w-full group-hover:bg-neural-primary group-hover:text-white">
                           Explore Course
                           <ArrowRight className="ml-2 h-3 w-3" />
@@ -359,7 +555,6 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
                     {Array.from({ length: Math.min(7, pagination.totalPages) }, (_, i) => {
                       let pageNum: number;
 
-                      // Smart pagination display logic
                       if (pagination.totalPages <= 7) {
                         pageNum = i + 1;
                       } else if (currentPage <= 4) {
@@ -411,16 +606,18 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
                   No courses found
                 </h3>
                 <p className="text-muted-foreground mb-6">
-                  Try adjusting your search terms or check back later for new courses.
+                  Try adjusting your filters or search terms.
                 </p>
                 <NeuralButton
                   variant="neural"
                   onClick={() => {
                     setSearchTerm('')
                     setShowFeaturedOnly(false)
+                    setSelectedTag(null)
+                    setSelectedInstructor(null)
                   }}
                 >
-                  Clear Search
+                  Clear All Filters
                 </NeuralButton>
               </CardContent>
             </Card>

@@ -35,6 +35,7 @@ npm run vercel:install   # Install with legacy peer deps (required)
 - **Framework**: Next.js 15 (App Router) + React 19
 - **Database**: PostgreSQL with Prisma ORM
 - **Auth**: NextAuth v5 (uses `auth()` not `getServerSession()`)
+- **Email**: Resend (email verification & password reset)
 - **Styling**: Tailwind CSS 3.4 + Custom Neural Design System
 - **Deployment**: Vercel (serverless)
 
@@ -227,6 +228,30 @@ const data = await withDatabaseRetry(async () => {
 }, { maxAttempts: 3, baseDelayMs: 500 })
 ```
 
+### Email Configuration (Resend)
+The platform uses **Resend** for email verification and password reset:
+
+**Environment Variables**:
+```bash
+EMAIL_PROVIDER="resend"              # Use "console" for dev, "resend" for prod
+RESEND_API_KEY="re_your_api_key"    # Get from https://resend.com
+EMAIL_FROM="onboarding@resend.dev"   # Dev: onboarding@resend.dev, Prod: verified domain
+EMAIL_FROM_NAME="BCS E-Textbook"     # Display name (can be anything)
+```
+
+**Setup Instructions**:
+1. Create Resend account at https://resend.com
+2. Create API key with "Sending Access" permission
+3. For development: Use `onboarding@resend.dev` (works immediately)
+4. For production: Add and verify your domain in Resend dashboard
+5. Add environment variables to `.env` (local) and Vercel (production)
+
+**Email Functions** (in `/src/lib/email.ts`):
+- `sendVerificationEmail(email, name, token)` - Send email verification
+- `sendPasswordResetEmail(email, name, token)` - Send password reset
+
+See `/docs/EMAIL_SETUP_GUIDE.md` for detailed setup instructions.
+
 ## Common Gotchas
 
 1. **Schema Changes**: Always use `npm run db:push` in development. Migrations are for production only.
@@ -235,11 +260,13 @@ const data = await withDatabaseRetry(async () => {
 
 3. **Prisma Queries**: Use transaction pooler (port 6543) for production, session pooler (port 5432) for development.
 
-4. **Content Security Policy**: Python playgrounds require specific CSP headers for Pyodide (see `next.config.ts`).
+4. **Email Configuration**: Must add `RESEND_API_KEY` and verify domain for production. Development can use `onboarding@resend.dev`.
 
-5. **Image Domains**: External images must be added to `remotePatterns` in `next.config.ts`.
+5. **Content Security Policy**: Python playgrounds require specific CSP headers for Pyodide (see `next.config.ts`).
 
-6. **Prisma Client**: Generated client is gitignored. Always run `prisma generate` after pulling schema changes.
+6. **Image Domains**: External images must be added to `remotePatterns` in `next.config.ts`.
+
+7. **Prisma Client**: Generated client is gitignored. Always run `prisma generate` after pulling schema changes.
 
 ## Recent Features & Current Status
 
@@ -249,8 +276,8 @@ const data = await withDatabaseRetry(async () => {
 3. **Enhanced Course View** - Overview section and instructor display when no module selected
 4. **Optimized Layouts** - Module content maximized with fixed 280px sidebar
 5. **Interactive Playgrounds** - Python execution with Pyodide, parameter binding, template system
-6. **Email Verification** - User account verification system
-7. **Password Reset** - Forgot password functionality
+6. **Email Verification** - User account verification via Resend
+7. **Password Reset** - Forgot password functionality via Resend
 
 ### Testing Approach
 The project uses manual testing. When adding features:
@@ -267,6 +294,10 @@ The project uses manual testing. When adding features:
 - `DATABASE_URL` - PostgreSQL connection string (port 6543 for serverless)
 - `NEXTAUTH_URL` - Production URL
 - `NEXTAUTH_SECRET` - Random secure string
+- `EMAIL_PROVIDER` - Email service (`resend` for production)
+- `RESEND_API_KEY` - API key from Resend dashboard
+- `EMAIL_FROM` - Verified sender email (e.g., `noreply@yourdomain.com`)
+- `EMAIL_FROM_NAME` - Sender display name (e.g., `BCS E-Textbook`)
 
 **Build Process**:
 1. Vercel runs `npm run vercel:build`

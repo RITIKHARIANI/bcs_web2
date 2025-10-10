@@ -49,6 +49,7 @@ export function Header() {
   const { data: session } = useSession();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSignOut = () => {
@@ -58,10 +59,9 @@ export function Header() {
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (searchTerm.trim()) {
-      // For now, search courses by default, but we can make this smarter later
-      // TODO: Create a unified search page or smart routing
-      router.push(`/courses?search=${encodeURIComponent(searchTerm.trim())}`);
+      router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
       setMobileMenuOpen(false); // Close mobile menu if search from mobile
+      setSearchTerm(''); // Clear search input after navigation
     }
   };
 
@@ -160,12 +160,12 @@ export function Header() {
               <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
-                  placeholder="Search courses..."
+                  placeholder="Search courses, modules, people..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleSearchKeyPress}
                   className="h-9 w-[300px] bg-background pl-10 border-neural-light/30 focus:border-neural-primary"
-                  aria-label="Search courses and topics"
+                  aria-label="Search courses, modules, and people"
                   role="searchbox"
                 />
               </form>
@@ -189,7 +189,16 @@ export function Header() {
                     </div>
                   </div>
                   <DropdownMenuSeparator />
-                  
+
+                  {/* My Profile */}
+                  <DropdownMenuItem asChild>
+                    <Link href={`/profile/${session.user.id}`} className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      My Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+
                   {/* User-specific actions */}
                   {session.user.role === "faculty" && (
                     <>
@@ -251,18 +260,53 @@ export function Header() {
               </>
             )}
 
+            {/* Mobile Search Icon */}
+            <button
+              onClick={() => {
+                setMobileSearchOpen(!mobileSearchOpen)
+                if (mobileMenuOpen) setMobileMenuOpen(false)
+              }}
+              className="lg:hidden p-2 text-muted-foreground hover:text-neural-primary transition-colors rounded-md"
+              aria-label="Toggle search"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+
             {/* Mobile Menu Button */}
-            <NeuralButton 
-              variant="ghost" 
-              size="icon" 
+            <NeuralButton
+              variant="ghost"
+              size="icon"
               className="lg:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                setMobileMenuOpen(!mobileMenuOpen)
+                if (mobileSearchOpen) setMobileSearchOpen(false)
+              }}
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </NeuralButton>
           </div>
         </div>
+
+        {/* Mobile Search Bar (appears when search icon clicked) */}
+        {mobileSearchOpen && (
+          <div className="lg:hidden border-t border-border/40 bg-background/95 backdrop-blur">
+            <div className="px-4 py-4">
+              <form onSubmit={handleSearch} className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search courses, modules, people..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={handleSearchKeyPress}
+                  autoFocus
+                  className="h-10 w-full bg-background pl-10 border-neural-light/30 focus:border-neural-primary"
+                  aria-label="Search courses, modules, and people"
+                />
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
@@ -272,12 +316,12 @@ export function Header() {
               <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search courses..."
+                  placeholder="Search courses, modules, people..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleSearchKeyPress}
                   className="h-9 w-full bg-background pl-10 border-neural-light/30 focus:border-neural-primary"
-                  aria-label="Search courses and topics"
+                  aria-label="Search courses, modules, and people"
                 />
               </form>
 

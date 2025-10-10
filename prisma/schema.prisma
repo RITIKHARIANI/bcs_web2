@@ -35,7 +35,7 @@ model courses {
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt
   course_modules course_modules[]
-  users          users            @relation(fields: [author_id], references: [id])
+  users          users            @relation(fields: [author_id], references: [id], onDelete: Restrict)
 
   @@index([author_id])
   @@index([slug])
@@ -52,7 +52,7 @@ model media_files {
   thumbnail_path String?
   uploaded_by    String
   created_at     DateTime       @default(now())
-  users          users          @relation(fields: [uploaded_by], references: [id])
+  users          users          @relation(fields: [uploaded_by], references: [id], onDelete: Restrict)
   module_media   module_media[]
 
   @@index([mime_type])
@@ -88,7 +88,7 @@ model modules {
   updated_at       DateTime         @updatedAt
   course_modules   course_modules[]
   module_media     module_media[]
-  users            users            @relation(fields: [author_id], references: [id])
+  users            users            @relation(fields: [author_id], references: [id], onDelete: Restrict)
   modules          modules?         @relation("modulesTomodules", fields: [parent_module_id], references: [id])
   other_modules    modules[]        @relation("modulesTomodules")
 
@@ -121,6 +121,13 @@ model users {
   interested_fields      String[]      @default([])
   university             String?
   avatar_url             String?
+
+  // Academic & Social Links
+  google_scholar_url     String?
+  personal_website_url   String?
+  linkedin_url           String?
+  twitter_url            String?
+  github_url             String?
 
   // Email verification
   email_verified         Boolean       @default(false)

@@ -1,8 +1,8 @@
-// Email service abstraction for different providers
-// Supports console logging for development and multiple production providers
+// Email service using Resend
+// Supports console logging for development and Resend for production
 
 interface EmailConfig {
-  provider: 'console' | 'sendgrid' | 'resend' | 'smtp';
+  provider: 'console' | 'resend';
   from: string;
   fromName?: string;
 }
@@ -17,7 +17,7 @@ interface EmailData {
 // Get email configuration from environment
 const getEmailConfig = (): EmailConfig => {
   const provider = process.env.EMAIL_PROVIDER || 'console';
-  const from = process.env.EMAIL_FROM || 'noreply@bcs-etextbook.vercel.app';
+  const from = process.env.EMAIL_FROM || 'onboarding@resend.dev';
   const fromName = process.env.EMAIL_FROM_NAME || 'BCS E-Textbook';
 
   return {
@@ -58,7 +58,7 @@ const generateEmailTemplate = (title: string, content: string, actionUrl?: strin
           ${actionUrl && actionText ? `<div style="text-align: center; margin: 30px 0;"><a href="${actionUrl}" class="button">${actionText}</a></div>` : ''}
         </div>
         <div class="footer">
-          <p>University of Illinois Computer Science Department</p>
+          <p>BCS E-Textbook Platform</p>
           <p>This is an automated message. Please do not reply to this email.</p>
         </div>
       </div>
@@ -80,41 +80,14 @@ const sendConsoleEmail = async (emailData: EmailData): Promise<void> => {
   console.log('=====================================\n');
 };
 
-// SendGrid email sending
-const sendSendGridEmail = async (emailData: EmailData, config: EmailConfig): Promise<void> => {
-  try {
-    // Dynamic import to avoid bundle bloat if not using SendGrid
-    const sgMail = await import('@sendgrid/mail' as any).catch(() => {
-      throw new Error('SendGrid not installed. Run: npm install @sendgrid/mail');
-    });
-
-    sgMail.default.setApiKey(process.env.SENDGRID_API_KEY!);
-
-    const msg = {
-      to: emailData.to,
-      from: {
-        email: config.from,
-        name: config.fromName || 'BCS E-Textbook'
-      },
-      subject: emailData.subject,
-      text: emailData.text,
-      html: emailData.html,
-    };
-
-    await sgMail.default.send(msg);
-  } catch (error) {
-    console.error('SendGrid email error:', error);
-    throw new Error(`Failed to send email via SendGrid: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-};
-
 // Resend email sending
 const sendResendEmail = async (emailData: EmailData, config: EmailConfig): Promise<void> => {
   try {
-    // Dynamic import to avoid bundle bloat if not using Resend
-    const { Resend } = await import('resend' as any).catch(() => {
-      throw new Error('Resend not installed. Run: npm install resend');
-    });
+    const { Resend } = await import('resend');
+
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
+    }
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -139,15 +112,9 @@ export const sendEmail = async (emailData: EmailData): Promise<void> => {
     case 'console':
       await sendConsoleEmail(emailData);
       break;
-    case 'sendgrid':
-      await sendSendGridEmail(emailData, config);
-      break;
     case 'resend':
       await sendResendEmail(emailData, config);
       break;
-    case 'smtp':
-      // Could add nodemailer SMTP support here
-      throw new Error('SMTP provider not implemented yet');
     default:
       throw new Error(`Unknown email provider: ${config.provider}`);
   }
