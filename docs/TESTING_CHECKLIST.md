@@ -1,10 +1,16 @@
 # 🧪 BCS E-Textbook Platform - Comprehensive Testing Checklist
 
-**Version**: 2.0.0
-**Last Updated**: January 2025
+**Version**: 2.1.0
+**Last Updated**: October 10, 2025
 **Tester**: _______________
 **Test Date**: _______________
 **Environment**: □ Development □ Production
+
+**Recent Updates**:
+- Updated email verification flow (two-step POST-based verification)
+- Added token expiration enforcement (24 hours)
+- Added email verification requirement for login
+- Updated authentication test scenarios
 
 ---
 
@@ -22,7 +28,7 @@
 
 | Category | Total Tests | Passed | Failed | NA |
 |----------|-------------|--------|--------|-----|
-| Authentication | 7 | ___ | ___ | ___ |
+| Authentication | 10 | ___ | ___ | ___ |
 | Faculty Dashboard | 8 | ___ | ___ | ___ |
 | User Profiles | 5 | ___ | ___ | ___ |
 | Course Catalog | 6 | ___ | ___ | ___ |
@@ -35,7 +41,7 @@
 | API Endpoints | 5 | ___ | ___ | ___ |
 | Performance & Accessibility | 6 | ___ | ___ | ___ |
 | Error Handling | 5 | ___ | ___ | ___ |
-| **TOTAL** | **80** | **___** | **___** | **___** |
+| **TOTAL** | **83** | **___** | **___** | **___** |
 
 ---
 
@@ -73,7 +79,7 @@
 
 ## TEST-AUTH-002: Email Verification
 
-**Feature**: Email Verification
+**Feature**: Email Verification (Two-Step Process)
 **Priority**: Critical
 
 ### Prerequisites:
@@ -81,13 +87,19 @@
 
 ### Test Steps:
 1. Check email inbox for verification email
-2. Click verification link or copy token
-3. Navigate to `/auth/verify-email?token=<token>`
+2. Click verification link in email
+3. Should be redirected to `/auth/verify-email?token=<token>`
+4. **Click the "Verify My Email" button** on the verification page
+5. Wait for verification to complete
 
 ### Expected Result:
-- ✅ Email verified successfully
+- ✅ Verification page loads with "Verify My Email" button (not automatic)
+- ✅ Clicking button sends POST request to API
+- ✅ Email verified successfully after button click
 - ✅ Success message displayed
-- ✅ Can now login
+- ✅ Redirected to login page after 3 seconds
+- ✅ Token expires after 24 hours (server-side enforced)
+- ✅ Token can only be used once (cleared after verification)
 
 ### Actual Result:
 ```
@@ -95,11 +107,11 @@
 ```
 
 **Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Notes**: Two-step verification prevents email scanners from auto-verifying accounts
 
 ---
 
-## TEST-AUTH-003: User Login
+## TEST-AUTH-003: User Login (Verified Account)
 
 **Feature**: Login
 **Priority**: Critical
@@ -116,8 +128,9 @@
 
 ### Expected Result:
 - ✅ Login successful
-- ✅ Redirected to faculty dashboard
+- ✅ Redirected to faculty dashboard (`/faculty/dashboard`)
 - ✅ Session created (check browser cookies)
+- ✅ JWT token contains user role and email verification status
 
 ### Actual Result:
 ```
@@ -125,7 +138,36 @@
 ```
 
 **Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Notes**: Email verification is required before login. Unverified users will be blocked (see TEST-AUTH-003A)
+
+---
+
+## TEST-AUTH-003A: Login with Unverified Email
+
+**Feature**: Email Verification Enforcement
+**Priority**: Critical
+
+### Prerequisites:
+- Registered account that has NOT completed email verification
+
+### Test Steps:
+1. Navigate to `/auth/login`
+2. Enter credentials for unverified account
+3. Click "Sign In"
+
+### Expected Result:
+- ❌ Login blocked
+- ✅ Error message: "Please verify your email before signing in"
+- ✅ User stays on login page
+- ✅ No session created
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Email verification is enforced at login to ensure valid email addresses
 
 ---
 
@@ -143,7 +185,7 @@
 
 ### Expected Result:
 - ❌ Login fails
-- ✅ Error message: "Invalid credentials"
+- ✅ Error message: "Invalid credentials" or "Sign in failed"
 - ✅ User stays on login page
 
 ### Actual Result:
@@ -167,9 +209,11 @@
 3. Click "Send Reset Link"
 
 ### Expected Result:
-- ✅ Success message displayed
-- ✅ Password reset email sent
-- ✅ Email contains reset token
+- ✅ Success message displayed: "If an account with this email exists, a password reset link has been sent."
+- ✅ Password reset email sent (if account exists)
+- ✅ Email contains secure reset token (crypto.randomBytes)
+- ✅ Token expires in 1 hour (server-side enforced)
+- ✅ Generic message shown (doesn't reveal if email exists - security)
 
 ### Actual Result:
 ```
@@ -177,7 +221,7 @@
 ```
 
 **Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Notes**: Security-conscious: Doesn't reveal whether email exists in system
 
 ---
 
@@ -197,9 +241,13 @@
 5. Click "Reset Password"
 
 ### Expected Result:
-- ✅ Password updated successfully
-- ✅ Redirected to login page
+- ✅ Reset page validates token on load (GET request)
+- ✅ Shows email address if token is valid
+- ✅ Password updated successfully (POST request)
+- ✅ Token cleared after use (can't reuse)
+- ✅ Redirected to login page with success message
 - ✅ Can login with new password
+- ✅ Old password no longer works
 
 ### Actual Result:
 ```
@@ -207,11 +255,71 @@
 ```
 
 **Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Notes**: Password reset uses POST for actual reset (same pattern as email verification)
 
 ---
 
-## TEST-AUTH-007: Logout
+## TEST-AUTH-007: Resend Verification Email
+
+**Feature**: Resend Verification Email
+**Priority**: Medium
+
+### Prerequisites:
+- Registered but unverified account
+
+### Test Steps:
+1. Attempt to login with unverified account (should fail)
+2. Request a new verification email via POST to `/api/auth/verify-email`
+3. Check email inbox for new verification email
+4. Verify new token is different from original
+5. Complete verification with new token
+
+### Expected Result:
+- ✅ New verification email sent
+- ✅ New token generated with crypto.randomBytes (secure)
+- ✅ New 24-hour expiration set
+- ✅ Old token becomes invalid
+- ✅ Can verify with new token
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: API supports both verification (POST with token) and resend (POST with email)
+
+---
+
+## TEST-AUTH-008: Expired Verification Token
+
+**Feature**: Token Expiration (24 hours)
+**Priority**: High
+
+### Prerequisites:
+- Verification token that is > 24 hours old (or manually expire in database)
+
+### Test Steps:
+1. Navigate to `/auth/verify-email?token=<expired_token>`
+2. Click "Verify My Email" button
+
+### Expected Result:
+- ❌ Verification fails
+- ✅ Error message: "Verification token has expired. Please request a new verification email."
+- ✅ User can request a new verification email
+- ✅ No verification occurs with expired token
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Token expiration is server-side enforced (email_verification_token_expires field)
+
+---
+
+## TEST-AUTH-009: Logout
 
 **Feature**: User Logout
 **Priority**: High
@@ -2311,7 +2419,7 @@ Result:
 
 ## 📊 Test Completion Summary
 
-**Total Tests Completed**: _____ / 80
+**Total Tests Completed**: _____ / 83
 **Pass Rate**: _____%
 **Critical Issues Found**: _____
 **High Priority Issues**: _____
@@ -2336,6 +2444,30 @@ Result:
 ```
 [Write your overall assessment of the platform here]
 ```
+
+---
+
+## 📝 Changelog
+
+### Version 2.1.0 (October 10, 2025)
+**Authentication & Security Enhancements:**
+- Added TEST-AUTH-002: Updated email verification to reflect two-step POST-based process
+- Added TEST-AUTH-003A: New test for unverified email login blocking
+- Added TEST-AUTH-007: Resend verification email functionality
+- Added TEST-AUTH-008: Token expiration enforcement testing
+- Updated TEST-AUTH-003: Clarified login requires verified email
+- Updated TEST-AUTH-005: Password reset now shows secure token generation details
+- Updated TEST-AUTH-006: Password reset follows GET (validate) + POST (reset) pattern
+
+**Key Changes:**
+- Email verification now requires button click (POST request) to prevent scanner auto-verification
+- All tokens now use `crypto.randomBytes()` instead of `Math.random()` (cryptographically secure)
+- Email verification tokens expire after 24 hours (server-side enforced)
+- Password reset tokens expire after 1 hour (server-side enforced)
+- Tokens are single-use and cleared after verification/reset
+- Login now blocks unverified users with clear error message
+
+**Total Tests:** Increased from 80 to 83 tests
 
 ---
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 import { prisma } from '../../../../lib/db'
 import { sendVerificationEmail } from '../../../../lib/email'
 import { z } from 'zod'
@@ -55,7 +56,8 @@ export async function POST(request: NextRequest) {
 
     // Generate unique user ID and email verification token
     const userId = `faculty_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
-    const verificationToken = `verify_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
+    const verificationToken = crypto.randomBytes(32).toString('hex')
+    const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
     // Create user with email verification fields
     const newUser = await prisma.users.create({
@@ -67,6 +69,7 @@ export async function POST(request: NextRequest) {
         role: 'faculty',
         email_verified: false,
         email_verification_token: verificationToken,
+        email_verification_token_expires: verificationTokenExpires,
       },
       select: {
         id: true,
