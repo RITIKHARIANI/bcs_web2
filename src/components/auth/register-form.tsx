@@ -89,7 +89,7 @@ export function RegisterForm() {
 
       setSuccess(true);
       setTimeout(() => {
-        router.push("/auth/login?message=Registration successful! Please sign in.");
+        router.push("/auth/login?message=Registration successful! Please check your email to verify your account.");
       }, 2000);
 
     } catch (error) {
@@ -110,7 +110,7 @@ export function RegisterForm() {
                 Registration Successful!
               </CardTitle>
               <CardDescription className="text-center">
-                Your faculty account has been created. Redirecting to login...
+                Please check your email to verify your account before signing in.
               </CardDescription>
             </CardHeader>
           </Card>
