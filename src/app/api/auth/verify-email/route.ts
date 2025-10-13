@@ -191,16 +191,35 @@ async function handleResendVerification(email: string) {
       });
     }
 
+    // Rate limiting: Check if user has requested verification email recently
+    if (user.last_verification_email_sent_at) {
+      const timeSinceLastEmail = Date.now() - user.last_verification_email_sent_at.getTime();
+      const twentyMinutes = 20 * 60 * 1000; // 20 minutes in milliseconds
+
+      if (timeSinceLastEmail < twentyMinutes) {
+        const minutesRemaining = Math.ceil((twentyMinutes - timeSinceLastEmail) / 60000);
+        return NextResponse.json(
+          {
+            error: `Please wait ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} before requesting another verification email.`,
+            rateLimited: true,
+            retryAfter: minutesRemaining
+          },
+          { status: 429 } // Too Many Requests
+        );
+      }
+    }
+
     // Generate new verification token with expiration
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Update user with new token
+    // Update user with new token and timestamp
     await prisma.users.update({
       where: { id: user.id },
       data: {
         email_verification_token: verificationToken,
         email_verification_token_expires: verificationTokenExpires,
+        last_verification_email_sent_at: new Date(),
         updated_at: new Date()
       }
     });

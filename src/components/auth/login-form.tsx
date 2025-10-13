@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -17,7 +17,11 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
+  // Resend verification email state
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendMessage, setResendMessage] = useState("");
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/faculty/dashboard";
@@ -56,6 +60,39 @@ export function LoginForm() {
     }
   };
 
+  // Cooldown timer for resend button
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
+  const handleResendVerification = async () => {
+    setResendMessage("");
+
+    try {
+      const response = await fetch('/api/auth/verify-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 429) {
+        setResendMessage(`Rate limited. Please wait ${data.retryAfter} minute${data.retryAfter > 1 ? 's' : ''} before trying again.`);
+      } else if (response.ok) {
+        setResendMessage("Verification email sent! Please check your inbox.");
+        setResendCooldown(60);
+      } else {
+        setResendMessage(data.error || "Failed to send verification email. Please try again.");
+      }
+    } catch (error) {
+      setResendMessage("An error occurred. Please try again later.");
+    }
+  };
+
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -85,10 +122,36 @@ export function LoginForm() {
               )}
 
               {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
+                <div className="space-y-2">
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+
+                  {/* Show resend button only if error is about email verification */}
+                  {error.toLowerCase().includes('verify') && (
+                    <div className="space-y-2">
+                      <NeuralButton
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleResendVerification}
+                        disabled={resendCooldown > 0 || !email}
+                        className="w-full"
+                      >
+                        {resendCooldown > 0
+                          ? `Wait ${resendCooldown}s`
+                          : "Resend Verification Email"
+                        }
+                      </NeuralButton>
+                      {resendMessage && (
+                        <p className={`text-xs text-center ${resendMessage.includes('sent') ? 'text-green-600' : 'text-muted-foreground'}`}>
+                          {resendMessage}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
 
               <div className="space-y-2">

@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
         email_verified: false,
         email_verification_token: verificationToken,
         email_verification_token_expires: verificationTokenExpires,
+        last_verification_email_sent_at: new Date(),
       },
       select: {
         id: true,

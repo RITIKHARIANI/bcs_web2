@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { NeuralButton } from "@/components/ui/neural-button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, AlertCircle, Mail, ArrowRight, ShieldCheck } from "lucide-react";
@@ -17,6 +18,54 @@ export function VerifyEmailForm() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Resend verification email state
+  const [resendEmail, setResendEmail] = useState("");
+  const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendMessage, setResendMessage] = useState("");
+
+  // Cooldown timer for resend button
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
+  const handleResendVerification = async () => {
+    if (!resendEmail.trim()) {
+      setResendMessage("Please enter your email address");
+      return;
+    }
+
+    setIsResending(true);
+    setResendMessage("");
+
+    try {
+      const response = await fetch('/api/auth/verify-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resendEmail.trim().toLowerCase() }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 429) {
+        setResendMessage(`Rate limited. Please wait ${data.retryAfter} minute${data.retryAfter > 1 ? 's' : ''} before trying again.`);
+      } else if (response.ok) {
+        setResendMessage("If an account with this email exists and is unverified, a verification email has been sent. Please check your inbox.");
+        setResendCooldown(60);
+        setResendEmail(""); // Clear the input
+      } else {
+        setResendMessage(data.error || "Failed to send verification email. Please try again.");
+      }
+    } catch (error) {
+      setResendMessage("An error occurred. Please try again later.");
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   const handleVerifyClick = async () => {
     if (!token) {
@@ -175,7 +224,40 @@ export function VerifyEmailForm() {
                     This could happen if the verification link has expired or has already been used.
                   </p>
 
-                  <div className="space-y-2">
+                  {/* Resend verification email section */}
+                  <div className="border-t pt-4 text-left space-y-3">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Need a new verification link?
+                    </p>
+                    <Input
+                      type="email"
+                      placeholder="Enter your email address"
+                      value={resendEmail}
+                      onChange={(e) => setResendEmail(e.target.value)}
+                      disabled={isResending || resendCooldown > 0}
+                      className="border-neural-light/30 focus:border-neural-primary"
+                    />
+                    <NeuralButton
+                      onClick={handleResendVerification}
+                      disabled={!resendEmail.trim() || isResending || resendCooldown > 0}
+                      className="w-full"
+                      variant="neural"
+                    >
+                      {resendCooldown > 0
+                        ? `Wait ${resendCooldown}s`
+                        : isResending
+                        ? "Sending..."
+                        : "Resend Verification Email"
+                      }
+                    </NeuralButton>
+                    {resendMessage && (
+                      <p className={`text-xs ${resendMessage.includes('sent') ? 'text-green-600' : 'text-muted-foreground'}`}>
+                        {resendMessage}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2 border-t pt-4">
                     <Link href="/auth/register">
                       <NeuralButton variant="outline" className="w-full">
                         Register Again

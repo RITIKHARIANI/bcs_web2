@@ -244,11 +244,17 @@
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested October 10, 2025)
+- Success message displayed: "If an account with this email exists, a password reset link has been sent."
+- Password reset email sent to inbox
+- Token generated using crypto.randomBytes(32) - 64 character hex string
+- Token expiration set to 1 hour from request time
+- Database stores both password_reset_token and password_reset_expires
+- Generic message correctly implements security best practice (no email enumeration)
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**: Security-conscious: Doesn't reveal whether email exists in system
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Security-conscious: Doesn't reveal whether email exists in system. 1-hour expiration enforced at database level.
 
 ---
 
@@ -278,43 +284,113 @@
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested October 10, 2025)
+- Reset page loads and validates token via GET request
+- Email address displayed correctly when token is valid
+- Password requirements shown with real-time validation (green checkmarks)
+- Password updated successfully via POST request
+- Token and expiration cleared from database after successful reset (confirmed single-use)
+- Redirected to login page with message: "Password reset successfully! Please sign in."
+- Successfully logged in with new password
+- Old password rejected (properly invalidated)
+- Password hashed with bcrypt (12 rounds) in database
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**: Password reset uses POST for actual reset (same pattern as email verification)
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Password reset uses POST for actual reset (same pattern as email verification). Double validation: token checked on page load AND submit. 1-hour timeout enforced at database level.
 
 ---
 
 ## TEST-AUTH-007: Resend Verification Email
 
-**Feature**: Resend Verification Email
+**Feature**: Resend Verification Email (Two UI Touchpoints)
 **Priority**: Medium
 
 ### Prerequisites:
 - Registered but unverified account
 
-### Test Steps:
-1. Attempt to login with unverified account (should fail)
-2. Request a new verification email via POST to `/api/auth/verify-email`
-3. Check email inbox for new verification email
-4. Verify new token is different from original
-5. Complete verification with new token
+### Test Scenario A: Resend from Login Page
 
-### Expected Result:
-- ✅ New verification email sent
-- ✅ New token generated with crypto.randomBytes (secure)
+#### Test Steps:
+1. Navigate to `/auth/login`
+2. Enter unverified account credentials
+3. Click "Sign In"
+4. Observe "Please verify your email" error
+5. Click "Resend Verification Email" button (appears below error)
+6. Wait for success message
+7. Check email inbox
+
+#### Expected Result:
+- ✅ Login fails with verification error
+- ✅ "Resend Verification Email" button appears below error
+- ✅ Button disabled for 60 seconds after click (client-side cooldown)
+- ✅ Success message: "Verification email sent! Please check your inbox."
+- ✅ New verification email received
+
+### Test Scenario B: Resend from Verification Error Page
+
+#### Test Steps:
+1. Navigate to `/auth/verify-email?token=<expired_or_invalid_token>`
+2. Click "Verify My Email" (should fail)
+3. Observe error message
+4. Enter email address in "Need a new verification link?" input
+5. Click "Resend Verification Email"
+6. Wait for success message
+7. Check email inbox
+
+#### Expected Result:
+- ✅ Verification fails with appropriate error
+- ✅ Resend UI section visible with email input
+- ✅ Button disabled for 60 seconds after click (client-side cooldown)
+- ✅ Generic success message: "If an account with this email exists and is unverified, a verification email has been sent."
+- ✅ New verification email received (if account exists and is unverified)
+
+### Test Scenario C: Rate Limiting
+
+#### Test Steps:
+1. Request resend verification email
+2. Wait 30 seconds
+3. Request again (should succeed)
+4. Immediately request again (should fail)
+5. Wait 20 minutes
+6. Request again (should succeed)
+
+#### Expected Result:
+- ✅ First request: Success
+- ✅ Second request (after 30s but before 20min): HTTP 429 error
+- ✅ Error message: "Please wait X minutes before requesting another verification email."
+- ✅ Third request (after 20min): Success
+- ✅ Rate limiting: Maximum 3 attempts per hour (20 minute intervals)
+- ✅ Rate limiting tracked via `last_verification_email_sent_at` database field
+
+### Test Scenario D: Security Tests
+
+#### Test Steps:
+1. Request resend for non-existent email
+2. Request resend for already-verified account
+3. Verify response messages are generic
+4. Check database for token updates
+
+#### Expected Result:
+- ✅ Non-existent email: Generic success message (no enumeration)
+- ✅ Already verified: "Email is already verified." message
+- ✅ No information leakage about account existence
+- ✅ New token invalidates old token (verified in database)
+- ✅ Token generated with crypto.randomBytes(32) - 64 character hex string
 - ✅ New 24-hour expiration set
-- ✅ Old token becomes invalid
-- ✅ Can verify with new token
+- ✅ `last_verification_email_sent_at` timestamp updated in database
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+[Enter what actually happened for each scenario]
 ```
 
 **Status**: □ Pass □ Fail □ NA
-**Notes**: API supports both verification (POST with token) and resend (POST with email)
+**Notes**:
+- Two UI touchpoints: Login page (unverified error) and Verification error page
+- Server-side rate limiting: 20 minutes between requests (3 attempts/hour max)
+- Client-side cooldown: 60 seconds (visual feedback, bypassable)
+- Security: No email enumeration, generic messages for non-existent accounts
 
 ---
 
