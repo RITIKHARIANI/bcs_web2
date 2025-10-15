@@ -95,9 +95,9 @@ A modern, responsive, and feature-rich e-textbook platform designed specifically
 ### **Technical Documentation**
 - 🤖 **[CLAUDE.md](./CLAUDE.md)** - AI-assisted development guide
 - 🔧 **[Technical Documentation](./docs/TECHNICAL_DOCUMENTATION.md)** - Architecture and development details
-- 🚀 **[Deployment Guide](./docs/DEPLOYMENT_GUIDE.md)** - Production deployment instructions
+- 🔄 **[Dev/Prod Workflow](./docs/DEV_PROD_WORKFLOW.md)** - Fork-based development & deployment workflow
 - 📋 **[Development Guide](./docs/Development_Guide.md)** - Developer onboarding
-- 🧪 **[Testing Guide](./docs/TESTING_GUIDE.md)** - Testing procedures
+- 🧪 **[Testing Checklist](./docs/TESTING_CHECKLIST.md)** - Testing procedures
 
 ### **Playground System**
 - 🎮 **[Playground Architecture](./docs/PLAYGROUND_BUILDER_ARCHITECTURE.md)** - System design
@@ -241,7 +241,7 @@ vercel --prod
 - `EMAIL_FROM` - Verified sender email (e.g., `noreply@yourdomain.com`)
 - `EMAIL_FROM_NAME` - Sender display name (e.g., `BCS E-Textbook`)
 
-See [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) and [Production Guide](./docs/PRODUCTION_DEPLOYMENT_GUIDE.md) for detailed instructions.
+See the [Development & Production Workflow Guide](./docs/DEV_PROD_WORKFLOW.md) for complete deployment instructions, including fork-based workflow, environment configuration, and domain setup.
 
 ---
 
