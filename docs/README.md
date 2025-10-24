@@ -29,6 +29,10 @@ This directory contains all project documentation for the University of Illinois
 - [`PLAYGROUND_TESTING_GUIDE.md`](PLAYGROUND_TESTING_GUIDE.md) - Testing interactive components
 - [`IMPLEMENTATION_STATUS.md`](IMPLEMENTATION_STATUS.md) - Current implementation status
 
+### 📈 **Planning & Roadmap**
+- [`FEATURE_PROPOSALS.md`](FEATURE_PROPOSALS.md) - Comprehensive feature proposals and 6-month roadmap
+- [`COLLABORATION_FEATURE_ANALYSIS.md`](COLLABORATION_FEATURE_ANALYSIS.md) - Faculty collaboration implementation options (5 approaches analyzed)
+
 ---
 
 ## 📁 **Other Documentation**
