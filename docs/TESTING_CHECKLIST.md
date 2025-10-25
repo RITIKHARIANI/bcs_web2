@@ -30,6 +30,7 @@
 |----------|-------------|--------|--------|-----|
 | Authentication | 10 | ___ | ___ | ___ |
 | Faculty Dashboard | 8 | ___ | ___ | ___ |
+| Faculty Collaboration | 10 | ___ | ___ | ___ |
 | User Profiles | 5 | ___ | ___ | ___ |
 | Course Catalog | 6 | ___ | ___ | ___ |
 | Enhanced Catalog Features | 9 | ___ | ___ | ___ |
@@ -41,7 +42,7 @@
 | API Endpoints | 5 | ___ | ___ | ___ |
 | Performance & Accessibility | 6 | ___ | ___ | ___ |
 | Error Handling | 5 | ___ | ___ | ___ |
-| **TOTAL** | **83** | **___** | **___** | **___** |
+| **TOTAL** | **93** | **___** | **___** | **___** |
 
 ---
 
@@ -698,7 +699,335 @@
 
 ---
 
-# 3. User Profiles
+# 3. Faculty Collaboration
+
+## TEST-COLLAB-001: Add Collaborator to Course
+
+**Feature**: Add Collaborator
+**Priority**: Critical
+
+### Prerequisites:
+- Logged in as faculty (User A)
+- At least one course created by User A
+- Another faculty user (User B) exists in system
+
+### Test Steps:
+1. Navigate to `/faculty/courses`
+2. Click "Edit" on a course
+3. Locate "Collaborators" panel in sidebar
+4. Click "+ Add Collaborator" button
+5. Search for User B by name or email
+6. Click "Add" next to User B
+7. Confirm User B appears in collaborator list
+
+### Expected Result:
+- ✅ Add collaborator modal opens
+- ✅ Faculty search works
+- ✅ User B added successfully
+- ✅ User B appears in collaborator list with avatar/name
+- ✅ Success message shown
+- ✅ Activity logged: "Added [User B] as collaborator"
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-COLLAB-002: Collaborator Can Edit Course
+
+**Feature**: Collaborator Authorization
+**Priority**: Critical
+
+### Prerequisites:
+- User B is collaborator on User A's course (from TEST-COLLAB-001)
+
+### Test Steps:
+1. Log out and log in as User B
+2. Navigate to `/faculty/courses`
+3. Verify course appears in "Shared with Me" tab
+4. Click "Edit" on the shared course
+5. Change course title
+6. Click "Save Changes"
+7. Verify update successful
+
+### Expected Result:
+- ✅ Course visible to User B in "Shared with Me"
+- ✅ User B can access edit page
+- ✅ User B can modify course content
+- ✅ Changes saved successfully
+- ✅ Activity logged: "[User B] updated course title"
+- ✅ No permission errors
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-COLLAB-003: Non-Collaborator Cannot Edit
+
+**Feature**: Authorization Enforcement
+**Priority**: Critical
+
+### Prerequisites:
+- User A's course with User B as collaborator
+- User C exists but is NOT a collaborator
+
+### Test Steps:
+1. Log in as User C
+2. Try to access `/faculty/courses/edit/[courseId]` directly (URL)
+3. Check response
+
+### Expected Result:
+- ❌ Access denied (403 Forbidden)
+- ✅ Error message: "You don't have permission to edit this course"
+- ✅ Redirected to faculty dashboard or courses page
+- ✅ Course not visible in User C's course list
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-COLLAB-004: Remove Collaborator
+
+**Feature**: Remove Collaborator
+**Priority**: High
+
+### Prerequisites:
+- User B is collaborator on User A's course
+
+### Test Steps:
+1. Log in as User A (or User B - anyone can remove)
+2. Navigate to course edit page
+3. Locate collaborators panel
+4. Click "X" (remove) button next to User B
+5. Confirm removal in dialog
+6. Log out, log in as User B
+7. Verify course no longer accessible
+
+### Expected Result:
+- ✅ Confirmation dialog appears
+- ✅ User B removed from collaborator list
+- ✅ Activity logged: "[User A] removed [User B] as collaborator"
+- ✅ User B can no longer see or edit course
+- ✅ User B gets 403 error if accessing directly
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-COLLAB-005: Activity Feed Display
+
+**Feature**: Activity Tracking
+**Priority**: High
+
+### Prerequisites:
+- Course with multiple edits and collaborator changes
+
+### Test Steps:
+1. Navigate to course edit page
+2. Locate "Recent Activity" panel in sidebar
+3. Verify activities shown:
+   - Course created
+   - Collaborator added
+   - Content updated
+   - Status changed
+
+### Expected Result:
+- ✅ Activity feed displays all actions
+- ✅ Shows user avatar, name, action, timestamp
+- ✅ Actions sorted by most recent first
+- ✅ Relative timestamps ("2 hours ago")
+- ✅ Pagination or "Load More" if many activities
+- ✅ Clear descriptions: "Updated course title", "Published course"
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-COLLAB-006: Add Collaborator to Module
+
+**Feature**: Module Collaboration
+**Priority**: High
+
+### Prerequisites:
+- Logged in as faculty (User A)
+- At least one module created by User A
+- Another faculty user (User B) exists
+
+### Test Steps:
+1. Navigate to `/faculty/modules`
+2. Click "Edit" on a module
+3. Add User B as collaborator (same flow as course)
+4. Verify User B can edit module
+
+### Expected Result:
+- ✅ Collaborator management works same as courses
+- ✅ User B added successfully
+- ✅ User B can edit module
+- ✅ Activity logged
+- ✅ Module appears in User B's "Shared with Me"
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-COLLAB-007: Collaborator Count Badge
+
+**Feature**: Collaborator Count Display
+**Priority**: Medium
+
+### Prerequisites:
+- Course with 2-3 collaborators
+
+### Test Steps:
+1. Navigate to `/faculty/courses`
+2. Find course with collaborators
+3. Verify badge shows collaborator count
+
+### Expected Result:
+- ✅ Badge visible on course card
+- ✅ Shows correct count (e.g., "👥 3 collaborators")
+- ✅ Clicking card opens course
+- ✅ Badge styled appropriately
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-COLLAB-008: Prevent Duplicate Collaborators
+
+**Feature**: Duplicate Prevention
+**Priority**: Medium
+
+### Prerequisites:
+- User B already collaborator on course
+
+### Test Steps:
+1. Try to add User B as collaborator again
+2. Click "Add"
+3. Check response
+
+### Expected Result:
+- ❌ Addition fails
+- ✅ Error message: "User is already a collaborator"
+- ✅ User B not duplicated in list
+- ✅ No database changes
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-COLLAB-009: Cannot Remove Original Author
+
+**Feature**: Author Protection
+**Priority**: High
+
+### Prerequisites:
+- User A is original author
+- User B is collaborator
+
+### Test Steps:
+1. Log in as User B
+2. Navigate to course edit page
+3. Try to remove User A (original author)
+4. Check if remove button even appears
+
+### Expected Result:
+- ✅ No remove button shown for original author
+- ✅ Or if button shown, removal fails with error
+- ✅ Error: "Cannot remove original author"
+- ✅ Original author remains in collaborator list
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**:
+
+---
+
+## TEST-COLLAB-010: Multiple Collaborators Editing
+
+**Feature**: Concurrent Editing
+**Priority**: Medium
+
+### Prerequisites:
+- Course with User A and User B as collaborators
+- Two separate browser sessions
+
+### Test Steps:
+1. User A opens course for editing (Browser 1)
+2. User B opens same course for editing (Browser 2)
+3. User A makes changes and saves
+4. User B makes different changes and saves
+5. Refresh both browsers
+
+### Expected Result:
+- ✅ Both can edit simultaneously
+- ✅ Changes from both users saved
+- ✅ Activity feed shows both users' actions
+- ✅ Last save wins (expected behavior for simple model)
+- ⚠️ Optional: Warning shown if content was updated since loading
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Simple co-author model means last save wins. Conflict detection is optional enhancement.
+
+---
+
+# 4. User Profiles
 
 ## TEST-PROFILE-001: View Own Profile
 
@@ -2551,6 +2880,19 @@ Result:
 ---
 
 ## 📝 Changelog
+
+### Version 2.2.0 (January 2025)
+**Faculty Collaboration Feature:**
+- Added TEST-COLLAB-001 through TEST-COLLAB-010: Faculty collaboration testing scenarios
+- New test category: Faculty Collaboration (10 tests)
+- Tests cover:
+  - Adding/removing collaborators
+  - Authorization checks (collaborators can edit, non-collaborators cannot)
+  - Activity tracking display
+  - Duplicate prevention
+  - Original author protection
+  - Concurrent editing scenarios
+- Updated test total: 83 → 93 tests
 
 ### Version 2.1.0 (October 10, 2025)
 **Authentication & Security Enhancements:**

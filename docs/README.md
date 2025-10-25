@@ -10,31 +10,28 @@ This directory contains all project documentation for the University of Illinois
 
 ### 🏗️ **Development Guides**
 - [`Development_Guide.md`](Development_Guide.md) - Development setup and guidelines
-- [`Application_Development_Prompt.md`](Application_Development_Prompt.md) - Development prompts and instructions
 - [`TECHNICAL_DOCUMENTATION.md`](TECHNICAL_DOCUMENTATION.md) - Technical architecture documentation
 
 ### 🚀 **Deployment & Production**
-- [`DEPLOYMENT_GUIDE.md`](DEPLOYMENT_GUIDE.md) - Technical deployment reference
-- [`PRODUCTION_DEPLOYMENT_GUIDE.md`](PRODUCTION_DEPLOYMENT_GUIDE.md) - Step-by-step production deployment
-- [`AI_Validation_Guide.md`](AI_Validation_Guide.md) - AI validation procedures
-
-### 📊 **Project Planning**
-- [`BCS_Interactive_Platform_Project_Plan.md`](BCS_Interactive_Platform_Project_Plan.md) - Overall project plan
-- [`Educational_Platform_Requirements.md`](Educational_Platform_Requirements.md) - Platform requirements
-- [`Phase_1_Scope.md`](Phase_1_Scope.md) - Phase 1 scope definition
-- [`Complete_Prompting_Sequence.md`](Complete_Prompting_Sequence.md) - Complete prompting instructions
+- [`DEV_PROD_WORKFLOW.md`](DEV_PROD_WORKFLOW.md) - Development & production workflow (fork-based)
+- [`EMAIL_SETUP_GUIDE.md`](EMAIL_SETUP_GUIDE.md) - Email configuration with Resend
 
 ### 👥 **User Guides**
 - [`FACULTY_USER_GUIDE.md`](FACULTY_USER_GUIDE.md) - Faculty user documentation
 
 ### 🧪 **Testing & Quality Assurance**
-- [`TESTING_GUIDE.md`](TESTING_GUIDE.md) - Testing procedures and methodologies
-- [`TEST_EXECUTION_REPORT.md`](TEST_EXECUTION_REPORT.md) - QA testing results
-- [`TESTING_PERFORMANCE_REPORT.md`](TESTING_PERFORMANCE_REPORT.md) - Performance testing results
+- [`TESTING_CHECKLIST.md`](TESTING_CHECKLIST.md) - Comprehensive testing checklist (active use)
+- [`PLAYGROUND_TESTING_GUIDE.md`](PLAYGROUND_TESTING_GUIDE.md) - Playground-specific testing procedures
 
-### 📈 **Implementation Reports**
-- [`GRAPH_VISUALIZATION_IMPLEMENTATION_REPORT.md`](GRAPH_VISUALIZATION_IMPLEMENTATION_REPORT.md) - Graph visualization implementation
-- [`TASK_05_COMPLETION_REPORT.md`](TASK_05_COMPLETION_REPORT.md) - Public learning interface completion
+### 🎮 **Interactive Playgrounds**
+- [`PLAYGROUND_BUILDER_ARCHITECTURE.md`](PLAYGROUND_BUILDER_ARCHITECTURE.md) - Playground system architecture
+- [`PLAYGROUND_QUICK_START.md`](PLAYGROUND_QUICK_START.md) - Getting started with playgrounds
+- [`PLAYGROUND_TESTING_GUIDE.md`](PLAYGROUND_TESTING_GUIDE.md) - Testing interactive components
+- [`IMPLEMENTATION_STATUS.md`](IMPLEMENTATION_STATUS.md) - Current implementation status
+
+### 📈 **Planning & Roadmap**
+- [`FEATURE_PROPOSALS.md`](FEATURE_PROPOSALS.md) - Comprehensive feature proposals and 6-month roadmap
+- [`COLLABORATION_FEATURE_ANALYSIS.md`](COLLABORATION_FEATURE_ANALYSIS.md) - Faculty collaboration implementation options (5 approaches analyzed)
 
 ---
 
