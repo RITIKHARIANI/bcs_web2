@@ -83,8 +83,8 @@ function getActionBadgeVariant(
   }
 }
 
-function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString)
+function formatRelativeTime(dateInput: string | Date): string {
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
   const diffMins = Math.floor(diffMs / 60000)

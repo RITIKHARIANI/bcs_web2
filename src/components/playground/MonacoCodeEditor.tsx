@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
-import * as monaco from 'monaco-editor';
+import type { editor, languages } from 'monaco-editor';
 
 interface MonacoCodeEditorProps {
   /**
@@ -70,17 +70,17 @@ export function MonacoCodeEditor({
   theme = 'vs-dark',
   minimap = true,
 }: MonacoCodeEditorProps) {
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   /**
    * Handle editor mount
    */
   function handleEditorDidMount(
-    editor: monaco.editor.IStandaloneCodeEditor,
+    editorInstance: editor.IStandaloneCodeEditor,
     monacoInstance: Monaco
   ) {
-    editorRef.current = editor;
+    editorRef.current = editorInstance;
     setIsReady(true);
 
     // Configure Python-specific settings
@@ -95,7 +95,7 @@ export function MonacoCodeEditor({
       // Add common Python snippets
       monacoInstance.languages.registerCompletionItemProvider('python', {
         provideCompletionItems: () => {
-          const suggestions: monaco.languages.CompletionItem[] = [
+          const suggestions: any[] = [
             {
               label: 'shiny_app',
               kind: monacoInstance.languages.CompletionItemKind.Snippet,
@@ -149,7 +149,7 @@ export function MonacoCodeEditor({
     }
 
     // Focus editor
-    editor.focus();
+    editorInstance.focus();
   }
 
   /**

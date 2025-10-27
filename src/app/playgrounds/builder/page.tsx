@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { PlaygroundBuilder } from '@/components/playground/PlaygroundBuilder';
 import { ShinyliveCategory } from '@/types/shinylive';
 
-export default function PlaygroundBuilderPage() {
+function PlaygroundBuilderContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
@@ -161,5 +161,22 @@ export default function PlaygroundBuilderPage() {
       initialDescription={existingPlayground?.description}
       initialCategory={existingPlayground?.category}
     />
+  );
+}
+
+export default function PlaygroundBuilderPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading playground builder...</p>
+          </div>
+        </div>
+      }
+    >
+      <PlaygroundBuilderContent />
+    </Suspense>
   );
 }

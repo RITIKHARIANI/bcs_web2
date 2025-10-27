@@ -78,7 +78,7 @@ export function TemplateSelector({ onSelect, selectedId }: TemplateSelectorProps
       <div className="mb-6">
         <h3 className="text-2xl font-bold text-gray-900 mb-2">Choose a Template</h3>
         <p className="text-gray-600">
-          Start with a pre-built template or select "Blank" to create from scratch
+          Start with a pre-built template or select &quot;Blank&quot; to create from scratch
         </p>
       </div>
 

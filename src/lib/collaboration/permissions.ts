@@ -160,7 +160,7 @@ export async function getModulePermissions(
   userId: string,
   moduleId: string
 ): Promise<PermissionCheck> {
-  const module = await prisma.modules.findUnique({
+  const moduleData = await prisma.modules.findUnique({
     where: { id: moduleId },
     select: {
       author_id: true,
@@ -171,7 +171,7 @@ export async function getModulePermissions(
     }
   })
 
-  if (!module) {
+  if (!moduleData) {
     return {
       canEdit: false,
       isAuthor: false,
@@ -179,8 +179,8 @@ export async function getModulePermissions(
     }
   }
 
-  const isAuthor = module.author_id === userId
-  const isCollaborator = module.collaborators.length > 0
+  const isAuthor = moduleData.author_id === userId
+  const isCollaborator = moduleData.collaborators.length > 0
 
   return {
     canEdit: isAuthor || isCollaborator,
@@ -248,10 +248,10 @@ export async function isAuthorOfModule(
   userId: string,
   moduleId: string
 ): Promise<boolean> {
-  const module = await prisma.modules.findUnique({
+  const moduleData = await prisma.modules.findUnique({
     where: { id: moduleId },
     select: { author_id: true }
   })
 
-  return module?.author_id === userId
+  return moduleData?.author_id === userId
 }

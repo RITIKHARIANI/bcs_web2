@@ -141,16 +141,16 @@ export async function POST(
     }
 
     // Check if user is the module author
-    const module = await prisma.modules.findUnique({
+    const moduleData = await prisma.modules.findUnique({
       where: { id: moduleId },
       select: { author_id: true, title: true },
     })
 
-    if (!module) {
+    if (!moduleData) {
       return NextResponse.json({ error: 'Module not found' }, { status: 404 })
     }
 
-    if (module.author_id === userId) {
+    if (moduleData.author_id === userId) {
       return NextResponse.json(
         { error: 'Module author is already a collaborator by default' },
         { status: 400 }

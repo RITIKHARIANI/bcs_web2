@@ -283,7 +283,7 @@ export async function updateModuleWithActivity<T>(
 ): Promise<T> {
   return await prisma.$transaction(async (tx) => {
     // 1. Update the module
-    const module = await tx.modules.update({
+    const moduleData = await tx.modules.update({
       where: { id: moduleId },
       data: updates
     })
@@ -309,7 +309,7 @@ export async function updateModuleWithActivity<T>(
       }
     })
 
-    return module as T
+    return moduleData as T
   })
 }
 
