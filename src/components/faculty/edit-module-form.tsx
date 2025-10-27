@@ -10,6 +10,8 @@ import Link from 'next/link'
 import { NeuralRichTextEditor } from '@/components/editor/neural-rich-text-editor'
 import { NeuralButton } from '@/components/ui/neural-button'
 import { TagsInput } from '@/components/ui/tags-input'
+import { CollaboratorPanel } from '@/components/collaboration/CollaboratorPanel'
+import { ActivityFeed } from '@/components/collaboration/ActivityFeed'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -56,6 +58,7 @@ interface Module {
   parentModuleId: string | null
   createdAt: string
   updatedAt: string
+  author_id: string
   author: {
     name: string
     email: string
@@ -527,6 +530,20 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Collaboration */}
+            <CollaboratorPanel
+              entityType="module"
+              entityId={moduleId}
+              authorId={module.author_id}
+            />
+
+            {/* Activity Feed */}
+            <ActivityFeed
+              entityType="module"
+              entityId={moduleId}
+              limit={10}
+            />
           </div>
 
           {/* Content Editor */}
