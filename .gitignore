@@ -41,6 +41,11 @@ next-env.d.ts
 # Prisma
 prisma/migrations/
 
+# Database Backups
+*.sql
+*.dump
+database_backup*.sql
+
 # Editor
 .vscode/
 .idea/
