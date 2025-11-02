@@ -452,10 +452,43 @@ All scenarios passed successfully. All expected behaviors verified.
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASSED
+
+Test Setup:
+- Used test account from TEST-AUTH-007: test-auth007-1762062058@illinois.edu
+- Manually expired token in database: SET email_verification_token_expires = NOW() - INTERVAL '25 hours'
+- Old token: 36f6c12249f440856d131f34e256caf50bfe54ec60cf1e9dd9542807cd540b7a
+- Token was expired by 25 hours
+
+Test Execution:
+1. Navigated to /auth/verify-email?token=36f6c12249f440856d131f34e256caf50bfe54ec60cf1e9dd9542807cd540b7a
+2. Page loaded showing "Verify Your Email" screen
+3. Clicked "Verify My Email" button
+4. Page updated to "Verification Failed" state
+5. Error message displayed: "Verification token has expired. Please request a new verification email."
+6. Resend UI section visible with email input field
+7. Entered test email and clicked "Resend Verification Email"
+8. Success message displayed: "If an account with this email exists and is unverified, a verification email has been sent."
+9. Button disabled with 60-second cooldown ("Wait 59s")
+
+Database Verification:
+- New token generated: 8a0890cf192a3ceba719fc334fad3194e9b9d1d7b1703171b1b142109858381b (different from old token)
+- New expiration set: 24 hours from resend time (2025-11-03 17:39:47.127)
+- last_verification_email_sent_at updated to current timestamp
+- email_verified remains false (correct - token not yet used)
+
+All expected behaviors verified:
+✅ Verification failed with expired token
+✅ Appropriate error message displayed
+✅ User can request new verification email
+✅ Old token invalidated, new token generated
+✅ New 24-hour expiration set
+✅ No verification occurred with expired token
+
+Screenshots: test-auth-008-before-verify.png, test-auth-008-expired-token-error.png, test-auth-008-resend-success.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
+**Status**: ✅ Pass □ Fail □ NA
 **Notes**: Token expiration is server-side enforced (email_verification_token_expires field)
 
 ---
@@ -480,11 +513,35 @@ All scenarios passed successfully. All expected behaviors verified.
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASSED
+
+Test Setup:
+- Logged in with test user: ritikh2@illinois.edu
+- Accessed Faculty Dashboard at /faculty/dashboard
+- Dashboard loaded successfully showing user name "Ritik Hariani" in navigation
+
+Test Execution:
+1. User logged in and navigated to Faculty Dashboard
+2. Dashboard displayed correctly with "Sign Out" button visible
+3. Clicked "Sign Out" button from dashboard
+4. Page redirected to homepage (/)
+5. Navigation bar updated to show "Sign In" button instead of user name
+6. Attempted to access protected route: /faculty/dashboard
+7. Automatically redirected to /auth/login (authentication required)
+
+All expected behaviors verified:
+✅ User successfully logged out
+✅ Session cleared (no longer authenticated)
+✅ Redirected to homepage after logout
+✅ Cannot access faculty pages without re-authentication
+✅ Protected routes enforce authentication
+✅ Navigation UI updated correctly (Sign In button visible)
+
+Screenshots: test-auth-009-logged-in.png, test-auth-009-logged-out.png, test-auth-009-protected-route-redirect.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Logout clears NextAuth session and redirects to homepage. Protected routes correctly redirect unauthenticated users to login page.
 
 ---
 
