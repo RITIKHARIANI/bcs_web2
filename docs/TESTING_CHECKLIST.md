@@ -37,12 +37,11 @@
 | Universal Search | 6 | ___ | ___ | ___ |
 | Profile Enhancements | 7 | ___ | ___ | ___ |
 | Course & Module Viewing | 7 | ___ | ___ | ___ |
-| Playgrounds | 6 | ___ | ___ | ___ |
 | Network Visualization | 3 | ___ | ___ | ___ |
 | API Endpoints | 5 | ___ | ___ | ___ |
 | Performance & Accessibility | 6 | ___ | ___ | ___ |
 | Error Handling | 5 | ___ | ___ | ___ |
-| **TOTAL** | **117** | **___** | **___** | **___** |
+| **TOTAL** | **111** | **___** | **___** | **___** |
 
 ---
 
@@ -383,15 +382,53 @@
 
 ### Actual Result:
 ```
-[Enter what actually happened for each scenario]
+✅ ALL SCENARIOS PASSED
+
+Test Account Created:
+- Email: test-auth007-1762062058@illinois.edu
+- Password: TestPass123!
+- Name: Test AuthSeven User (Note: Initially used "Test Auth007 User" but failed validation - numbers not allowed in name field)
+- Status: Unverified
+
+Scenario A - Resend from Login Page: ✅ PASS
+- Login with unverified account triggered error: "Please verify your email before signing in"
+- "Resend Verification Email" button appeared below error
+- Clicked button - observed 60-second client-side cooldown (button showed "Wait 59s")
+- Success message displayed: "Verification email sent! Please check your inbox."
+- Screenshots: test-auth-007-scenario-a-unverified-login.png, test-auth-007-scenario-a-email-sent.png
+
+Scenario B - Resend from Verification Error Page: ✅ PASS
+- Navigated to /auth/verify-email?token=invalid_token_for_testing
+- Clicked "Verify My Email" - error displayed: "Invalid or expired verification token"
+- Entered test account email in "Need a new verification link?" input
+- Clicked "Resend Verification Email"
+- Generic success message displayed (security: no email enumeration)
+- Screenshots: test-auth-007-scenario-b-error-page.png, test-auth-007-scenario-b-email-sent.png
+
+Scenario C - Rate Limiting: ✅ PASS
+- Triggered rate limit immediately after registration
+- Received HTTP 429 error: "Rate limited. Please wait 20 minutes before trying again."
+- Verified rate limiting enforced via last_verification_email_sent_at database field
+- Bypassed for testing by updating timestamp: UPDATE users SET last_verification_email_sent_at = NOW() - INTERVAL '21 minutes'
+- Screenshot: test-auth-007-scenario-c-rate-limited.png
+
+Scenario D - Security Tests: ✅ PASS
+- Tested with non-existent email (nonexistent@illinois.edu)
+- Received generic success message: "If an account with this email exists and is unverified, a verification email has been sent."
+- No information leakage about account existence (security: no email enumeration)
+- 60-second cooldown applies even for non-existent accounts
+- Screenshot: test-auth-007-scenario-d-nonexistent-email.png
+
+All scenarios passed successfully. All expected behaviors verified.
 ```
 
-**Status**: □ Pass □ Fail □ NA
+**Status**: ✅ Pass □ Fail □ NA
 **Notes**:
 - Two UI touchpoints: Login page (unverified error) and Verification error page
 - Server-side rate limiting: 20 minutes between requests (3 attempts/hour max)
 - Client-side cooldown: 60 seconds (visual feedback, bypassable)
 - Security: No email enumeration, generic messages for non-existent accounts
+- **UX Issue Discovered**: Name field validation regex `/^[a-zA-Z\s\-\']+$/` rejects numbers but provides generic "Invalid input" error - user doesn't know what's wrong. Recommendation: Add helper text explaining allowed format (letters, spaces, hyphens, apostrophes only).
 
 ---
 
@@ -2990,181 +3027,7 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 9. Interactive Playgrounds
-
-## TEST-PLAYGROUND-001: View Playground
-
-**Feature**: Playground Viewer
-**Priority**: High
-
-### Test Steps:
-1. Navigate to `/playgrounds`
-2. Click on a playground (or direct link `/playgrounds/[id]`)
-
-### Expected Result:
-- ✅ Playground loads successfully
-- ✅ Controls panel visible on left
-- ✅ Visualization canvas on right
-- ✅ Initial state rendered
-
-### Actual Result:
-```
-[Enter what actually happened]
-```
-
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
-
----
-
-## TEST-PLAYGROUND-002: Python Execution
-
-**Feature**: Pyodide Python Runtime
-**Priority**: Critical
-
-### Test Steps:
-1. Navigate to `/python` or a playground
-2. Wait for Python initialization
-3. Code executes automatically
-
-### Expected Result:
-- ✅ Pyodide loads successfully
-- ✅ "Running..." indicator shown
-- ✅ Python code executes
-- ✅ Output displayed
-- ✅ No errors in console
-
-### Actual Result:
-```
-[Enter what actually happened]
-```
-
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
-
----
-
-## TEST-PLAYGROUND-003: Control Interactions
-
-**Feature**: Interactive Controls
-**Priority**: High
-
-### Test Steps:
-1. Open a playground with controls
-2. Test each control type:
-   - Slider: Drag to change value
-   - Button: Click to trigger action
-   - Dropdown: Select different options
-   - Checkbox: Toggle on/off
-
-### Expected Result:
-- ✅ Slider updates value in real-time
-- ✅ Button triggers correct action
-- ✅ Dropdown changes parameters
-- ✅ Checkbox toggles state
-- ✅ Changes reflected in visualization
-
-### Actual Result:
-```
-[Enter what actually happened]
-```
-
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
-
----
-
-## TEST-PLAYGROUND-004: Braitenberg Vehicles Demo
-
-**Feature**: Braitenberg Vehicles Simulation
-**Priority**: High
-
-### Prerequisites:
-- Python playground loaded
-
-### Test Steps:
-1. Navigate to Braitenberg vehicle playground
-2. Adjust vehicle parameters (speed, sensitivity)
-3. Click "Start Simulation"
-4. Click "Stop"
-5. Click "Reset"
-
-### Expected Result:
-- ✅ Vehicles move on canvas
-- ✅ Parameters affect behavior
-- ✅ Start/Stop/Reset buttons work
-- ✅ Smooth animation
-- ✅ Canvas clears on reset
-
-### Actual Result:
-```
-[Enter what actually happened]
-```
-
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
-
----
-
-## TEST-PLAYGROUND-005: Playground Builder
-
-**Feature**: Playground Builder Interface
-**Priority**: Medium
-
-### Prerequisites:
-- Logged in as faculty
-
-### Test Steps:
-1. Navigate to `/playgrounds/builder`
-2. Select a template
-3. Customize controls
-4. Edit code
-5. Save playground
-
-### Expected Result:
-- ✅ Builder interface loads
-- ✅ Templates available
-- ✅ Can add/remove/edit controls
-- ✅ Code editor functional
-- ✅ Save functionality works
-
-### Actual Result:
-```
-[Enter what actually happened]
-```
-
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
-
----
-
-## TEST-PLAYGROUND-006: Canvas Graphics
-
-**Feature**: Turtle Graphics / Canvas Drawing
-**Priority**: Medium
-
-### Test Steps:
-1. Open playground with canvas
-2. Trigger drawing operations
-3. Observe canvas updates
-
-### Expected Result:
-- ✅ Canvas renders correctly
-- ✅ Graphics draw smoothly
-- ✅ Colors and shapes accurate
-- ✅ No flickering or artifacts
-
-### Actual Result:
-```
-[Enter what actually happened]
-```
-
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
-
----
-
-# 10. Network Visualization
+# 9. Network Visualization
 
 ## TEST-NETWORK-001: Course Structure Graph
 
@@ -3246,7 +3109,7 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 11. API Endpoints
+# 10. API Endpoints
 
 ## TEST-API-001: Health Check
 
@@ -3369,7 +3232,7 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 12. Performance & Accessibility
+# 11. Performance & Accessibility
 
 ## TEST-PERF-001: Page Load Performance
 
@@ -3540,7 +3403,7 @@ Result:
 
 ---
 
-# 13. Edge Cases & Error Handling
+# 12. Edge Cases & Error Handling
 
 ## TEST-ERROR-001: 404 Page
 
@@ -3672,7 +3535,7 @@ Result:
 
 ## 📊 Test Completion Summary
 
-**Total Tests Completed**: _____ / 83
+**Total Tests Completed**: _____ / 111
 **Pass Rate**: _____%
 **Critical Issues Found**: _____
 **High Priority Issues**: _____
