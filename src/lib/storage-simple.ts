@@ -31,13 +31,10 @@ export const uploadFile = async (file: File): Promise<{ url: string; path: strin
     const filename = `${timestamp}_${randomStr}.${fileExt}`;
     const filePath = `uploads/${filename}`;
 
-    // Convert File to ArrayBuffer for Supabase
-    const arrayBuffer = await file.arrayBuffer();
-
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage (pass File directly, not ArrayBuffer)
     const { data, error } = await supabase.storage
       .from(MEDIA_BUCKET)
-      .upload(filePath, arrayBuffer, {
+      .upload(filePath, file, {
         contentType: file.type,
         cacheControl: '3600',
         upsert: false
