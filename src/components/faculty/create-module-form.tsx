@@ -294,8 +294,8 @@ export function CreateModuleForm() {
 
                 <div className="space-y-2">
                   <Label htmlFor="parentModule">Parent Module</Label>
-                  <Select 
-                    value={watchedParentModuleId || 'none'}
+                  <Select
+                    value={watchedParentModuleId ?? 'none'}
                     onValueChange={(value) => {
                       console.log('Parent module selected:', value);
                       setValue('parentModuleId', value === 'none' ? undefined : value);

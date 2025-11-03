@@ -225,7 +225,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
       setValue('slug', module.slug)
       setValue('description', module.description || '')
       setValue('content', module.content)
-      setValue('parentModuleId', module.parentModuleId || 'none')
+      setValue('parentModuleId', module.parentModuleId)
       setValue('status', module.status)
       setValue('tags', module.tags || [])
       // Also set the tags state
@@ -446,8 +446,8 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
 
                 <div className="space-y-2">
                   <Label htmlFor="parentModule">Parent Module</Label>
-                  <Select 
-                    value={watchedParentId || 'none'} 
+                  <Select
+                    value={watchedParentId ?? 'none'}
                     onValueChange={(value) => setValue('parentModuleId', value === 'none' ? null : value)}
                   >
                     <SelectTrigger className="border-neural-light/30 focus:border-neural-primary">
