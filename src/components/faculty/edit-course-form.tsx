@@ -97,9 +97,9 @@ interface Course {
   author_id: string
   createdAt: string
   updatedAt: string
-  courseModules: {
+  course_modules?: {
     id: string
-    sortOrder: number
+    sort_order: number
     modules: Module
   }[]
 }
@@ -317,9 +317,9 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
       setTags(course.tags || [])
 
       // Initialize selected modules
-      const initialModules: SelectedModule[] = course.courseModules.map((cm) => ({
+      const initialModules: SelectedModule[] = (course.course_modules || []).map((cm) => ({
         moduleId: cm.modules.id,
-        order: cm.sortOrder,
+        order: cm.sort_order,
         module: cm.modules,
       }))
       setSelectedModules(initialModules)

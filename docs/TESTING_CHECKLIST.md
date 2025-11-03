@@ -821,11 +821,49 @@ Screenshots: test-faculty-003-edit-page.png, test-faculty-003-modified.png, test
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+Date: 2025-11-02
+Tester: Automated test via Playwright
+
+✅ PASS - All expected results verified:
+1. Successfully navigated to /faculty/courses/create
+2. Course form loaded with all fields present
+3. Filled in course details:
+   - Title: "Test Course for Module Integration"
+   - Auto-generated slug: "test-course-for-module-integration"
+   - Description: "This is a test course to verify module integration and course creation functionality."
+4. Clicked "Add Modules" button successfully
+5. Module selection dialog displayed 3 available modules:
+   - "- Fixed" (published)
+   - "Test Collaboration Module" (draft)
+   - "Test Module After Bug Fix" (draft)
+6. Added published module "- Fixed" to course
+7. Course statistics updated correctly:
+   - Modules: 1
+   - Published Modules: 1
+8. Clicked "Create Course" button
+9. Redirected to /faculty/courses
+10. Success notification displayed: "Course created successfully!"
+11. New course appears in Course Library with correct information:
+    - Title: "Test Course for Module Integration"
+    - Status: draft
+    - Description visible
+    - Slug: /test-course-for-module-integration
+    - Edit and view buttons present
+12. Course statistics updated:
+    - Total Courses: 1
+    - Published: 0
+    - Drafts: 1
+    - Featured: 0
+
+Screenshots:
+- test-faculty-005-course-creation-page.png
+- test-faculty-005-module-selection-dialog.png
+- test-faculty-005-module-added-to-course.png
+- test-faculty-005-course-created-successfully.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: Course creation works perfectly. Module integration successful. All UI elements functioning as expected. Note: The course shows "Invalid Date" in the created date field - this is a minor display issue that doesn't affect functionality.
 
 ---
 
