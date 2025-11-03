@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import mediumZoom from 'medium-zoom'
+import 'medium-zoom/dist/style.css'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { NeuralButton } from '@/components/ui/neural-button'
@@ -89,7 +91,8 @@ interface EnhancedCourseViewerProps {
 export function EnhancedCourseViewer({ course, initialModule, initialSearch = '' }: EnhancedCourseViewerProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+  const contentRef = useRef<HTMLDivElement>(null)
+
   // State management
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(() => {
     if (initialModule) {
@@ -227,6 +230,22 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [prevModuleData, nextModuleData])
+
+  // Initialize medium-zoom on module content images
+  useEffect(() => {
+    if (contentRef.current && selectedModule) {
+      const images = contentRef.current.querySelectorAll('img')
+      const zoom = mediumZoom(images, {
+        margin: 24,
+        background: 'rgba(0, 0, 0, 0.9)',
+        scrollOffset: 0,
+      })
+
+      return () => {
+        zoom.detach()
+      }
+    }
+  }, [selectedModule])
 
   return (
     <div className={`min-h-screen bg-background ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
@@ -550,6 +569,7 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
                 <Card className="cognitive-card">
                   <CardContent className={`${isFullscreen ? 'p-12' : 'p-6 sm:p-8 lg:p-12'}`}>
                     <article
+                      ref={contentRef}
                       className="neural-content reading-interface prose prose-sm sm:prose-base lg:prose-lg prose-neural max-w-none mx-auto"
                       style={{ maxWidth: '90ch' }}
                       dangerouslySetInnerHTML={{ __html: selectedModule.content }}

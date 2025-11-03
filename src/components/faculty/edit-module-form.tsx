@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { NeuralRichTextEditor } from '@/components/editor/neural-rich-text-editor'
 import { NeuralButton } from '@/components/ui/neural-button'
 import { TagsInput } from '@/components/ui/tags-input'
+import { MediaLibraryPanel } from '@/components/ui/media-library-panel'
 import { CollaboratorPanel } from '@/components/collaboration/CollaboratorPanel'
 import { ActivityFeed } from '@/components/collaboration/ActivityFeed'
 
@@ -151,6 +152,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [tags, setTags] = useState<string[]>([])
   const [availableTags, setAvailableTags] = useState<string[]>([])
+  const [insertImageFn, setInsertImageFn] = useState<((url: string, alt?: string, caption?: string) => void) | null>(null)
 
   const { data: module, isLoading: isLoadingModule, error: moduleError } = useQuery({
     queryKey: ['module', moduleId],
@@ -380,7 +382,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
       </header>
 
       <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Module Settings */}
           <div className="lg:col-span-1 space-y-6">
             <Card className="cognitive-card">
@@ -565,6 +567,8 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                   placeholder="Start writing your module content..."
                   autoSave={true}
                   onSave={(html) => setValue('content', html)}
+                  moduleId={moduleId}
+                  onEditorReady={(insertImage) => setInsertImageFn(() => insertImage)}
                 />
                 {errors.content && (
                   <Alert className="mt-4">
@@ -576,6 +580,20 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 )}
               </CardContent>
             </Card>
+          </div>
+
+          {/* Media Library */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 h-[calc(100vh-8rem)]">
+              <MediaLibraryPanel
+                moduleId={moduleId}
+                onMediaSelect={(file, altText, caption) => {
+                  if (insertImageFn) {
+                    insertImageFn(file.url, altText || file.originalName, caption);
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
       </main>

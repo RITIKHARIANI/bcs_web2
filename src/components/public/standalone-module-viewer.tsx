@@ -1,7 +1,9 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import Link from 'next/link'
+import mediumZoom from 'medium-zoom'
+import 'medium-zoom/dist/style.css'
 import { 
   BookOpen, 
   Clock, 
@@ -48,6 +50,24 @@ interface StandaloneModuleProps {
 }
 
 export function StandaloneModuleViewer({ module }: StandaloneModuleProps) {
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  // Initialize medium-zoom on module content images
+  useEffect(() => {
+    if (contentRef.current) {
+      const images = contentRef.current.querySelectorAll('img')
+      const zoom = mediumZoom(images, {
+        margin: 24,
+        background: 'rgba(0, 0, 0, 0.9)',
+        scrollOffset: 0,
+      })
+
+      return () => {
+        zoom.detach()
+      }
+    }
+  }, [module.id])
+
   return (
     <div className="max-w-6xl mx-auto">
       {/* Header */}
@@ -115,7 +135,8 @@ export function StandaloneModuleViewer({ module }: StandaloneModuleProps) {
         <div className="lg:col-span-3">
           <Card className="cognitive-card">
             <CardContent className="p-8">
-              <div 
+              <div
+                ref={contentRef}
                 className="neural-content reading-interface prose prose-lg max-w-none"
                 dangerouslySetInnerHTML={{ __html: module.content }}
               />
