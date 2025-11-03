@@ -945,6 +945,8 @@ Screenshots:
 **Status**: ☑ Pass □ Fail □ NA
 **Notes**: Test completed successfully using alternative SQL approach due to Playwright authentication issues. Critical course edit bug was discovered and fixed (Commit 8d6e654). Course publishing and public visibility working correctly. The course created in TEST-FACULTY-005 is now published and fully accessible to all users.
 
+**MANUAL VERIFICATION COMPLETED (2025-11-03)**: Course edit page bug fix confirmed working by user. Page loads successfully without crashing when accessing `/faculty/courses/edit/[id]`. The TypeScript interface fix (snake_case property names) resolved the production-critical bug.
+
 ---
 
 ## TEST-FACULTY-007: Delete Module
@@ -969,11 +971,41 @@ Screenshots:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+Date: 2025-11-03
+Tester: Manual testing by user
+
+✅ PASS - All module deletion functionality working correctly
+
+TEST CASE 1: Delete Unused Draft Module
+1. Navigated to /faculty/modules
+2. Located "Test Module After Bug Fix" (draft, not in any courses)
+3. Clicked "Edit" to open module edit page
+4. Clicked "Delete" button on edit page
+5. Confirmation modal appeared
+6. Clicked "Confirm Delete" in modal
+7. ✅ Module deleted successfully
+8. ✅ Module removed from module list
+9. ✅ Module count updated correctly
+
+TEST CASE 2: Prevent Deleting Module in Published Course
+1. Located "- Fixed" module (published, used in 1 course)
+2. Attempted to delete the module
+3. ✅ Deletion prevented with error message
+4. Error notification displayed: "Cannot delete module that is used in courses. Remove from courses first."
+5. ✅ Error appears in toast notification (bottom right)
+6. ✅ Module remains in list after attempted deletion
+
+VERIFICATION:
+✅ Confirmation modal works correctly
+✅ Deletion succeeds for unused modules
+✅ Deletion blocked for modules in courses
+✅ Clear error messaging for blocked deletions
+✅ Module list updates immediately after deletion
+✅ Protection mechanism prevents data integrity issues
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: Module deletion feature working as designed. The system properly protects modules that are in use by displaying a clear error message. Unused modules can be deleted successfully through the edit page interface.
 
 ---
 
