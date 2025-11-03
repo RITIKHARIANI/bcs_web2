@@ -19,6 +19,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { NeuralButton } from '@/components/ui/neural-button'
 import { Separator } from '@/components/ui/separator'
+import { ModuleResources } from '@/components/public/module-resources'
+
+interface MediaFile {
+  id: string
+  name: string
+  filename: string
+  size: number
+  mimeType: string
+  url: string
+  uploadedAt: string
+}
 
 interface StandaloneModuleProps {
   module: {
@@ -46,6 +57,7 @@ interface StandaloneModuleProps {
       description: string | null
       sortOrder: number
     }[]
+    resources?: MediaFile[]
   }
 }
 
@@ -132,7 +144,7 @@ export function StandaloneModuleViewer({ module }: StandaloneModuleProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Main Content */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 space-y-8">
           <Card className="cognitive-card">
             <CardContent className="p-8">
               <div
@@ -142,6 +154,11 @@ export function StandaloneModuleViewer({ module }: StandaloneModuleProps) {
               />
             </CardContent>
           </Card>
+
+          {/* Module Resources */}
+          {module.resources && module.resources.length > 0 && (
+            <ModuleResources resources={module.resources} />
+          )}
         </div>
 
         {/* Sidebar */}

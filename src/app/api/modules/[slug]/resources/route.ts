@@ -9,7 +9,7 @@ export async function GET(
     const { slug } = await params
 
     // Fetch module by slug with media files (public endpoint, no auth required)
-    const module = await prisma.modules.findUnique({
+    const foundModule = await prisma.modules.findFirst({
       where: {
         slug: slug,
         status: 'published', // Only show resources for published modules
@@ -29,7 +29,7 @@ export async function GET(
       },
     })
 
-    if (!module) {
+    if (!foundModule) {
       return NextResponse.json(
         { error: 'Module not found or not published' },
         { status: 404 }
@@ -37,7 +37,7 @@ export async function GET(
     }
 
     // Transform media files to student-friendly format
-    const resources = module.module_media.map((mm) => ({
+    const resources = foundModule.module_media.map((mm) => ({
       id: mm.media_files.id,
       name: mm.media_files.original_name,
       filename: mm.media_files.filename,
@@ -49,9 +49,9 @@ export async function GET(
 
     return NextResponse.json({
       module: {
-        id: module.id,
-        title: module.title,
-        slug: module.slug,
+        id: foundModule.id,
+        title: foundModule.title,
+        slug: foundModule.slug,
       },
       resources,
       total: resources.length,

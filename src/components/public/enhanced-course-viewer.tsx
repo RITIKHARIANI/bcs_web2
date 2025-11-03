@@ -12,6 +12,7 @@ import { NeuralButton } from '@/components/ui/neural-button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Loading } from '@/components/ui/loading'
+import { ModuleResources } from '@/components/public/module-resources'
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -41,6 +42,16 @@ import {
   Navigation
 } from 'lucide-react'
 
+interface MediaFile {
+  id: string
+  name: string
+  filename: string
+  size: number
+  mimeType: string
+  url: string
+  uploadedAt: string
+}
+
 interface Module {
   id: string
   title: string
@@ -52,6 +63,7 @@ interface Module {
   sortOrder: number
   createdAt: string
   updatedAt: string
+  resources?: MediaFile[]
 }
 
 interface CourseModule {
@@ -576,6 +588,11 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
                     />
                   </CardContent>
                 </Card>
+
+                {/* Module Resources */}
+                {selectedModule.resources && selectedModule.resources.length > 0 && (
+                  <ModuleResources resources={selectedModule.resources} />
+                )}
 
                 {/* Course Modules Overview */}
                 <Card className="cognitive-card">
