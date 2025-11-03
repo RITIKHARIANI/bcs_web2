@@ -750,6 +750,18 @@ Screenshots: test-faculty-003-edit-page.png, test-faculty-003-modified.png, test
 **Status**: ✅ Pass □ Fail □ NA
 **Notes**: Module editing works correctly but has a critical bug preventing saves when parent module is "None (Root Module)". Frontend sends "none" string but API expects null. Needs fix in module edit form or API validation.
 
+**✅ BUG FIXED** (11/2/2025 - Commit 0bc87c1):
+- **Fix Applied**: Changed `||` to `??` operator for proper null handling in both edit and create forms
+- **Files Modified**:
+  - `src/components/faculty/edit-module-form.tsx` (Lines 228, 450)
+  - `src/components/faculty/create-module-form.tsx` (Line 298)
+- **Re-test Results**:
+  - ✅ Module edit saves successfully (changed title to " - Fixed")
+  - ✅ No "Parent module 'none' does not exist" error
+  - ✅ Module creation still works (created "Test Module After Bug Fix")
+  - ✅ No regression - total modules increased from 2 to 3
+- **Root Cause**: `||` operator treats `null` as falsy, converting it to 'none'. `??` only coalesces `null`/`undefined`.
+
 ---
 
 ## TEST-FACULTY-004: Module Pagination
