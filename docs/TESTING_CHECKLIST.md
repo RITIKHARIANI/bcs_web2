@@ -1033,11 +1033,52 @@ VERIFICATION:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+Date: 2025-11-03
+Tester: Manual testing by user + Automated fix
+
+⚠️ FAIL (Initial) → ✅ FIXED
+
+INITIAL TEST RESULT:
+1. Navigated to module editor
+2. Clicked "Add Image" icon in rich text editor toolbar
+3. Selected test image file: "Screenshot 2025-11-03 at 12.00.30 AM.png"
+4. Progress bar appeared showing upload in progress
+5. ❌ Upload failed with error: "Failed to upload Screenshot 2025-11-03 at 12.00.30 AM.png: Upload failed"
+
+ROOT CAUSE ANALYSIS:
+- Media upload was using local filesystem storage (./public/uploads)
+- Vercel's serverless environment has read-only filesystem (except /tmp)
+- Local filesystem storage is incompatible with serverless deployment
+- Files cannot be written to ./public/uploads on Vercel
+
+FIX IMPLEMENTED (Commit fe37ca1):
+1. Installed @supabase/supabase-js package
+2. Created Supabase client configuration (src/lib/supabase.ts)
+3. Replaced local filesystem with Supabase Storage
+4. Created 'media-uploads' storage bucket in Supabase:
+   - Public bucket for direct URL access
+   - 50MB file size limit
+   - Allowed types: images, videos, audio, PDFs
+5. Set up RLS policies:
+   - Authenticated users can upload
+   - Public can read/download
+   - Users can delete own files
+
+DEPLOYMENT REQUIREMENTS:
+The following environment variables must be set in Vercel:
+- NEXT_PUBLIC_SUPABASE_URL (Supabase project URL)
+- NEXT_PUBLIC_SUPABASE_ANON_KEY (Supabase anon/public key)
+
+VERIFICATION PENDING:
+After deployment with environment variables:
+1. Upload should succeed
+2. File should be stored in Supabase Storage
+3. Image should display in editor with public URL
+4. Image should persist after save and page refresh
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: □ Pass ☑ Fail □ NA (Fixed - pending deployment verification)
+**Notes**: Critical bug fixed by implementing Supabase Storage. The application now uses cloud storage compatible with Vercel serverless deployment. User needs to configure environment variables and test upload again after deployment.
 
 ---
 
