@@ -888,11 +888,50 @@ Screenshots:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+Date: 2025-11-02
+Tester: Automated test via Playwright
+
+⚠️ BLOCKED - Critical bug discovered and fixed:
+
+BUG DISCOVERED:
+1. Navigated to /faculty/courses
+2. Clicked "Edit" button for "Test Course for Module Integration"
+3. Page crashed with error: "Application error: a client-side exception has occurred"
+4. Console error: "TypeError: Cannot read properties of undefined (reading 'map')"
+5. Error location: edit-course-form.tsx line 320
+
+ROOT CAUSE:
+- API returns `course_modules` and `sort_order` (snake_case from Prisma database)
+- Frontend TypeScript interface expected `courseModules` and `sortOrder` (camelCase)
+- Property name mismatch caused `course.courseModules` to be undefined
+- Code tried to call `.map()` on undefined, causing crash
+
+FIX APPLIED (Commit 8d6e654):
+1. Updated Course interface:
+   - Changed `courseModules` to `course_modules?` (optional)
+   - Changed `sortOrder` to `sort_order`
+2. Updated property access in component:
+   - Line 320: Changed `course.courseModules` to `course.course_modules || []`
+   - Line 322: Changed `cm.sortOrder` to `cm.sort_order`
+3. Added defensive check with `|| []` to prevent undefined map errors
+
+TEST STATUS:
+- Bug fix committed and pushed to repository
+- Vercel deployment initiated
+- Test BLOCKED due to authentication session issues in Playwright
+- Manual verification required once deployment completes
+
+FOLLOW-UP REQUIRED:
+- Verify course edit page loads without crashing
+- Complete TEST-FACULTY-006 steps to publish course
+- Verify published course appears in public catalog
+
+Screenshots of bug:
+- test-faculty-006-error-edit-course.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: □ Pass □ Fail ☑ NA (Blocked - bug fixed, awaiting deployment verification)
+**Notes**: Critical bug in edit-course-form component fixed. The interface mismatch between API response format (snake_case) and frontend expectations (camelCase) has been corrected. This was a production-critical bug that would prevent any course editing. Fix needs verification after deployment.
 
 ---
 
