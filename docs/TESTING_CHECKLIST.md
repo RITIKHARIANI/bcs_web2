@@ -1077,8 +1077,15 @@ After deployment with environment variables:
 4. Image should persist after save and page refresh
 ```
 
-**Status**: □ Pass ☑ Fail □ NA (Fixed - pending deployment verification)
-**Notes**: Critical bug fixed by implementing Supabase Storage. The application now uses cloud storage compatible with Vercel serverless deployment. User needs to configure environment variables and test upload again after deployment.
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: Fixed successfully! After implementing Supabase Storage, setting environment variables, and fixing RLS policies, upload now works. Image uploaded successfully and appears in rich text editor. Verified with screenshot showing uploaded image in module content with "Content saved successfully!" confirmation.
+
+**Fixes Applied**:
+1. Implemented Supabase Storage (Commit fe37ca1)
+2. Fixed File upload API to pass File directly (Commit 8801cbf)
+3. Added lazy initialization for better error handling (Commit 255d97d)
+4. Updated RLS policies to allow public access (Supabase SQL)
+5. Environment variables configured in Vercel
 
 ---
 
