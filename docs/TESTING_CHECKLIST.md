@@ -28,9 +28,10 @@
 
 | Category | Total Tests | Passed | Failed | NA |
 |----------|-------------|--------|--------|-----|
-| Authentication | 10 | ___ | ___ | ___ |
+| Authentication | 13 | ___ | ___ | ___ |
 | Faculty Dashboard | 8 | ___ | ___ | ___ |
 | Faculty Collaboration | 34 | ___ | ___ | ___ |
+| Phase 2 Media Features | 5 | ___ | ___ | ___ |
 | User Profiles | 5 | ___ | ___ | ___ |
 | Course Catalog | 6 | ___ | ___ | ___ |
 | Enhanced Catalog Features | 9 | ___ | ___ | ___ |
@@ -41,7 +42,7 @@
 | API Endpoints | 5 | ___ | ___ | ___ |
 | Performance & Accessibility | 6 | ___ | ___ | ___ |
 | Error Handling | 5 | ___ | ___ | ___ |
-| **TOTAL** | **111** | **___** | **___** | **___** |
+| **TOTAL** | **119** | **___** | **___** | **___** |
 
 ---
 
@@ -542,6 +543,150 @@ Screenshots: test-auth-009-logged-in.png, test-auth-009-logged-out.png, test-aut
 
 **Status**: ✅ Pass □ Fail □ NA
 **Notes**: Logout clears NextAuth session and redirects to homepage. Protected routes correctly redirect unauthenticated users to login page.
+
+---
+
+## TEST-AUTH-010: Role-Based Access Control (Non-Faculty User)
+
+**Feature**: Role-Based Authorization
+**Priority**: Critical
+
+### Prerequisites:
+- User account with role other than 'faculty' (e.g., 'student' role)
+
+### Test Steps:
+1. Log in with a non-faculty user account
+2. Try to access `/faculty/dashboard` directly via URL
+3. Verify redirect behavior
+4. Try to access `/faculty/courses` directly
+5. Verify error message displayed
+
+### Expected Result:
+- ❌ Access denied to faculty routes
+- ✅ Redirected to home page (`/`)
+- ✅ URL parameter shows error: `/?error=unauthorized`
+- ✅ Unauthorized alert displayed at top of home page
+- ✅ Alert message: "You do not have permission to access that page. Faculty access required."
+- ✅ Alert is dismissable (X button)
+- ✅ No data leakage about faculty content
+- ✅ Session remains valid (user still logged in)
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Middleware checks user role from session JWT before allowing access to /faculty/* routes.
+
+---
+
+## TEST-AUTH-011: Callback URL Preservation
+
+**Feature**: Post-Login Redirect to Intended Page
+**Priority**: High
+
+### Prerequisites:
+- User is not logged in
+
+### Test Steps:
+1. Navigate to `/faculty/courses` (or any protected route)
+2. Verify redirect to login page
+3. Check URL contains callback parameter
+4. Enter valid credentials and log in
+5. Observe redirect destination
+
+### Expected Result:
+- ✅ Redirected to `/auth/login?callbackUrl=%2Ffaculty%2Fcourses`
+- ✅ URL shows encoded callback URL parameter
+- ✅ After successful login, redirected to original intended page (`/faculty/courses`)
+- ✅ NOT redirected to default dashboard
+- ✅ Callback URL preserved through login flow
+- ✅ Works for any protected route
+
+### Test Edge Cases:
+- Try with query parameters: `/faculty/courses?tab=shared`
+- Try with deeply nested route: `/faculty/courses/edit/[id]`
+- Verify callback URL is properly encoded
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Middleware adds callbackUrl parameter. Login form (line 27) reads this parameter and uses it for post-login redirect.
+
+---
+
+## TEST-AUTH-012: Unauthorized Access Alert Display
+
+**Feature**: Unauthorized Alert Component
+**Priority**: Medium
+
+### Prerequisites:
+- Non-faculty user account
+
+### Test Steps:
+1. Log in as non-faculty user
+2. Access `/faculty/dashboard` directly
+3. Verify redirect to home page
+4. Examine alert display
+5. Click X button to dismiss
+6. Verify URL cleaned up
+
+### Expected Result:
+- ✅ Alert appears at top center of page (fixed position)
+- ✅ Red/destructive styling with AlertCircle icon
+- ✅ Message text displayed clearly
+- ✅ X (close) button visible on right side
+- ✅ Clicking X dismisses alert (fade out animation)
+- ✅ URL changes from `/?error=unauthorized` to `/`
+- ✅ Error parameter removed from URL
+- ✅ Alert doesn't reappear on page refresh after dismissal
+- ✅ Alert z-index above other content (z-50)
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: UnauthorizedAlert component handles display and dismissal. Uses searchParams to detect error parameter.
+
+---
+
+## TEST-AUTH-013: Prevent Logged-In Users from Auth Pages
+
+**Feature**: Auth Page Access Control
+**Priority**: Medium
+
+### Prerequisites:
+- User is already logged in
+
+### Test Steps:
+1. Log in as faculty user
+2. Navigate to `/auth/login`
+3. Verify redirect behavior
+4. Try to access `/auth/register`
+5. Try to access `/auth/forgot-password`
+
+### Expected Result:
+- ✅ All auth pages redirect to home page (`/`)
+- ✅ Cannot access login page while logged in
+- ✅ Cannot access registration page while logged in
+- ✅ Cannot access forgot password page while logged in
+- ✅ Redirect happens immediately (middleware level)
+- ✅ No flash of auth page content
+- ✅ User remains logged in after redirect
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Middleware checks if user is authenticated and on auth page, then redirects to home. Prevents logged-in users from accessing unnecessary auth flows.
 
 ---
 
@@ -4095,6 +4240,24 @@ Result:
 ---
 
 ## 📝 Changelog
+
+### Version 2.5.0 (November 2025)
+**Authentication Middleware Enhancements:**
+- Added TEST-AUTH-010 through TEST-AUTH-013: Role-based access control testing
+- New authentication security tests (4 tests)
+- Tests cover:
+  - Role-based authorization (non-faculty users blocked from faculty routes)
+  - Callback URL preservation for post-login redirects
+  - Unauthorized access alert display and dismissal
+  - Prevent logged-in users from accessing auth pages
+- Features implemented:
+  - Middleware role checking (faculty vs non-faculty)
+  - Automatic redirect with callbackUrl parameter
+  - UnauthorizedAlert component with dismissable UI
+  - Auth page access prevention for logged-in users
+  - NextResponse-based redirect handling
+  - Edge runtime middleware for performance
+- Updated test total: 115 → 119 tests (111 baseline + 5 Phase 2 media + 3 original auth gaps closed = 119)
 
 ### Version 2.4.0 (January 2025)
 **Phase 2 Media Features:**
