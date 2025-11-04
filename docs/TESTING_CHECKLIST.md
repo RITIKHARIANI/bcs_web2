@@ -2238,7 +2238,185 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 4. User Profiles
+# 4. Phase 2 Media Features
+
+## TEST-MEDIA-001: Image Caption Upload
+
+**Feature**: Faculty Image Caption Support
+**Priority**: High
+
+### Prerequisites:
+- Logged in as faculty
+- At least one image in media library
+
+### Test Steps:
+1. Navigate to module creation or edit page
+2. Click "Add Image" in editor toolbar
+3. Open Media Library panel
+4. Click "Insert" on an image
+5. In the dialog, fill in Alt Text field
+6. Fill in Caption field (optional)
+7. Click "Insert Image"
+
+### Expected Result:
+- ✅ Dialog shows both "Alt Text" and "Caption" fields
+- ✅ Alt Text field is clearly labeled for accessibility
+- ✅ Caption field is marked as optional
+- ✅ Placeholder text provides helpful example
+- ✅ Image inserts into editor with both attributes
+- ✅ Success notification appears
+
+### Actual Result:
+```
+✅ PASSED - Dialog displays both fields correctly
+✅ PASSED - Caption field has placeholder "e.g., Figure 1.1: Neural network architecture..."
+✅ PASSED - Image inserted successfully with caption stored in title attribute
+✅ PASSED - Success toast notification displays "Image inserted"
+```
+
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Caption is stored in image title attribute. Visual caption display below image requires figure wrapper (documented as future enhancement).
+
+---
+
+## TEST-MEDIA-002: Click-to-Zoom Lightbox
+
+**Feature**: Student Image Zoom Functionality
+**Priority**: Medium
+
+### Prerequisites:
+- Published module or course with images in content
+- Viewing as student (public access)
+
+### Test Steps:
+1. Navigate to a published module page with images
+2. Click on an image in the module content
+3. Observe zoom behavior
+4. Click outside zoomed image or press ESC
+5. Test on mobile device (optional)
+
+### Expected Result:
+- ✅ Image zooms to full screen on click
+- ✅ Dark overlay (rgba(0, 0, 0, 0.9)) appears behind image
+- ✅ Image maintains aspect ratio when zoomed
+- ✅ 24px margin around zoomed image
+- ✅ Click outside or ESC closes zoom
+- ✅ Cursor changes to indicate clickable
+- ✅ Multiple images on page all zoomable
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Uses medium-zoom library. Images with title attribute show border to indicate caption presence.
+
+---
+
+## TEST-MEDIA-003: Module Resources Section Display
+
+**Feature**: Student Resources Download Table
+**Priority**: High
+
+### Prerequisites:
+- Published module with uploaded media files
+- Viewing as student (public access)
+
+### Test Steps:
+1. Navigate to a published module page
+2. Scroll to bottom of module content
+3. Locate "Module Resources" section
+4. Observe resource table display
+
+### Expected Result:
+- ✅ "Module Resources" section appears below content
+- ✅ Table shows: File name, Type, Size, Upload date
+- ✅ File type badges display (PDF, Image, Video, etc.)
+- ✅ File sizes formatted correctly (KB, MB)
+- ✅ Total resources count shown
+- ✅ Total storage used displayed
+- ✅ Download buttons visible for each file
+- ✅ Section hidden if no resources exist
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Resources displayed in table format with file icons and metadata.
+
+---
+
+## TEST-MEDIA-004: Resource File Download
+
+**Feature**: Student Resource Download Functionality
+**Priority**: High
+
+### Prerequisites:
+- Published module with at least one uploaded file
+- Viewing as student (public access)
+
+### Test Steps:
+1. Navigate to module with resources
+2. Scroll to "Module Resources" section
+3. Click download button for a file
+4. Verify file downloads
+
+### Expected Result:
+- ✅ Download button triggers file download
+- ✅ File opens in new tab (images, PDFs)
+- ✅ File downloads with correct name
+- ✅ File is accessible (not 404)
+- ✅ File size matches displayed size
+- ✅ Multiple files can be downloaded
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Files served from Supabase public storage URLs.
+
+---
+
+## TEST-MEDIA-005: Resources API Endpoint
+
+**Feature**: Module Resources Public API
+**Priority**: Medium
+
+### Prerequisites:
+- Published module with media files
+- API testing tool (optional: Postman, curl)
+
+### Test Steps:
+1. Make GET request to `/api/modules/resources/[slug]`
+2. Use slug of published module
+3. Verify response structure
+4. Try with unpublished module
+5. Try with non-existent slug
+
+### Expected Result:
+- ✅ Returns 200 for published module
+- ✅ JSON includes: module info, resources array, total count
+- ✅ Each resource has: id, name, filename, size, mimeType, url, uploadedAt
+- ✅ Returns 404 for unpublished module
+- ✅ Returns 404 for non-existent slug
+- ✅ Resources ordered by created_at DESC
+
+### Actual Result:
+```
+[Enter what actually happened]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Endpoint path changed to /api/modules/resources/[slug] to avoid route conflict with /api/modules/[id].
+
+---
+
+# 5. User Profiles
 
 ## TEST-PROFILE-001: View Own Profile
 
@@ -2385,7 +2563,7 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 4. Public Course Catalog
+# 6. Public Course Catalog
 
 ## TEST-CATALOG-001: Browse Course Catalog
 
@@ -2545,7 +2723,7 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 5. Enhanced Catalog Features
+# 7. Enhanced Catalog Features
 
 ## TEST-CATALOG-007: Course Sorting
 
@@ -2798,7 +2976,7 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 6. Universal Search
+# 8. Universal Search
 
 ## TEST-SEARCH-001: Universal Search from Header
 
@@ -2983,7 +3161,7 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 7. Profile Enhancements
+# 9. Profile Enhancements
 
 ## TEST-PROFILE-006: Instructor Badge Display
 
@@ -3196,7 +3374,7 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 8. Course & Module Viewing
+# 10. Course & Module Viewing
 
 ## TEST-VIEWING-001: Course Overview Display
 
@@ -3380,7 +3558,7 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 9. Network Visualization
+# 11. Network Visualization
 
 ## TEST-NETWORK-001: Course Structure Graph
 
@@ -3462,7 +3640,7 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 10. API Endpoints
+# 12. API Endpoints
 
 ## TEST-API-001: Health Check
 
@@ -3585,7 +3763,7 @@ Query plan: [EXPLAIN output]
 
 ---
 
-# 11. Performance & Accessibility
+# 13. Performance & Accessibility
 
 ## TEST-PERF-001: Page Load Performance
 
@@ -3756,7 +3934,7 @@ Result:
 
 ---
 
-# 12. Edge Cases & Error Handling
+# 14. Edge Cases & Error Handling
 
 ## TEST-ERROR-001: 404 Page
 
@@ -3888,7 +4066,7 @@ Result:
 
 ## 📊 Test Completion Summary
 
-**Total Tests Completed**: _____ / 111
+**Total Tests Completed**: _____ / 122
 **Pass Rate**: _____%
 **Critical Issues Found**: _____
 **High Priority Issues**: _____
@@ -3917,6 +4095,27 @@ Result:
 ---
 
 ## 📝 Changelog
+
+### Version 2.4.0 (January 2025)
+**Phase 2 Media Features:**
+- Added TEST-MEDIA-001 through TEST-MEDIA-005: Phase 2 media feature testing
+- New test category: Phase 2 Media Features (5 tests)
+- Tests cover:
+  - Image caption upload functionality (faculty)
+  - Caption dialog with Alt Text and Caption fields
+  - Click-to-zoom lightbox for student image viewing
+  - Module resources section display with file metadata
+  - Resource file download functionality
+  - Resources API endpoint (`/api/modules/resources/[slug]`)
+  - Route conflict resolution (moved endpoint to avoid [id]/[slug] conflict)
+- Features implemented:
+  - Caption stored in image title attribute
+  - medium-zoom library integration for click-to-zoom
+  - ModuleResources component with table layout
+  - File type detection and badges (PDF, Image, Video, etc.)
+  - Storage formatting (Bytes → KB → MB)
+  - Public API endpoint for fetching module resources
+- Updated test total: 117 → 122 tests
 
 ### Version 2.3.0 (January 2025)
 **Faculty Collaboration UI Components:**
