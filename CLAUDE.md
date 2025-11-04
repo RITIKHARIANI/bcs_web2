@@ -334,3 +334,4 @@ The project uses manual testing. When adding features:
 
 **Note**: Outdated files have been removed. All AI development prompts, task reports, and debug documentation have been cleaned up.
 - Use Context7 to check up-to-date docs when needed for implementing new libraries or frameworks, or adding features using them.
+- When you need to access supabase production through MCP, the MCP server name is supabasePROD
