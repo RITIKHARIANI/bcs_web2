@@ -23,17 +23,19 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
-import { 
-  Save, 
-  Eye, 
-  ArrowLeft, 
-  Brain, 
+import {
+  Save,
+  Eye,
+  ArrowLeft,
+  Brain,
   Hash,
   CheckCircle,
   FileText,
   AlertCircle,
   Layers,
-  Trash2
+  Trash2,
+  Globe,
+  Lock
 } from 'lucide-react'
 
 const editModuleSchema = z.object({
@@ -43,6 +45,7 @@ const editModuleSchema = z.object({
   content: z.string().min(1, 'Content is required'),
   parentModuleId: z.string().nullable().optional(),
   status: z.enum(['draft', 'published']).default('draft'),
+  visibility: z.enum(['public', 'private']).default('public'),
   tags: z.array(z.string()).default([]),
 })
 
@@ -218,6 +221,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
 
   const watchedTitle = watch('title')
   const watchedStatus = watch('status')
+  const watchedVisibility = watch('visibility')
   const watchedParentId = watch('parentModuleId')
 
   // Initialize form when module data loads
@@ -229,6 +233,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
       setValue('content', module.content)
       setValue('parentModuleId', module.parentModuleId)
       setValue('status', module.status)
+      setValue('visibility', module.visibility || 'public')
       setValue('tags', module.tags || [])
       // Also set the tags state
       setTags(module.tags || [])
@@ -498,6 +503,39 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                       </span>
                     </label>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="visibility">Visibility</Label>
+                  <div className="flex items-center space-x-4">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        value="public"
+                        {...register('visibility')}
+                        className="text-neural-primary"
+                      />
+                      <span className="flex items-center text-sm">
+                        <Globe className="mr-1 h-4 w-4 text-blue-500" />
+                        Public
+                      </span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        value="private"
+                        {...register('visibility')}
+                        className="text-neural-primary"
+                      />
+                      <span className="flex items-center text-sm">
+                        <Lock className="mr-1 h-4 w-4 text-purple-500" />
+                        Private
+                      </span>
+                    </label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Public: Can be added to any course. Private: Only you can add to courses.
+                  </p>
                 </div>
               </CardContent>
             </Card>
