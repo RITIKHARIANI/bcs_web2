@@ -169,22 +169,22 @@ export async function PUT(
         // Check 2: Validate each module can be added to course
         const invalidModules: Array<{id: string, title: string, reason: string}> = []
 
-        for (const module of existingModules) {
+        for (const mod of existingModules) {
           // Must be published
-          if (module.status !== 'published') {
+          if (mod.status !== 'published') {
             invalidModules.push({
-              id: module.id,
-              title: module.title,
+              id: mod.id,
+              title: mod.title,
               reason: 'Module must be published before adding to course'
             })
             continue
           }
 
           // If private, only author can add to courses
-          if (module.visibility === 'private' && module.author_id !== session.user.id) {
+          if (mod.visibility === 'private' && mod.author_id !== session.user.id) {
             invalidModules.push({
-              id: module.id,
-              title: module.title,
+              id: mod.id,
+              title: mod.title,
               reason: 'This is a private module. Only the author can add it to courses.'
             })
             continue
