@@ -11,6 +11,7 @@ const createModuleSchema = z.object({
   description: z.string().optional(),
   parent_module_id: z.string().optional(),
   status: z.enum(['draft', 'published']).default('draft'),
+  visibility: z.enum(['public', 'private']).default('public'),
   tags: z.array(z.string().min(1).max(50)).max(20).default([]),
 })
 
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
           description: validatedData.description,
           parent_module_id: validatedData.parent_module_id,
           status: validatedData.status,
+          visibility: validatedData.visibility,
           tags: cleanTags,
           author_id: session.user.id,
           sort_order,
