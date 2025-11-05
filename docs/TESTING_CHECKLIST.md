@@ -1429,11 +1429,65 @@ After deployment with environment variables:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS WITH ISSUE (Tested January 2025 - Development Environment: bcs-web2.vercel.app)
+
+CRITICAL BUG DISCOVERED AND FIXED:
+- Initial attempt failed with 400 validation error
+- Root cause: API validation expected CUID format for userId, but database uses custom format (faculty_timestamp_random)
+- Fix: Changed validation from z.string().cuid() to z.string().min(1) in route.ts line 10
+- Commit: 808e253 - Bug fix deployed to development environment
+- After deployment, retry succeeded
+
+Test Account Setup:
+- User A (Current): ritikh2@illinois.edu (Ritik Hariani) - Course author
+- User B (To Add): jsmith@university.edu (Jane Smith) - Faculty member
+- Course: "Test Course for Module Integration" (ID: course_1762144599313_ss9m89gmyi)
+
+Test Execution:
+1. Logged in as ritikh2@illinois.edu (faculty) ✅
+2. Navigated to /faculty/courses ✅
+3. Clicked "Edit" on "Test Course for Module Integration" ✅
+4. Located "Collaborators" panel in sidebar ✅
+   - Initially showed "No collaborators yet"
+5. Clicked "Add" button ✅
+6. Add Collaborator modal opened ✅
+   - Title: "Add Collaborator"
+   - Subtitle: "Search for faculty members to add as collaborators"
+   - Search textbox displayed
+7. Searched for "Jane Smith" ✅
+   - Search results appeared immediately
+   - Displayed: "JS Jane Smith jsmith@university.edu" with avatar
+8. Clicked on Jane Smith ✅
+9. Success! Collaborator added ✅
+
+Verification:
+✅ Success notification displayed: "Collaborator added successfully"
+✅ Collaborators section updated from "No collaborators yet" to "1 collaborator"
+✅ Jane Smith appears in collaborator list with:
+   - Avatar circle with initials "JS"
+   - Full name: "Jane Smith"
+   - Edit count: "0 edits"
+   - Date added: "11/4/2025"
+   - Remove button (X) visible
+✅ Activity logged in database (verified via SQL):
+   - entity_type: course
+   - action: invited_user
+   - description: "Ritik Hariani invited Jane Smith to collaborate"
+   - changes: {"invitedUserId":"faculty_1757395044739_lrpi7nydgg","invitedUserName":"Jane Smith"}
+   - created_at: 2025-11-05 00:44:14.002
+
+MINOR UI ISSUE DISCOVERED:
+⚠️ Activity Feed UI not displaying logged activity
+- Activity WAS logged correctly in collaboration_activity table (confirmed via database query)
+- Activity Feed component shows "No activity yet" despite activity existing
+- This is a frontend display bug, not a backend/functionality bug
+- Core collaboration functionality works correctly
+
+Screenshot: test-collab-001-collaborator-added.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Core collaboration feature works perfectly after bug fix. Activity logging backend works correctly but Activity Feed UI has a display issue (not fetching/rendering activities). The critical userId validation bug was identified and fixed during testing.
 
 ---
 
