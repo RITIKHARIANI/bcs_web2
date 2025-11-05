@@ -6,9 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { NeuralButton } from '@/components/ui/neural-button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { FacultySearchInput } from './FacultySearchInput'
 import { toast } from 'sonner'
-import { Users, UserPlus, X, AlertCircle, Clock, Edit } from 'lucide-react'
+import { Users, UserPlus, X, AlertCircle, Clock, Edit, Layers } from 'lucide-react'
 import type { Collaborator } from '@/types/collaboration'
 import Image from 'next/image'
 
@@ -37,12 +39,13 @@ async function fetchCollaborators(
 async function addCollaborator(
   entityType: 'course' | 'module',
   entityId: string,
-  userId: string
+  userId: string,
+  cascadeToModules?: boolean
 ) {
   const response = await fetch(`/api/${entityType}s/${entityId}/collaborators`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify({ userId, cascadeToModules }),
   })
 
   if (!response.ok) {
@@ -78,6 +81,7 @@ export function CollaboratorPanel({
 }: CollaboratorPanelProps) {
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null)
+  const [cascadeToModules, setCascadeToModules] = useState(false)
   const queryClient = useQueryClient()
 
   const {
@@ -90,14 +94,18 @@ export function CollaboratorPanel({
   })
 
   const addMutation = useMutation({
-    mutationFn: (userId: string) =>
-      addCollaborator(entityType, entityId, userId),
-    onSuccess: () => {
-      toast.success('Collaborator added successfully')
+    mutationFn: ({ userId, cascade }: { userId: string; cascade: boolean }) =>
+      addCollaborator(entityType, entityId, userId, cascade),
+    onSuccess: (data, variables) => {
+      const message = variables.cascade && entityType === 'course'
+        ? 'Collaborator added and permissions cascaded to public modules'
+        : 'Collaborator added successfully'
+      toast.success(message)
       queryClient.invalidateQueries({
         queryKey: ['collaborators', entityType, entityId],
       })
       setShowAddDialog(false)
+      setCascadeToModules(false)
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to add collaborator')
@@ -124,7 +132,10 @@ export function CollaboratorPanel({
       toast.error('Cannot add the author as a collaborator')
       return
     }
-    addMutation.mutate(userId)
+    addMutation.mutate({
+      userId,
+      cascade: entityType === 'course' ? cascadeToModules : false
+    })
   }
 
   const handleRemoveCollaborator = (userId: string) => {
@@ -288,10 +299,38 @@ export function CollaboratorPanel({
                   ...collaborators.map((c) => c.userId),
                 ]}
               />
+
+              {/* Cascade permissions checkbox - only for courses */}
+              {entityType === 'course' && (
+                <div className="flex items-start space-x-3 p-3 rounded-lg border border-border/40 bg-muted/30">
+                  <Checkbox
+                    id="cascade-permissions"
+                    checked={cascadeToModules}
+                    onCheckedChange={(checked) => setCascadeToModules(checked === true)}
+                    className="mt-0.5"
+                  />
+                  <div className="flex-1">
+                    <Label
+                      htmlFor="cascade-permissions"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      <Layers className="inline-block mr-1.5 h-4 w-4 text-neural-primary" />
+                      Also add to public modules
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Automatically grant edit permissions on all public modules in this course. Private modules will not be affected.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex justify-end space-x-2">
                 <NeuralButton
                   variant="outline"
-                  onClick={() => setShowAddDialog(false)}
+                  onClick={() => {
+                    setShowAddDialog(false)
+                    setCascadeToModules(false)
+                  }}
                   disabled={addMutation.isPending}
                 >
                   Cancel
