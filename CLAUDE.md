@@ -338,3 +338,7 @@ The project uses manual testing. When adding features:
 - Whenever database schema changes is made, remember to create migrations locally, commit them, and let Vercel apply them automatically.
 - https://bcs-web2.vercel.app/ is the development environment referred in @docs/DEV_PROD_WORKFLOW.md 
 https://www.brainandcognitivescience.com/ is the production environment referred in @docs/DEV_PROD_WORKFLOW.md
+- For faculty user in development environment and testing, use:
+
+email/username: ritikh2@illinois.edu
+password: Test234!
