@@ -225,22 +225,22 @@ export async function POST(
           .map(cm => cm.modules)
 
         // For each public module, add the collaborator if not already added
-        for (const module of modulesToAddTo) {
+        for (const courseModule of modulesToAddTo) {
           // Check if already a collaborator
           const existingModuleCollab = await prisma.module_collaborators.findUnique({
             where: {
               module_id_user_id: {
-                module_id: module.id,
+                module_id: courseModule.id,
                 user_id: userId,
               },
             },
           })
 
           // Only add if not already a collaborator and not the author
-          if (!existingModuleCollab && module.author_id !== userId) {
+          if (!existingModuleCollab && courseModule.author_id !== userId) {
             await prisma.module_collaborators.create({
               data: {
-                module_id: module.id,
+                module_id: courseModule.id,
                 user_id: userId,
                 added_by: session.user.id,
               },
@@ -249,7 +249,7 @@ export async function POST(
             // Log activity for module collaboration
             await logCollaboratorAdded(
               'module',
-              module.id,
+              courseModule.id,
               session.user.id,
               session.user.name || 'Unknown',
               userId,
