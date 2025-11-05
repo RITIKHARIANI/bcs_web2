@@ -2669,6 +2669,191 @@ Query plan: [EXPLAIN output]
 
 ---
 
+## TEST-VISIBILITY-001: Public Module Added to Course by Non-Owner
+
+**Feature**: Module Visibility - Public Modules
+**Priority**: Critical
+
+### Prerequisites:
+- User A has published public module "Module A"
+- User B is collaborator on User A's course
+
+### Test Steps:
+1. Log in as User B (collaborator, NOT module owner)
+2. Navigate to course edit page
+3. Click "Add Modules"
+4. Search for and select "Module A" (owned by User A)
+5. Click "Save Changes"
+
+### Expected Result:
+- ✅ Module A visible in module selector
+- ✅ Can add Module A to course
+- ✅ Save successful without permission errors
+- ✅ Course contains Module A after save
+
+### Actual Result:
+```
+✅ PASS (Tested January 2025 - Development Environment: bcs-web2.vercel.app)
+
+Public modules can be added to any course by any collaborator.
+Module visibility = 'public' and status = 'published' allows universal access for curation.
+```
+
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Verified in TEST-COLLAB-002 re-test. Public modules work as expected.
+
+---
+
+## TEST-VISIBILITY-002: Private Module Blocked from Non-Owner
+
+**Feature**: Module Visibility - Private Modules
+**Priority**: Critical
+
+### Prerequisites:
+- User A has published private module "Module B"
+- User C is collaborator on User D's course
+
+### Test Steps:
+1. Log in as User C (collaborator on course, NOT owner of Module B)
+2. Navigate to course edit page
+3. Click "Add Modules"
+4. Try to add "Module B" (private, owned by User A)
+5. Click "Save Changes"
+
+### Expected Result:
+- ❌ Module B NOT visible in module selector (filtered out)
+- OR if somehow added: Error on save
+- ✅ Error message: "This is a private module. Only the author can add it to courses."
+
+### Actual Result:
+```
+[To be tested after Phase 2 UI implementation]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Pending Phase 2 (visibility selector in UI) and Phase 4 (module filtering by visibility).
+
+---
+
+## TEST-VISIBILITY-003: Module Author Can Add Own Private Module
+
+**Feature**: Module Visibility - Private Module Access
+**Priority**: High
+
+### Test Steps:
+1. User A creates private module "Module C"
+2. User A creates course "Course X"
+3. User A adds "Module C" to "Course X"
+4. Save course
+
+### Expected Result:
+- ✅ Private module visible to author in module selector
+- ✅ Can add own private module to own course
+- ✅ Save successful
+- ✅ Private module appears in course
+
+### Actual Result:
+```
+[To be tested after Phase 2 UI implementation]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Pending Phase 2 (visibility selector in UI).
+
+---
+
+## TEST-VISIBILITY-004: Unpublished Module Blocked from Courses
+
+**Feature**: Module Publication Status
+**Priority**: Critical
+
+### Prerequisites:
+- User A has draft (unpublished) module "Module D"
+- User B is collaborator on User A's course
+
+### Test Steps:
+1. Log in as User B
+2. Navigate to course edit page
+3. Try to add "Module D" (status = 'draft')
+4. Click "Save Changes"
+
+### Expected Result:
+- ❌ Draft modules NOT visible in module selector
+- OR if added: Error on save
+- ✅ Error message: "Module must be published before adding to course"
+
+### Actual Result:
+```
+[To be tested - validation exists in API]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: API validation exists (src/app/api/courses/[id]/route.ts:174). UI filtering pending.
+
+---
+
+## TEST-VISIBILITY-005: Module Visibility Toggle in Create Form
+
+**Feature**: Module Visibility UI
+**Priority**: High
+
+### Prerequisites:
+- Logged in as faculty
+
+### Test Steps:
+1. Navigate to `/faculty/modules/create`
+2. Locate visibility selector
+3. Verify options: "Public" and "Private"
+4. Create module with visibility = "Private"
+5. Save and verify in database
+
+### Expected Result:
+- ✅ Visibility selector visible with two options
+- ✅ Default: "Public"
+- ✅ Can select "Private"
+- ✅ Saved module has correct visibility value in database
+
+### Actual Result:
+```
+[To be implemented - Phase 2]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Pending implementation. Schema ready, UI pending.
+
+---
+
+## TEST-VISIBILITY-006: Module Visibility Toggle in Edit Form
+
+**Feature**: Module Visibility UI
+**Priority**: High
+
+### Prerequisites:
+- User has existing public module
+
+### Test Steps:
+1. Navigate to module edit page
+2. Change visibility from "Public" to "Private"
+3. Save changes
+4. Verify module now private in database
+5. Verify module no longer appears for other users
+
+### Expected Result:
+- ✅ Can change visibility setting
+- ✅ Update saves successfully
+- ✅ Visibility updated in database
+- ✅ Access restrictions apply immediately
+
+### Actual Result:
+```
+[To be implemented - Phase 2]
+```
+
+**Status**: □ Pass □ Fail □ NA
+**Notes**: Pending implementation. Should prevent adding to new courses after visibility change.
+
+---
+
 # 4. Phase 2 Media Features
 
 ## TEST-MEDIA-001: Image Caption Upload
