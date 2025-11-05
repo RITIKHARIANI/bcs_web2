@@ -21,17 +21,19 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
-import { 
-  Save, 
-  Eye, 
-  ArrowLeft, 
-  FileText, 
-  Brain, 
+import {
+  Save,
+  Eye,
+  ArrowLeft,
+  FileText,
+  Brain,
   Layers,
   AlertCircle,
   Hash,
   BookOpen,
-  CheckCircle
+  CheckCircle,
+  Globe,
+  Lock
 } from 'lucide-react'
 
 const createModuleSchema = z.object({
@@ -40,6 +42,7 @@ const createModuleSchema = z.object({
   description: z.string().optional(),
   parentModuleId: z.string().optional(),
   status: z.enum(['draft', 'published']).default('draft'),
+  visibility: z.enum(['public', 'private']).default('public'),
   tags: z.array(z.string()).default([]),
 })
 
@@ -136,12 +139,14 @@ export function CreateModuleForm() {
     resolver: zodResolver(createModuleSchema),
     defaultValues: {
       status: 'draft',
+      visibility: 'public',
       tags: [],
     },
   })
 
   const watchedTitle = watch('title')
   const watchedStatus = watch('status')
+  const watchedVisibility = watch('visibility')
   const watchedParentModuleId = watch('parentModuleId')
 
   // Auto-generate slug from title
@@ -337,7 +342,7 @@ export function CreateModuleForm() {
 
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
-                  <Select 
+                  <Select
                     value={watchedStatus}
                     onValueChange={(value: 'draft' | 'published') => setValue('status', value)}
                   >
@@ -359,6 +364,35 @@ export function CreateModuleForm() {
                       </SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="visibility">Visibility</Label>
+                  <Select
+                    value={watchedVisibility}
+                    onValueChange={(value: 'public' | 'private') => setValue('visibility', value)}
+                  >
+                    <SelectTrigger className="border-neural-light/30 focus:border-neural-primary">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">
+                        <div className="flex items-center">
+                          <Globe className="mr-2 h-4 w-4 text-blue-500" />
+                          Public
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="private">
+                        <div className="flex items-center">
+                          <Lock className="mr-2 h-4 w-4 text-purple-500" />
+                          Private
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Public: Can be added to any course. Private: Only you can add to courses.
+                  </p>
                 </div>
               </CardContent>
             </Card>
