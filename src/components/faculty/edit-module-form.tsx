@@ -58,6 +58,7 @@ interface Module {
   description: string | null
   content: string
   status: 'draft' | 'published'
+  visibility: 'public' | 'private'
   tags: string[]
   parentModuleId: string | null
   createdAt: string

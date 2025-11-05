@@ -30,6 +30,7 @@ const updateModuleSchema = z.object({
   description: z.string().optional(),
   parent_module_id: z.string().nullable().optional(),
   status: z.enum(['draft', 'published']).optional(),
+  visibility: z.enum(['public', 'private']).optional(),
   tags: z.array(z.string().min(1).max(50)).max(20).optional(),
 })
 
