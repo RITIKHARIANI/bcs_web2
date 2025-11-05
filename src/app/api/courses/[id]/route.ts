@@ -136,29 +136,68 @@ export async function PUT(
       }
     }
 
-    // Verify all modules belong to or are accessible by the user (author or collaborator)
+    // CRITICAL FIX: Verify modules exist, are published, and respect visibility rules
+    // Course collaborators can ADD any public module without needing edit access
+    // This separates curation (course structure) from content creation (module editing)
     if (validatedData.modules) {
       if (validatedData.modules.length > 0) {
         const moduleIds = validatedData.modules.map(m => m.moduleId)
-        const userModules = await prisma.modules.findMany({
-          where: {
-            id: { in: moduleIds },
-            OR: [
-              { author_id: session.user.id },
-              {
-                collaborators: {
-                  some: { user_id: session.user.id }
-                }
-              }
-            ]
-          },
+
+        // Fetch modules with visibility and status info
+        const existingModules = await prisma.modules.findMany({
+          where: { id: { in: moduleIds }},
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            visibility: true,
+            author_id: true
+          }
         })
 
-        if (userModules.length !== moduleIds.length) {
+        // Check 1: Do all modules exist?
+        if (existingModules.length !== moduleIds.length) {
+          const missingIds = moduleIds.filter(
+            id => !existingModules.find(m => m.id === id)
+          )
           return NextResponse.json(
-            { error: 'Some modules do not exist or you do not have access to them' },
+            { error: 'Some modules no longer exist', missingModuleIds: missingIds },
             { status: 400 }
           )
+        }
+
+        // Check 2: Validate each module can be added to course
+        const invalidModules: Array<{id: string, title: string, reason: string}> = []
+
+        for (const module of existingModules) {
+          // Must be published
+          if (module.status !== 'published') {
+            invalidModules.push({
+              id: module.id,
+              title: module.title,
+              reason: 'Module must be published before adding to course'
+            })
+            continue
+          }
+
+          // If private, only author can add to courses
+          if (module.visibility === 'private' && module.author_id !== session.user.id) {
+            invalidModules.push({
+              id: module.id,
+              title: module.title,
+              reason: 'This is a private module. Only the author can add it to courses.'
+            })
+            continue
+          }
+
+          // If public and published, anyone can add! No permission check needed.
+        }
+
+        if (invalidModules.length > 0) {
+          return NextResponse.json({
+            error: 'Some modules cannot be added to this course',
+            invalidModules
+          }, { status: 400 })
         }
       }
     }
