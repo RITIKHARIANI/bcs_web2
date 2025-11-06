@@ -2849,11 +2849,21 @@ Screenshots saved:
 - visibility-field-full.png (full page)
 - visibility-dropdown-open.png (dropdown expanded)
 
-Note: Full database verification pending manual save test
+Database Verification (November 5, 2025):
+- Created test module: "Test Private Module for Manual Testing"
+- Set visibility to "Private" via dropdown
+- Saved module successfully
+- Database query confirmed:
+  * Module ID: module_1762382166246_5phgq19axkj
+  * Slug: test-private-module-for-manual-testing
+  * Visibility: "private" ✅
+  * Status: "draft"
+  * Created_at: 2025-11-06 02:36:06.248
+- Module creation with private visibility CONFIRMED WORKING ✅
 ```
 
 **Status**: ✅ Pass □ Fail □ NA
-**Notes**: UI implementation complete and verified on production. Visibility selector fully functional with proper icons, helper text, and default values. Schema implemented (migration 20251105192911_add_module_visibility_and_cloning_features).
+**Notes**: UI implementation complete and verified on production. Visibility selector fully functional with proper icons, helper text, and default values. Schema implemented (migration 20251105192911_add_module_visibility_and_cloning_features). Database verification completed successfully.
 
 ---
 
@@ -2902,11 +2912,27 @@ Code Evidence:
 
 Pattern: Radio buttons (not dropdown) - consistent with Status field in edit form
 
-Note: Full end-to-end test (save + database verification) pending manual testing
+Manual Testing (November 5, 2025):
+- Opened edit page for module: module_1762382166246_5phgq19axkj
+- Initial state: "Private" radio button checked (red circle) ✅
+- Clicked "Public" radio button ✅
+- "Public" radio button checked (blue circle) ✅
+- Clicked "Save Changes" button ✅
+- Success message: "Module updated successfully!" ✅
+
+Database Verification:
+- Query before save: visibility = "private"
+- Query after save: visibility = "public" ✅
+- Updated_at timestamp changed: 2025-11-06 02:02:07.143 ✅
+- Visibility toggle working correctly in both directions ✅
+
+Screenshots:
+- test-visibility-radio-buttons-private.png (private selected)
+- test-visibility-radio-buttons-public.png (public selected after change)
 ```
 
 **Status**: ✅ Pass □ Fail □ NA
-**Notes**: Implementation complete. Edit form has visibility radio buttons matching the Status field pattern. API endpoint handles updates correctly. Access restrictions enforced at course save validation level (see TEST-VISIBILITY-002).
+**Notes**: Implementation complete. Edit form has visibility radio buttons matching the Status field pattern. API endpoint handles updates correctly. Access restrictions enforced at course save validation level (see TEST-VISIBILITY-002). Manual end-to-end testing completed successfully.
 
 ---
 
@@ -2944,11 +2970,41 @@ Note: Full end-to-end test (save + database verification) pending manual testing
 
 ### Actual Result:
 ```
-[To be tested manually]
+✅ PASS (Tested manually - November 5, 2025)
+
+Test Environment: https://bcs-web2.vercel.app (Production)
+Test User: Jane Smith (jsmith@university.edu)
+
+Setup:
+- Created course "Test Course for Cascade Permissions"
+- Added 1 public module: "Test Private Module for Manual Testing" (visibility: public)
+- Course ID: course_1762394618745_0gcxj525r9ba
+- Module ID: module_1762382166246_5phgq19axkj
+
+Test Execution:
+1. Logged in as Jane Smith ✅
+2. Navigated to course edit page ✅
+3. Clicked "Add Collaborator" ✅
+4. Verified checkbox visible with correct label and icon ✅
+5. Searched for "Test Faculty" (testfaculty@university.edu) ✅
+6. Checked "Also add to public modules" checkbox ✅
+7. Selected Test Faculty ✅
+8. Success message: "Collaborator added and permissions cascaded to public modules" ✅
+
+Database Verification:
+- Course collaborator added: Test Faculty (added_at: 2025-11-06 02:06:00.006) ✅
+- Module collaborator added: Test Faculty (added_at: 2025-11-06 02:06:00.127) ✅
+- Both records added within 121ms (cascade logic executed) ✅
+- Added_by: Jane Smith (faculty_1757395044739_lrpi7nydgg) ✅
+
+Screenshots:
+- test-cascade-checkbox-visible.png (checkbox UI)
+- test-cascade-checkbox-checked.png (checkbox checked)
+- test-cascade-success.png (success message and collaborator list)
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**: Implementation complete (Commits: bcfd349 API, a5a6634 UI, 5cb88fe fixes). Checkbox component created. API cascade logic implemented. Awaiting manual testing.
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Implementation complete (Commits: bcfd349 API, a5a6634 UI, 5cb88fe fixes). Checkbox component created. API cascade logic implemented. Manually tested and verified working correctly on production.
 
 ---
 
@@ -2981,11 +3037,44 @@ Note: Full end-to-end test (save + database verification) pending manual testing
 
 ### Actual Result:
 ```
-[To be tested manually]
+✅ PASS (Tested manually - November 5, 2025)
+
+Test Environment: https://bcs-web2.vercel.app (Production)
+Test User: Jane Smith (jsmith@university.edu)
+
+Setup:
+- Same course "Test Course for Cascade Permissions"
+- Same 1 public module (already has Test Faculty as collaborator from TEST-CASCADE-001)
+- Course already has Test Faculty as collaborator
+
+Test Execution:
+1. Logged in as Jane Smith ✅
+2. Navigated to course edit page ✅
+3. Clicked "Add Collaborator" ✅
+4. Verified checkbox defaults to unchecked ✅
+5. Searched for "Ritik Hariani" (ritik@gmail.com) ✅
+6. LEFT checkbox unchecked (default state) ✅
+7. Selected Ritik Hariani ✅
+8. Success message: "Collaborator added successfully" (NOT cascade message) ✅
+
+Database Verification:
+- Course collaborator added: Ritik Hariani (added_at: 2025-11-06 02:07:20.302) ✅
+- Module collaborator NOT added: Verified only Test Faculty in module_collaborators ✅
+- Only course collaboration created (no module collaborations) ✅
+- Cascade logic did NOT execute (as expected) ✅
+
+Query Results:
+- Course collaborators: Test Faculty, Ritik Hariani (2 total) ✅
+- Module collaborators: Test Faculty only (1 total) ✅
+- Ritik Hariani correctly excluded from module ✅
+
+Screenshots:
+- test-cascade-checkbox-unchecked.png (checkbox unchecked)
+- test-no-cascade-success.png (success message without cascade text)
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**: Default behavior is NO cascade. Checkbox must be explicitly checked to cascade permissions. This prevents accidental broad permissions grants.
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Default behavior is NO cascade. Checkbox must be explicitly checked to cascade permissions. This prevents accidental broad permissions grants. Verified working correctly - unchecked checkbox does not cascade permissions.
 
 ---
 
