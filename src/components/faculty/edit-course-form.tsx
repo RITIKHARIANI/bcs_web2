@@ -57,7 +57,9 @@ import {
   X,
   Search,
   FileText,
-  Trash2
+  Trash2,
+  Calendar,
+  Users
 } from 'lucide-react'
 
 const editCourseSchema = z.object({
@@ -538,80 +540,78 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            <Card className="cognitive-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="mr-2 h-5 w-5 text-neural-primary" />
-                  Course Details
-                </CardTitle>
-                <CardDescription>
-                  Configure the basic information for your course
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Basic Information Section */}
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Title *</Label>
-                    <Input
-                      id="title"
-                      placeholder="Enter course title..."
-                      {...register('title')}
-                      className="border-neural-light/30 focus:border-neural-primary"
-                    />
-                    {errors.title && (
-                      <p className="text-sm text-red-500">{errors.title.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="slug">URL Slug *</Label>
-                    <div className="relative">
-                      <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        id="slug"
-                        placeholder="url-friendly-slug"
-                        {...register('slug')}
-                        className="pl-10 border-neural-light/30 focus:border-neural-primary"
-                      />
-                    </div>
-                    {errors.slug && (
-                      <p className="text-sm text-red-500">{errors.slug.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Brief description of the course..."
-                      rows={3}
-                      {...register('description')}
-                      className="border-neural-light/30 focus:border-neural-primary"
-                    />
-                  </div>
+      <main className="container mx-auto px-6 py-8 space-y-8">
+        {/* Full-Width Course Details Card */}
+        <Card className="cognitive-card">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <FileText className="mr-2 h-5 w-5 text-neural-primary" />
+              Course Details
+            </CardTitle>
+            <CardDescription>
+              Configure the basic information for your course
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column: Title + Slug */}
+              <div className="lg:col-span-3 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title *</Label>
+                  <Input
+                    id="title"
+                    placeholder="Enter course title..."
+                    {...register('title')}
+                    className="border-neural-light/30 focus:border-neural-primary"
+                  />
+                  {errors.title && (
+                    <p className="text-sm text-red-500">{errors.title.message}</p>
+                  )}
                 </div>
 
-                <Separator className="my-6" />
+                <div className="space-y-2">
+                  <Label htmlFor="slug">URL Slug *</Label>
+                  <div className="relative">
+                    <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="slug"
+                      placeholder="url-friendly-slug"
+                      {...register('slug')}
+                      className="pl-10 border-neural-light/30 focus:border-neural-primary"
+                    />
+                  </div>
+                  {errors.slug && (
+                    <p className="text-sm text-red-500">{errors.slug.message}</p>
+                  )}
+                </div>
+              </div>
 
-                {/* Categorization Section */}
+              {/* Middle Column: Description */}
+              <div className="lg:col-span-4 space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Brief description of the course..."
+                  rows={6}
+                  {...register('description')}
+                  className="border-neural-light/30 focus:border-neural-primary resize-none"
+                />
+              </div>
+
+              {/* Right Column: Tags + Publishing Settings */}
+              <div className="lg:col-span-5 space-y-6">
                 <TagsInput
                   value={tags}
                   onChange={setTags}
                   label="Tags"
-                  placeholder="Add tags to categorize this course..."
+                  placeholder="Add tags..."
                   suggestions={availableTags}
                   maxTags={10}
                   id="tags"
                 />
 
-                <Separator className="my-6" />
+                <Separator className="my-4" />
 
-                {/* Publishing Settings Section */}
                 <div className="space-y-4">
                   <div className="space-y-3">
                     <Label htmlFor="status">Status</Label>
@@ -674,81 +674,115 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* Course Statistics */}
-            <Card className="cognitive-card">
-              <CardHeader>
-                <CardTitle className="text-sm">Course Statistics</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Modules:</span>
-                  <span className="font-medium">{selectedModules.length}</span>
+        {/* Horizontal Statistics Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {/* Modules Count */}
+          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105">
+            <CardContent className="p-4 bg-gradient-to-br from-neural-primary/5 to-neural-primary/10">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-neural-primary/10 group-hover:bg-neural-primary/20 transition-colors">
+                    <Layers className="h-5 w-5 text-neural-primary" />
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Published Modules:</span>
-                  <span className="font-medium">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Modules</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {selectedModules.length}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Published Modules */}
+          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105">
+            <CardContent className="p-4 bg-gradient-to-br from-green-500/5 to-green-500/10">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Published</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {selectedModules.filter(item => item.module.status === 'published').length}
-                  </span>
+                  </p>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Status:</span>
-                  <Badge variant={watchedStatus === 'published' ? 'default' : 'outline'}>
-                    {watchedStatus}
-                  </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Course Status */}
+          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105">
+            <CardContent className="p-4 bg-gradient-to-br from-synapse-primary/5 to-synapse-primary/10">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-synapse-primary/10 group-hover:bg-synapse-primary/20 transition-colors">
+                    <BookOpen className="h-5 w-5 text-synapse-primary" />
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Created:</span>
-                  <span className="font-medium">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Status</p>
+                  <div className="mt-1">
+                    <Badge variant={watchedStatus === 'published' ? 'default' : 'outline'} className="text-xs">
+                      {watchedStatus}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Created Date */}
+          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105">
+            <CardContent className="p-4 bg-gradient-to-br from-cognition-teal/5 to-cognition-teal/10">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-cognition-teal/10 group-hover:bg-cognition-teal/20 transition-colors">
+                    <Calendar className="h-5 w-5 text-cognition-teal" />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Created</p>
+                  <p className="text-sm font-semibold text-foreground">
                     {new Date(course.created_at).toLocaleDateString()}
-                  </span>
+                  </p>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Updated:</span>
-                  <span className="font-medium">
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Updated Date */}
+          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105">
+            <CardContent className="p-4 bg-gradient-to-br from-cognition-orange/5 to-cognition-orange/10">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-cognition-orange/10 group-hover:bg-cognition-orange/20 transition-colors">
+                    <Calendar className="h-5 w-5 text-cognition-orange" />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Updated</p>
+                  <p className="text-sm font-semibold text-foreground">
                     {new Date(course.updated_at).toLocaleDateString()}
-                  </span>
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            {/* Collaboration */}
-            <CollaboratorPanel
-              entityType="course"
-              entityId={courseId}
-              authorId={course.author_id}
-            />
-
-            {/* Activity Feed */}
-            <ActivityFeed
-              entityType="course"
-              entityId={courseId}
-              limit={10}
-            />
-
-            {/* Delete Course */}
-            <Card className="cognitive-card border-red-200">
-              <CardHeader>
-                <CardTitle className="text-sm text-red-600">Danger Zone</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <NeuralButton
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="w-full border-red-200 text-red-600 hover:bg-red-50"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Course
-                </NeuralButton>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Module Assembly */}
-          <div className="lg:col-span-3 space-y-6">
+        {/* Three-Column Content Area */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Course Assembly (50% width = 2 cols) */}
+          <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-neural-primary">Course Assembly</h2>
               <NeuralButton
@@ -892,7 +926,49 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
               </CardContent>
             </Card>
           </div>
+
+          {/* Collaborators (25% width = 1 col) */}
+          <div className="lg:col-span-1">
+            <CollaboratorPanel
+              entityType="course"
+              entityId={courseId}
+              authorId={course.author_id}
+            />
+          </div>
+
+          {/* Activity Feed (25% width = 1 col) */}
+          <div className="lg:col-span-1">
+            <ActivityFeed
+              entityType="course"
+              entityId={courseId}
+              limit={10}
+            />
+          </div>
         </div>
+
+        {/* Danger Zone (Full Width at Bottom) */}
+        <Card className="cognitive-card border-red-200">
+          <CardHeader>
+            <CardTitle className="text-sm text-red-600 flex items-center">
+              <AlertCircle className="mr-2 h-5 w-5" />
+              Danger Zone
+            </CardTitle>
+            <CardDescription>
+              Irreversible actions for this course
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <NeuralButton
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="border-red-200 text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Course
+            </NeuralButton>
+          </CardContent>
+        </Card>
       </main>
 
       {/* Delete Confirmation Modal */}
