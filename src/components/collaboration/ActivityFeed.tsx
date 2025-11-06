@@ -254,11 +254,13 @@ export function ActivityFeed({
       </CardHeader>
       <CardContent>
         {activities.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <Activity className="mx-auto h-12 w-12 mb-3 opacity-30" />
-            <p className="text-sm">
-              No activity yet. Changes and collaboration events will appear
-              here.
+          <div className="text-center py-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-neural/10 mb-4">
+              <Activity className="h-8 w-8 text-neural-primary opacity-50" />
+            </div>
+            <h3 className="font-medium text-foreground mb-2">No activity yet</h3>
+            <p className="text-sm text-muted-foreground">
+              Changes and collaboration events will appear here.
             </p>
           </div>
         ) : (

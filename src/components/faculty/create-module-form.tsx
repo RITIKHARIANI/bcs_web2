@@ -307,9 +307,10 @@ export function CreateModuleForm() {
                       console.log('Parent module selected:', value);
                       setValue('parentModuleId', value === 'none' ? undefined : value);
                     }}
+                    disabled={isLoadingModules}
                   >
                     <SelectTrigger className="border-neural-light/30 focus:border-neural-primary">
-                      <SelectValue placeholder="Select parent module (optional)" />
+                      <SelectValue placeholder={isLoadingModules ? "Loading modules..." : "Select parent module (optional)"} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">
@@ -318,7 +319,14 @@ export function CreateModuleForm() {
                           Root Level Module
                         </div>
                       </SelectItem>
-                      {rootModules.map((module) => (
+                      {!isLoadingModules && rootModules.length === 0 && (
+                        <SelectItem value="no-modules" disabled>
+                          <div className="flex items-center text-muted-foreground">
+                            No parent modules available
+                          </div>
+                        </SelectItem>
+                      )}
+                      {!isLoadingModules && rootModules.map((module) => (
                         <SelectItem key={module.id} value={module.id}>
                           <div className="flex items-center justify-between w-full">
                             <div className="flex items-center">
@@ -336,7 +344,7 @@ export function CreateModuleForm() {
                     </SelectContent>
                   </Select>
                   {isLoadingModules && (
-                    <p className="text-sm text-muted-foreground">Loading modules...</p>
+                    <p className="text-xs text-muted-foreground animate-pulse">Loading available modules...</p>
                   )}
                 </div>
 

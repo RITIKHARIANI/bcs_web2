@@ -459,23 +459,26 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                   <Select
                     value={watchedParentId ?? 'none'}
                     onValueChange={(value) => setValue('parentModuleId', value === 'none' ? null : value)}
+                    disabled={isLoadingParents}
                   >
                     <SelectTrigger className="border-neural-light/30 focus:border-neural-primary">
-                      <SelectValue placeholder="None (Root Module)" />
+                      <SelectValue placeholder={isLoadingParents ? "Loading modules..." : "None (Root Module)"} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">None (Root Module)</SelectItem>
-                      {isLoadingParents ? (
-                        <SelectItem value="loading" disabled>Loading...</SelectItem>
-                      ) : (
-                        availableParentModules.map((parent) => (
-                          <SelectItem key={parent.id} value={parent.id}>
-                            {parent.title}
-                          </SelectItem>
-                        ))
+                      {!isLoadingParents && availableParentModules.length === 0 && (
+                        <SelectItem value="no-modules" disabled>No parent modules available</SelectItem>
                       )}
+                      {!isLoadingParents && availableParentModules.map((parent) => (
+                        <SelectItem key={parent.id} value={parent.id}>
+                          {parent.title}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                  {isLoadingParents && (
+                    <p className="text-xs text-muted-foreground animate-pulse">Loading available parent modules...</p>
+                  )}
                 </div>
 
                 <div className="space-y-3">
@@ -570,13 +573,25 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Created:</span>
                   <span className="font-medium">
-                    {new Date(module.createdAt).toLocaleDateString()}
+                    {module.createdAt
+                      ? new Date(module.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })
+                      : 'Unknown'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Updated:</span>
                   <span className="font-medium">
-                    {new Date(module.updatedAt).toLocaleDateString()}
+                    {module.updatedAt
+                      ? new Date(module.updatedAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })
+                      : 'Unknown'}
                   </span>
                 </div>
                 <div className="flex justify-between">

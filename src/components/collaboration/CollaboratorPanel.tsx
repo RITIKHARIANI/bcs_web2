@@ -213,12 +213,22 @@ export function CollaboratorPanel({
         </CardHeader>
         <CardContent>
           {count === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="mx-auto h-12 w-12 mb-3 opacity-30" />
-              <p className="text-sm">
-                No collaborators yet. Add faculty members to collaborate on this{' '}
-                {entityType}.
+            <div className="text-center py-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-neural/10 mb-4">
+                <Users className="h-8 w-8 text-neural-primary opacity-50" />
+              </div>
+              <h3 className="font-medium text-foreground mb-2">No collaborators yet</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Add faculty members to collaborate on this {entityType}.
               </p>
+              <NeuralButton
+                variant="neural"
+                size="sm"
+                onClick={() => setShowAddDialog(true)}
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add First Collaborator
+              </NeuralButton>
             </div>
           ) : (
             <div className="space-y-3">
