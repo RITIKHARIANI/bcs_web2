@@ -434,8 +434,8 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
           </div>
         )}
 
-        <div className={`grid grid-cols-1 ${isFullscreen ? 'lg:grid-cols-1' : 'lg:grid-cols-[280px_1fr]'} gap-4 sm:gap-8`}>
-          {/* Course Navigation Sidebar - Fixed width for better content space */}
+        <div className={`grid grid-cols-1 ${isFullscreen ? 'lg:grid-cols-1' : 'lg:grid-cols-[320px_1fr]'} gap-4 sm:gap-8`}>
+          {/* Course Navigation Sidebar - Increased width for better readability */}
           <div className={`${isFullscreen ? 'hidden' : ''} ${showMobileSidebar ? 'fixed inset-0 z-30 bg-background lg:relative lg:inset-auto lg:bg-transparent' : 'hidden lg:block'}`}>
             {showMobileSidebar && (
               <div className="lg:hidden absolute top-4 right-4 z-40">

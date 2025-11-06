@@ -423,13 +423,19 @@ export function NeuralRichTextEditor({
       {/* Editor Content */}
       <CardContent className="p-0">
         <div className="relative">
-          <EditorContent 
-            editor={editor} 
+          <EditorContent
+            editor={editor}
             className="neural-editor-wrapper"
           />
           {editor.isEmpty && (
-            <div className="absolute top-6 left-6 text-muted-foreground pointer-events-none">
-              {placeholder}
+            <div className="absolute top-6 left-6 pointer-events-none">
+              <div className="flex items-start gap-3 text-muted-foreground">
+                <FileText className="h-5 w-5 mt-1 flex-shrink-0 opacity-50" />
+                <div>
+                  <p className="text-sm">{placeholder}</p>
+                  <p className="text-xs mt-1 opacity-70">Use the toolbar above to format your content</p>
+                </div>
+              </div>
             </div>
           )}
         </div>
