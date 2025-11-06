@@ -14,7 +14,7 @@ const updateCourseModuleSchema = z.object({
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ courseId: string; moduleId: string }> }
+  { params }: { params: Promise<{ id: string; moduleId: string }> }
 ) {
   try {
     const session = await auth()
@@ -22,7 +22,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { courseId, moduleId } = await params
+    const { id: courseId, moduleId } = await params
 
     // Check if user can edit this course
     const canEdit = await canEditCourseWithRetry(session.user.id, courseId)
@@ -99,7 +99,7 @@ export async function PATCH(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ courseId: string; moduleId: string }> }
+  { params }: { params: Promise<{ id: string; moduleId: string }> }
 ) {
   try {
     const session = await auth()
@@ -107,7 +107,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { courseId, moduleId } = await params
+    const { id: courseId, moduleId } = await params
 
     // Check if user can access this course
     const canAccess = await canEditCourseWithRetry(session.user.id, courseId)
