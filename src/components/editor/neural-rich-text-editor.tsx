@@ -65,6 +65,7 @@ export function NeuralRichTextEditor({
   const [wordCount, setWordCount] = useState(0)
   const [characterCount, setCharacterCount] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
   const [showMediaUpload, setShowMediaUpload] = useState(false)
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -154,6 +155,7 @@ export function NeuralRichTextEditor({
 
     try {
       await onSave(html)
+      setLastSavedAt(new Date())
       toast.success('Content saved successfully!')
     } catch (error) {
       toast.error('Failed to save content')
@@ -217,6 +219,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive('bold') ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleBold().run()}
+              title="Bold (Ctrl+B)"
+              aria-label="Toggle bold"
             >
               <Bold className="h-4 w-4" />
             </NeuralButton>
@@ -224,6 +228,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive('italic') ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleItalic().run()}
+              title="Italic (Ctrl+I)"
+              aria-label="Toggle italic"
             >
               <Italic className="h-4 w-4" />
             </NeuralButton>
@@ -231,6 +237,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive('strike') ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleStrike().run()}
+              title="Strikethrough"
+              aria-label="Toggle strikethrough"
             >
               <Strikethrough className="h-4 w-4" />
             </NeuralButton>
@@ -238,6 +246,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive('code') ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleCode().run()}
+              title="Inline code"
+              aria-label="Toggle inline code"
             >
               <Code className="h-4 w-4" />
             </NeuralButton>
@@ -251,6 +261,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive('heading', { level: 1 }) ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+              title="Heading 1"
+              aria-label="Toggle heading level 1"
             >
               <Heading1 className="h-4 w-4" />
             </NeuralButton>
@@ -258,6 +270,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive('heading', { level: 2 }) ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+              title="Heading 2"
+              aria-label="Toggle heading level 2"
             >
               <Heading2 className="h-4 w-4" />
             </NeuralButton>
@@ -265,6 +279,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive('heading', { level: 3 }) ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+              title="Heading 3"
+              aria-label="Toggle heading level 3"
             >
               <Heading3 className="h-4 w-4" />
             </NeuralButton>
@@ -278,6 +294,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive('bulletList') ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleBulletList().run()}
+              title="Bullet list"
+              aria-label="Toggle bullet list"
             >
               <List className="h-4 w-4" />
             </NeuralButton>
@@ -285,6 +303,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive('orderedList') ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
+              title="Numbered list"
+              aria-label="Toggle numbered list"
             >
               <ListOrdered className="h-4 w-4" />
             </NeuralButton>
@@ -292,6 +312,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive('blockquote') ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
+              title="Block quote"
+              aria-label="Toggle blockquote"
             >
               <Quote className="h-4 w-4" />
             </NeuralButton>
@@ -305,6 +327,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive({ textAlign: 'left' }) ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign('left').run()}
+              title="Align left"
+              aria-label="Align text left"
             >
               <AlignLeft className="h-4 w-4" />
             </NeuralButton>
@@ -312,6 +336,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive({ textAlign: 'center' }) ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign('center').run()}
+              title="Align center"
+              aria-label="Align text center"
             >
               <AlignCenter className="h-4 w-4" />
             </NeuralButton>
@@ -319,6 +345,8 @@ export function NeuralRichTextEditor({
               variant={editor.isActive({ textAlign: 'right' }) ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign('right').run()}
+              title="Align right"
+              aria-label="Align text right"
             >
               <AlignRight className="h-4 w-4" />
             </NeuralButton>
@@ -332,6 +360,8 @@ export function NeuralRichTextEditor({
               variant="ghost"
               size="sm"
               onClick={addLink}
+              title="Add link"
+              aria-label="Insert or edit link"
             >
               <LinkIcon className="h-4 w-4" />
             </NeuralButton>
@@ -339,7 +369,8 @@ export function NeuralRichTextEditor({
               variant="ghost"
               size="sm"
               onClick={addImage}
-              title="Add Image"
+              title="Add image"
+              aria-label="Insert image"
             >
               <Upload className="h-4 w-4" />
             </NeuralButton>
@@ -354,6 +385,8 @@ export function NeuralRichTextEditor({
               size="sm"
               onClick={() => editor.chain().focus().undo().run()}
               disabled={!editor.can().undo()}
+              title="Undo (Ctrl+Z)"
+              aria-label="Undo last action"
             >
               <Undo className="h-4 w-4" />
             </NeuralButton>
@@ -362,6 +395,8 @@ export function NeuralRichTextEditor({
               size="sm"
               onClick={() => editor.chain().focus().redo().run()}
               disabled={!editor.can().redo()}
+              title="Redo (Ctrl+Y)"
+              aria-label="Redo last action"
             >
               <Redo className="h-4 w-4" />
             </NeuralButton>
@@ -415,7 +450,11 @@ export function NeuralRichTextEditor({
         
         {autoSave && (
           <div className="text-xs text-neural-primary">
-            Auto-save enabled
+            {lastSavedAt ? (
+              <span>Last saved at {lastSavedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>
+            ) : (
+              <span>Auto-save enabled</span>
+            )}
           </div>
         )}
       </div>
