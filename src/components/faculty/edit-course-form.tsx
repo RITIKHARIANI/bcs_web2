@@ -30,6 +30,7 @@ import { NeuralButton } from '@/components/ui/neural-button'
 import { TagsInput } from '@/components/ui/tags-input'
 import { CollaboratorPanel } from '@/components/collaboration/CollaboratorPanel'
 import { ActivityFeed } from '@/components/collaboration/ActivityFeed'
+import { ModuleNotesEditor } from '@/components/faculty/module-notes-editor'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -104,7 +105,15 @@ interface Course {
   }[]
 }
 
-function SortableModuleItem({ item, onRemove }: { item: SelectedModule; onRemove: (moduleId: string) => void }) {
+function SortableModuleItem({
+  item,
+  onRemove,
+  onEditNotes
+}: {
+  item: SelectedModule;
+  onRemove: (moduleId: string) => void;
+  onEditNotes: (moduleId: string) => void;
+}) {
   const {
     attributes,
     listeners,
@@ -166,14 +175,25 @@ function SortableModuleItem({ item, onRemove }: { item: SelectedModule; onRemove
               )}
             </div>
 
-            <NeuralButton
-              variant="ghost"
-              size="sm"
-              onClick={() => onRemove(item.moduleId)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <X className="h-4 w-4" />
-            </NeuralButton>
+            <div className="flex items-center gap-1">
+              <NeuralButton
+                variant="ghost"
+                size="sm"
+                onClick={() => onEditNotes(item.moduleId)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Edit course-specific notes"
+              >
+                <FileText className="h-4 w-4" />
+              </NeuralButton>
+              <NeuralButton
+                variant="ghost"
+                size="sm"
+                onClick={() => onRemove(item.moduleId)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="h-4 w-4" />
+              </NeuralButton>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -238,6 +258,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
   const [tags, setTags] = useState<string[]>([])
   const [availableTags, setAvailableTags] = useState<string[]>([])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [editingNotesForModule, setEditingNotesForModule] = useState<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -817,6 +838,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                               <SortableModuleItem
                                 item={item}
                                 onRemove={removeModule}
+                                onEditNotes={setEditingNotesForModule}
                               />
                             </div>
                           </div>
@@ -874,6 +896,19 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
           </Card>
         </div>
       )}
+
+      {/* Module Notes Editor */}
+      {editingNotesForModule && (() => {
+        const moduleData = selectedModules.find(m => m.moduleId === editingNotesForModule);
+        return moduleData ? (
+          <ModuleNotesEditor
+            courseId={courseId}
+            moduleId={editingNotesForModule}
+            moduleTitle={moduleData.module.title}
+            onClose={() => setEditingNotesForModule(null)}
+          />
+        ) : null;
+      })()}
     </div>
   )
 }
