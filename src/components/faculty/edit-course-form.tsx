@@ -779,10 +779,10 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
           </Card>
         </div>
 
-        {/* Three-Column Content Area */}
+        {/* Two-Column Content Area */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Course Assembly (50% width = 2 cols) */}
-          <div className="lg:col-span-2 space-y-6">
+          {/* Course Assembly (75% width = 3 cols) */}
+          <div className="lg:col-span-3 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-neural-primary">Course Assembly</h2>
               <NeuralButton
@@ -927,17 +927,14 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             </Card>
           </div>
 
-          {/* Collaborators (25% width = 1 col) */}
-          <div className="lg:col-span-1">
+          {/* Sidebar: Collaborators + Activity Feed (25% width = 1 col) */}
+          <div className="lg:col-span-1 space-y-6">
             <CollaboratorPanel
               entityType="course"
               entityId={courseId}
               authorId={course.author_id}
             />
-          </div>
 
-          {/* Activity Feed (25% width = 1 col) */}
-          <div className="lg:col-span-1">
             <ActivityFeed
               entityType="course"
               entityId={courseId}

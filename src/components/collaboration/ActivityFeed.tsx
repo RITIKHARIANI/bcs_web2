@@ -108,9 +108,9 @@ function renderActivityChanges(action: string, changes: Record<string, unknown>)
           <span className="text-muted-foreground">Invited:</span>
           <span className="font-medium text-foreground">{String(changes.invitedUserName)}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">User ID:</span>
-          <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{String(changes.invitedUserId)}</code>
+        <div className="flex items-start gap-2">
+          <span className="text-muted-foreground flex-shrink-0">User ID:</span>
+          <code className="text-xs bg-muted px-1.5 py-0.5 rounded break-all">{String(changes.invitedUserId)}</code>
         </div>
       </div>
     )
@@ -124,9 +124,9 @@ function renderActivityChanges(action: string, changes: Record<string, unknown>)
           <span className="text-muted-foreground">Removed:</span>
           <span className="font-medium text-foreground">{String(changes.removedUserName)}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">User ID:</span>
-          <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{String(changes.removedUserId)}</code>
+        <div className="flex items-start gap-2">
+          <span className="text-muted-foreground flex-shrink-0">User ID:</span>
+          <code className="text-xs bg-muted px-1.5 py-0.5 rounded break-all">{String(changes.removedUserId)}</code>
         </div>
       </div>
     )
