@@ -103,7 +103,15 @@ export async function GET(
       )
     }
 
-    return NextResponse.json({ module: foundModule })
+    // Transform the response to match frontend interface
+    const transformedModule = {
+      ...foundModule,
+      author: foundModule.users,
+      parentModule: foundModule.modules,
+      subModules: foundModule.other_modules,
+    }
+
+    return NextResponse.json({ module: transformedModule })
   } catch (error) {
     console.error('Error fetching module:', error)
     
@@ -255,7 +263,15 @@ export async function PUT(
       },
     })
 
-    return NextResponse.json({ module: updatedModule })
+    // Transform the response to match frontend interface
+    const transformedModule = {
+      ...updatedModule,
+      author: updatedModule.users,
+      parentModule: updatedModule.modules,
+      subModules: updatedModule.other_modules,
+    }
+
+    return NextResponse.json({ module: transformedModule })
   } catch (error) {
     console.error('Error updating module:', error)
     
