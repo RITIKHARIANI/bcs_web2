@@ -184,7 +184,7 @@ function SortableModuleItem({
                 variant="ghost"
                 size="sm"
                 onClick={() => onEditNotes(item.moduleId)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                 title="Edit course-specific notes"
               >
                 <FileText className="h-4 w-4" />
@@ -193,7 +193,7 @@ function SortableModuleItem({
                 variant="ghost"
                 size="sm"
                 onClick={() => onRemove(item.moduleId)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
               >
                 <X className="h-4 w-4" />
               </NeuralButton>
@@ -916,12 +916,25 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     </SortableContext>
                   </DndContext>
                 ) : (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      No modules added yet. Click &quot;Add Modules&quot; to start building your course.
-                    </AlertDescription>
-                  </Alert>
+                  <div className="text-center py-12 px-4">
+                    <div className="mx-auto w-16 h-16 rounded-full bg-gradient-neural flex items-center justify-center mb-4">
+                      <Layers className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No modules added yet
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+                      Start building your course by adding modules. You can reorder them later by dragging and dropping.
+                    </p>
+                    <NeuralButton
+                      variant="neural"
+                      size="sm"
+                      onClick={() => setShowModuleSelector(true)}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Your First Module
+                    </NeuralButton>
+                  </div>
                 )}
               </CardContent>
             </Card>
