@@ -496,8 +496,51 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          {/* Mobile Layout */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {/* Top Row: Back Button + Actions */}
+            <div className="flex items-center justify-between">
+              <Link href="/faculty/courses">
+                <NeuralButton variant="ghost" size="sm">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="sr-only">Back to Courses</span>
+                </NeuralButton>
+              </Link>
+              <div className="flex items-center gap-2">
+                <Link href={`/courses/${course.slug}`}>
+                  <NeuralButton variant="ghost" size="sm">
+                    <Eye className="h-4 w-4" />
+                  </NeuralButton>
+                </Link>
+                <NeuralButton
+                  variant="synaptic"
+                  size="sm"
+                  onClick={handleSubmit(onSubmit)}
+                  disabled={isSubmitting}
+                  className="min-h-[44px]"
+                >
+                  <Save className="mr-1.5 h-4 w-4" />
+                  {isSubmitting ? 'Saving...' : 'Save'}
+                </NeuralButton>
+              </div>
+            </div>
+            {/* Bottom Row: Title */}
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-neural flex-shrink-0">
+                <BookOpen className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg font-bold text-neural-primary">Edit Course</h1>
+                <p className="text-xs text-muted-foreground truncate">
+                  {course.title}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden sm:flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link href="/faculty/courses">
                 <NeuralButton variant="ghost" size="sm">
