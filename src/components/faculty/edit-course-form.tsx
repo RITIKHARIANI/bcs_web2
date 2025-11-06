@@ -140,29 +140,29 @@ function SortableModuleItem({
       className="group"
     >
       <Card className="cognitive-card border-2 border-neural-light/30 hover:border-neural-primary/50 hover:bg-neural-primary/5 transition-all duration-200 hover:shadow-md">
-        <CardContent className="p-4">
-          <div className="flex items-center space-x-3">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3">
             <div
               {...attributes}
               {...listeners}
-              className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-muted transition-colors"
+              className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-muted transition-colors flex-shrink-0"
             >
-              <GripVertical className="h-5 w-5 text-muted-foreground" />
+              <GripVertical className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
             </div>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center min-w-0 flex-1">
                   {item.module.parentModule ? (
-                    <Layers className="h-4 w-4 text-synapse-primary mr-1" />
+                    <Layers className="h-4 w-4 text-synapse-primary mr-1 flex-shrink-0" />
                   ) : (
-                    <BookOpen className="h-4 w-4 text-neural-primary mr-1" />
+                    <BookOpen className="h-4 w-4 text-neural-primary mr-1 flex-shrink-0" />
                   )}
                   <h4 className="font-medium text-sm truncate">{item.module.title}</h4>
                 </div>
                 <Badge
                   variant={item.module.status === 'published' ? 'default' : 'outline'}
-                  className="text-xs"
+                  className="text-xs flex-shrink-0"
                 >
                   {item.module.status}
                 </Badge>
@@ -173,18 +173,18 @@ function SortableModuleItem({
                 </p>
               )}
               {item.module.parentModule && (
-                <p className="text-xs text-synapse-primary mt-1">
+                <p className="text-xs text-synapse-primary mt-1 truncate">
                   Sub-module of: {item.module.parentModule.title}
                 </p>
               )}
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-shrink-0">
               <NeuralButton
                 variant="ghost"
                 size="sm"
                 onClick={() => onEditNotes(item.moduleId)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden sm:flex"
                 title="Edit course-specific notes"
               >
                 <FileText className="h-4 w-4" />
@@ -954,11 +954,11 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     >
                       <div className="space-y-3">
                         {selectedModules.map((item, index) => (
-                          <div key={item.moduleId} className="flex items-center space-x-3">
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-neural flex items-center justify-center text-white text-sm font-medium">
+                          <div key={item.moduleId} className="flex items-start gap-2 sm:gap-3">
+                            <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-neural flex items-center justify-center text-white text-xs sm:text-sm font-medium mt-0.5">
                               {index + 1}
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0 overflow-hidden">
                               <SortableModuleItem
                                 item={item}
                                 onRemove={removeModule}
