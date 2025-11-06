@@ -33,8 +33,9 @@ interface Module {
   description: string | null
   content: string
   status: 'draft' | 'published'
-  createdAt: string
-  updatedAt: string
+  visibility: 'public' | 'private'
+  created_at: string
+  updated_at: string
   author: {
     name: string
     email: string
@@ -238,16 +239,23 @@ export function ModuleViewer({ moduleId }: ModuleViewerProps) {
                 </div>
 
                 <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Visibility:</span>
+                  <Badge variant={module.visibility === 'public' ? 'default' : 'secondary'}>
+                    {module.visibility === 'public' ? '🌐 Public' : '🔒 Private'}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Created:</span>
                   <span className="font-medium">
-                    {new Date(module.createdAt).toLocaleDateString()}
+                    {new Date(module.created_at).toLocaleDateString()}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Updated:</span>
                   <span className="font-medium">
-                    {new Date(module.updatedAt).toLocaleDateString()}
+                    {new Date(module.updated_at).toLocaleDateString()}
                   </span>
                 </div>
 

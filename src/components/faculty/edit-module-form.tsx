@@ -639,7 +639,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
           <Card className="w-full max-w-md">
             <CardHeader>
               <CardTitle className="flex items-center text-red-600">

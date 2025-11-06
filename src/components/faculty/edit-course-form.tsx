@@ -95,8 +95,8 @@ interface Course {
   featured: boolean
   tags: string[]
   author_id: string
-  createdAt: string
-  updatedAt: string
+  created_at: string
+  updated_at: string
   course_modules?: {
     id: string
     sort_order: number
@@ -650,13 +650,13 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Created:</span>
                   <span className="font-medium">
-                    {new Date(course.createdAt).toLocaleDateString()}
+                    {new Date(course.created_at).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Updated:</span>
                   <span className="font-medium">
-                    {new Date(course.updatedAt).toLocaleDateString()}
+                    {new Date(course.updated_at).toLocaleDateString()}
                   </span>
                 </div>
               </CardContent>
@@ -840,7 +840,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
           <Card className="w-full max-w-md">
             <CardHeader>
               <CardTitle className="flex items-center text-red-600">
