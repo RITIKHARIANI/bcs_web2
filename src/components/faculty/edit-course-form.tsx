@@ -540,7 +540,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8 space-y-8">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
         {/* Full-Width Course Details Card */}
         <Card className="cognitive-card">
           <CardHeader>
@@ -553,7 +553,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6">
               {/* Left Column: Title + Slug */}
               <div className="lg:col-span-3 space-y-4">
                 <div className="space-y-2">
@@ -587,7 +587,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
               </div>
 
               {/* Middle Column: Description */}
-              <div className="lg:col-span-4 space-y-2">
+              <div className="md:col-span-2 lg:col-span-4 space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
@@ -599,7 +599,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
               </div>
 
               {/* Right Column: Tags + Publishing Settings */}
-              <div className="lg:col-span-5 space-y-6">
+              <div className="md:col-span-2 lg:col-span-5 space-y-4 sm:space-y-6">
                 <TagsInput
                   value={tags}
                   onChange={setTags}
@@ -680,9 +680,9 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         </Card>
 
         {/* Horizontal Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           {/* Modules Count */}
-          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <CardContent className="p-4 bg-gradient-to-br from-neural-primary/5 to-neural-primary/10">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -701,7 +701,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
           </Card>
 
           {/* Published Modules */}
-          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
             <CardContent className="p-4 bg-gradient-to-br from-green-500/5 to-green-500/10">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -720,7 +720,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
           </Card>
 
           {/* Course Status */}
-          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
             <CardContent className="p-4 bg-gradient-to-br from-synapse-primary/5 to-synapse-primary/10">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -741,7 +741,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
           </Card>
 
           {/* Created Date */}
-          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
             <CardContent className="p-4 bg-gradient-to-br from-cognition-teal/5 to-cognition-teal/10">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -760,7 +760,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
           </Card>
 
           {/* Updated Date */}
-          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
             <CardContent className="p-4 bg-gradient-to-br from-cognition-orange/5 to-cognition-orange/10">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -780,15 +780,16 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         </div>
 
         {/* Two-Column Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
           {/* Course Assembly (75% width = 3 cols) */}
           <div className="lg:col-span-3 space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
               <h2 className="text-lg font-semibold text-neural-primary">Course Assembly</h2>
               <NeuralButton
                 variant="neural"
                 size="sm"
                 onClick={() => setShowModuleSelector(!showModuleSelector)}
+                className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Modules
@@ -821,8 +822,19 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
                     <div className="max-h-64 overflow-y-auto space-y-2">
                       {isLoadingModules ? (
-                        <div className="text-center py-4 text-muted-foreground">
-                          Loading modules...
+                        <div className="space-y-2">
+                          {[1, 2, 3].map((i) => (
+                            <div
+                              key={i}
+                              className="flex items-center justify-between p-3 border rounded-lg animate-pulse"
+                            >
+                              <div className="flex-1 space-y-2">
+                                <div className="h-4 bg-gradient-to-r from-neural-light/30 to-neural-primary/30 rounded w-3/4"></div>
+                                <div className="h-3 bg-gradient-to-r from-neural-primary/20 to-neural-light/20 rounded w-1/2"></div>
+                              </div>
+                              <div className="h-8 w-8 bg-gradient-to-r from-neural-light/30 to-neural-primary/30 rounded"></div>
+                            </div>
+                          ))}
                         </div>
                       ) : availableModules.length > 0 ? (
                         availableModules.map((module) => (
