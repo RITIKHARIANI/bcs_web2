@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -229,11 +230,12 @@ export function MediaLibraryPanel({
                       className="group relative cursor-pointer rounded-lg border border-border hover:border-neural-primary transition-all overflow-hidden"
                     >
                       {file.mimeType.startsWith('image/') ? (
-                        <div className="aspect-square bg-muted">
-                          <img
+                        <div className="aspect-square bg-muted relative">
+                          <Image
                             src={file.url}
                             alt={file.originalName}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
                           />
                         </div>
                       ) : (
@@ -266,10 +268,12 @@ export function MediaLibraryPanel({
                       className="flex items-center gap-3 p-3 border rounded-lg hover:border-neural-primary cursor-pointer transition-colors"
                     >
                       {file.mimeType.startsWith('image/') ? (
-                        <img
+                        <Image
                           src={file.url}
                           alt={file.originalName}
-                          className="w-12 h-12 object-cover rounded"
+                          width={48}
+                          height={48}
+                          className="object-cover rounded"
                         />
                       ) : (
                         <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
@@ -331,11 +335,12 @@ export function MediaLibraryPanel({
             </div>
 
             {/* Image Preview */}
-            <div className="mb-4">
-              <img
+            <div className="mb-4 relative h-48">
+              <Image
                 src={selectedFile.url}
                 alt={selectedFile.originalName}
-                className="w-full h-48 object-cover rounded-lg"
+                fill
+                className="object-cover rounded-lg"
               />
             </div>
 
