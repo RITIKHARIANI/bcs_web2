@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
@@ -39,6 +39,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group-custom'
+import { Checkbox } from '@/components/ui/checkbox-custom'
 import { toast } from 'sonner'
 import {
   Save,
@@ -135,7 +137,7 @@ function SortableModuleItem({
       style={style}
       className="group"
     >
-      <Card className="cognitive-card border-2 border-neural-light/30 hover:border-neural-primary/50">
+      <Card className="cognitive-card border-2 border-neural-light/30 hover:border-neural-primary/50 hover:bg-neural-primary/5 transition-all duration-200 hover:shadow-md">
         <CardContent className="p-4">
           <div className="flex items-center space-x-3">
             <div
@@ -318,6 +320,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<EditCourseFormData>({
     resolver: zodResolver(editCourseSchema),
@@ -549,47 +552,53 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                   Configure the basic information for your course
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    placeholder="Enter course title..."
-                    {...register('title')}
-                    className="border-neural-light/30 focus:border-neural-primary"
-                  />
-                  {errors.title && (
-                    <p className="text-sm text-red-500">{errors.title.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="slug">URL Slug *</Label>
-                  <div className="relative">
-                    <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <CardContent className="space-y-6">
+                {/* Basic Information Section */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title *</Label>
                     <Input
-                      id="slug"
-                      placeholder="url-friendly-slug"
-                      {...register('slug')}
-                      className="pl-10 border-neural-light/30 focus:border-neural-primary"
+                      id="title"
+                      placeholder="Enter course title..."
+                      {...register('title')}
+                      className="border-neural-light/30 focus:border-neural-primary"
+                    />
+                    {errors.title && (
+                      <p className="text-sm text-red-500">{errors.title.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="slug">URL Slug *</Label>
+                    <div className="relative">
+                      <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="slug"
+                        placeholder="url-friendly-slug"
+                        {...register('slug')}
+                        className="pl-10 border-neural-light/30 focus:border-neural-primary"
+                      />
+                    </div>
+                    {errors.slug && (
+                      <p className="text-sm text-red-500">{errors.slug.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Brief description of the course..."
+                      rows={3}
+                      {...register('description')}
+                      className="border-neural-light/30 focus:border-neural-primary"
                     />
                   </div>
-                  {errors.slug && (
-                    <p className="text-sm text-red-500">{errors.slug.message}</p>
-                  )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Brief description of the course..."
-                    rows={3}
-                    {...register('description')}
-                    className="border-neural-light/30 focus:border-neural-primary"
-                  />
-                </div>
+                <Separator className="my-6" />
 
+                {/* Categorization Section */}
                 <TagsInput
                   value={tags}
                   onChange={setTags}
@@ -600,48 +609,70 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                   id="tags"
                 />
 
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <div className="flex items-center space-x-4">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        value="draft"
-                        {...register('status')}
-                        className="text-neural-primary"
-                      />
-                      <span className="flex items-center text-sm">
-                        <FileText className="mr-1 h-4 w-4 text-orange-500" />
-                        Draft
-                      </span>
-                    </label>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        value="published"
-                        {...register('status')}
-                        className="text-neural-primary"
-                      />
-                      <span className="flex items-center text-sm">
-                        <CheckCircle className="mr-1 h-4 w-4 text-green-500" />
-                        Published
-                      </span>
-                    </label>
-                  </div>
-                </div>
+                <Separator className="my-6" />
 
-                <div className="space-y-2">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      {...register('featured')}
-                      className="text-neural-primary"
+                {/* Publishing Settings Section */}
+                <div className="space-y-4">
+                  <div className="space-y-3">
+                    <Label htmlFor="status">Status</Label>
+                    <Controller
+                      name="status"
+                      control={control}
+                      render={({ field }) => (
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          className="flex items-center space-x-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="draft" id="status-draft" />
+                            <Label
+                              htmlFor="status-draft"
+                              className="flex items-center cursor-pointer font-normal"
+                            >
+                              <FileText className="mr-1.5 h-4 w-4 text-orange-500" />
+                              Draft
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="published" id="status-published" />
+                            <Label
+                              htmlFor="status-published"
+                              className="flex items-center cursor-pointer font-normal"
+                            >
+                              <CheckCircle className="mr-1.5 h-4 w-4 text-green-500" />
+                              Published
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      )}
                     />
-                    <span className="text-sm">Feature this course</span>
-                  </label>
-                  <p className="text-xs text-muted-foreground">
-                    Featured courses appear prominently on the homepage
-                  </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Controller
+                      name="featured"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="featured"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                          <Label
+                            htmlFor="featured"
+                            className="text-sm font-normal cursor-pointer"
+                          >
+                            Feature this course
+                          </Label>
+                        </div>
+                      )}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Featured courses appear prominently on the homepage
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

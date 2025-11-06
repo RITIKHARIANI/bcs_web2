@@ -99,6 +99,70 @@ function formatRelativeTime(dateInput: string | Date): string {
   return date.toLocaleDateString()
 }
 
+function renderActivityChanges(action: string, changes: Record<string, unknown>) {
+  // Handle invited_user action
+  if (action === 'invited_user' && changes.invitedUserName && changes.invitedUserId) {
+    return (
+      <div className="mt-2 p-3 bg-muted/30 rounded-md text-sm space-y-1.5">
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">Invited:</span>
+          <span className="font-medium text-foreground">{String(changes.invitedUserName)}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">User ID:</span>
+          <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{String(changes.invitedUserId)}</code>
+        </div>
+      </div>
+    )
+  }
+
+  // Handle removed_user action
+  if (action === 'removed_user' && changes.removedUserName && changes.removedUserId) {
+    return (
+      <div className="mt-2 p-3 bg-muted/30 rounded-md text-sm space-y-1.5">
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">Removed:</span>
+          <span className="font-medium text-foreground">{String(changes.removedUserName)}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">User ID:</span>
+          <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{String(changes.removedUserId)}</code>
+        </div>
+      </div>
+    )
+  }
+
+  // Handle updated action with field changes
+  if (action === 'updated' && typeof changes === 'object') {
+    const entries = Object.entries(changes)
+    if (entries.length > 0) {
+      return (
+        <div className="mt-2 p-3 bg-muted/30 rounded-md text-sm space-y-1.5">
+          <div className="text-xs text-muted-foreground font-medium mb-1">Changes:</div>
+          {entries.map(([key, value]) => (
+            <div key={key} className="flex items-start gap-2">
+              <span className="text-muted-foreground capitalize">{key.replace(/_/g, ' ')}:</span>
+              <span className="font-medium text-foreground flex-1 break-words">
+                {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )
+    }
+  }
+
+  // Fallback: render as formatted JSON for unknown structures
+  return (
+    <div className="mt-2 p-3 bg-muted/30 rounded-md text-xs font-mono overflow-x-auto max-w-full">
+      <div className="text-muted-foreground mb-1">Additional details:</div>
+      <pre className="whitespace-pre-wrap break-words">
+        {JSON.stringify(changes, null, 2)}
+      </pre>
+    </div>
+  )
+}
+
 export function ActivityFeed({
   entityType,
   entityId,
@@ -228,20 +292,20 @@ export function ActivityFeed({
 
                   {/* Activity Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-foreground">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <p className="text-sm text-foreground leading-relaxed">
                           {activity.description}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-1.5">
                           {formatRelativeTime(activity.createdAt)}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         {getActionIcon(activity.action)}
                         <Badge
                           variant={getActionBadgeVariant(activity.action)}
-                          className="text-xs"
+                          className="text-xs whitespace-nowrap"
                         >
                           {activity.action.replace('_', ' ')}
                         </Badge>
@@ -249,13 +313,7 @@ export function ActivityFeed({
                     </div>
 
                     {/* Show changes if available */}
-                    {activity.changes && (
-                      <div className="mt-2 p-2 bg-muted/30 rounded text-xs font-mono overflow-x-auto max-w-full">
-                        <pre className="whitespace-pre-wrap break-words">
-                          {JSON.stringify(activity.changes, null, 2)}
-                        </pre>
-                      </div>
-                    )}
+                    {activity.changes && renderActivityChanges(activity.action, activity.changes)}
                   </div>
                 </div>
               ))}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
@@ -22,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group-custom'
 import { toast } from 'sonner'
 import {
   Save,
@@ -215,6 +216,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<EditModuleFormData>({
     resolver: zodResolver(editModuleSchema),
@@ -401,7 +403,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                   Configure the basic information for your module
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="title">Title *</Label>
                   <Input
@@ -476,64 +478,76 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor="status">Status</Label>
-                  <div className="flex items-center space-x-4">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        value="draft"
-                        {...register('status')}
-                        className="text-neural-primary"
-                      />
-                      <span className="flex items-center text-sm">
-                        <FileText className="mr-1 h-4 w-4 text-orange-500" />
-                        Draft
-                      </span>
-                    </label>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        value="published"
-                        {...register('status')}
-                        className="text-neural-primary"
-                      />
-                      <span className="flex items-center text-sm">
-                        <CheckCircle className="mr-1 h-4 w-4 text-green-500" />
-                        Published
-                      </span>
-                    </label>
-                  </div>
+                  <Controller
+                    name="status"
+                    control={control}
+                    render={({ field }) => (
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex items-center space-x-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="draft" id="status-draft" />
+                          <Label
+                            htmlFor="status-draft"
+                            className="flex items-center cursor-pointer font-normal"
+                          >
+                            <FileText className="mr-1.5 h-4 w-4 text-orange-500" />
+                            Draft
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="published" id="status-published" />
+                          <Label
+                            htmlFor="status-published"
+                            className="flex items-center cursor-pointer font-normal"
+                          >
+                            <CheckCircle className="mr-1.5 h-4 w-4 text-green-500" />
+                            Published
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    )}
+                  />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor="visibility">Visibility</Label>
-                  <div className="flex items-center space-x-4">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        value="public"
-                        {...register('visibility')}
-                        className="text-neural-primary"
-                      />
-                      <span className="flex items-center text-sm">
-                        <Globe className="mr-1 h-4 w-4 text-blue-500" />
-                        Public
-                      </span>
-                    </label>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        value="private"
-                        {...register('visibility')}
-                        className="text-neural-primary"
-                      />
-                      <span className="flex items-center text-sm">
-                        <Lock className="mr-1 h-4 w-4 text-purple-500" />
-                        Private
-                      </span>
-                    </label>
-                  </div>
+                  <Controller
+                    name="visibility"
+                    control={control}
+                    render={({ field }) => (
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex items-center space-x-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="public" id="visibility-public" />
+                          <Label
+                            htmlFor="visibility-public"
+                            className="flex items-center cursor-pointer font-normal"
+                          >
+                            <Globe className="mr-1.5 h-4 w-4 text-blue-500" />
+                            Public
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="private" id="visibility-private" />
+                          <Label
+                            htmlFor="visibility-private"
+                            className="flex items-center cursor-pointer font-normal"
+                          >
+                            <Lock className="mr-1.5 h-4 w-4 text-purple-500" />
+                            Private
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    )}
+                  />
                   <p className="text-xs text-muted-foreground">
                     Public: Can be added to any course. Private: Only you can add to courses.
                   </p>
