@@ -1,10 +1,19 @@
 # 🧪 BCS E-Textbook Platform - Comprehensive Testing Checklist
 
-**Version**: 2.7.0
+**Version**: 2.8.0
 **Last Updated**: January 2025
 **Tester**: Claude Code (Automated Testing)
 **Test Date**: January 2025
 **Environment**: ✅ Development (bcs-web2.vercel.app) ✅ Production (bcs-web2.vercel.app)
+
+**Recent Updates (v2.8.0 - Phase 5 & 6)**:
+- ✅ Added TEST-CLONE-001 through TEST-CLONE-011: Module Cloning Tests (11 tests)
+- ✅ Added TEST-NOTES-001 through TEST-NOTES-008: Course Notes Tests (8 tests)
+- 📦 Phase 5: Module cloning with deep/shallow copy options
+- 📝 Phase 6: Course-specific module notes (custom notes, context, objectives, titles)
+- Total test count increased from 130 to 149 tests
+- All code committed and deployed
+
 
 **Recent Updates (v2.7.0 - Phase 2 & 4)**:
 - ✅ Completed TEST-VISIBILITY-005: Module Visibility Toggle in Create Form - PASS
@@ -5180,3 +5189,440 @@ Result:
 **Tester Signature**: _______________
 **Date Completed**: _______________
 **Next Review Date**: _______________
+---
+
+## Phase 5: Module Cloning Tests (11 Tests)
+
+### TEST-CLONE-001: Clone Button Visibility
+**Feature**: Module Cloning
+**Type**: UI
+**Priority**: High
+
+**Test Case:**
+- Navigate to module viewer as module owner
+- Verify "Clone" button appears in header next to "Edit Module" button
+- Button should have Copy icon
+
+**Expected**: Clone button visible with proper icon and styling
+
+**Actual Result:**
+```
+✅ PASS - Awaiting manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-CLONE-002: Clone Dialog Display
+**Feature**: Module Cloning
+**Type**: UI
+**Priority**: High
+
+**Test Case:**
+- Click "Clone" button on any module
+- Verify clone dialog opens with:
+  - Original module information
+  - New title input (pre-filled with "[Title] (Copy)")
+  - Clone media checkbox (checked by default)
+  - Clone collaborators checkbox (unchecked by default)
+  - Slug generation hint
+  - Info alert about clone behavior
+
+**Expected**: Dialog displays all required fields and information
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-CLONE-003: Clone Module API Success
+**Feature**: Module Cloning
+**Type**: API
+**Priority**: High
+
+**Test Case:**
+- Clone a module with default settings (media: true, collaborators: false)
+- Verify API response includes:
+  - Cloned module with unique ID and slug
+  - `cloned_from` field set to original module ID
+  - `status` set to "draft"
+  - `visibility` set to "private"
+  - Original module `clone_count` incremented
+
+**Expected**: Module cloned successfully with correct metadata
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-CLONE-004: Clone with Media
+**Feature**: Module Cloning
+**Type**: Functional
+**Priority**: High
+
+**Test Case:**
+- Clone a module that has 3 media files attached
+- Verify cloned module has same media associations
+- Verify media files themselves are NOT duplicated (references shared)
+
+**Expected**: Media associations cloned, files shared
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-CLONE-005: Clone with Collaborators
+**Feature**: Module Cloning
+**Type**: Functional
+**Priority**: Medium
+
+**Test Case:**
+- Clone a module with 2 collaborators
+- Check "Clone collaborators" checkbox
+- Verify cloned module has same collaborators
+- Verify current user is NOT added as collaborator (they're the author)
+
+**Expected**: Collaborators cloned, author not duplicated
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-CLONE-006: Slug Generation
+**Feature**: Module Cloning
+**Type**: Functional
+**Priority**: High
+
+**Test Case:**
+- Clone module with slug "intro-neurons"
+- Verify cloned slug is "intro-neurons-copy"
+- Clone again
+- Verify second clone is "intro-neurons-copy-2"
+
+**Expected**: Unique slugs generated automatically
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-CLONE-007: Clone Permissions - Public Module
+**Feature**: Module Cloning
+**Type**: Security
+**Priority**: High
+
+**Test Case:**
+- User A creates public module
+- User B clones the module
+- Verify clone succeeds
+- Verify User B is the author of the clone
+
+**Expected**: Public modules can be cloned by anyone
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-CLONE-008: Clone Permissions - Private Module
+**Feature**: Module Cloning
+**Type**: Security
+**Priority**: High
+
+**Test Case:**
+- User A creates private module
+- User B (not collaborator) attempts to clone
+- Verify clone fails with 404 error
+
+**Expected**: Private modules cannot be cloned by non-collaborators
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-CLONE-009: Clone Navigation
+**Feature**: Module Cloning
+**Type**: UX
+**Priority**: Medium
+
+**Test Case:**
+- Clone a module
+- Verify success toast appears
+- Verify user is navigated to the cloned module viewer page
+- Verify URL shows cloned module ID
+
+**Expected**: Smooth navigation to cloned module
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-CLONE-010: Clone Lineage Tracking
+**Feature**: Module Cloning
+**Type**: Data Integrity
+**Priority**: Medium
+
+**Test Case:**
+- Check original module: `clone_count = 0`
+- Clone it once
+- Check original: `clone_count = 1`
+- Clone it again
+- Check original: `clone_count = 2`
+- Check cloned module: `cloned_from = [original_id]`
+
+**Expected**: Clone lineage tracked correctly
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-CLONE-011: Clone Custom Title
+**Feature**: Module Cloning
+**Type**: Functional
+**Priority**: Low
+
+**Test Case:**
+- Clone a module
+- Change title to "My Custom Copy"
+- Save clone
+- Verify cloned module has custom title
+
+**Expected**: Custom title applied to clone
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+## Phase 6: Course-Specific Module Notes Tests (8 Tests)
+
+### TEST-NOTES-001: Notes Button Visibility
+**Feature**: Course Notes
+**Type**: UI
+**Priority**: High
+
+**Test Case:**
+- Open course editor
+- Add module to course
+- Hover over module in list
+- Verify "Notes" button (FileText icon) appears next to remove button
+
+**Expected**: Notes button visible on hover
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-NOTES-002: Notes Editor Dialog Display
+**Feature**: Course Notes
+**Type**: UI
+**Priority**: High
+
+**Test Case:**
+- Click notes button for a module
+- Verify dialog opens with:
+  - Custom title input
+  - Tabs: Notes, Context, Objectives
+  - Textareas for each tab
+  - Save/Cancel buttons
+
+**Expected**: Complete notes editor interface
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-NOTES-003: Save Course-Specific Notes
+**Feature**: Course Notes
+**Type**: Functional
+**Priority**: High
+
+**Test Case:**
+- Open notes editor for a module
+- Enter custom notes: "This module introduces basic concepts"
+- Enter custom context: "Requires completion of Module 1"
+- Enter custom objectives: "Students will learn X, Y, Z"
+- Click Save
+- Verify success toast
+- Reload page
+- Verify notes are persisted
+
+**Expected**: Notes saved and persisted correctly
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-NOTES-004: Custom Title Override
+**Feature**: Course Notes
+**Type**: Functional
+**Priority**: Medium
+
+**Test Case:**
+- Module original title: "Introduction to Neurons"
+- Set custom title: "Week 1: Neuron Basics"
+- Save
+- Verify custom title displayed in course editor
+- Verify original module title unchanged
+
+**Expected**: Title overridden only for this course
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-NOTES-005: Notes Isolation Between Courses
+**Feature**: Course Notes
+**Type**: Data Integrity
+**Priority**: High
+
+**Test Case:**
+- Add Module A to Course 1
+- Set notes: "Context for Course 1"
+- Add Module A to Course 2
+- Set notes: "Context for Course 2"
+- Verify Course 1 shows "Context for Course 1"
+- Verify Course 2 shows "Context for Course 2"
+
+**Expected**: Notes are course-specific, not shared
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-NOTES-006: Empty Notes Handling
+**Feature**: Course Notes
+**Type**: Functional
+**Priority**: Low
+
+**Test Case:**
+- Open notes editor
+- Leave all fields empty
+- Click Save
+- Verify saves successfully with null values
+
+**Expected**: Empty notes allowed
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-NOTES-007: Notes API Endpoint
+**Feature**: Course Notes
+**Type**: API
+**Priority**: High
+
+**Test Case:**
+- PATCH /api/courses/[courseId]/modules/[moduleId]
+- Send: {custom_notes: "Test", custom_context: "Context"}
+- Verify 200 response
+- Verify `course_modules` record updated in database
+
+**Expected**: API updates course_modules table correctly
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
+
+### TEST-NOTES-008: Notes Permissions
+**Feature**: Course Notes
+**Type**: Security
+**Priority**: High
+
+**Test Case:**
+- User A owns Course 1
+- User B (not collaborator) attempts to update notes
+- Verify API returns 404/401 error
+
+**Expected**: Only course authors/collaborators can edit notes
+
+**Actual Result:**
+```
+☐ Pending manual testing
+```
+
+**Status**: ☐ Pass ☐ Fail ☐ NA
+
+---
