@@ -891,11 +891,11 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                   Course Modules ({selectedModules.length})
                 </CardTitle>
                 <CardDescription className="space-y-1">
-                  <p>Drag and drop to reorder modules. Students will follow this sequence.</p>
-                  <p className="flex items-center gap-1 text-xs">
+                  <div>Drag and drop to reorder modules. Students will follow this sequence.</div>
+                  <div className="flex items-center gap-1 text-xs">
                     <FileText className="h-3 w-3" />
                     <span>Hover over a module to edit course-specific notes or remove it</span>
-                  </p>
+                  </div>
                 </CardDescription>
               </CardHeader>
               <CardContent>
