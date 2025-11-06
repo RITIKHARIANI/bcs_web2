@@ -214,11 +214,11 @@ export function TagsInput({
       </div>
       
       {/* Helper text */}
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>
+      <div className="flex justify-between gap-4 text-xs text-muted-foreground">
+        <span className="flex-1">
           Press Enter or Tab to add tags. Use tags to categorize and search your content.
         </span>
-        <span>
+        <span className="flex-shrink-0 font-medium">
           {value.length}/{maxTags}
         </span>
       </div>

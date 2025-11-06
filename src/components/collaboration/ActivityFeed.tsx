@@ -250,8 +250,8 @@ export function ActivityFeed({
 
                     {/* Show changes if available */}
                     {activity.changes && (
-                      <div className="mt-2 p-2 bg-muted/30 rounded text-xs font-mono">
-                        <pre className="whitespace-pre-wrap">
+                      <div className="mt-2 p-2 bg-muted/30 rounded text-xs font-mono overflow-x-auto max-w-full">
+                        <pre className="whitespace-pre-wrap break-words">
                           {JSON.stringify(activity.changes, null, 2)}
                         </pre>
                       </div>

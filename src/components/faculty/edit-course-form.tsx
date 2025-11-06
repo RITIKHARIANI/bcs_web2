@@ -813,8 +813,12 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                   <Layers className="mr-2 h-5 w-5 text-neural-primary" />
                   Course Modules ({selectedModules.length})
                 </CardTitle>
-                <CardDescription>
-                  Drag and drop to reorder modules. Students will follow this sequence.
+                <CardDescription className="space-y-1">
+                  <p>Drag and drop to reorder modules. Students will follow this sequence.</p>
+                  <p className="flex items-center gap-1 text-xs">
+                    <FileText className="h-3 w-3" />
+                    <span>Hover over a module to edit course-specific notes or remove it</span>
+                  </p>
                 </CardDescription>
               </CardHeader>
               <CardContent>
