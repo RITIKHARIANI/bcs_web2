@@ -730,19 +730,19 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         </Card>
 
         {/* Horizontal Statistics Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
           {/* Modules Count */}
           <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <CardContent className="p-4 bg-gradient-to-br from-neural-primary/5 to-neural-primary/10">
-              <div className="space-y-2">
+            <CardContent className="p-3 sm:p-4 bg-gradient-to-br from-neural-primary/5 to-neural-primary/10">
+              <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-neural-primary/10 group-hover:bg-neural-primary/20 transition-colors">
-                    <Layers className="h-5 w-5 text-neural-primary" />
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-neural-primary/10 group-hover:bg-neural-primary/20 transition-colors">
+                    <Layers className="h-4 w-4 sm:h-5 sm:w-5 text-neural-primary" />
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Modules</p>
-                  <p className="text-2xl font-bold text-foreground">
+                  <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Modules</p>
+                  <p className="text-xl sm:text-2xl font-bold text-foreground">
                     {selectedModules.length}
                   </p>
                 </div>
@@ -752,16 +752,16 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
           {/* Published Modules */}
           <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
-            <CardContent className="p-4 bg-gradient-to-br from-green-500/5 to-green-500/10">
-              <div className="space-y-2">
+            <CardContent className="p-3 sm:p-4 bg-gradient-to-br from-green-500/5 to-green-500/10">
+              <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Published</p>
-                  <p className="text-2xl font-bold text-foreground">
+                  <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Published</p>
+                  <p className="text-xl sm:text-2xl font-bold text-foreground">
                     {selectedModules.filter(item => item.module.status === 'published').length}
                   </p>
                 </div>
@@ -771,17 +771,17 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
           {/* Course Status */}
           <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
-            <CardContent className="p-4 bg-gradient-to-br from-synapse-primary/5 to-synapse-primary/10">
-              <div className="space-y-2">
+            <CardContent className="p-3 sm:p-4 bg-gradient-to-br from-synapse-primary/5 to-synapse-primary/10">
+              <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-synapse-primary/10 group-hover:bg-synapse-primary/20 transition-colors">
-                    <BookOpen className="h-5 w-5 text-synapse-primary" />
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-synapse-primary/10 group-hover:bg-synapse-primary/20 transition-colors">
+                    <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-synapse-primary" />
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Status</p>
-                  <div className="mt-1">
-                    <Badge variant={watchedStatus === 'published' ? 'default' : 'outline'} className="text-xs">
+                  <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Status</p>
+                  <div className="mt-0.5 sm:mt-1">
+                    <Badge variant={watchedStatus === 'published' ? 'default' : 'outline'} className="text-[10px] sm:text-xs">
                       {watchedStatus}
                     </Badge>
                   </div>
@@ -792,16 +792,16 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
           {/* Created Date */}
           <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-            <CardContent className="p-4 bg-gradient-to-br from-cognition-teal/5 to-cognition-teal/10">
-              <div className="space-y-2">
+            <CardContent className="p-3 sm:p-4 bg-gradient-to-br from-cognition-teal/5 to-cognition-teal/10">
+              <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-cognition-teal/10 group-hover:bg-cognition-teal/20 transition-colors">
-                    <Calendar className="h-5 w-5 text-cognition-teal" />
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-cognition-teal/10 group-hover:bg-cognition-teal/20 transition-colors">
+                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-cognition-teal" />
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Created</p>
-                  <p className="text-sm font-semibold text-foreground">
+                  <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Created</p>
+                  <p className="text-xs sm:text-sm font-semibold text-foreground">
                     {new Date(course.created_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -811,16 +811,16 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
           {/* Updated Date */}
           <Card className="cognitive-card group hover:shadow-lg transition-all duration-200 hover:scale-105 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
-            <CardContent className="p-4 bg-gradient-to-br from-cognition-orange/5 to-cognition-orange/10">
-              <div className="space-y-2">
+            <CardContent className="p-3 sm:p-4 bg-gradient-to-br from-cognition-orange/5 to-cognition-orange/10">
+              <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-cognition-orange/10 group-hover:bg-cognition-orange/20 transition-colors">
-                    <Calendar className="h-5 w-5 text-cognition-orange" />
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-cognition-orange/10 group-hover:bg-cognition-orange/20 transition-colors">
+                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-cognition-orange" />
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Updated</p>
-                  <p className="text-sm font-semibold text-foreground">
+                  <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Updated</p>
+                  <p className="text-xs sm:text-sm font-semibold text-foreground">
                     {new Date(course.updated_at).toLocaleDateString()}
                   </p>
                 </div>

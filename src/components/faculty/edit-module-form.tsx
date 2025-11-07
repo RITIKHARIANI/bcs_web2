@@ -568,16 +568,16 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
               <CardHeader>
                 <CardTitle className="text-sm">Module Statistics</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Status:</span>
-                  <Badge variant={watchedStatus === 'published' ? 'default' : 'outline'}>
+              <CardContent className="space-y-2 text-xs sm:text-sm">
+                <div className="flex justify-between items-center gap-2">
+                  <span className="text-muted-foreground flex-shrink-0">Status:</span>
+                  <Badge variant={watchedStatus === 'published' ? 'default' : 'outline'} className="text-xs">
                     {watchedStatus}
                   </Badge>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Created:</span>
-                  <span className="font-medium">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-muted-foreground flex-shrink-0">Created:</span>
+                  <span className="font-medium text-right">
                     {module.createdAt
                       ? new Date(module.createdAt).toLocaleDateString('en-US', {
                           month: 'short',
@@ -587,9 +587,9 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                       : 'Unknown'}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Updated:</span>
-                  <span className="font-medium">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-muted-foreground flex-shrink-0">Updated:</span>
+                  <span className="font-medium text-right">
                     {module.updatedAt
                       ? new Date(module.updatedAt).toLocaleDateString('en-US', {
                           month: 'short',
@@ -599,8 +599,8 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                       : 'Unknown'}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Sub-modules:</span>
+                <div className="flex justify-between items-center gap-2">
+                  <span className="text-muted-foreground flex-shrink-0">Sub-modules:</span>
                   <span className="font-medium">{module.subModules?.length || 0}</span>
                 </div>
               </CardContent>
