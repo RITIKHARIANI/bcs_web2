@@ -589,6 +589,28 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
                   </CardContent>
                 </Card>
 
+                {/* Next Module Navigation */}
+                {(() => {
+                  const currentIndex = course.courseModules.findIndex(cm => cm.module.id === selectedModuleId)
+                  const nextModule = currentIndex >= 0 && currentIndex < course.courseModules.length - 1
+                    ? course.courseModules[currentIndex + 1].module
+                    : null
+
+                  return nextModule ? (
+                    <div className="flex justify-end">
+                      <NeuralButton
+                        variant="neural"
+                        size="lg"
+                        onClick={() => handleModuleSelect(nextModule)}
+                        className="group"
+                      >
+                        <span>Next: {nextModule.title}</span>
+                        <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                      </NeuralButton>
+                    </div>
+                  ) : null
+                })()}
+
                 {/* Module Resources */}
                 {selectedModule.resources && selectedModule.resources.length > 0 && (
                   <ModuleResources resources={selectedModule.resources} />

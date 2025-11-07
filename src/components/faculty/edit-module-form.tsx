@@ -364,16 +364,24 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </div>
               </div>
             </div>
-            
-            <NeuralButton
-              variant="synaptic"
-              size="sm"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isSubmitting || updateMutation.isPending}
-            >
-              <Save className="mr-2 h-4 w-4" />
-              {isSubmitting || updateMutation.isPending ? 'Saving...' : 'Save Changes'}
-            </NeuralButton>
+
+            <div className="flex items-center space-x-2">
+              <Link href={`/modules/${module.slug}`}>
+                <NeuralButton variant="ghost" size="sm">
+                  <Eye className="mr-2 h-4 w-4" />
+                  Preview
+                </NeuralButton>
+              </Link>
+              <NeuralButton
+                variant="synaptic"
+                size="sm"
+                onClick={handleSubmit(onSubmit)}
+                disabled={isSubmitting || updateMutation.isPending}
+              >
+                <Save className="mr-2 h-4 w-4" />
+                {isSubmitting || updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+              </NeuralButton>
+            </div>
           </div>
         </div>
       </header>
