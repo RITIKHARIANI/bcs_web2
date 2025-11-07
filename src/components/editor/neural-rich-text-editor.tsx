@@ -211,8 +211,8 @@ export function NeuralRichTextEditor({
   return (
     <Card className={`cognitive-card ${className}`}>
       {/* Toolbar */}
-      <div className="border-b border-border/50 p-4">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="border-b border-border/50 p-2 sm:p-3 md:p-4">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
           {/* Text Formatting */}
           <div className="flex items-center gap-1">
             <NeuralButton
@@ -242,18 +242,20 @@ export function NeuralRichTextEditor({
             >
               <Strikethrough className="h-4 w-4" />
             </NeuralButton>
+            {/* Hide inline code button on mobile - less common */}
             <NeuralButton
               variant={editor.isActive('code') ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleCode().run()}
               title="Inline code"
               aria-label="Toggle inline code"
+              className="hidden sm:inline-flex"
             >
               <Code className="h-4 w-4" />
             </NeuralButton>
           </div>
 
-          <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-6 hidden sm:block" />
 
           {/* Headings */}
           <div className="flex items-center gap-1">
@@ -308,21 +310,23 @@ export function NeuralRichTextEditor({
             >
               <ListOrdered className="h-4 w-4" />
             </NeuralButton>
+            {/* Hide blockquote on mobile - less common */}
             <NeuralButton
               variant={editor.isActive('blockquote') ? 'neural' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
               title="Block quote"
               aria-label="Toggle blockquote"
+              className="hidden md:inline-flex"
             >
               <Quote className="h-4 w-4" />
             </NeuralButton>
           </div>
 
-          <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-6 hidden sm:block" />
 
-          {/* Alignment */}
-          <div className="flex items-center gap-1">
+          {/* Alignment - hide on mobile, show on md+ */}
+          <div className="hidden md:flex items-center gap-1">
             <NeuralButton
               variant={editor.isActive({ textAlign: 'left' }) ? 'neural' : 'ghost'}
               size="sm"
@@ -352,7 +356,8 @@ export function NeuralRichTextEditor({
             </NeuralButton>
           </div>
 
-          <Separator orientation="vertical" className="h-6" />
+          {/* Hide separator before alignment since alignment is hidden on mobile */}
+          <Separator orientation="vertical" className="h-6 hidden md:block" />
 
           {/* Media */}
           <div className="flex items-center gap-1">
