@@ -115,8 +115,8 @@ export default async function ModulePage({ params }: ModulePageProps) {
   return (
     <PublicLayout>
       <div className="container mx-auto px-6 py-8">
-        {/* Breadcrumb */}
-        <div className="mb-6 overflow-x-auto">
+        {/* Breadcrumb - Hidden on mobile, visible on sm+ */}
+        <div className="hidden sm:block mb-6 overflow-x-auto">
           <nav className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
             <Link href="/" className="hover:text-foreground">Home</Link>
             {foundModule.modules && (

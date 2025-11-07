@@ -270,8 +270,8 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          {/* Breadcrumbs */}
-          <nav aria-label="Breadcrumb" className="mb-2 sm:mb-4 overflow-x-auto">
+          {/* Breadcrumbs - Hidden on mobile, visible on sm+ */}
+          <nav aria-label="Breadcrumb" className="hidden sm:block mb-2 sm:mb-4 overflow-x-auto">
             <ol className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
               {breadcrumbs.map((crumb, index) => (
                 <li key={crumb.href} className="flex items-center flex-shrink-0">
