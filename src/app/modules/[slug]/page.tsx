@@ -116,19 +116,24 @@ export default async function ModulePage({ params }: ModulePageProps) {
     <PublicLayout>
       <div className="container mx-auto px-6 py-8">
         {/* Breadcrumb */}
-        <div className="mb-6">
-          <nav className="text-sm text-muted-foreground">
+        <div className="mb-6 overflow-x-auto">
+          <nav className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
             <Link href="/" className="hover:text-foreground">Home</Link>
             {foundModule.modules && (
               <>
-                <span className="mx-2">/</span>
-                <Link href={`/modules/${foundModule.modules.slug}`} className="hover:text-foreground">
+                <span className="mx-1 sm:mx-2">/</span>
+                <Link
+                  href={`/modules/${foundModule.modules.slug}`}
+                  className="hover:text-foreground inline-block max-w-24 sm:max-w-none truncate align-bottom"
+                >
                   {foundModule.modules.title}
                 </Link>
               </>
             )}
-            <span className="mx-2">/</span>
-            <span className="text-foreground font-medium">{foundModule.title}</span>
+            <span className="mx-1 sm:mx-2">/</span>
+            <span className="text-foreground font-medium inline-block max-w-32 sm:max-w-48 md:max-w-none truncate align-bottom">
+              {foundModule.title}
+            </span>
           </nav>
         </div>
 

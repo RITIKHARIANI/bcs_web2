@@ -271,19 +271,19 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
       <header className="sticky top-0 z-40 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           {/* Breadcrumbs */}
-          <nav aria-label="Breadcrumb" className="mb-2 sm:mb-4">
-            <ol className="flex items-center space-x-1 text-sm text-muted-foreground">
+          <nav aria-label="Breadcrumb" className="mb-2 sm:mb-4 overflow-x-auto">
+            <ol className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
               {breadcrumbs.map((crumb, index) => (
-                <li key={crumb.href} className="flex items-center">
-                  {index > 0 && <ChevronRight className="mx-1 h-3 w-3" />}
+                <li key={crumb.href} className="flex items-center flex-shrink-0">
+                  {index > 0 && <ChevronRight className="mx-1 h-3 w-3 flex-shrink-0" />}
                   {index === breadcrumbs.length - 1 ? (
-                    <span className="text-foreground font-medium truncate max-w-48 sm:max-w-none">
+                    <span className="text-foreground font-medium truncate max-w-32 sm:max-w-48 md:max-w-none">
                       {crumb.label}
                     </span>
                   ) : (
-                    <Link 
-                      href={crumb.href} 
-                      className="hover:text-neural-primary transition-colors truncate max-w-24 sm:max-w-none"
+                    <Link
+                      href={crumb.href}
+                      className="hover:text-neural-primary transition-colors truncate max-w-20 sm:max-w-24 md:max-w-none"
                     >
                       {crumb.label}
                     </Link>
