@@ -1012,14 +1012,14 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         </div>
 
         {/* Danger Zone (Full Width at Bottom) */}
-        <Card className="cognitive-card border-red-200">
+        <Card className="cognitive-card border-red-200 dark:border-red-900">
           <CardHeader>
-            <CardTitle className="text-sm text-red-600 flex items-center">
-              <AlertCircle className="mr-2 h-5 w-5" />
+            <CardTitle className="text-sm text-red-600 dark:text-red-400 flex items-center">
+              <AlertCircle className="mr-2 h-4 w-4" />
               Danger Zone
             </CardTitle>
             <CardDescription>
-              Irreversible actions for this course
+              Irreversible actions that permanently affect this course
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -1027,7 +1027,8 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
               variant="outline"
               size="sm"
               onClick={() => setShowDeleteConfirm(true)}
-              className="border-red-200 text-red-600 hover:bg-red-50"
+              disabled={deleteCourseMutation.isPending}
+              className="w-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete Course

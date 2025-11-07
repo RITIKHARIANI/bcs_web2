@@ -365,26 +365,15 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
               </div>
             </div>
             
-            <div className="flex items-center space-x-2">
-              <NeuralButton
-                variant="destructive"
-                size="sm"
-                onClick={() => setShowDeleteConfirm(true)}
-                disabled={deleteMutation.isPending}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </NeuralButton>
-              <NeuralButton
-                variant="synaptic"
-                size="sm"
-                onClick={handleSubmit(onSubmit)}
-                disabled={isSubmitting || updateMutation.isPending}
-              >
-                <Save className="mr-2 h-4 w-4" />
-                {isSubmitting || updateMutation.isPending ? 'Saving...' : 'Save Changes'}
-              </NeuralButton>
-            </div>
+            <NeuralButton
+              variant="synaptic"
+              size="sm"
+              onClick={handleSubmit(onSubmit)}
+              disabled={isSubmitting || updateMutation.isPending}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              {isSubmitting || updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </NeuralButton>
           </div>
         </div>
       </header>
@@ -614,6 +603,31 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
               entityId={moduleId}
               limit={10}
             />
+
+            {/* Danger Zone */}
+            <Card className="cognitive-card border-red-200 dark:border-red-900">
+              <CardHeader>
+                <CardTitle className="text-sm text-red-600 dark:text-red-400 flex items-center">
+                  <AlertCircle className="mr-2 h-4 w-4" />
+                  Danger Zone
+                </CardTitle>
+                <CardDescription>
+                  Irreversible actions that permanently affect this module
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <NeuralButton
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={deleteMutation.isPending}
+                  className="w-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Module
+                </NeuralButton>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Content Editor */}
