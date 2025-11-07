@@ -539,34 +539,39 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             </div>
           </div>
 
-          {/* Desktop Layout */}
-          <div className="hidden sm:flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          {/* Desktop/Tablet Layout */}
+          <div className="hidden sm:flex items-center justify-between gap-2 md:gap-4">
+            {/* Left Section - Back Button + Title */}
+            <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
               <Link href="/faculty/courses">
                 <NeuralButton variant="ghost" size="sm">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Courses
+                  <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden md:inline">Back to Courses</span>
                 </NeuralButton>
               </Link>
-              <Separator orientation="vertical" className="h-6" />
-              <div className="flex items-center space-x-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-neural">
+              <Separator orientation="vertical" className="h-6 hidden md:block" />
+              <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                {/* Show icon on md+ */}
+                <div className="hidden md:flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-neural flex-shrink-0">
                   <BookOpen className="h-6 w-6 text-primary-foreground" />
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-neural-primary">Edit Course</h1>
-                  <p className="text-sm text-muted-foreground">
+                <div className="min-w-0">
+                  <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-neural-primary truncate">
+                    Edit Course
+                  </h1>
+                  <p className="text-xs md:text-sm text-muted-foreground truncate">
                     {course.title}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            {/* Right Section - Action Buttons */}
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Link href={`/courses/${course.slug}`}>
                 <NeuralButton variant="ghost" size="sm">
-                  <Eye className="mr-2 h-4 w-4" />
-                  Preview
+                  <Eye className="h-4 w-4" />
+                  <span className="hidden lg:inline ml-2">Preview</span>
                 </NeuralButton>
               </Link>
               <NeuralButton
@@ -575,8 +580,10 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                 onClick={handleSubmit(onSubmit)}
                 disabled={isSubmitting}
               >
-                <Save className="mr-2 h-4 w-4" />
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                <Save className="h-4 w-4" />
+                <span className="hidden md:inline ml-2">
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </span>
               </NeuralButton>
             </div>
           </div>

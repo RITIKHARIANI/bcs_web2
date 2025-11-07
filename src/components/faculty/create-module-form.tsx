@@ -187,47 +187,57 @@ export function CreateModuleForm() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2 md:gap-4">
+            {/* Left Section - Back Button + Title */}
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
               <Link href="/faculty/modules">
                 <NeuralButton variant="ghost" size="sm">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Modules
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-2">Back to Modules</span>
                 </NeuralButton>
               </Link>
-              <Separator orientation="vertical" className="h-6" />
-              <div className="flex items-center space-x-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-neural">
+              <Separator orientation="vertical" className="h-6 hidden sm:block" />
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                {/* Hide icon on mobile to save space */}
+                <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-neural flex-shrink-0">
                   <Brain className="h-6 w-6 text-primary-foreground" />
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-neural-primary">Create New Module</h1>
-                  <p className="text-sm text-muted-foreground">
+                <div className="min-w-0">
+                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-neural-primary truncate">
+                    Create New Module
+                  </h1>
+                  {/* Hide subtitle on very small screens */}
+                  <p className="hidden sm:block text-xs sm:text-sm text-muted-foreground truncate">
                     Build engaging educational content with rich media support
                   </p>
                 </div>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-2">
+
+            {/* Right Section - Action Buttons */}
+            <div className="flex items-center gap-2 flex-shrink-0">
               <NeuralButton
                 variant={isPreviewMode ? 'neural' : 'ghost'}
                 size="sm"
                 onClick={() => setIsPreviewMode(!isPreviewMode)}
               >
-                <Eye className="mr-2 h-4 w-4" />
-                {isPreviewMode ? 'Edit' : 'Preview'}
+                <Eye className="h-4 w-4" />
+                <span className="hidden lg:inline ml-2">
+                  {isPreviewMode ? 'Edit' : 'Preview'}
+                </span>
               </NeuralButton>
-              
+
               <NeuralButton
                 variant="synaptic"
                 size="sm"
                 onClick={handleSubmit(onSubmit)}
                 disabled={isSubmitting}
               >
-                <Save className="mr-2 h-4 w-4" />
-                {isSubmitting ? 'Creating...' : 'Create Module'}
+                <Save className="h-4 w-4" />
+                <span className="hidden md:inline ml-2">
+                  {isSubmitting ? 'Creating...' : 'Create Module'}
+                </span>
               </NeuralButton>
             </div>
           </div>
