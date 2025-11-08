@@ -1654,11 +1654,39 @@ Private modules can only be added to courses by their authors, preventing unauth
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (After Critical Security Fix)
+
+CRITICAL BUG FOUND: Any faculty user could edit ANY course or module!
+
+Initial Test (Before Fix):
+- Logged in as Test Faculty (testfaculty@university.edu) - NOT a collaborator
+- Navigated to /faculty/courses/edit/course_1762144599313_ss9m89gmyi
+- SECURITY ISSUE: Full access granted! Could edit course, manage collaborators, etc.
+
+Root Cause:
+- Edit pages only checked: authentication + faculty role
+- Missing check: Is user the author OR a collaborator?
+
+Fix Implemented (3 commits):
+1. (379e7bb) Added authorization checks to both course and module edit pages
+2. (c3e7b04) Fixed ESLint error - renamed 'module' variable to 'foundModule'
+3. (00ac821) Fixed Prisma relation names - changed 'course_collaborators' to 'collaborators'
+
+Fix Details:
+- Added Prisma query to check if user is author or collaborator
+- Redirects unauthorized users to /faculty/dashboard?error=unauthorized
+- Applied fix to both courses AND modules edit pages
+
+Re-Test (After Fix):
+- Test Faculty attempted to access same course edit page
+- Correctly redirected to /faculty/dashboard?error=unauthorized
+- Access properly denied
+
+Screenshots: test-collab-003-bug-non-collaborator-can-access.png, test-collab-003-fix-verified-access-blocked.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: CRITICAL security vulnerability fixed. Both course and module edit pages now properly enforce authorization.
 
 ---
 
@@ -1688,11 +1716,40 @@ Private modules can only be added to courses by their authors, preventing unauth
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS
+
+Test Setup:
+- Course: "Test Course for Module Integration - Edited by Collaborator - FIX WORKS!"
+- User A (Author): Ritik Hariani (ritikh2@illinois.edu)
+- User B (Collaborator): Jane Smith (jsmith@university.edu)
+
+Test Execution:
+1. Logged in as Ritik Hariani (author)
+2. Navigated to course edit page
+3. Found collaborators panel showing "1 collaborator"
+4. Clicked remove (X) button next to Jane Smith
+5. Confirmation dialog appeared: "Remove Collaborator" with warning message
+6. Clicked "Remove" to confirm
+7. Success notification: "Collaborator removed successfully"
+8. Collaborators section updated to "No collaborators yet"
+9. Database verified: course_collaborators table is empty for this course
+10. Logged out and logged in as Jane Smith
+11. Attempted to access /faculty/courses/edit/course_1762144599313_ss9m89gmyi
+12. Correctly redirected to /faculty/dashboard?error=unauthorized
+
+All Expected Behaviors Verified:
+✅ Confirmation dialog appeared with proper warning
+✅ Jane Smith removed from collaborator list
+✅ Activity logged: "Ritik Hariani removed Jane Smith as collaborator" (visible in Activity Feed)
+✅ Jane Smith can no longer access the course
+✅ Access denied when attempting direct URL access
+✅ Database record properly deleted
+
+Screenshots: test-collab-004-before-remove.png, test-collab-004-remove-dialog.png, test-collab-004-after-remove.png, test-collab-004-jane-blocked.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Remove collaborator feature working perfectly. Both UI and database properly updated. Authorization checks prevent removed users from accessing the course.
 
 ---
 
@@ -1723,11 +1780,48 @@ Private modules can only be added to courses by their authors, preventing unauth
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS
+
+Test Setup:
+- Course: "Test Course for Module Integration - Edited by Collaborator - FIX WORKS!"
+- Navigated to course edit page after removing Jane Smith as collaborator
+
+Activity Feed Observations:
+- Heading: "Activity Feed"
+- Count: "2 activities" displayed
+- Located in sidebar (right side of edit page)
+
+Activity 1 (Most Recent):
+- Avatar: "RH" (round badge with initials)
+- User: "Ritik Hariani"
+- Action: "removed Jane Smith as collaborator"
+- Timestamp: "4 minutes ago" (relative time)
+- Badge: "removed user" (with icon)
+- Details: Shows "Removed: Jane Smith" and "User ID: faculty_1757395044739_lrpi7nydgg"
+
+Activity 2 (Older):
+- Avatar: "RH"
+- User: "Ritik Hariani"
+- Action: "invited Jane Smith to collaborate"
+- Timestamp: "3 days ago" (relative time)
+- Badge: "invited user" (with icon)
+- Details: Shows "Invited: Jane Smith" and "User ID: faculty_1757395044739_lrpi7nydgg"
+
+All Expected Behaviors Verified:
+✅ Activity feed displays all actions (2 collaboration events shown)
+✅ Shows user avatar ("RH"), name ("Ritik Hariani"), action description, timestamp
+✅ Actions sorted by most recent first (removed shown before invited)
+✅ Relative timestamps working: "4 minutes ago", "3 days ago"
+✅ Activity count displayed in header
+✅ Clear, descriptive action messages
+✅ Activity type badges with icons
+✅ Expandable details section for each activity
+
+Screenshots: test-collab-005-activity-feed.png, test-collab-005-activity-feed-detailed.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Activity feed working perfectly with proper chronological ordering, clear descriptions, and all metadata displayed correctly.
 
 ---
 
@@ -1756,11 +1850,102 @@ Private modules can only be added to courses by their authors, preventing unauth
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested January 2025 - Development Environment: bcs-web2.vercel.app)
+
+Test Module:
+- Module ID: module_1761498182119_i7lfcv4igkp
+- Title: "Test Collaboration Module"
+- Author: Ritik Hariani (ritikh2@illinois.edu)
+- Initial Collaborators: None
+
+Test User (User B):
+- User ID: faculty_1761243856629_6ytw5vvvev
+- Name: Jane Smith
+- Email: jsmith@university.edu
+- Role: faculty
+- Status: Previously removed from collaborators in TEST-COLLAB-004
+
+Test Execution:
+1. Logged in as Ritik Hariani (module author)
+2. Navigated to `/faculty/modules`
+3. Clicked "Edit" on "Test Collaboration Module"
+4. Clicked "Add First Collaborator" button in Collaborators section
+5. Searched for Jane Smith by typing "jane" in search field
+6. Selected Jane Smith from results
+7. Clicked "Add" button
+
+INITIAL BUG DISCOVERED:
+- HTTP 400 Error: Validation error
+- Root Cause: Module collaborator API validation used `z.string().cuid()` which doesn't match custom ID format
+- System uses: `faculty_[timestamp]_[random]` format
+- Course API correctly used: `z.string().min(1)`
+- File: /src/app/api/modules/[id]/collaborators/route.ts:10
+
+FIX IMPLEMENTED:
+- Commit: 22cdb48
+- Changed validation schema from:
+  ```typescript
+  userId: z.string().cuid('Invalid user ID format')
+  ```
+  To:
+  ```typescript
+  userId: z.string().min(1, 'User ID is required')
+  ```
+- This matches the validation pattern used in course collaborator API
+- Allows any non-empty string user ID format
+
+VERIFICATION AFTER FIX:
+1. Waited for Vercel deployment to complete
+2. Re-tested add collaborator flow
+3. RESULT: Successfully added Jane Smith as collaborator ✅
+   - Success notification displayed: "Collaborator added successfully"
+   - UI updated from "No collaborators yet" to "1 collaborator"
+   - Jane Smith appears in collaborators list with details:
+     * Avatar displayed
+     * Name: "Jane Smith"
+     * Email: "jsmith@university.edu"
+     * Added by: "Ritik Hariani"
+     * Timestamp: "just now"
+   - Remove button available next to collaborator
+
+4. Verified User B can access module:
+   - Logged in as Jane Smith
+   - Module appears in dashboard (shared with me section)
+   - Can successfully navigate to module edit page
+   - Can view and edit module content
+
+5. Activity logging verified:
+   - Activity Feed shows: "Ritik Hariani invited Jane Smith to collaborate"
+   - Timestamp: "just now"
+   - Collaboration badge displayed
+
+Database Verification (via Supabase MCP):
+```sql
+SELECT * FROM module_collaborators
+WHERE module_id = 'module_1761498182119_i7lfcv4igkp';
+```
+Result: 1 row found
+- user_id: faculty_1761243856629_6ytw5vvvev (Jane Smith)
+- added_by: faculty_1735876806551_f6bw3p2t22 (Ritik Hariani)
+- edit_count: 0
+- last_accessed: null
+
+All expected behaviors verified:
+✅ Collaborator management works same as courses
+✅ User B (Jane Smith) added successfully
+✅ User B can edit module (verified access)
+✅ Activity logged in feed
+✅ Module appears in User B's "Shared with Me" section
+✅ Success notification displayed
+✅ UI updated correctly with collaborator count
+✅ Bug discovered and fixed during testing
+
+Screenshots: (not captured - MCP browser automation)
+Bug Fix Commit: 22cdb48 - "Fix module collaborator validation to accept custom user ID format"
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Module collaboration feature works correctly after fixing validation schema bug. The bug was discovered during initial testing - the module API was incorrectly using CUID validation while the system uses a custom ID format. After fixing to match the course API pattern (using `.min(1)` instead of `.cuid()`), all functionality works as expected. Collaborators can be added to modules with the same UI/UX as courses.
 
 ---
 
