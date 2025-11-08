@@ -27,7 +27,7 @@ export default async function EditCoursePage({
     select: {
       id: true,
       author_id: true,
-      course_collaborators: {
+      collaborators: {
         where: { user_id: session.user.id },
         select: { id: true },
       },
@@ -40,7 +40,7 @@ export default async function EditCoursePage({
 
   // User must be either the author or a collaborator
   const isAuthor = course.author_id === session.user.id;
-  const isCollaborator = course.course_collaborators.length > 0;
+  const isCollaborator = course.collaborators.length > 0;
 
   if (!isAuthor && !isCollaborator) {
     redirect("/faculty/dashboard?error=unauthorized");

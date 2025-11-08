@@ -26,7 +26,7 @@ export default async function EditModulePage({
     select: {
       id: true,
       author_id: true,
-      module_collaborators: {
+      collaborators: {
         where: { user_id: session.user.id },
         select: { id: true },
       },
@@ -39,7 +39,7 @@ export default async function EditModulePage({
 
   // User must be either the author or a collaborator
   const isAuthor = foundModule.author_id === session.user.id;
-  const isCollaborator = foundModule.module_collaborators.length > 0;
+  const isCollaborator = foundModule.collaborators.length > 0;
 
   if (!isAuthor && !isCollaborator) {
     redirect("/faculty/dashboard?error=unauthorized");
