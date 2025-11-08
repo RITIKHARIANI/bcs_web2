@@ -21,7 +21,7 @@ export default async function EditModulePage({
   const { id } = await params;
 
   // Check if user is authorized to edit this module
-  const module = await prisma.modules.findUnique({
+  const foundModule = await prisma.modules.findUnique({
     where: { id },
     select: {
       id: true,
@@ -33,13 +33,13 @@ export default async function EditModulePage({
     },
   });
 
-  if (!module) {
+  if (!foundModule) {
     notFound();
   }
 
   // User must be either the author or a collaborator
-  const isAuthor = module.author_id === session.user.id;
-  const isCollaborator = module.module_collaborators.length > 0;
+  const isAuthor = foundModule.author_id === session.user.id;
+  const isCollaborator = foundModule.module_collaborators.length > 0;
 
   if (!isAuthor && !isCollaborator) {
     redirect("/faculty/dashboard?error=unauthorized");
