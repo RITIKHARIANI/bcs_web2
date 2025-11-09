@@ -473,7 +473,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
           <Card className="cognitive-card max-w-md mx-auto">
             <CardContent className="p-8 text-center">
               <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
-              <h2 className="text-xl font-semibold text-foreground mb-2">
+              <h2 className="text-xl md:text-2xl font-semibold text-foreground mb-2 leading-snug">
                 Course Not Found
               </h2>
               <p className="text-muted-foreground mb-6">
@@ -556,7 +556,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                   <BookOpen className="h-6 w-6 text-primary-foreground" />
                 </div>
                 <div className="min-w-0">
-                  <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-neural-primary truncate">
+                  <h1 className="text-2xl md:text-3xl font-bold text-neural-primary truncate leading-tight">
                     Edit Course
                   </h1>
                   <p className="text-xs md:text-sm text-muted-foreground truncate">
@@ -805,7 +805,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
           {/* Course Assembly (75% width = 3 cols) */}
           <div className="lg:col-span-3 space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-              <h2 className="text-lg font-semibold text-neural-primary">Course Assembly</h2>
+              <h2 className="text-xl md:text-2xl font-semibold text-neural-primary leading-snug">Course Assembly</h2>
               <NeuralButton
                 variant="neural"
                 size="sm"

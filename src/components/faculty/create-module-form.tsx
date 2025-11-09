@@ -204,7 +204,7 @@ export function CreateModuleForm() {
                   <Brain className="h-6 w-6 text-primary-foreground" />
                 </div>
                 <div className="min-w-0">
-                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-neural-primary truncate">
+                  <h1 className="text-2xl md:text-3xl font-bold text-neural-primary truncate leading-tight">
                     Create New Module
                   </h1>
                   {/* Hide subtitle on very small screens */}

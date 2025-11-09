@@ -316,7 +316,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
           <Card className="cognitive-card max-w-md mx-auto">
             <CardContent className="p-8 text-center">
               <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
-              <h2 className="text-xl font-semibold text-foreground mb-2">
+              <h2 className="text-xl md:text-2xl font-semibold text-foreground mb-2 leading-snug">
                 Module Not Found
               </h2>
               <p className="text-muted-foreground mb-6">
@@ -360,7 +360,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-neural-primary truncate">
+                  <h1 className="text-2xl md:text-3xl font-bold text-neural-primary truncate leading-tight">
                     Edit Module
                   </h1>
                   {/* Hide subtitle on very small screens */}

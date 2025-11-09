@@ -349,7 +349,7 @@ export function CreateCourseForm() {
                   <BookOpen className="h-6 w-6 text-primary-foreground" />
                 </div>
                 <div className="min-w-0">
-                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-neural-primary truncate">
+                  <h1 className="text-2xl md:text-3xl font-bold text-neural-primary truncate leading-tight">
                     Create New Course
                   </h1>
                   {/* Hide subtitle on very small screens */}
@@ -548,7 +548,7 @@ export function CreateCourseForm() {
           {/* Module Assembly */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-neural-primary">Course Assembly</h2>
+              <h2 className="text-xl md:text-2xl font-semibold text-neural-primary leading-snug">Course Assembly</h2>
               <NeuralButton
                 variant="neural"
                 size="sm"
