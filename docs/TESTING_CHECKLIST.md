@@ -2479,12 +2479,28 @@ FIX APPLIED:
 
 VERIFICATION:
 - Cleaned up orphaned test data manually
-- Fix committed and pushed
-- Will re-test after deployment to verify complete CASCADE behavior
+- Fix committed and pushed (commits: 827d458, 9f7f3e9)
+- Re-tested after deployment
+
+POST-FIX VERIFICATION TEST:
+1. Created test course 'course_1762669213628_rjdx1rzxi5p'
+2. Added 2 activity records
+3. Pre-deletion counts:
+   - course_count: 1
+   - activity_count: 2
+
+4. Deleted via API: DELETE /api/courses/course_1762669213628_rjdx1rzxi5p
+   Response: HTTP 200 { "success": true }
+
+5. Post-deletion counts:
+   - course_count: 0 ✅ (deleted)
+   - activity_count: 0 ✅ (deleted - FIX CONFIRMED WORKING!)
+
+CONCLUSION: CASCADE delete now works correctly with application-level cleanup in transaction.
 ```
 
 **Status**: ☑ Pass (after fix) □ Fail □ NA
-**Notes**: **CRITICAL BUG FIXED** - Found and fixed orphaned activity record issue. The polymorphic relationship pattern in collaboration_activity requires application-level cleanup since database CASCADE doesn't work without FK constraints. Both course and module DELETE endpoints now properly clean up all related records in a transaction. This prevents data bloat and maintains database integrity.
+**Notes**: **CRITICAL BUG FIXED AND VERIFIED** - Found and fixed orphaned activity record issue. The polymorphic relationship pattern in collaboration_activity requires application-level cleanup since database CASCADE doesn't work without FK constraints. Both course and module DELETE endpoints now properly clean up all related records in a transaction. Fix verified in production - all records cleaned up correctly with no orphaned data.
 
 ---
 
