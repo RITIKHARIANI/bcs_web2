@@ -2524,11 +2524,35 @@ CONCLUSION: CASCADE delete now works correctly with application-level cleanup in
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS - CASCADE delete on user works correctly:
+
+TEST SETUP:
+1. Created test user: user_delete_test_1762671756957
+2. Added as collaborator to existing course: course_1762394618745_0gcxj525r9ba
+3. Created 2 activity records for the test user
+
+PRE-DELETION STATE:
+- user_count: 1
+- collab_count: 1 (collaborator record exists)
+- activity_count: 2 (activity records exist)
+- course_count: 1 (course exists)
+
+DELETION:
+- Executed: DELETE FROM users WHERE id = 'user_delete_test_1762671756957'
+- Result: User deleted successfully
+
+POST-DELETION VERIFICATION:
+- user_count: 0 ✅ (user deleted)
+- collab_count: 0 ✅ (CASCADE deleted via FK constraint on user_id)
+- activity_count: 0 ✅ (CASCADE deleted via FK constraint on user_id)
+- course_count: 1 ✅ (course unaffected)
+- remaining_collabs: 2 ✅ (other collaborators unaffected)
+
+CONCLUSION: All user-related records properly CASCADE deleted. Course and other collaborators unaffected.
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: User deletion properly triggers CASCADE delete on both `course_collaborators.user_id` and `collaboration_activity.user_id` foreign key constraints. The course and other collaborators remain intact. No orphaned records or foreign key violations.
 
 ---
 
@@ -2552,11 +2576,39 @@ CONCLUSION: CASCADE delete now works correctly with application-level cleanup in
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS - SetNull behavior works correctly when inviter is deleted:
+
+TEST SETUP:
+1. Created test users:
+   - Inviter: inviter_test_1762671836133
+   - Collaborator: collab_test_1762671836133
+2. Created course owned by existing user (faculty_1757395044739_lrpi7nydgg)
+3. Inviter added Collaborator to the course
+
+PRE-DELETION STATE:
+- course_id: course_inviter_test2_1762671906224
+- collaborator_id: collab_test_1762671836133
+- inviter_id (added_by): inviter_test_1762671836133 ✅ (FK reference exists)
+- course_owner_id: faculty_1757395044739_lrpi7nydgg (different from inviter)
+
+DELETION:
+- Executed: DELETE FROM users WHERE id = 'inviter_test_1762671836133'
+- Result: Inviter deleted successfully
+
+POST-DELETION VERIFICATION:
+- Collaboration record still exists: collab_inviter_test2_1762671917143 ✅
+- added_by field: NULL ✅ (was inviter_test_1762671836133, now SetNull)
+- Collaborator still exists: collab_test_1762671836133 ✅
+- Collaborator retains access to course ✅
+- Course still exists ✅
+- Course owner unaffected ✅
+- Inviter deleted: inviter_exists = 0 ✅
+
+CONCLUSION: onDelete: SetNull works correctly. Collaboration persists with null inviter reference.
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: The `course_collaborators.added_by` foreign key correctly uses `onDelete: SetNull` behavior. When the inviter is deleted, the collaboration record persists with `added_by = NULL`, allowing the collaborator to retain access to the course. This gracefully handles the edge case of inviter account deletion.
 
 ---
 
@@ -2581,11 +2633,37 @@ VALUES ('[existing-course]', '[existing-user]', '[inviter]');
 
 ### Actual Result:
 ```
-[Enter database error message]
+✅ PASS - Unique constraint prevents duplicate collaborators:
+
+TEST EXECUTION:
+- Attempted to insert duplicate collaborator:
+  INSERT INTO course_collaborators (id, course_id, user_id, added_by, added_at)
+  VALUES (
+    'duplicate_test',
+    'course_inviter_test2_1762671906224',
+    'collab_test_1762671836133',  -- User already exists as collaborator
+    'faculty_1757395044739_lrpi7nydgg',
+    NOW()
+  )
+
+DATABASE RESPONSE:
+❌ Insert rejected with error:
+- Error Code: 23505 ✅ (PostgreSQL unique constraint violation)
+- Error Name: HttpException
+- Error Message: "duplicate key value violates unique constraint \"course_collaborators_course_id_user_id_key\""
+- Detail: "Key (course_id, user_id)=(course_inviter_test2_1762671906224, collab_test_1762671836133) already exists."
+
+VERIFICATION:
+- No duplicate record created ✅
+- Unique constraint name matches: "course_collaborators_course_id_user_id_key" ✅
+- Composite key (course_id, user_id) enforced ✅
+- Database-level protection working ✅
+
+CONCLUSION: Unique constraint at database level successfully prevents duplicate collaborators.
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: The unique constraint `course_collaborators_course_id_user_id_key` on the composite key (course_id, user_id) correctly prevents duplicate collaborator entries at the database level. This provides a safety net even if application-level validation fails. Error code 23505 is the standard PostgreSQL unique constraint violation error.
 
 ---
 
