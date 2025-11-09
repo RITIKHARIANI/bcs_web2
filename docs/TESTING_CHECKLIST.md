@@ -2787,11 +2787,27 @@ MANUAL VERIFICATION:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ ALL REQUIREMENTS MET
+
+Tested on: https://bcs-web2.vercel.app/faculty/modules/edit/module_1762131561811_285plqgr1np
+
+Panel Elements Verified:
+1. ✅ Collaborators card visible in left sidebar
+2. ✅ Title "Collaborators" with Users icon displayed
+3. ✅ "Add" button visible in panel header (blue button with UserPlus icon)
+4. ✅ Empty state properly displayed:
+   - Users icon with slash-through
+   - Heading: "No collaborators yet"
+   - Description: "Add faculty members to collaborate on this module."
+   - "Add First Collaborator" button with UserPlus icon
+5. ✅ Proper cognitive-card styling with neural theme
+6. ✅ Panel integrates well with sidebar layout
+
+Screenshot saved: test-collab-021-collaborators-panel.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: All UI elements render correctly with proper styling and empty state messaging.
 
 ---
 
@@ -2822,11 +2838,27 @@ MANUAL VERIFICATION:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ ALL REQUIREMENTS MET
+
+Tested on: https://bcs-web2.vercel.app/faculty/modules/edit/module_1762131561811_285plqgr1np
+
+Dialog Elements Verified:
+1. ✅ Modal opens centered on screen with smooth animation
+2. ✅ Dark overlay visible behind modal (dimmed background)
+3. ✅ Title "Add Collaborator" with UserPlus icon displayed
+4. ✅ Description: "Search for faculty members to add as collaborators"
+5. ✅ Search input field with label "Search Faculty" and placeholder text
+6. ✅ "Cancel" button visible and functional
+7. ✅ Modal remains open when clicking outside (proper modal behavior)
+8. ⚠️ ESC key does NOT close modal (optional feature not implemented)
+9. ✅ Modal appears above all other content with proper z-index
+10. ✅ Cancel button successfully closes the modal
+
+Screenshot saved: test-collab-022-add-collaborator-dialog.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: ESC key functionality not implemented but marked as optional. All critical requirements met.
 
 ---
 
