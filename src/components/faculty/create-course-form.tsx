@@ -363,7 +363,7 @@ export function CreateCourseForm() {
             {/* Right Section - Action Button */}
             {/* PRIMARY BUTTON: Create Course - Orange Solid */}
             <NeuralButton
-              variant="default"
+              variant="neural"
               size="sm"
               onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting}

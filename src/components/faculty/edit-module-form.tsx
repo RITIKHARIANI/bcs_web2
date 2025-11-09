@@ -386,7 +386,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
               </Link>
               {/* PRIMARY BUTTON: Save Changes - Orange Solid */}
               <NeuralButton
-                variant="default"
+                variant="neural"
                 size="sm"
                 onClick={handleSubmit(onSubmit)}
                 disabled={isSubmitting || updateMutation.isPending}

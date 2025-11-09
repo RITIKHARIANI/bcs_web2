@@ -232,7 +232,7 @@ export function CreateModuleForm() {
 
               {/* PRIMARY BUTTON: Create Module - Orange Solid */}
               <NeuralButton
-                variant="default"
+                variant="neural"
                 size="sm"
                 onClick={handleSubmit(onSubmit)}
                 disabled={isSubmitting}
