@@ -361,12 +361,13 @@ export function CreateCourseForm() {
             </div>
 
             {/* Right Section - Action Button */}
+            {/* PRIMARY BUTTON: Create Course - Orange Solid */}
             <NeuralButton
-              variant="synaptic"
+              variant="default"
               size="sm"
               onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting}
-              className="flex-shrink-0"
+              className="flex-shrink-0 min-h-[44px] min-w-[44px] bg-[#FF6B35] hover:bg-[#E55A28] text-white font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <Save className="h-4 w-4" />
               <span className="hidden md:inline ml-2">
@@ -393,14 +394,14 @@ export function CreateCourseForm() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Basic Information Section */}
-                <div className="space-y-4">
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-2">
-                    <Label htmlFor="title">Title *</Label>
+                    <Label htmlFor="title" className="font-medium text-sm">Title *</Label>
                     <Input
                       id="title"
                       placeholder="Enter course title..."
                       {...register('title')}
-                      className="border-neural-light/30 focus:border-neural-primary"
+                      className="h-11 p-4 border-neural-light/30 focus:border-neural-primary transition-colors"
                     />
                     {errors.title && (
                       <p className="text-sm text-red-500">{errors.title.message}</p>
@@ -408,29 +409,29 @@ export function CreateCourseForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="slug">URL Slug *</Label>
-                  <div className="relative">
-                    <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="slug"
-                      placeholder="url-friendly-slug"
-                      {...register('slug')}
-                      className="pl-10 border-neural-light/30 focus:border-neural-primary"
-                    />
+                    <Label htmlFor="slug" className="font-medium text-sm">URL Slug *</Label>
+                    <div className="relative">
+                      <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="slug"
+                        placeholder="url-friendly-slug"
+                        {...register('slug')}
+                        className="h-11 p-4 pl-10 border-neural-light/30 focus:border-neural-primary transition-colors"
+                      />
+                    </div>
+                    {errors.slug && (
+                      <p className="text-sm text-red-500">{errors.slug.message}</p>
+                    )}
                   </div>
-                  {errors.slug && (
-                    <p className="text-sm text-red-500">{errors.slug.message}</p>
-                  )}
-                </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description" className="font-medium text-sm">Description</Label>
                     <Textarea
                       id="description"
                       placeholder="Brief description of the course..."
                       rows={3}
                       {...register('description')}
-                      className="border-neural-light/30 focus:border-neural-primary"
+                      className="p-4 border-neural-light/30 focus:border-neural-primary transition-colors resize-none"
                     />
                   </div>
                 </div>
@@ -438,22 +439,24 @@ export function CreateCourseForm() {
                 <Separator className="my-6" />
 
                 {/* Categorization Section */}
-                <TagsInput
-                  value={tags}
-                  onChange={setTags}
-                  label="Tags"
-                  placeholder="Add tags to categorize this course..."
-                  suggestions={availableTags}
-                  maxTags={10}
-                  id="tags"
-                />
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
+                  <TagsInput
+                    value={tags}
+                    onChange={setTags}
+                    label="Tags"
+                    placeholder="Add tags to categorize this course..."
+                    suggestions={availableTags}
+                    maxTags={10}
+                    id="tags"
+                  />
+                </div>
 
                 <Separator className="my-6" />
 
                 {/* Publishing Settings Section */}
-                <div className="space-y-4">
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-3">
-                    <Label htmlFor="status">Status</Label>
+                    <Label htmlFor="status" className="font-medium text-sm">Status</Label>
                   <Controller
                     name="status"
                     control={control}
