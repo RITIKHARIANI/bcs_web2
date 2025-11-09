@@ -342,8 +342,20 @@ export async function DELETE(
       )
     }
 
-    await prisma.modules.delete({
-      where: { id },
+    // Delete module in a transaction to ensure all related records are cleaned up
+    await prisma.$transaction(async (tx) => {
+      // Manual cleanup for collaboration_activity (no foreign key CASCADE due to polymorphic relationship)
+      await tx.collaboration_activity.deleteMany({
+        where: {
+          entity_type: 'module',
+          entity_id: id,
+        },
+      })
+
+      // Delete module (CASCADE will handle module_media, module_collaborators, etc.)
+      await tx.modules.delete({
+        where: { id },
+      })
     })
 
     return NextResponse.json({ success: true })

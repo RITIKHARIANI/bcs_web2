@@ -321,9 +321,20 @@ export async function DELETE(
       return NextResponse.json({ error: 'Course not found' }, { status: 404 })
     }
 
-    // Delete course (cascade will handle course-module relationships and collaborators)
-    await prisma.courses.delete({
-      where: { id },
+    // Delete course in a transaction to ensure all related records are cleaned up
+    await prisma.$transaction(async (tx) => {
+      // Manual cleanup for collaboration_activity (no foreign key CASCADE due to polymorphic relationship)
+      await tx.collaboration_activity.deleteMany({
+        where: {
+          entity_type: 'course',
+          entity_id: id,
+        },
+      })
+
+      // Delete course (CASCADE will handle course_modules and course_collaborators)
+      await tx.courses.delete({
+        where: { id },
+      })
     })
 
     return NextResponse.json({ success: true })

@@ -2370,11 +2370,52 @@ NEGATIVE CASE (404 if collaborator not found):
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS - Activity Feed endpoint working correctly:
+
+POSITIVE CASES:
+1. Basic GET request (200 OK):
+   - GET /api/courses/course_1762144599313_ss9m89gmyi/activity
+   - Response: HTTP 200
+   - Returns activities array (4 activities found)
+   - Returns pagination object with correct metadata
+   - Sample activity structure:
+     * id, entityType, entityId, userId, action, description
+     * changes object with detailed info
+     * createdAt timestamp
+     * user object with id, name, avatar_url
+
+2. Pagination (page=1&limit=2):
+   - Returns exactly 2 activities (respects limit)
+   - Pagination: { page: 1, limit: 2, totalCount: 4, totalPages: 2, hasNext: true, hasPrev: false }
+   - Correctly calculates total pages and navigation flags
+
+3. Filter by userId:
+   - GET /api/courses/[id]/activity?userId=faculty_1760130020977_mrpjkoo0bgb
+   - Returns only activities by Ritik Hariani (all 4 activities matched)
+   - All activities have userId matching the filter
+
+4. Filter by action type:
+   - GET /api/courses/[id]/activity?action=removed_user
+   - Returns only 'removed_user' actions (2 activities)
+   - All activities have action matching the filter
+
+5. Combined filters (userId + action):
+   - GET /api/courses/[id]/activity?userId=faculty_1760130020977_mrpjkoo0bgb&action=removed_user
+   - Returns activities matching BOTH filters (2 activities)
+   - Both userId and action filters applied correctly
+
+NEGATIVE CASES:
+6. 401 if not authenticated:
+   - Unauthenticated request (via curl without cookies)
+   - Response: HTTP 401 { "error": "Unauthorized" }
+
+7. 404 if course doesn't exist:
+   - GET /api/courses/course_nonexistent_12345/activity
+   - Response: HTTP 404 { "error": "Course not found or you do not have permission to access it" }
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: Activity feed endpoint fully functional with proper pagination, filtering, and security. Activities are sorted by createdAt DESC (newest first). Each activity includes complete user information and detailed change tracking. The API correctly handles both authentication and authorization checks.
 
 ---
 
