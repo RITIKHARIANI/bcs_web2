@@ -729,7 +729,6 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                   onChange={(html) => setValue('content', html)}
                   placeholder="Start writing your module content..."
                   autoSave={true}
-                  onSave={(html) => setValue('content', html)}
                   moduleId={moduleId}
                   onEditorReady={(insertImage) => setInsertImageFn(() => insertImage)}
                 />
