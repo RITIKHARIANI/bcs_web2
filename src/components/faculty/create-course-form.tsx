@@ -675,12 +675,25 @@ export function CreateCourseForm() {
                     </SortableContext>
                   </DndContext>
                 ) : (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      No modules added yet. Click &quot;Add Modules&quot; to start building your course.
-                    </AlertDescription>
-                  </Alert>
+                  <div className="text-center py-12 px-4">
+                    <div className="mx-auto w-16 h-16 rounded-full bg-gradient-neural flex items-center justify-center mb-4">
+                      <Layers className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No modules yet
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+                      Your course is waiting for modules! Add your first module to start building your curriculum.
+                    </p>
+                    <NeuralButton
+                      variant="neural"
+                      size="sm"
+                      onClick={() => setShowModuleSelector(true)}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add First Module
+                    </NeuralButton>
+                  </div>
                 )}
               </CardContent>
             </Card>
