@@ -349,7 +349,7 @@ export function CourseCatalog({ initialSearch = '' }: CourseCatalogProps) {
                         </div>
                         <div className="flex items-center">
                           <Layers className="mr-1 h-3 w-3" />
-                          {course._count.courseModules} modules
+                          {course._count?.course_modules || 0} modules
                         </div>
                       </div>
 
