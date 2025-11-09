@@ -2121,11 +2121,31 @@ Screenshot: test-collab-008-frontend-prevention.png
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS - Author protection works through data model design:
+
+1. UI Protection:
+   - Navigated to course edit page as Ritik Hariani (author)
+   - Collaborators section shows "1 collaborator"
+   - Only Jane Smith (actual collaborator) appears in the list
+   - Ritik Hariani (the author) does NOT appear in collaborators list
+   - No remove button exists for the author (because they're not shown)
+
+2. API Protection:
+   - Attempted DELETE request to /api/courses/[id]/collaborators/[authorUserId]
+   - Response: HTTP 404 with error "Collaborator not found"
+   - Author cannot be removed via API
+
+3. Database Design (Inherent Protection):
+   - Authors stored in courses.author_id field
+   - Collaborators stored in course_collaborators table
+   - Query: SELECT * FROM course_collaborators WHERE user_id = [authorId]
+   - Result: Empty (author not in collaborators table)
+
+Screenshot: test-collab-009-author-not-in-list.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: Excellent architectural design - author protection is inherent to the data model. The author is stored separately from collaborators, making it impossible to accidentally remove them. The UI correctly hides the author from the collaborators list, and the API returns 404 when attempting to remove a non-existent collaborator record.
 
 ---
 
