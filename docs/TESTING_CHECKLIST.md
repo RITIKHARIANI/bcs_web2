@@ -2269,11 +2269,32 @@ All critical validation working correctly!
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS - List collaborators endpoint working correctly:
+
+POSITIVE CASE (200 OK):
+- GET /api/courses/course_1762144599313_ss9m89gmyi/collaborators
+- Response structure verified:
+  * collaborators: Array with 1 item
+  * count: 1
+- Each collaborator object contains:
+  * id: "cmhr2ayp10001jm0499v0r7ih"
+  * userId: "faculty_1757395044739_lrpi7nydgg"
+  * addedBy: "faculty_1760130020977_mrpjkoo0bgb"
+  * addedAt: "2025-11-09T01:56:07.333Z" (ISO format)
+  * lastAccessed: "2025-11-09T01:56:07.333Z"
+  * editCount: 0
+  * user: { id, name, email, avatar_url }
+  * inviter: { id, name, email }
+- User details correct: Jane Smith, jsmith@university.edu
+- Inviter details correct: Ritik Hariani, ritikh2@illinois.edu
+
+NEGATIVE CASE (404):
+- GET /api/courses/nonexistent_course_id/collaborators
+- Response: HTTP 404 "Course not found or you do not have permission to access it"
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: API returns comprehensive collaborator information including both user and inviter details. All required fields present and correctly formatted.
 
 ---
 
@@ -2301,11 +2322,24 @@ All critical validation working correctly!
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS - Remove collaborator endpoint working correctly:
+
+POSITIVE CASE (200 OK):
+- DELETE /api/courses/course_1762144599313_ss9m89gmyi/collaborators/faculty_1757395044739_lrpi7nydgg
+- Response: HTTP 200 { success: true }
+- Database verification:
+  * Query: SELECT COUNT(*) FROM course_collaborators WHERE user_id = 'faculty_1757395044739_lrpi7nydgg'
+  * Result: count = 0 (record successfully deleted)
+- Activity logging: Verified via UI earlier - activity feed shows removal events
+
+NEGATIVE CASE (404 if collaborator not found):
+- Attempted to delete same collaborator again
+- Response: HTTP 404 "Collaborator not found"
+- Correctly prevents deletion of non-existent collaborators
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: Removal endpoint works correctly. Successfully deletes database record and returns appropriate errors when collaborator doesn't exist. Activity logging confirmed via UI in earlier tests.
 
 ---
 
