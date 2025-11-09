@@ -46,6 +46,7 @@ interface Course {
   }
   _count: {
     courseModules: number
+    collaborators: number
   }
 }
 
@@ -345,6 +346,12 @@ export function CourseLibrary() {
                         <Layers className="mr-1 h-3 w-3" />
                         {course._count.courseModules} modules
                       </div>
+                      {course._count.collaborators > 0 && (
+                        <div className="flex items-center">
+                          <Users className="mr-1 h-3 w-3" />
+                          {course._count.collaborators} {course._count.collaborators === 1 ? 'collaborator' : 'collaborators'}
+                        </div>
+                      )}
                     </div>
                   </div>
 
