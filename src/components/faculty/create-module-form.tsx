@@ -217,10 +217,12 @@ export function CreateModuleForm() {
 
             {/* Right Section - Action Buttons */}
             <div className="flex items-center gap-2 flex-shrink-0">
+              {/* SECONDARY BUTTON: Preview/Edit - Blue Outline */}
               <NeuralButton
-                variant={isPreviewMode ? 'neural' : 'ghost'}
+                variant={isPreviewMode ? 'outline' : 'outline'}
                 size="sm"
                 onClick={() => setIsPreviewMode(!isPreviewMode)}
+                className="min-h-[44px] min-w-[44px] border-2 border-blue-500 text-blue-600 hover:bg-blue-50 hover:border-blue-600 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950 transition-all duration-200 hover:scale-105"
               >
                 <Eye className="h-4 w-4" />
                 <span className="hidden lg:inline ml-2">
@@ -228,11 +230,13 @@ export function CreateModuleForm() {
                 </span>
               </NeuralButton>
 
+              {/* PRIMARY BUTTON: Create Module - Orange Solid */}
               <NeuralButton
-                variant="synaptic"
+                variant="default"
                 size="sm"
                 onClick={handleSubmit(onSubmit)}
                 disabled={isSubmitting}
+                className="min-h-[44px] min-w-[44px] bg-[#FF6B35] hover:bg-[#E55A28] text-white font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <Save className="h-4 w-4" />
                 <span className="hidden md:inline ml-2">
@@ -258,59 +262,64 @@ export function CreateModuleForm() {
                   Configure the basic information for your module
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    placeholder="Enter module title..."
-                    {...register('title')}
-                    className="border-neural-light/30 focus:border-neural-primary"
-                  />
-                  {errors.title && (
-                    <p className="text-sm text-red-500">{errors.title.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="slug">URL Slug *</Label>
-                  <div className="relative">
-                    <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <CardContent className="space-y-6">
+                {/* Basic Information Group */}
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
+                  <div className="space-y-2">
+                    <Label htmlFor="title" className="font-medium text-sm">Title *</Label>
                     <Input
-                      id="slug"
-                      placeholder="url-friendly-slug"
-                      {...register('slug')}
-                      className="pl-10 border-neural-light/30 focus:border-neural-primary"
+                      id="title"
+                      placeholder="Enter module title..."
+                      {...register('title')}
+                      className="h-11 p-4 border-neural-light/30 focus:border-neural-primary transition-colors"
+                    />
+                    {errors.title && (
+                      <p className="text-sm text-red-500">{errors.title.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="slug" className="font-medium text-sm">URL Slug *</Label>
+                    <div className="relative">
+                      <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="slug"
+                        placeholder="url-friendly-slug"
+                        {...register('slug')}
+                        className="h-11 p-4 pl-10 border-neural-light/30 focus:border-neural-primary transition-colors"
+                      />
+                    </div>
+                    {errors.slug && (
+                      <p className="text-sm text-red-500">{errors.slug.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="font-medium text-sm">Description</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Brief description of the module content..."
+                      rows={3}
+                      {...register('description')}
+                      className="p-4 border-neural-light/30 focus:border-neural-primary transition-colors resize-none"
                     />
                   </div>
-                  {errors.slug && (
-                    <p className="text-sm text-red-500">{errors.slug.message}</p>
-                  )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Brief description of the module content..."
-                    rows={3}
-                    {...register('description')}
-                    className="border-neural-light/30 focus:border-neural-primary"
+                {/* Categorization Group */}
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
+                  <TagsInput
+                    value={tags}
+                    onChange={setTags}
+                    label="Tags"
+                    placeholder="Add tags to categorize this module..."
+                    suggestions={availableTags}
+                    maxTags={10}
+                    id="tags"
                   />
-                </div>
 
-                <TagsInput
-                  value={tags}
-                  onChange={setTags}
-                  label="Tags"
-                  placeholder="Add tags to categorize this module..."
-                  suggestions={availableTags}
-                  maxTags={10}
-                  id="tags"
-                />
-
-                <div className="space-y-2">
-                  <Label htmlFor="parentModule">Parent Module</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="parentModule" className="font-medium text-sm">Parent Module</Label>
                   <Select
                     value={watchedParentModuleId ?? 'none'}
                     onValueChange={(value) => {
@@ -353,13 +362,16 @@ export function CreateModuleForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {isLoadingModules && (
-                    <p className="text-xs text-muted-foreground animate-pulse">Loading available modules...</p>
-                  )}
+                    {isLoadingModules && (
+                      <p className="text-xs text-muted-foreground animate-pulse">Loading available modules...</p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
+                {/* Publishing Settings Group */}
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
+                  <div className="space-y-2">
+                    <Label htmlFor="status" className="font-medium text-sm">Status</Label>
                   <Select
                     value={watchedStatus}
                     onValueChange={(value: 'draft' | 'published') => setValue('status', value)}
@@ -381,11 +393,11 @@ export function CreateModuleForm() {
                         </div>
                       </SelectItem>
                     </SelectContent>
-                  </Select>
-                </div>
+                    </Select>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="visibility">Visibility</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="visibility" className="font-medium text-sm">Visibility</Label>
                   <Select
                     value={watchedVisibility}
                     onValueChange={(value: 'public' | 'private') => setValue('visibility', value)}
@@ -408,9 +420,10 @@ export function CreateModuleForm() {
                       </SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Public: Can be added to any course. Private: Only you can add to courses.
-                  </p>
+                    <p className="text-xs text-muted-foreground">
+                      Public: Can be added to any course. Private: Only you can add to courses.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -450,7 +463,7 @@ export function CreateModuleForm() {
             ) : (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-neural-primary">Content Editor</h2>
+                  <h2 className="text-2xl font-semibold text-neural-primary leading-tight">Content Editor</h2>
                   <Badge variant="outline" className="text-neural-primary border-neural-primary/30">
                     Rich Text Editor
                   </Badge>
@@ -460,18 +473,23 @@ export function CreateModuleForm() {
                   content={content}
                   onChange={setContent}
                   placeholder="Start writing your module content here. Use the toolbar above to format your text, add headings, lists, images, and more..."
-                  className="min-h-[600px]"
+                  className="min-h-[400px]"
                   autoSave={true}
                   onEditorReady={(insertImage) => setInsertImageFn(() => insertImage)}
                 />
 
                 {!content && (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      Your module content is empty. Add some text, headings, or media to create engaging educational content.
-                    </AlertDescription>
-                  </Alert>
+                  <div className="mt-4 text-center py-8 px-4 border-2 border-dashed border-neural-light/30 rounded-lg bg-gray-50/50 dark:bg-gray-900/20">
+                    <div className="mx-auto w-16 h-16 rounded-full bg-gradient-neural flex items-center justify-center mb-4">
+                      <Brain className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      Start Creating Your Module
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                      Use the rich text editor above to add engaging educational content. Include headings, lists, images, and interactive elements to create an immersive learning experience.
+                    </p>
+                  </div>
                 )}
               </div>
             )}
