@@ -295,8 +295,8 @@ export function ActivityFeed({
                   {/* Activity Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground leading-relaxed">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground leading-relaxed break-words">
                           {activity.description}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1.5">

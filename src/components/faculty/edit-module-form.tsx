@@ -419,20 +419,20 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <main className="container mx-auto px-3 sm:px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-8">
           {/* Module Settings - Tabbed Sidebar */}
           <div className="lg:col-span-1">
             <Card className="cognitive-card">
               <Tabs defaultValue="details" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="settings">Settings</TabsTrigger>
-                  <TabsTrigger value="team">Team</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-3 text-xs sm:text-sm">
+                  <TabsTrigger value="details" className="px-2 sm:px-4">Details</TabsTrigger>
+                  <TabsTrigger value="settings" className="px-2 sm:px-4">Settings</TabsTrigger>
+                  <TabsTrigger value="team" className="px-2 sm:px-4">Team</TabsTrigger>
                 </TabsList>
 
                 {/* Tab 1: Module Details */}
-                <TabsContent value="details" className="space-y-4 mt-4 px-2">
+                <TabsContent value="details" className="space-y-4 mt-4 px-2 sm:px-4">
                 {/* Basic Information Group */}
                 <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-2">
@@ -492,7 +492,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </TabsContent>
 
                 {/* Tab 2: Settings */}
-                <TabsContent value="settings" className="space-y-4 mt-4 px-2">
+                <TabsContent value="settings" className="space-y-4 mt-4 px-2 sm:px-4">
                 {/* Parent Module */}
                 <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-2">
@@ -604,20 +604,20 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 {/* Module Statistics */}
                 <div className="space-y-2">
                   <Label className="font-medium text-sm">Module Statistics</Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {/* Status Card */}
               <Card className="cognitive-card bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-200">
-                <CardContent className="p-3">
-                  <div className="space-y-2">
+                <CardContent className="p-2 sm:p-3">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="p-2 rounded-lg bg-synapse-primary/10">
-                        <CheckCircle className="h-4 w-4 text-synapse-primary" />
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-synapse-primary/10">
+                        <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-synapse-primary" />
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground">Status</p>
-                      <div className="mt-1">
-                        <Badge variant={watchedStatus === 'published' ? 'default' : 'outline'} className="text-xs">
+                      <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Status</p>
+                      <div className="mt-0.5 sm:mt-1">
+                        <Badge variant={watchedStatus === 'published' ? 'default' : 'outline'} className="text-[10px] sm:text-xs">
                           {watchedStatus}
                         </Badge>
                       </div>
@@ -628,16 +628,16 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
 
               {/* Sub-modules Card */}
               <Card className="cognitive-card bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-200">
-                <CardContent className="p-3">
-                  <div className="space-y-2">
+                <CardContent className="p-2 sm:p-3">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="p-2 rounded-lg bg-neural-primary/10">
-                        <Layers className="h-4 w-4 text-neural-primary" />
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-neural-primary/10">
+                        <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neural-primary" />
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground">Sub-modules</p>
-                      <p className="text-xl font-bold text-foreground">{module.subModules?.length || 0}</p>
+                      <p className="text-[10px] sm:text-xs font-medium text-muted-foreground break-words">Sub-modules</p>
+                      <p className="text-lg sm:text-xl font-bold text-foreground">{module.subModules?.length || 0}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -645,16 +645,16 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
 
               {/* Created Date Card */}
               <Card className="cognitive-card bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-200">
-                <CardContent className="p-3">
-                  <div className="space-y-2">
+                <CardContent className="p-2 sm:p-3">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="p-2 rounded-lg bg-cognition-teal/10">
-                        <Calendar className="h-4 w-4 text-cognition-teal" />
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-cognition-teal/10">
+                        <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cognition-teal" />
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground">Created</p>
-                      <p className="text-sm font-semibold text-foreground">
+                      <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Created</p>
+                      <p className="text-xs sm:text-sm font-semibold text-foreground break-words">
                         {module.createdAt
                           ? new Date(module.createdAt).toLocaleDateString('en-US', {
                               month: 'short',
@@ -670,16 +670,16 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
 
               {/* Updated Date Card */}
               <Card className="cognitive-card bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-200">
-                <CardContent className="p-3">
-                  <div className="space-y-2">
+                <CardContent className="p-2 sm:p-3">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="p-2 rounded-lg bg-cognition-orange/10">
-                        <Calendar className="h-4 w-4 text-cognition-orange" />
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-cognition-orange/10">
+                        <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cognition-orange" />
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground">Updated</p>
-                      <p className="text-sm font-semibold text-foreground">
+                      <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Updated</p>
+                      <p className="text-xs sm:text-sm font-semibold text-foreground break-words">
                         {module.updatedAt
                           ? new Date(module.updatedAt).toLocaleDateString('en-US', {
                               month: 'short',
@@ -697,7 +697,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </TabsContent>
 
                 {/* Tab 3: Team & Collaboration */}
-                <TabsContent value="team" className="space-y-4 mt-4 px-2">
+                <TabsContent value="team" className="space-y-4 mt-4 px-2 sm:px-4">
                 {/* Collaborators */}
                 <CollaboratorPanel
                   entityType="module"
