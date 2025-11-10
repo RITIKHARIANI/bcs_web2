@@ -33,7 +33,8 @@ import {
   BookOpen,
   CheckCircle,
   Globe,
-  Lock
+  Lock,
+  Lightbulb
 } from 'lucide-react'
 
 const createModuleSchema = z.object({
@@ -265,9 +266,26 @@ export function CreateModuleForm() {
       </header>
 
       <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-7 gap-8">
           {/* Module Settings */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Writing Guidelines */}
+            <Card className="cognitive-card">
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center">
+                  <Lightbulb className="mr-2 h-4 w-4 text-cognition-orange" />
+                  Writing Guidelines
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-muted-foreground">
+                <p>• Use clear, concise language</p>
+                <p>• Include examples and visuals</p>
+                <p>• Structure content with headings</p>
+                <p>• Add interactive elements when possible</p>
+                <p>• Review and test before publishing</p>
+              </CardContent>
+            </Card>
+
             <Card className="cognitive-card">
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -346,7 +364,7 @@ export function CreateModuleForm() {
                     disabled={isLoadingModules}
                   >
                     <SelectTrigger className="border-neural-light/30 focus:border-neural-primary">
-                      <SelectValue placeholder={isLoadingModules ? "Loading modules..." : "Select parent module (optional)"} />
+                      <SelectValue placeholder={isLoadingModules ? "Loading modules..." : "Select parent module (optional)"} className="truncate" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">
@@ -444,20 +462,6 @@ export function CreateModuleForm() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Guidelines */}
-            <Card className="cognitive-card">
-              <CardHeader>
-                <CardTitle className="text-sm">Writing Guidelines</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm text-muted-foreground">
-                <p>• Use clear, concise language</p>
-                <p>• Include examples and visuals</p>
-                <p>• Structure content with headings</p>
-                <p>• Add interactive elements when possible</p>
-                <p>• Review and test before publishing</p>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Content Editor */}
@@ -513,7 +517,7 @@ export function CreateModuleForm() {
           </div>
 
           {/* Media Library */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-2">
             <div className="sticky top-24 h-[calc(100vh-8rem)]">
               <MediaLibraryPanel
                 onMediaSelect={(file, altText, caption) => {
