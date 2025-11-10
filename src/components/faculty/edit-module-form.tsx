@@ -395,7 +395,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 <NeuralButton
                   variant="outline"
                   size="sm"
-                  className="min-h-[44px] min-w-[44px] border-2 border-blue-500 text-blue-600 hover:bg-blue-50 hover:border-blue-600 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950 transition-all duration-200 hover:scale-105"
+                  className="min-h-[44px] min-w-[44px] border-2 border-blue-500 text-blue-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-600 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950 dark:hover:text-blue-300 transition-all duration-200 hover:scale-105"
                 >
                   <Eye className="h-4 w-4" />
                   <span className="hidden lg:inline ml-2">Preview</span>
@@ -432,9 +432,9 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </TabsList>
 
                 {/* Tab 1: Module Details */}
-                <TabsContent value="details" className="space-y-4 mt-2 px-2 sm:px-4 pb-4">
+                <TabsContent value="details" className="space-y-3 mt-2 px-2 sm:px-4 pb-4">
                 {/* Basic Information Group */}
-                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
+                <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-2">
                     <Label htmlFor="title" className="font-medium text-sm">Title *</Label>
                     <Input
@@ -478,7 +478,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </div>
 
                 {/* Categorization Group */}
-                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
+                <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <TagsInput
                     value={tags}
                     onChange={setTags}
@@ -492,9 +492,9 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </TabsContent>
 
                 {/* Tab 2: Settings */}
-                <TabsContent value="settings" className="space-y-4 mt-2 px-2 sm:px-4 pb-4">
+                <TabsContent value="settings" className="space-y-3 mt-2 px-2 sm:px-4 pb-4">
                 {/* Parent Module */}
-                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
+                <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-2">
                     <Label htmlFor="parentModule" className="font-medium text-sm">Parent Module</Label>
                   <Select
@@ -505,7 +505,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                     <SelectTrigger className="border-neural-light/30 focus:border-neural-primary">
                       <SelectValue placeholder={isLoadingParents ? "Loading modules..." : "None (Root Module)"} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[100]">
                       <SelectItem value="none">None (Root Module)</SelectItem>
                       {!isLoadingParents && availableParentModules.length === 0 && (
                         <SelectItem value="no-modules" disabled>No parent modules available</SelectItem>
@@ -524,7 +524,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </div>
 
                 {/* Status & Visibility */}
-                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
+                <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-3">
                     <Label htmlFor="status" className="font-medium text-sm" title="Draft: Not visible to students. Published: Live and accessible">Status</Label>
                   <Controller
@@ -697,7 +697,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </TabsContent>
 
                 {/* Tab 3: Team & Collaboration */}
-                <TabsContent value="team" className="space-y-4 mt-2 px-2 sm:px-4 pb-4">
+                <TabsContent value="team" className="space-y-3 mt-2 px-2 sm:px-4 pb-4">
                 {/* Collaborators */}
                 <CollaboratorPanel
                   entityType="module"

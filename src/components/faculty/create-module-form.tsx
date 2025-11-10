@@ -238,7 +238,7 @@ export function CreateModuleForm() {
                 variant={isPreviewMode ? 'outline' : 'outline'}
                 size="sm"
                 onClick={() => setIsPreviewMode(!isPreviewMode)}
-                className="min-h-[44px] min-w-[44px] border-2 border-blue-500 text-blue-600 hover:bg-blue-50 hover:border-blue-600 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950 transition-all duration-200 hover:scale-105"
+                className="min-h-[44px] min-w-[44px] border-2 border-blue-500 text-blue-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-600 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950 dark:hover:text-blue-300 transition-all duration-200 hover:scale-105"
               >
                 <Eye className="h-4 w-4" />
                 <span className="hidden lg:inline ml-2">
