@@ -423,9 +423,9 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-8">
           {/* Module Settings - Tabbed Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="cognitive-card pt-2 px-0 pb-0">
+            <Card className="cognitive-card pt-4 px-0 pb-0">
               <Tabs defaultValue="details" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 text-xs sm:text-sm mx-2 mt-1 mb-2">
+                <TabsList className="grid w-full grid-cols-3 text-xs sm:text-sm mx-2 mb-2">
                   <TabsTrigger value="details" className="px-2 sm:px-4">Details</TabsTrigger>
                   <TabsTrigger value="settings" className="px-2 sm:px-4">Settings</TabsTrigger>
                   <TabsTrigger value="team" className="px-2 sm:px-4">Team</TabsTrigger>
