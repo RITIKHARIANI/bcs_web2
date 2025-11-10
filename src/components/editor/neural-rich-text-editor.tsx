@@ -433,12 +433,12 @@ export function NeuralRichTextEditor({
             className="neural-editor-wrapper"
           />
           {editor.isEmpty && (
-            <div className="absolute top-6 left-6 pointer-events-none">
+            <div className="absolute top-6 left-6 right-6 pointer-events-none">
               <div className="flex items-start gap-3 text-muted-foreground">
                 <FileText className="h-5 w-5 mt-1 flex-shrink-0 opacity-50" />
-                <div>
-                  <p className="text-sm">{placeholder}</p>
-                  <p className="text-xs mt-1 opacity-70">Use the toolbar above to format your content</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm break-words">{placeholder}</p>
+                  <p className="text-xs mt-1 opacity-70 break-words">Use the toolbar above to format your content</p>
                 </div>
               </div>
             </div>
