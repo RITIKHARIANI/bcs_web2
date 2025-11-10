@@ -257,6 +257,21 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
     }
   }, [watchedTitle, setValue, module])
 
+  // Keyboard shortcut: Ctrl+S (or Cmd+S) to save
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        if (!isSubmitting) {
+          handleSubmit(onSubmit)()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleSubmit, isSubmitting])
+
   const onSubmit = async (data: EditModuleFormData) => {
     try {
       await updateMutation.mutateAsync({
