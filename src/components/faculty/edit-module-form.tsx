@@ -742,7 +742,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
           </div>
 
           {/* Content Editor */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-4 space-y-6">
             <Card className="cognitive-card">
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -775,7 +775,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
           </div>
 
           {/* Media Library */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <div className="sticky top-24 h-[calc(100vh-8rem)]">
               <MediaLibraryPanel
                 moduleId={moduleId}

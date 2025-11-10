@@ -465,7 +465,7 @@ export function CreateModuleForm() {
           </div>
 
           {/* Content Editor */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-4">
             {isPreviewMode ? (
               <Card className="cognitive-card">
                 <CardHeader>
@@ -517,7 +517,7 @@ export function CreateModuleForm() {
           </div>
 
           {/* Media Library */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <div className="sticky top-24 h-[calc(100vh-8rem)]">
               <MediaLibraryPanel
                 onMediaSelect={(file, altText, caption) => {
