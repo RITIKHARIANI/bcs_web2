@@ -420,7 +420,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
       </header>
 
       <main className="container mx-auto px-3 sm:px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-9 gap-4 lg:gap-8">
           {/* Module Settings - Tabbed Sidebar */}
           <div className="lg:col-span-2">
             <Card className="cognitive-card pt-4 px-0 pb-0">
@@ -742,7 +742,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
           </div>
 
           {/* Content Editor */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="lg:col-span-5 space-y-6">
             <Card className="cognitive-card">
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -775,7 +775,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
           </div>
 
           {/* Media Library */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-2">
             <div className="sticky top-24 h-[calc(100vh-8rem)]">
               <MediaLibraryPanel
                 moduleId={moduleId}

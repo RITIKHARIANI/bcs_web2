@@ -266,7 +266,7 @@ export function CreateModuleForm() {
       </header>
 
       <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-7 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-9 gap-8">
           {/* Module Settings */}
           <div className="lg:col-span-2 space-y-6">
             {/* Writing Guidelines */}
@@ -465,7 +465,7 @@ export function CreateModuleForm() {
           </div>
 
           {/* Content Editor */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-5">
             {isPreviewMode ? (
               <Card className="cognitive-card">
                 <CardHeader>
@@ -517,7 +517,7 @@ export function CreateModuleForm() {
           </div>
 
           {/* Media Library */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-2">
             <div className="sticky top-24 h-[calc(100vh-8rem)]">
               <MediaLibraryPanel
                 onMediaSelect={(file, altText, caption) => {
