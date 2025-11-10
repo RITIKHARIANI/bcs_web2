@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group-custom'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import {
   Save,
@@ -420,19 +421,18 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
 
       <main className="container mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Module Settings */}
-          <div className="lg:col-span-1 space-y-6">
+          {/* Module Settings - Tabbed Sidebar */}
+          <div className="lg:col-span-1">
             <Card className="cognitive-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="mr-2 h-5 w-5 text-neural-primary" />
-                  Module Details
-                </CardTitle>
-                <CardDescription>
-                  Configure the basic information for your module
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
+              <Tabs defaultValue="details" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="settings">Settings</TabsTrigger>
+                  <TabsTrigger value="team">Team</TabsTrigger>
+                </TabsList>
+
+                {/* Tab 1: Module Details */}
+                <TabsContent value="details" className="space-y-4 mt-4 px-2">
                 {/* Basic Information Group */}
                 <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-2">
@@ -488,7 +488,13 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                     maxTags={10}
                     id="tags"
                   />
+                </div>
+                </TabsContent>
 
+                {/* Tab 2: Settings */}
+                <TabsContent value="settings" className="space-y-4 mt-4 px-2">
+                {/* Parent Module */}
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-2">
                     <Label htmlFor="parentModule" className="font-medium text-sm">Parent Module</Label>
                   <Select
@@ -517,7 +523,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                   </div>
                 </div>
 
-                {/* Publishing Settings Group */}
+                {/* Status & Visibility */}
                 <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-3">
                     <Label htmlFor="status" className="font-medium text-sm" title="Draft: Not visible to students. Published: Live and accessible">Status</Label>
@@ -594,11 +600,11 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                     </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Module Statistics - Improved Cards */}
-            <div className="grid grid-cols-2 gap-3">
+                {/* Module Statistics */}
+                <div className="space-y-2">
+                  <Label className="font-medium text-sm">Module Statistics</Label>
+                  <div className="grid grid-cols-2 gap-3">
               {/* Status Card */}
               <Card className="cognitive-card bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-200">
                 <CardContent className="p-3">
@@ -686,24 +692,28 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                   </div>
                 </CardContent>
               </Card>
-            </div>
+                  </div>
+                </div>
+                </TabsContent>
 
-            {/* Collaboration */}
-            <CollaboratorPanel
-              entityType="module"
-              entityId={moduleId}
-              authorId={module.author_id}
-            />
+                {/* Tab 3: Team & Collaboration */}
+                <TabsContent value="team" className="space-y-4 mt-4 px-2">
+                {/* Collaborators */}
+                <CollaboratorPanel
+                  entityType="module"
+                  entityId={moduleId}
+                  authorId={module.author_id}
+                />
 
-            {/* Activity Feed */}
-            <ActivityFeed
-              entityType="module"
-              entityId={moduleId}
-              limit={10}
-            />
+                {/* Activity Feed */}
+                <ActivityFeed
+                  entityType="module"
+                  entityId={moduleId}
+                  limit={10}
+                />
 
-            {/* Danger Zone */}
-            <Card className="cognitive-card border-red-200 dark:border-red-900">
+                {/* Danger Zone */}
+                <Card className="cognitive-card border-red-200 dark:border-red-900">
               <CardHeader>
                 <CardTitle className="text-sm text-red-600 dark:text-red-400 flex items-center">
                   <AlertCircle className="mr-2 h-4 w-4" />
@@ -725,6 +735,9 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                   Delete Module
                 </NeuralButton>
               </CardContent>
+                </Card>
+                </TabsContent>
+              </Tabs>
             </Card>
           </div>
 
