@@ -295,7 +295,7 @@ export function CreateModuleForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="slug" className="font-medium text-sm">URL Slug *</Label>
+                    <Label htmlFor="slug" className="font-medium text-sm" title="URL-friendly identifier, automatically generated from title">URL Slug *</Label>
                     <div className="relative">
                       <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
@@ -303,6 +303,7 @@ export function CreateModuleForm() {
                         placeholder="url-friendly-slug"
                         {...register('slug')}
                         className="h-11 p-4 pl-10 border-neural-light/30 focus:border-neural-primary transition-colors"
+                        title="URL-friendly identifier, automatically generated from title"
                       />
                     </div>
                     {errors.slug && (
@@ -387,7 +388,7 @@ export function CreateModuleForm() {
                 {/* Publishing Settings Group */}
                 <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-2">
-                    <Label htmlFor="status" className="font-medium text-sm">Status</Label>
+                    <Label htmlFor="status" className="font-medium text-sm" title="Draft: Not visible to students. Published: Live and accessible">Status</Label>
                   <Select
                     value={watchedStatus}
                     onValueChange={(value: 'draft' | 'published') => setValue('status', value)}
@@ -413,7 +414,7 @@ export function CreateModuleForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="visibility" className="font-medium text-sm">Visibility</Label>
+                    <Label htmlFor="visibility" className="font-medium text-sm" title="Public: Any faculty can add to courses. Private: Only you can use this module">Visibility</Label>
                   <Select
                     value={watchedVisibility}
                     onValueChange={(value: 'public' | 'private') => setValue('visibility', value)}

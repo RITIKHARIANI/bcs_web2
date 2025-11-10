@@ -636,7 +636,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="slug">URL Slug *</Label>
+                  <Label htmlFor="slug" title="URL-friendly identifier, automatically generated from title">URL Slug *</Label>
                   <div className="relative">
                     <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -644,6 +644,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                       placeholder="url-friendly-slug"
                       {...register('slug')}
                       className="pl-10 border-neural-light/30 focus:border-neural-primary"
+                      title="URL-friendly identifier, automatically generated from title"
                     />
                   </div>
                   {errors.slug && (
@@ -680,7 +681,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
                 <div className="space-y-4">
                   <div className="space-y-3">
-                    <Label htmlFor="status">Status</Label>
+                    <Label htmlFor="status" title="Draft: Not visible to students. Published: Live and accessible">Status</Label>
                     <Controller
                       name="status"
                       control={control}
@@ -729,6 +730,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                           <Label
                             htmlFor="featured"
                             className="text-sm font-normal cursor-pointer"
+                            title="Display this course on homepage and in featured course lists"
                           >
                             Feature this course
                           </Label>
