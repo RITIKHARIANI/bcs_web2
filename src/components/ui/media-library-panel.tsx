@@ -150,9 +150,9 @@ export function MediaLibraryPanel({
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col space-y-3 pb-4">
+      <CardContent className="flex-1 flex flex-col space-y-3 pb-4 pt-3">
         <Tabs defaultValue="library" className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 text-xs sm:text-sm">
+          <TabsList className="grid w-full grid-cols-2 text-xs sm:text-sm mt-1">
             <TabsTrigger value="library" className="px-2 sm:px-4">
               <Grid3x3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
               Library

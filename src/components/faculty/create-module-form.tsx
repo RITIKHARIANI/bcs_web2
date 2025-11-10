@@ -335,7 +335,7 @@ export function CreateModuleForm() {
                     id="tags"
                   />
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="parentModule" className="font-medium text-sm">Parent Module</Label>
                   <Select
                     value={watchedParentModuleId ?? 'none'}

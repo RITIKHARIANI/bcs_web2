@@ -495,7 +495,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 <TabsContent value="settings" className="space-y-3 mt-2 px-2 sm:px-4 pb-4">
                 {/* Parent Module */}
                 <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="parentModule" className="font-medium text-sm">Parent Module</Label>
                   <Select
                     value={watchedParentId ?? 'none'}
