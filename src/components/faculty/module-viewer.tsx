@@ -199,38 +199,39 @@ export function ModuleViewer({ moduleId }: ModuleViewerProps) {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+        <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               <Link href="/faculty/modules">
-                <NeuralButton variant="ghost" size="sm">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Modules
+                <NeuralButton variant="ghost" size="sm" className="flex-shrink-0">
+                  <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Back to Modules</span>
                 </NeuralButton>
               </Link>
-              <Separator orientation="vertical" className="h-6" />
-              <div className="flex items-center space-x-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-neural">
+              <Separator orientation="vertical" className="h-6 hidden sm:block" />
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-neural flex-shrink-0">
                   {module.parentModule ? (
                     <Layers className="h-6 w-6 text-primary-foreground" />
                   ) : (
                     <Brain className="h-6 w-6 text-primary-foreground" />
                   )}
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-neural-primary">{module.title}</h1>
-                  <p className="text-sm text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-lg sm:text-2xl font-bold text-neural-primary truncate">{module.title}</h1>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">
                     {module.parentModule ? 'Sub-module' : 'Root module'} • /{module.slug}
                   </p>
                 </div>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-2">
-              <Link href={`/faculty/modules/edit/${module.id}`}>
-                <NeuralButton variant="neural" size="sm">
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Link href={`/faculty/modules/edit/${module.id}`} className="flex-1 sm:flex-initial">
+                <NeuralButton variant="neural" size="sm" className="w-full sm:w-auto">
                   <Edit className="mr-2 h-4 w-4" />
-                  Edit Module
+                  <span className="hidden sm:inline">Edit Module</span>
+                  <span className="sm:hidden">Edit</span>
                 </NeuralButton>
               </Link>
               <NeuralButton

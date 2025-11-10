@@ -152,13 +152,13 @@ export function MediaLibraryPanel({
 
       <CardContent className="flex-1 flex flex-col space-y-3 pb-4">
         <Tabs defaultValue="library" className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="library">
-              <Grid3x3 className="h-4 w-4 mr-2" />
+          <TabsList className="grid w-full grid-cols-2 text-xs sm:text-sm">
+            <TabsTrigger value="library" className="px-2 sm:px-4">
+              <Grid3x3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
               Library
             </TabsTrigger>
-            <TabsTrigger value="upload">
-              <Upload className="h-4 w-4 mr-2" />
+            <TabsTrigger value="upload" className="px-2 sm:px-4">
+              <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
               Upload
             </TabsTrigger>
           </TabsList>

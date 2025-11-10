@@ -423,16 +423,16 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-8">
           {/* Module Settings - Tabbed Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="cognitive-card">
+            <Card className="cognitive-card p-0">
               <Tabs defaultValue="details" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 text-xs sm:text-sm">
+                <TabsList className="grid w-full grid-cols-3 text-xs sm:text-sm m-2">
                   <TabsTrigger value="details" className="px-2 sm:px-4">Details</TabsTrigger>
                   <TabsTrigger value="settings" className="px-2 sm:px-4">Settings</TabsTrigger>
                   <TabsTrigger value="team" className="px-2 sm:px-4">Team</TabsTrigger>
                 </TabsList>
 
                 {/* Tab 1: Module Details */}
-                <TabsContent value="details" className="space-y-4 mt-4 px-2 sm:px-4">
+                <TabsContent value="details" className="space-y-4 mt-2 px-2 sm:px-4 pb-4">
                 {/* Basic Information Group */}
                 <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-2">
@@ -492,7 +492,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </TabsContent>
 
                 {/* Tab 2: Settings */}
-                <TabsContent value="settings" className="space-y-4 mt-4 px-2 sm:px-4">
+                <TabsContent value="settings" className="space-y-4 mt-2 px-2 sm:px-4 pb-4">
                 {/* Parent Module */}
                 <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                   <div className="space-y-2">
@@ -697,7 +697,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 </TabsContent>
 
                 {/* Tab 3: Team & Collaboration */}
-                <TabsContent value="team" className="space-y-4 mt-4 px-2 sm:px-4">
+                <TabsContent value="team" className="space-y-4 mt-2 px-2 sm:px-4 pb-4">
                 {/* Collaborators */}
                 <CollaboratorPanel
                   entityType="module"

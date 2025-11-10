@@ -255,26 +255,26 @@ export function ModuleLibrary() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-neural">
+        <div className="container mx-auto px-3 sm:px-6 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center space-x-3 min-w-0">
+              <div className="hidden sm:flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-neural flex-shrink-0">
                 <Brain className="h-7 w-7 text-primary-foreground" />
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-neural-primary">Module Library</h1>
-                <p className="text-muted-foreground">
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-bold text-neural-primary">Module Library</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Create and manage your educational content modules
                 </p>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-2">
+
+            <div className="flex items-center space-x-2 w-full sm:w-auto">
               {isFetching && (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               )}
-              <Link href="/faculty/modules/create">
-                <NeuralButton variant="neural" size="lg">
+              <Link href="/faculty/modules/create" className="flex-1 sm:flex-initial">
+                <NeuralButton variant="neural" size="lg" className="w-full sm:w-auto">
                   <Plus className="mr-2 h-5 w-5" />
                   Create Module
                 </NeuralButton>
