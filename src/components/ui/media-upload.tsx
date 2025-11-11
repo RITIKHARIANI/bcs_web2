@@ -82,8 +82,19 @@ export function MediaUpload({
         clearInterval(progressInterval);
 
         if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Upload failed');
+          // Check if response is JSON
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const error = await response.json();
+            throw new Error(error.error || 'Upload failed');
+          } else {
+            // Handle non-JSON error responses (e.g., from Vercel size limits)
+            const errorText = await response.text();
+            if (response.status === 413 || errorText.includes('too large') || errorText.includes('Too Large')) {
+              throw new Error('File is too large. Maximum file size is 4.5MB on the current hosting plan. Please compress your file or upgrade the plan.');
+            }
+            throw new Error(errorText || 'Upload failed');
+          }
         }
 
         const result = await response.json();
@@ -137,7 +148,18 @@ export function MediaUpload({
       'text/plain': ['.txt']
     },
     maxFiles,
-    maxSize: 50 * 1024 * 1024, // 50MB
+    maxSize: 4.5 * 1024 * 1024, // 4.5MB - Vercel free tier limit
+    onDropRejected: (fileRejections) => {
+      fileRejections.forEach(({ file, errors }) => {
+        errors.forEach(error => {
+          if (error.code === 'file-too-large') {
+            toast.error(`${file.name} is too large. Maximum file size is 4.5MB on the current hosting plan.`);
+          } else {
+            toast.error(`${file.name}: ${error.message}`);
+          }
+        });
+      });
+    },
   });
 
   const getFileIcon = (mimeType: string) => {
@@ -183,7 +205,7 @@ export function MediaUpload({
                   Drop files here or click to upload
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Supports images, videos, audio, PDFs, and text files up to 50MB
+                  Supports images, videos, audio, PDFs, and text files up to 4.5MB
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Maximum {maxFiles} files
