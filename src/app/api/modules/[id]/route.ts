@@ -109,6 +109,8 @@ export async function GET(
       author: foundModule.users,
       parentModule: foundModule.modules,
       subModules: foundModule.other_modules,
+      createdAt: foundModule.created_at,
+      updatedAt: foundModule.updated_at,
     }
 
     return NextResponse.json({ module: transformedModule })

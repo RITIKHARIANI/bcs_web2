@@ -554,11 +554,15 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 <p className="text-sm font-medium text-muted-foreground">Created</p>
               </div>
               <p className="text-sm font-semibold">
-                {new Date(module.createdAt).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
+                {module.createdAt ? (
+                  new Date(module.createdAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })
+                ) : (
+                  'N/A'
+                )}
               </p>
             </div>
 
@@ -568,11 +572,15 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
                 <p className="text-sm font-medium text-muted-foreground">Updated</p>
               </div>
               <p className="text-sm font-semibold">
-                {new Date(module.updatedAt).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
+                {module.updatedAt ? (
+                  new Date(module.updatedAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })
+                ) : (
+                  'N/A'
+                )}
               </p>
             </div>
           </div>

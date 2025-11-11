@@ -92,7 +92,7 @@ export function ResponsiveEditLayout({
           className="w-full"
         >
           {/* Tab Navigation */}
-          <TabsList className="grid w-full grid-cols-2 mb-6 max-w-md mx-auto lg:mx-0">
+          <TabsList className="grid w-full grid-cols-2 mb-6 max-w-md mx-auto lg:mx-0 shadow-none">
             <TabsTrigger value="edit" className="text-sm sm:text-base">
               ✏️ Edit
             </TabsTrigger>
