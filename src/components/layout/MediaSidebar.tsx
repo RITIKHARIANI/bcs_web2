@@ -39,7 +39,7 @@ export function MediaSidebar({
       {isCollapsed && (
         <button
           onClick={() => setIsCollapsed(false)}
-          className="fixed right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center justify-center w-12 h-32 bg-background border border-border rounded-lg shadow-lg hover:bg-muted transition-colors group"
+          className="fixed right-4 top-1/2 -translate-y-1/2 z-[60] flex flex-col items-center justify-center w-12 h-32 bg-background border border-border rounded-lg shadow-lg hover:bg-muted transition-colors group"
           aria-label="Expand media library"
         >
           <ImageIcon className="h-5 w-5 text-muted-foreground group-hover:text-foreground mb-2" />
@@ -52,7 +52,7 @@ export function MediaSidebar({
 
       {/* Expanded State - Full Sidebar */}
       {!isCollapsed && (
-        <Card className="fixed right-4 top-20 bottom-4 w-80 overflow-hidden shadow-lg z-30">
+        <Card className="fixed right-4 top-20 bottom-4 w-80 overflow-hidden shadow-lg z-[60]">
           {/* Header with Collapse Button */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50">
             <div className="flex items-center gap-2">

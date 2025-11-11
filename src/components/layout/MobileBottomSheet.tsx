@@ -82,7 +82,7 @@ export function MobileBottomSheet({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/50 z-[55] animate-in fade-in duration-200"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -91,7 +91,7 @@ export function MobileBottomSheet({
       <div
         ref={sheetRef}
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-2xl shadow-2xl",
+          "fixed bottom-0 left-0 right-0 z-[60] bg-background rounded-t-2xl shadow-2xl",
           "animate-in slide-in-from-bottom duration-300",
           className
         )}

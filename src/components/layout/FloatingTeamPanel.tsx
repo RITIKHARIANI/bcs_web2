@@ -80,7 +80,7 @@ export function FloatingTeamPanel({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/50 z-[55] animate-in fade-in duration-200"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -89,7 +89,7 @@ export function FloatingTeamPanel({
       <div
         ref={panelRef}
         className={cn(
-          "fixed top-0 right-0 bottom-0 z-50 bg-background shadow-2xl",
+          "fixed top-0 right-0 bottom-0 z-[60] bg-background shadow-2xl",
           "animate-in slide-in-from-right duration-300",
           "border-l border-border",
           className
