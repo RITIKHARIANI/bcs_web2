@@ -6,13 +6,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import Link from 'next/link'
 import { NeuralRichTextEditor } from '@/components/editor/neural-rich-text-editor'
 import { NeuralButton } from '@/components/ui/neural-button'
 import { TagsInput } from '@/components/ui/tags-input'
 import { MediaLibraryPanel } from '@/components/ui/media-library-panel'
 import { CollaboratorPanel } from '@/components/collaboration/CollaboratorPanel'
 import { ActivityFeed } from '@/components/collaboration/ActivityFeed'
+import { ResponsiveEditLayout } from '@/components/layout/ResponsiveEditLayout'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -21,14 +21,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group-custom'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import {
-  Save,
-  Eye,
-  ArrowLeft,
   Brain,
   Hash,
   CheckCircle,
@@ -111,14 +106,11 @@ async function fetchParentModules(): Promise<{ modules: ParentModule[], availabl
 }
 
 async function updateModule(id: string, data: EditModuleFormData) {
-  // Transform parentModuleId to parent_module_id for API consistency
   const { parentModuleId, ...rest } = data;
   const apiData = {
     ...rest,
     parent_module_id: parentModuleId,
   }
-
-  console.log('Updating module with data:', apiData);
 
   const response = await fetch(`/api/modules/${id}`, {
     method: 'PUT',
@@ -173,7 +165,6 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
 
   const parentModules = parentModuleData?.modules || []
 
-  // Populate tags and available tags when data loads
   useEffect(() => {
     if (module?.tags) {
       setTags(module.tags)
@@ -192,7 +183,6 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
       toast.success('Module updated successfully!')
       queryClient.invalidateQueries({ queryKey: ['module', moduleId] })
       queryClient.invalidateQueries({ queryKey: ['modules'] })
-      // Redirect to the module's view page
       router.push(`/faculty/modules/${moduleId}`)
     },
     onError: (error: Error) => {
@@ -240,7 +230,6 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
       setValue('status', module.status)
       setValue('visibility', module.visibility || 'public')
       setValue('tags', module.tags || [])
-      // Also set the tags state
       setTags(module.tags || [])
     }
   }, [module, setValue])
@@ -294,505 +283,385 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
   }
 
   // Available parent modules (exclude self and descendants)
-  const availableParentModules = parentModules.filter(parent => 
-    parent.id !== moduleId && 
+  const availableParentModules = parentModules.filter(parent =>
+    parent.id !== moduleId &&
     (!module?.subModules?.some(sub => sub.id === parent.id))
   )
 
+  // Loading state
   if (isLoadingModule) {
     return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b border-border/40 bg-background/95 backdrop-blur">
-          <div className="container mx-auto px-6 py-8">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gradient-to-r from-neural-light/30 to-neural-primary/30 rounded w-1/3"></div>
-              <div className="h-4 bg-gradient-to-r from-neural-primary/30 to-neural-light/30 rounded w-1/2"></div>
-            </div>
-          </div>
-        </header>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse space-y-4 text-center">
+          <div className="h-8 bg-gradient-to-r from-neural-light/30 to-neural-primary/30 rounded w-64 mx-auto"></div>
+          <div className="h-4 bg-gradient-to-r from-neural-primary/30 to-neural-light/30 rounded w-48 mx-auto"></div>
+        </div>
       </div>
     )
   }
 
+  // Error state
   if (moduleError || !module) {
     return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b border-border/40 bg-background/95 backdrop-blur">
-          <div className="container mx-auto px-6 py-4">
-            <div className="flex items-center space-x-4">
-              <Link href="/faculty/modules">
-                <NeuralButton variant="ghost" size="sm">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Modules
-                </NeuralButton>
-              </Link>
-            </div>
-          </div>
-        </header>
-        <main className="container mx-auto px-6 py-8">
-          <Card className="cognitive-card max-w-md mx-auto">
-            <CardContent className="p-8 text-center">
-              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
-              <h2 className="text-xl md:text-2xl font-semibold text-foreground mb-2 leading-snug">
-                Module Not Found
-              </h2>
-              <p className="text-muted-foreground mb-6">
-                The module you are trying to edit does not exist or you do not have permission to edit it.
-              </p>
-              <Link href="/faculty/modules">
-                <NeuralButton variant="neural">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Modules
-                </NeuralButton>
-              </Link>
-            </CardContent>
-          </Card>
-        </main>
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Card className="cognitive-card max-w-md mx-auto">
+          <CardContent className="p-8 text-center">
+            <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
+            <h2 className="text-xl md:text-2xl font-semibold text-foreground mb-2">
+              Module Not Found
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              The module you are trying to edit does not exist or you do not have permission to edit it.
+            </p>
+            <NeuralButton variant="neural" onClick={() => router.push('/faculty/modules')}>
+              Back to Modules
+            </NeuralButton>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center justify-between gap-2 md:gap-4">
-            {/* Left Section - Back Button + Title */}
-            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-              <Link href={`/faculty/modules/${moduleId}`}>
-                <NeuralButton variant="ghost" size="sm">
-                  <ArrowLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline ml-2">Back to Module</span>
-                </NeuralButton>
-              </Link>
-              <Separator orientation="vertical" className="h-6 hidden sm:block" />
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                {/* Hide icon on mobile to save space */}
-                <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-neural flex-shrink-0">
-                  {module.parentModule ? (
-                    <Layers className="h-6 w-6 text-primary-foreground" />
-                  ) : (
-                    <Brain className="h-6 w-6 text-primary-foreground" />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <h1 className="text-2xl md:text-3xl font-bold text-neural-primary truncate leading-tight">
-                    Edit Module
-                  </h1>
-                  {/* Hide subtitle on very small screens */}
-                  <p className="hidden sm:block text-xs sm:text-sm text-muted-foreground truncate">
-                    Modify content and settings for: {module.title}
-                  </p>
-                </div>
-              </div>
-            </div>
+  // ============================================================================
+  // RENDER SECTIONS FOR NEW LAYOUT
+  // ============================================================================
 
-            {/* Right Section - Action Buttons */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {/* SECONDARY BUTTON: Preview - Blue Outline */}
-              <Link href={`/modules/${module.slug}`}>
-                <NeuralButton
-                  variant="outline"
-                  size="sm"
-                  className="min-h-[44px] min-w-[44px] border-2 border-blue-500 text-blue-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-600 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950 dark:hover:text-blue-300 transition-all duration-200 hover:scale-105"
-                >
-                  <Eye className="h-4 w-4" />
-                  <span className="hidden lg:inline ml-2">Preview</span>
-                </NeuralButton>
-              </Link>
-              {/* PRIMARY BUTTON: Save Changes - Orange Solid */}
-              <NeuralButton
-                variant="neural"
-                size="sm"
-                onClick={handleSubmit(onSubmit)}
-                disabled={isSubmitting || updateMutation.isPending}
-                className="min-h-[44px] min-w-[44px] bg-[#FF6B35] hover:bg-[#E55A28] text-white font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                <Save className="h-4 w-4" />
-                <span className="hidden md:inline ml-2">
-                  {isSubmitting || updateMutation.isPending ? 'Saving...' : 'Save Changes'}
-                </span>
-              </NeuralButton>
-            </div>
-          </div>
-        </div>
-      </header>
+  // EDIT TAB: Rich Text Editor
+  const editTabContent = (
+    <Card className="cognitive-card">
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Brain className="mr-2 h-5 w-5 text-neural-primary" />
+          Module Content
+        </CardTitle>
+        <CardDescription>
+          Write and format your educational content using the rich text editor
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <NeuralRichTextEditor
+          content={watch('content') || ''}
+          onChange={(html) => setValue('content', html)}
+          placeholder="Start writing your module content..."
+          autoSave={true}
+          moduleId={moduleId}
+          onEditorReady={(insertImage) => setInsertImageFn(() => insertImage)}
+        />
+        {errors.content && (
+          <Alert className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {errors.content.message}
+            </AlertDescription>
+          </Alert>
+        )}
+      </CardContent>
+    </Card>
+  );
 
-      <main className="container mx-auto px-3 sm:px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-9 gap-4 lg:gap-8">
-          {/* Module Settings - Tabbed Sidebar */}
-          <div className="lg:col-span-2">
-            <Card className="cognitive-card pt-4 px-0 pb-0">
-              <Tabs defaultValue="details" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 text-xs sm:text-sm mx-2 mb-2">
-                  <TabsTrigger value="details" className="px-2 sm:px-4">Details</TabsTrigger>
-                  <TabsTrigger value="settings" className="px-2 sm:px-4">Settings</TabsTrigger>
-                  <TabsTrigger value="team" className="px-2 sm:px-4">Team</TabsTrigger>
-                </TabsList>
-
-                {/* Tab 1: Module Details */}
-                <TabsContent value="details" className="space-y-3 mt-2 px-2 sm:px-4 pb-4">
-                {/* Basic Information Group */}
-                <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="font-medium text-sm">Title *</Label>
-                    <Input
-                      id="title"
-                      placeholder="Enter module title..."
-                      {...register('title')}
-                      className="h-11 p-4 border-neural-light/30 focus:border-neural-primary transition-colors"
-                    />
-                    {errors.title && (
-                      <p className="text-sm text-red-500">{errors.title.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="slug" className="font-medium text-sm" title="URL-friendly identifier, automatically generated from title">URL Slug *</Label>
-                    <div className="relative">
-                      <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        id="slug"
-                        placeholder="url-friendly-slug"
-                        {...register('slug')}
-                        className="h-11 p-4 pl-10 border-neural-light/30 focus:border-neural-primary transition-colors"
-                        title="URL-friendly identifier, automatically generated from title"
-                      />
-                    </div>
-                    {errors.slug && (
-                      <p className="text-sm text-red-500">{errors.slug.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description" className="font-medium text-sm">Description</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Brief description of the module..."
-                      rows={3}
-                      {...register('description')}
-                      className="p-4 border-neural-light/30 focus:border-neural-primary transition-colors resize-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Categorization Group */}
-                <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
-                  <TagsInput
-                    value={tags}
-                    onChange={setTags}
-                    label="Tags"
-                    placeholder="Add tags to categorize this module..."
-                    suggestions={availableTags}
-                    maxTags={10}
-                    id="tags"
-                  />
-                </div>
-                </TabsContent>
-
-                {/* Tab 2: Settings */}
-                <TabsContent value="settings" className="space-y-3 mt-2 px-2 sm:px-4 pb-4">
-                {/* Parent Module */}
-                <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
-                  <div className="space-y-3">
-                    <Label htmlFor="parentModule" className="font-medium text-sm">Parent Module</Label>
-                  <Select
-                    value={watchedParentId ?? 'none'}
-                    onValueChange={(value) => setValue('parentModuleId', value === 'none' ? null : value)}
-                    disabled={isLoadingParents}
-                  >
-                    <SelectTrigger className="border-neural-light/30 focus:border-neural-primary">
-                      <SelectValue placeholder={isLoadingParents ? "Loading modules..." : "None (Root Module)"} className="truncate" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[100]">
-                      <SelectItem value="none">None (Root Module)</SelectItem>
-                      {!isLoadingParents && availableParentModules.length === 0 && (
-                        <SelectItem value="no-modules" disabled>No parent modules available</SelectItem>
-                      )}
-                      {!isLoadingParents && availableParentModules.map((parent) => (
-                        <SelectItem key={parent.id} value={parent.id}>
-                          {parent.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                    {isLoadingParents && (
-                      <p className="text-xs text-muted-foreground animate-pulse">Loading available parent modules...</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Status & Visibility */}
-                <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
-                  <div className="space-y-3">
-                    <Label htmlFor="status" className="font-medium text-sm" title="Draft: Not visible to students. Published: Live and accessible">Status</Label>
-                  <Controller
-                    name="status"
-                    control={control}
-                    render={({ field }) => (
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        className="flex items-center space-x-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="draft" id="status-draft" />
-                          <Label
-                            htmlFor="status-draft"
-                            className="flex items-center cursor-pointer font-normal"
-                          >
-                            <FileText className="mr-1.5 h-4 w-4 text-orange-500" />
-                            Draft
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="published" id="status-published" />
-                          <Label
-                            htmlFor="status-published"
-                            className="flex items-center cursor-pointer font-normal"
-                          >
-                            <CheckCircle className="mr-1.5 h-4 w-4 text-green-500" />
-                            Published
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    )}
-                  />
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor="visibility" className="font-medium text-sm" title="Public: Any faculty can add to courses. Private: Only you can use this module">Visibility</Label>
-                  <Controller
-                    name="visibility"
-                    control={control}
-                    render={({ field }) => (
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        className="flex items-center space-x-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="public" id="visibility-public" />
-                          <Label
-                            htmlFor="visibility-public"
-                            className="flex items-center cursor-pointer font-normal"
-                          >
-                            <Globe className="mr-1.5 h-4 w-4 text-blue-500" />
-                            Public
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="private" id="visibility-private" />
-                          <Label
-                            htmlFor="visibility-private"
-                            className="flex items-center cursor-pointer font-normal"
-                          >
-                            <Lock className="mr-1.5 h-4 w-4 text-purple-500" />
-                            Private
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    )}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Public: Can be added to any course. Private: Only you can add to courses.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Module Statistics */}
-                <div className="space-y-2">
-                  <Label className="font-medium text-sm">Module Statistics</Label>
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
-              {/* Status Card */}
-              <Card className="cognitive-card bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-200">
-                <CardContent className="p-2 sm:p-3">
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-synapse-primary/10">
-                        <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-synapse-primary" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Status</p>
-                      <div className="mt-0.5 sm:mt-1">
-                        <Badge variant={watchedStatus === 'published' ? 'default' : 'outline'} className="text-[10px] sm:text-xs">
-                          {watchedStatus}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Sub-modules Card */}
-              <Card className="cognitive-card bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-200">
-                <CardContent className="p-2 sm:p-3">
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-neural-primary/10">
-                        <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neural-primary" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-[10px] sm:text-xs font-medium text-muted-foreground break-words">Sub-modules</p>
-                      <p className="text-lg sm:text-xl font-bold text-foreground">{module.subModules?.length || 0}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Created Date Card */}
-              <Card className="cognitive-card bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-200">
-                <CardContent className="p-2 sm:p-3">
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-cognition-teal/10">
-                        <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cognition-teal" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Created</p>
-                      <p className="text-xs sm:text-sm font-semibold text-foreground break-words">
-                        {module.createdAt
-                          ? new Date(module.createdAt).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric'
-                            })
-                          : 'Unknown'}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Updated Date Card */}
-              <Card className="cognitive-card bg-white dark:bg-gray-900 hover:shadow-lg transition-all duration-200">
-                <CardContent className="p-2 sm:p-3">
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-cognition-orange/10">
-                        <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cognition-orange" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Updated</p>
-                      <p className="text-xs sm:text-sm font-semibold text-foreground break-words">
-                        {module.updatedAt
-                          ? new Date(module.updatedAt).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric'
-                            })
-                          : 'Unknown'}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-                  </div>
-                </div>
-                </TabsContent>
-
-                {/* Tab 3: Team & Collaboration */}
-                <TabsContent value="team" className="space-y-3 mt-2 px-2 sm:px-4 pb-4">
-                {/* Collaborators */}
-                <CollaboratorPanel
-                  entityType="module"
-                  entityId={moduleId}
-                  authorId={module.author_id}
-                />
-
-                {/* Activity Feed */}
-                <ActivityFeed
-                  entityType="module"
-                  entityId={moduleId}
-                  limit={10}
-                />
-
-                {/* Danger Zone */}
-                <Card className="cognitive-card border-red-200 dark:border-red-900">
-              <CardHeader>
-                <CardTitle className="text-sm text-red-600 dark:text-red-400 flex items-center">
-                  <AlertCircle className="mr-2 h-4 w-4" />
-                  Danger Zone
-                </CardTitle>
-                <CardDescription>
-                  Irreversible actions that permanently affect this module
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <NeuralButton
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  disabled={deleteMutation.isPending}
-                  className="w-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Module
-                </NeuralButton>
-              </CardContent>
-                </Card>
-                </TabsContent>
-              </Tabs>
-            </Card>
+  // SETTINGS TAB: Module Details + Publishing Settings
+  const settingsTabContent = (
+    <div className="space-y-6">
+      {/* Basic Information */}
+      <Card className="cognitive-card">
+        <CardHeader>
+          <CardTitle>Basic Information</CardTitle>
+          <CardDescription>Core module details and metadata</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Title *</Label>
+            <Input
+              id="title"
+              placeholder="Enter module title..."
+              {...register('title')}
+            />
+            {errors.title && (
+              <p className="text-sm text-red-500">{errors.title.message}</p>
+            )}
           </div>
 
-          {/* Content Editor */}
-          <div className="lg:col-span-5 space-y-6">
-            <Card className="cognitive-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Brain className="mr-2 h-5 w-5 text-neural-primary" />
-                  Module Content
-                </CardTitle>
-                <CardDescription>
-                  Write and format your educational content using the rich text editor
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <NeuralRichTextEditor
-                  content={watch('content') || ''}
-                  onChange={(html) => setValue('content', html)}
-                  placeholder="Start writing your module content..."
-                  autoSave={true}
-                  moduleId={moduleId}
-                  onEditorReady={(insertImage) => setInsertImageFn(() => insertImage)}
-                />
-                {errors.content && (
-                  <Alert className="mt-4">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      {errors.content.message}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Media Library */}
-          <div className="lg:col-span-2">
-            <div className="sticky top-24 h-[calc(100vh-8rem)]">
-              <MediaLibraryPanel
-                moduleId={moduleId}
-                onMediaSelect={(file, altText, caption) => {
-                  if (insertImageFn) {
-                    insertImageFn(file.url, altText || file.originalName, caption);
-                  }
-                }}
+          <div className="space-y-2">
+            <Label htmlFor="slug">URL Slug *</Label>
+            <div className="relative">
+              <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="slug"
+                placeholder="url-friendly-slug"
+                {...register('slug')}
+                className="pl-10"
               />
             </div>
+            {errors.slug && (
+              <p className="text-sm text-red-500">{errors.slug.message}</p>
+            )}
           </div>
-        </div>
-      </main>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              placeholder="Brief description of the module..."
+              rows={3}
+              {...register('description')}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <TagsInput
+              value={tags}
+              onChange={setTags}
+              label="Tags"
+              placeholder="Add tags to categorize this module..."
+              suggestions={availableTags}
+              maxTags={10}
+              id="tags"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Module Hierarchy */}
+      <Card className="cognitive-card">
+        <CardHeader>
+          <CardTitle>Module Hierarchy</CardTitle>
+          <CardDescription>Organize this module within a parent module</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="parentModule">Parent Module</Label>
+            <Select
+              value={watchedParentId ?? 'none'}
+              onValueChange={(value) => setValue('parentModuleId', value === 'none' ? null : value)}
+              disabled={isLoadingParents}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={isLoadingParents ? "Loading..." : "None (Root Module)"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None (Root Module)</SelectItem>
+                {availableParentModules.map((parent) => (
+                  <SelectItem key={parent.id} value={parent.id}>
+                    {parent.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Publishing Settings */}
+      <Card className="cognitive-card">
+        <CardHeader>
+          <CardTitle>Publishing Settings</CardTitle>
+          <CardDescription>Control module status and visibility</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <Label>Status</Label>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  className="flex items-center space-x-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="draft" id="status-draft" />
+                    <Label htmlFor="status-draft" className="flex items-center cursor-pointer font-normal">
+                      <FileText className="mr-1.5 h-4 w-4 text-orange-500" />
+                      Draft
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="published" id="status-published" />
+                    <Label htmlFor="status-published" className="flex items-center cursor-pointer font-normal">
+                      <CheckCircle className="mr-1.5 h-4 w-4 text-green-500" />
+                      Published
+                    </Label>
+                  </div>
+                </RadioGroup>
+              )}
+            />
+          </div>
+
+          <div className="space-y-3">
+            <Label>Visibility</Label>
+            <Controller
+              name="visibility"
+              control={control}
+              render={({ field }) => (
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  className="flex items-center space-x-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="public" id="visibility-public" />
+                    <Label htmlFor="visibility-public" className="flex items-center cursor-pointer font-normal">
+                      <Globe className="mr-1.5 h-4 w-4 text-blue-500" />
+                      Public
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="private" id="visibility-private" />
+                    <Label htmlFor="visibility-private" className="flex items-center cursor-pointer font-normal">
+                      <Lock className="mr-1.5 h-4 w-4 text-purple-500" />
+                      Private
+                    </Label>
+                  </div>
+                </RadioGroup>
+              )}
+            />
+            <p className="text-xs text-muted-foreground">
+              Public modules can be added to any course. Private modules are only accessible to you.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Module Statistics */}
+      <Card className="cognitive-card">
+        <CardHeader>
+          <CardTitle>Module Statistics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-synapse-primary" />
+                <p className="text-sm font-medium text-muted-foreground">Status</p>
+              </div>
+              <Badge variant={watchedStatus === 'published' ? 'default' : 'outline'}>
+                {watchedStatus}
+              </Badge>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Layers className="h-4 w-4 text-neural-primary" />
+                <p className="text-sm font-medium text-muted-foreground">Sub-modules</p>
+              </div>
+              <p className="text-2xl font-bold">{module.subModules?.length || 0}</p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-cognition-teal" />
+                <p className="text-sm font-medium text-muted-foreground">Created</p>
+              </div>
+              <p className="text-sm font-semibold">
+                {new Date(module.createdAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-cognition-orange" />
+                <p className="text-sm font-medium text-muted-foreground">Updated</p>
+              </div>
+              <p className="text-sm font-semibold">
+                {new Date(module.updatedAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Danger Zone */}
+      <Card className="cognitive-card border-red-200 dark:border-red-900">
+        <CardHeader>
+          <CardTitle className="text-sm text-red-600 dark:text-red-400 flex items-center">
+            <AlertCircle className="mr-2 h-4 w-4" />
+            Danger Zone
+          </CardTitle>
+          <CardDescription>
+            Irreversible actions that permanently affect this module
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <NeuralButton
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={deleteMutation.isPending}
+            className="w-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete Module
+          </NeuralButton>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // TEAM CONTENT: Collaborators + Activity Feed
+  const teamContent = (
+    <div className="space-y-6">
+      <CollaboratorPanel
+        entityType="module"
+        entityId={moduleId}
+        authorId={module.author_id}
+      />
+      <ActivityFeed
+        entityType="module"
+        entityId={moduleId}
+        limit={10}
+      />
+    </div>
+  );
+
+  // MEDIA CONTENT: Media Library
+  const mediaContent = (
+    <MediaLibraryPanel
+      moduleId={moduleId}
+      onMediaSelect={(file, altText, caption) => {
+        if (insertImageFn) {
+          insertImageFn(file.url, altText || file.originalName, caption);
+        }
+      }}
+    />
+  );
+
+  // ============================================================================
+  // MAIN RENDER
+  // ============================================================================
+
+  return (
+    <>
+      <ResponsiveEditLayout
+        header={{
+          title: "Edit Module",
+          subtitle: `Modify content and settings for: ${module.title}`,
+          backHref: `/faculty/modules/${moduleId}`,
+          backLabel: "Back to Module",
+          previewHref: `/modules/${module.slug}`,
+          collaboratorCount: 0, // TODO: Get actual count from API
+          onSave: handleSubmit(onSubmit),
+          isSaving: isSubmitting || updateMutation.isPending,
+          saveDisabled: isSubmitting || updateMutation.isPending,
+          icon: module.parentModule ? 'layers' : 'brain',
+        }}
+        editTabContent={editTabContent}
+        settingsTabContent={settingsTabContent}
+        teamContent={teamContent}
+        mediaContent={mediaContent}
+      />
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <Card className="w-full max-w-md">
             <CardHeader>
               <CardTitle className="flex items-center text-red-600">
@@ -826,6 +695,6 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
           </Card>
         </div>
       )}
-    </div>
+    </>
   )
 }
