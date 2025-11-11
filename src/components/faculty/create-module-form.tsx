@@ -414,7 +414,7 @@ export function CreateModuleForm() {
       </div>
       <h3 className="text-lg font-semibold mb-2">Collaboration Coming Soon</h3>
       <p className="text-muted-foreground max-w-sm mx-auto">
-        After creating this module, you'll be able to add collaborators and track activity from the edit page.
+        After creating this module, you&apos;ll be able to add collaborators and track activity from the edit page.
       </p>
     </div>
   );
@@ -427,7 +427,7 @@ export function CreateModuleForm() {
         <AlertDescription>
           <strong>Media Library Available After Creation</strong>
           <p className="mt-2 text-sm">
-            Once you create this module, you'll be able to upload images and other media files. For now, focus on writing your content!
+            Once you create this module, you&apos;ll be able to upload images and other media files. For now, focus on writing your content!
           </p>
         </AlertDescription>
       </Alert>
