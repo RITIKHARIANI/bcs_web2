@@ -28,6 +28,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { NeuralButton } from '@/components/ui/neural-button'
 import { TagsInput } from '@/components/ui/tags-input'
+import { ResponsiveEditLayout } from '@/components/layout/ResponsiveEditLayout'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -344,380 +345,331 @@ export function CreateCourseForm() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center justify-between gap-2 md:gap-4">
-            {/* Left Section - Back Button + Title */}
-            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-              <Link href="/faculty/courses">
-                <NeuralButton variant="ghost" size="sm">
-                  <ArrowLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline ml-2">Back to Courses</span>
-                </NeuralButton>
-              </Link>
-              <Separator orientation="vertical" className="h-6 hidden sm:block" />
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                {/* Hide icon on mobile to save space */}
-                <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-neural flex-shrink-0">
-                  <BookOpen className="h-6 w-6 text-primary-foreground" />
-                </div>
-                <div className="min-w-0">
-                  <h1 className="text-2xl md:text-3xl font-bold text-neural-primary truncate leading-tight">
-                    Create New Course
-                  </h1>
-                  {/* Hide subtitle on very small screens */}
-                  <p className="hidden sm:block text-xs sm:text-sm text-muted-foreground truncate">
-                    Assemble modules into a complete learning experience
-                  </p>
-                </div>
-              </div>
-            </div>
+  // ============================================================================
+  // RENDER SECTIONS FOR NEW LAYOUT
+  // ============================================================================
 
-            {/* Right Section - Action Button */}
-            {/* PRIMARY BUTTON: Create Course - Orange Solid */}
+  // EDIT TAB: Module Selection
+  const editTabContent = (
+    <div className="space-y-6">
+      {/* Module Assembly */}
+      <Card className="cognitive-card">
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center">
+                <Layers className="mr-2 h-5 w-5 text-neural-primary" />
+                Course Assembly
+              </CardTitle>
+              <CardDescription>Build your course by selecting and arranging modules</CardDescription>
+            </div>
             <NeuralButton
               variant="neural"
               size="sm"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isSubmitting}
-              className="flex-shrink-0 min-h-[44px] min-w-[44px] bg-[#FF6B35] hover:bg-[#E55A28] text-white font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              onClick={() => setShowModuleSelector(!showModuleSelector)}
             >
-              <Save className="h-4 w-4" />
-              <span className="hidden md:inline ml-2">
-                {isSubmitting ? 'Creating...' : 'Create Course'}
-              </span>
+              <Plus className="mr-2 h-4 w-4" />
+              {showModuleSelector ? 'Hide' : 'Add'} Modules
             </NeuralButton>
           </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Course Settings */}
-          <div className="lg:col-span-1 space-y-6">
-            <Card className="cognitive-card">
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Module Selector */}
+          {showModuleSelector && (
+            <Card className="border-2 border-blue-200 dark:border-blue-900">
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="mr-2 h-5 w-5 text-neural-primary" />
-                  Course Details
+                <CardTitle className="text-base flex items-center">
+                  <Search className="mr-2 h-4 w-4 text-neural-primary" />
+                  Select Modules
                 </CardTitle>
-                <CardDescription>
-                  Configure the basic information for your course
-                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Basic Information Section */}
-                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="font-medium text-sm">Title *</Label>
-                    <Input
-                      id="title"
-                      placeholder="Enter course title..."
-                      {...register('title')}
-                      className="h-11 p-4 border-neural-light/30 focus:border-neural-primary transition-colors"
-                    />
-                    {errors.title && (
-                      <p className="text-sm text-red-500">{errors.title.message}</p>
-                    )}
-                  </div>
+              <CardContent className="space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search modules..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="slug" className="font-medium text-sm" title="URL-friendly identifier, automatically generated from title">URL Slug *</Label>
-                    <div className="relative">
-                      <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        id="slug"
-                        placeholder="url-friendly-slug"
-                        {...register('slug')}
-                        className="h-11 p-4 pl-10 border-neural-light/30 focus:border-neural-primary transition-colors"
-                        title="URL-friendly identifier, automatically generated from title"
-                      />
+                <div className="max-h-64 overflow-y-auto space-y-2">
+                  {isLoadingModules ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center justify-between p-3 border rounded-lg animate-pulse">
+                          <div className="flex-1 space-y-2">
+                            <div className="h-4 bg-muted rounded w-3/4"></div>
+                            <div className="h-3 bg-muted rounded w-1/2"></div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    {errors.slug && (
-                      <p className="text-sm text-red-500">{errors.slug.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description" className="font-medium text-sm">Description</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Brief description of the course..."
-                      rows={3}
-                      {...register('description')}
-                      className="p-4 border-neural-light/30 focus:border-neural-primary transition-colors resize-none"
-                    />
-                  </div>
-                </div>
-
-                <Separator className="my-6" />
-
-                {/* Categorization Section */}
-                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
-                  <TagsInput
-                    value={tags}
-                    onChange={setTags}
-                    label="Tags"
-                    placeholder="Add tags to categorize this course..."
-                    suggestions={availableTags}
-                    maxTags={10}
-                    id="tags"
-                  />
-                </div>
-
-                <Separator className="my-6" />
-
-                {/* Publishing Settings Section */}
-                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
-                  <div className="space-y-3">
-                    <Label htmlFor="status" className="font-medium text-sm" title="Draft: Not visible to students. Published: Live and accessible">Status</Label>
-                  <Controller
-                    name="status"
-                    control={control}
-                    render={({ field }) => (
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        className="flex items-center space-x-4"
+                  ) : availableModules.length > 0 ? (
+                    availableModules.map((module) => (
+                      <div
+                        key={module.id}
+                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                       >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="draft" id="status-draft" />
-                          <Label
-                            htmlFor="status-draft"
-                            className="flex items-center cursor-pointer font-normal"
-                          >
-                            <FileText className="mr-1.5 h-4 w-4 text-orange-500" />
-                            Draft
-                          </Label>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {module.parentModule ? (
+                              <Layers className="h-4 w-4 text-synapse-primary flex-shrink-0" />
+                            ) : (
+                              <BookOpen className="h-4 w-4 text-neural-primary flex-shrink-0" />
+                            )}
+                            <span className="font-medium truncate">{module.title}</span>
+                            <Badge variant={module.status === 'published' ? 'default' : 'outline'} className="text-xs">
+                              {module.status}
+                            </Badge>
+                          </div>
+                          {module.description && (
+                            <p className="text-xs text-muted-foreground mt-1 truncate">{module.description}</p>
+                          )}
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="published" id="status-published" />
-                          <Label
-                            htmlFor="status-published"
-                            className="flex items-center cursor-pointer font-normal"
-                          >
-                            <CheckCircle className="mr-1.5 h-4 w-4 text-green-500" />
-                            Published
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    )}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Controller
-                    name="featured"
-                    control={control}
-                    render={({ field }) => (
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="featured"
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                        <Label
-                          htmlFor="featured"
-                          className="text-sm font-normal cursor-pointer"
-                          title="Display this course on homepage and in featured course lists"
+                        <NeuralButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => addModule(module)}
                         >
-                          Feature this course
-                        </Label>
+                          <Plus className="h-4 w-4" />
+                        </NeuralButton>
                       </div>
-                    )}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Featured courses appear prominently on the homepage
-                  </p>
-                  </div>
+                    ))
+                  ) : (
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        {searchTerm ? 'No modules found matching your search.' : 'No modules available.'}
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
               </CardContent>
             </Card>
+          )}
 
-            {/* Course Statistics */}
-            <Card className="cognitive-card">
-              <CardHeader>
-                <CardTitle className="text-sm">Course Statistics</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Modules:</span>
-                  <span className="font-medium">{selectedModules.length}</span>
+          {/* Selected Modules List */}
+          {selectedModules.length > 0 ? (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={selectedModules.map(item => item.moduleId)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-2">
+                  {selectedModules.map((item) => (
+                    <SortableModuleItem
+                      key={item.moduleId}
+                      item={item}
+                      onRemove={removeModule}
+                    />
+                  ))}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Published Modules:</span>
-                  <span className="font-medium">
-                    {selectedModules.filter(item => item.module.status === 'published').length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Status:</span>
-                  <Badge variant={watchedStatus === 'published' ? 'default' : 'outline'}>
-                    {watchedStatus}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Module Assembly */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl md:text-2xl font-semibold text-neural-primary leading-snug">Course Assembly</h2>
+              </SortableContext>
+            </DndContext>
+          ) : (
+            <div className="text-center py-12 px-4">
+              <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                <Layers className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No modules added yet</h3>
+              <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+                Start building your course by adding modules. You can reorder them later by dragging and dropping.
+              </p>
               <NeuralButton
                 variant="neural"
                 size="sm"
-                onClick={() => setShowModuleSelector(!showModuleSelector)}
+                onClick={() => setShowModuleSelector(true)}
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Add Modules
+                Add Your First Module
               </NeuralButton>
             </div>
-
-            {/* Module Selector */}
-            {showModuleSelector && (
-              <Card className="cognitive-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Search className="mr-2 h-5 w-5 text-neural-primary" />
-                    Select Modules
-                  </CardTitle>
-                  <CardDescription>
-                    Choose modules to include in your course
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        placeholder="Search modules..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 border-neural-light/30 focus:border-neural-primary"
-                      />
-                    </div>
-
-                    <div className="max-h-64 overflow-y-auto space-y-2">
-                      {isLoadingModules ? (
-                        <div className="text-center py-4 text-muted-foreground">
-                          Loading modules...
-                        </div>
-                      ) : availableModules.length > 0 ? (
-                        availableModules.map((module) => (
-                          <div
-                            key={module.id}
-                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                          >
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2">
-                                {module.parentModule ? (
-                                  <Layers className="h-4 w-4 text-synapse-primary" />
-                                ) : (
-                                  <BookOpen className="h-4 w-4 text-neural-primary" />
-                                )}
-                                <span className="font-medium">{module.title}</span>
-                                <Badge 
-                                  variant={module.status === 'published' ? 'default' : 'outline'}
-                                  className="text-xs"
-                                >
-                                  {module.status}
-                                </Badge>
-                              </div>
-                              {module.description && (
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  {module.description}
-                                </p>
-                              )}
-                            </div>
-                            <NeuralButton
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => addModule(module)}
-                            >
-                              <Plus className="h-4 w-4" />
-                            </NeuralButton>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-4 text-muted-foreground">
-                          {searchTerm ? 'No modules found matching your search' : 'All modules have been added'}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Course Module List */}
-            <Card className="cognitive-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Layers className="mr-2 h-5 w-5 text-neural-primary" />
-                  Course Modules ({selectedModules.length})
-                </CardTitle>
-                <CardDescription>
-                  Drag and drop to reorder modules. Students will follow this sequence.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {selectedModules.length > 0 ? (
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <SortableContext
-                      items={selectedModules.map(item => item.moduleId)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <div className="space-y-3">
-                        {selectedModules.map((item, index) => (
-                          <div key={item.moduleId} className="flex items-center space-x-3">
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-neural flex items-center justify-center text-white text-sm font-medium">
-                              {index + 1}
-                            </div>
-                            <div className="flex-1">
-                              <SortableModuleItem
-                                item={item}
-                                onRemove={removeModule}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
-                ) : (
-                  <div className="text-center py-12 px-4">
-                    <div className="mx-auto w-16 h-16 rounded-full bg-gradient-neural flex items-center justify-center mb-4">
-                      <Layers className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                      No modules yet
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-                      Your course is waiting for modules! Add your first module to start building your curriculum.
-                    </p>
-                    <NeuralButton
-                      variant="neural"
-                      size="sm"
-                      onClick={() => setShowModuleSelector(true)}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add First Module
-                    </NeuralButton>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </main>
+          )}
+        </CardContent>
+      </Card>
     </div>
+  );
+
+  // SETTINGS TAB: Course Details + Publishing
+  const settingsTabContent = (
+    <div className="space-y-6">
+      {/* Course Details */}
+      <Card className="cognitive-card">
+        <CardHeader>
+          <CardTitle>Course Details</CardTitle>
+          <CardDescription>Configure the basic information for your course</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                placeholder="Enter course title..."
+                {...register('title')}
+              />
+              {errors.title && (
+                <p className="text-sm text-red-500">{errors.title.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="slug">URL Slug *</Label>
+              <div className="relative">
+                <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="slug"
+                  placeholder="url-friendly-slug"
+                  {...register('slug')}
+                  className="pl-10"
+                />
+              </div>
+              {errors.slug && (
+                <p className="text-sm text-red-500">{errors.slug.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              placeholder="Brief description of the course..."
+              rows={4}
+              {...register('description')}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <TagsInput
+              value={tags}
+              onChange={setTags}
+              label="Tags"
+              placeholder="Add tags..."
+              suggestions={availableTags}
+              maxTags={10}
+              id="tags"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Publishing Settings */}
+      <Card className="cognitive-card">
+        <CardHeader>
+          <CardTitle>Publishing Settings</CardTitle>
+          <CardDescription>Control course status and visibility</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <Label>Status</Label>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  className="flex items-center space-x-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="draft" id="status-draft" />
+                    <Label htmlFor="status-draft" className="flex items-center cursor-pointer font-normal">
+                      <FileText className="mr-1.5 h-4 w-4 text-orange-500" />
+                      Draft
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="published" id="status-published" />
+                    <Label htmlFor="status-published" className="flex items-center cursor-pointer font-normal">
+                      <CheckCircle className="mr-1.5 h-4 w-4 text-green-500" />
+                      Published
+                    </Label>
+                  </div>
+                </RadioGroup>
+              )}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center space-x-2">
+            <Controller
+              name="featured"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  id="featured"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
+            />
+            <Label htmlFor="featured" className="cursor-pointer font-normal">
+              Feature this course on the homepage
+            </Label>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // TEAM CONTENT: Placeholder
+  const teamContent = (
+    <div className="text-center py-12">
+      <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+        <Brain className="h-8 w-8 text-muted-foreground" />
+      </div>
+      <h3 className="text-lg font-semibold mb-2">Collaboration Coming Soon</h3>
+      <p className="text-muted-foreground max-w-sm mx-auto">
+        After creating this course, you&apos;ll be able to add collaborators and track activity from the edit page.
+      </p>
+    </div>
+  );
+
+  // MEDIA CONTENT: Placeholder
+  const mediaContent = (
+    <div className="p-4">
+      <Alert>
+        <BookOpen className="h-4 w-4" />
+        <AlertDescription>
+          <strong>Media Library Not Available</strong>
+          <p className="mt-2 text-sm">
+            Courses organize modules and don&apos;t have their own media library. Media files are managed at the module level.
+          </p>
+        </AlertDescription>
+      </Alert>
+    </div>
+  );
+
+  // ============================================================================
+  // MAIN RENDER
+  // ============================================================================
+
+  return (
+    <ResponsiveEditLayout
+      header={{
+        title: "Create Course",
+        subtitle: "Build a new learning course",
+        backHref: "/faculty/courses",
+        backLabel: "Back to Courses",
+        collaboratorCount: 0,
+        onSave: handleSubmit(onSubmit),
+        isSaving: isSubmitting || createCourseMutation.isPending,
+        saveDisabled: isSubmitting || createCourseMutation.isPending,
+        icon: 'brain',
+      }}
+      editTabContent={editTabContent}
+      settingsTabContent={settingsTabContent}
+      teamContent={teamContent}
+      mediaContent={mediaContent}
+      defaultTab="edit"
+    />
   )
 }
