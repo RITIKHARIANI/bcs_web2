@@ -30,9 +30,9 @@ export function MobileModuleDrawer({
         <NeuralButton
           onClick={toggleDrawer}
           size="lg"
-          className="h-14 w-14 rounded-full shadow-lg"
+          className="h-14 w-14 rounded-full shadow-lg text-white"
         >
-          <Menu className="h-6 w-6" />
+          <Menu className="h-6 w-6 text-white" />
           <span className="sr-only">Open module navigation</span>
         </NeuralButton>
       </div>
