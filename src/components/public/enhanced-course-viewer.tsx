@@ -16,6 +16,7 @@ import { ModuleResources } from '@/components/public/module-resources'
 import { ModuleTreeSidebar } from '@/components/modules/module-tree-sidebar'
 import { InstructorsSection } from '@/components/public/instructors-section'
 import { ReadingProgressBar } from '@/components/public/reading-progress-bar'
+import { CourseNotesSection } from '@/components/public/course-notes-section'
 import type { ModuleTreeNode } from '@/lib/modules/tree-utils'
 import {
   ArrowLeft,
@@ -72,6 +73,10 @@ interface Module {
 
 interface CourseModule {
   sortOrder: number
+  customTitle?: string | null
+  customNotes?: string | null
+  customContext?: string | null
+  customObjectives?: string | null
   module: Module
 }
 
@@ -147,9 +152,10 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
   const [copiedUrl, setCopiedUrl] = useState(false)
   
   // Find current module and navigation
-  const selectedModule = course.courseModules.find(
+  const selectedCourseModule = course.courseModules.find(
     cm => cm.module.id === selectedModuleId
-  )?.module
+  )
+  const selectedModule = selectedCourseModule?.module
 
   const currentModuleIndex = course.courseModules.findIndex(
     cm => cm.module.id === selectedModuleId
@@ -572,6 +578,16 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Course-Specific Notes */}
+                {selectedCourseModule && (
+                  <CourseNotesSection
+                    customTitle={selectedCourseModule.customTitle}
+                    customNotes={selectedCourseModule.customNotes}
+                    customContext={selectedCourseModule.customContext}
+                    customObjectives={selectedCourseModule.customObjectives}
+                  />
+                )}
 
                 {/* Module Content */}
                 <Card className="cognitive-card">
