@@ -159,16 +159,32 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized - only published modules are publicly accessible' }, { status: 401 })
       }
       whereClause.status = 'published'
-    } 
-    // Faculty access: can see their own modules with any status
+      whereClause.visibility = 'public'
+    }
+    // Faculty access: can see their own modules + published public modules from others
     else if (session.user.role === 'faculty') {
-      whereClause.author_id = session.user.id
-    } 
+      // Build own modules filter (respects status if provided)
+      const ownModulesFilter: any = { author_id: session.user.id }
+      if (status) {
+        ownModulesFilter.status = status
+      }
+
+      whereClause.OR = [
+        // Show own modules (filtered by status if provided)
+        ownModulesFilter,
+        // Show published PUBLIC modules from other users
+        {
+          status: 'published',
+          visibility: 'public'
+        }
+      ]
+    }
     // Other authenticated users: only published modules
     else {
       whereClause.status = 'published'
+      whereClause.visibility = 'public'
     }
-    
+
     // Parent filtering logic - FIXED
     if (parentId === 'root') {
       // Only show root modules (no parent)
@@ -182,11 +198,6 @@ export async function GET(request: NextRequest) {
     }
     // ✅ IMPORTANT: When parentId is undefined or 'all', we DON'T add any parent filtering
     // This allows the query to return ALL modules (both root and sub-modules)
-    
-    // Apply status filter for faculty (public access already has status set)
-    if (status && session?.user?.role === 'faculty') {
-      whereClause.status = status
-    }
 
     // Add tag filtering
     if (tags) {
