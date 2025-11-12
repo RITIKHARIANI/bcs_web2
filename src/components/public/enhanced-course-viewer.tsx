@@ -121,9 +121,10 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(() => {
     if (initialModule) {
       const moduleExists = course.courseModules.find(cm => cm.module.slug === initialModule)
-      return moduleExists ? moduleExists.module.id : course.courseModules[0]?.module?.id || null
+      return moduleExists ? moduleExists.module.id : null
     }
-    return course.courseModules[0]?.module?.id || null
+    // Return null to show course overview when no module specified
+    return null
   })
   
   const [searchQuery, setSearchQuery] = useState(initialSearch)
