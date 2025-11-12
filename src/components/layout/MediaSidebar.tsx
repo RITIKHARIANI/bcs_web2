@@ -22,7 +22,7 @@ export interface MediaSidebarProps {
  */
 export function MediaSidebar({
   children,
-  defaultCollapsed = false,
+  defaultCollapsed = true,
   className,
 }: MediaSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);

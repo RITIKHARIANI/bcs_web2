@@ -185,7 +185,7 @@ function SortableModuleItem({
                 variant="ghost"
                 size="sm"
                 onClick={() => onEditNotes(item.moduleId)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden sm:flex"
+                className="hidden sm:flex"
                 title="Edit course-specific notes"
               >
                 <FileText className="h-4 w-4" />
