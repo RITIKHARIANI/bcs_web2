@@ -14,7 +14,7 @@ import { Separator } from '@/components/ui/separator'
 import { Loading } from '@/components/ui/loading'
 import { ModuleResources } from '@/components/public/module-resources'
 import { ModuleTreeSidebar } from '@/components/modules/module-tree-sidebar'
-import { InstructorSection } from '@/components/public/instructor-section'
+import { InstructorsSection } from '@/components/public/instructors-section'
 import { ReadingProgressBar } from '@/components/public/reading-progress-bar'
 import type { ModuleTreeNode } from '@/lib/modules/tree-utils'
 import {
@@ -98,6 +98,20 @@ interface Course {
     twitter_url?: string | null
     github_url?: string | null
   }
+  collaborators?: Array<{
+    id: string
+    name: string
+    email: string
+    avatar_url?: string | null
+    speciality?: string | null
+    university?: string | null
+    about?: string | null
+    google_scholar_url?: string | null
+    personal_website_url?: string | null
+    linkedin_url?: string | null
+    twitter_url?: string | null
+    github_url?: string | null
+  }>
   courseModules: CourseModule[]
   moduleTree?: ModuleTreeNode[] // Optional hierarchical tree structure
   moduleNumbering?: Record<string, string> // Optional module numbering (e.g., "1.2.3")
@@ -391,8 +405,8 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
               </CardContent>
             </Card>
 
-            {/* Instructor Section */}
-            <InstructorSection instructor={course.author} />
+            {/* Instructors Section */}
+            <InstructorsSection author={course.author} collaborators={course.collaborators} />
           </div>
         )}
 

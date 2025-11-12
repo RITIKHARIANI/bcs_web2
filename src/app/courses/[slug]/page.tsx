@@ -29,6 +29,26 @@ async function getCourse(slug: string) {
             github_url: true,
           },
         },
+        collaborators: {
+          include: {
+            collaborator: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                avatar_url: true,
+                speciality: true,
+                university: true,
+                about: true,
+                google_scholar_url: true,
+                personal_website_url: true,
+                linkedin_url: true,
+                twitter_url: true,
+                github_url: true,
+              },
+            },
+          },
+        },
         course_modules: {
           include: {
             modules: {
@@ -108,6 +128,20 @@ async function getCourse(slug: string) {
         twitter_url: course.users.twitter_url,
         github_url: course.users.github_url,
       },
+      collaborators: course.collaborators.map(collab => ({
+        id: collab.collaborator.id,
+        name: collab.collaborator.name,
+        email: collab.collaborator.email,
+        avatar_url: collab.collaborator.avatar_url,
+        speciality: collab.collaborator.speciality,
+        university: collab.collaborator.university,
+        about: collab.collaborator.about,
+        google_scholar_url: collab.collaborator.google_scholar_url,
+        personal_website_url: collab.collaborator.personal_website_url,
+        linkedin_url: collab.collaborator.linkedin_url,
+        twitter_url: collab.collaborator.twitter_url,
+        github_url: collab.collaborator.github_url,
+      })),
       courseModules: course.course_modules.map(cm => ({
         sortOrder: cm.sort_order,
         module: {
