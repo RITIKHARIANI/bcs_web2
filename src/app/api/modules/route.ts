@@ -368,10 +368,10 @@ export async function GET(request: NextRequest) {
         id: module.modules.id,
         title: module.modules.title,
       } : null,
-      // Transform 'other_modules' to 'subModules' (children relationship) 
+      // Transform 'other_modules' to 'subModules' (children relationship)
       subModules: module.other_modules || [],
       // Transform users (author info)
-      author: module.users,
+      users: module.users,
       // Transform counts
       _count: {
         subModules: module._count?.other_modules || 0,
