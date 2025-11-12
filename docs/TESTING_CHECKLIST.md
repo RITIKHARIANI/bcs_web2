@@ -4565,11 +4565,23 @@ Screenshot: test-profile-002-edit-profile.png
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested January 12, 2025 - Playwright + Manual)
+
+Test Environment: https://bcs-web2.vercel.app/profile/edit
+
+Verified:
+- ✅ Navigated to profile edit page
+- ✅ Cleared the Name field (removed "Ritik Hariani")
+- ✅ Clicked "Save Changes" button
+- ✅ Form submission blocked (no redirect occurred)
+- ✅ Browser validation prevented empty name field
+- ✅ Required field validation working correctly
+
+Screenshot: test-profile-003-validation-error.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: HTML5 required attribute on name field prevents form submission when empty. Validation working as expected.
 
 ---
 
@@ -4622,11 +4634,24 @@ Screenshot: test-profile-002-edit-profile.png
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested January 12, 2025 - Playwright)
+
+Test Environment: https://bcs-web2.vercel.app/profile/edit
+
+Verified:
+- ✅ Navigated to profile edit page
+- ✅ Located "Interested Fields" section with input and "Add" button
+- ✅ Typed "Machine Learning" in the interested fields input
+- ✅ Clicked "Add" button
+- ✅ Field successfully added and displayed as tag
+- ✅ Remove button (×) appeared next to the added field
+- ✅ Field management UI working correctly
+
+Screenshot: test-profile-005-interested-fields.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Add/remove functionality for interested fields working correctly. Fields appear as dismissible tags.
 
 ---
 
@@ -4789,11 +4814,35 @@ Verified:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested January 12, 2025 - Playwright + Supabase)
+
+Test Environment: https://bcs-web2.vercel.app/courses/example-course
+
+Database Query:
+SELECT slug, title, status FROM courses WHERE status = 'published' LIMIT 1
+Result: slug='example-course', title='Example Course', status='published'
+
+Verified:
+- ✅ Navigated to course details page at `/courses/example-course`
+- ✅ Course overview section displayed with title "Example Course"
+- ✅ Instructor section showing:
+  - Ritik Hariani avatar (initials "RH")
+  - Role: "Course Creator"
+  - Clickable link to profile
+- ✅ Course metadata displayed:
+  - 1 Modules
+  - Updated 9/13/2025
+  - Featured Course badge
+- ✅ Module navigation sidebar with "Example Module"
+- ✅ Breadcrumb navigation: Home > Courses > Example Course
+- ✅ Share and fullscreen buttons present
+- ✅ Welcome message: "Select a module from the sidebar to begin..."
+
+Screenshot: test-catalog-005-course-details.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Course details page displays all expected information correctly with proper layout and navigation.
 
 ---
 
@@ -5438,11 +5487,29 @@ Screenshot: test-search-001-002-003-universal-search-all-results.png
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested January 12, 2025 - Playwright)
+
+Test Environment: https://bcs-web2.vercel.app/search?q=xyzabc123nonexistent
+
+Verified:
+- ✅ Searched for nonsense query "xyzabc123nonexistent"
+- ✅ Search results page loaded successfully
+- ✅ Query displayed: 'Showing results for "xyzabc123nonexistent"'
+- ✅ Tabs displayed (all showing 0 results)
+- ✅ Empty state displayed with:
+  - Large search icon (magnifying glass)
+  - Heading: "No results found"
+  - Helpful message: "Try searching with different keywords or browse our course catalog"
+  - Clickable "course catalog" link
+- ✅ Link navigates correctly to `/courses`
+- ✅ No console errors observed
+- ✅ Graceful handling of no results
+
+Screenshot: test-search-005-empty-results.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Empty search state displays helpful message with actionable link to browse courses.
 
 ---
 
@@ -5497,11 +5564,25 @@ Screenshot: test-search-001-002-003-universal-search-all-results.png
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested January 12, 2025 - Playwright)
+
+Test Environment: https://bcs-web2.vercel.app/profile/faculty_1757325463418_m78nfc9w0c
+
+Verified:
+- ✅ Navigated to faculty user profile (Ritik Hariani)
+- ✅ "Faculty" role badge displayed (purple/blue color)
+- ✅ "Instructor" badge displayed next to Faculty badge
+- ✅ Instructor badge has:
+  - Book icon (graduation cap/book symbol)
+  - Emerald/teal color scheme
+  - Proper spacing and alignment
+- ✅ Badge responsive and visible
+
+Screenshot: test-profile-006-007-badges-email.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Instructor badge displays correctly on faculty profiles with proper styling and icon.
 
 ---
 
@@ -5524,11 +5605,23 @@ Screenshot: test-search-001-002-003-universal-search-all-results.png
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested January 12, 2025 - Playwright)
+
+Test Environment: https://bcs-web2.vercel.app/profile/faculty_1757325463418_m78nfc9w0c
+
+Verified:
+- ✅ Email displayed prominently below user name
+- ✅ Mail icon displayed next to email (envelope icon)
+- ✅ Email is clickable link: ritik@gmail.com
+- ✅ Link uses mailto: protocol (href="mailto:ritik@gmail.com")
+- ✅ Email styled with proper color and hover state
+- ✅ Positioned correctly in header section
+
+Screenshot: test-profile-006-007-badges-email.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Email display with mailto link working correctly, allowing users to easily contact profile owner.
 
 ---
 
@@ -6141,11 +6234,36 @@ Screenshot: test-network-001-visualization-display.png
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested January 12, 2025 - Playwright)
+
+Test Environment: https://bcs-web2.vercel.app/api/health
+
+Verified:
+- ✅ Navigated to /api/health endpoint
+- ✅ HTTP 200 status returned
+- ✅ JSON response with comprehensive health information:
+  {
+    "status": "healthy",
+    "timestamp": "2025-11-12T20:46:11.418Z",
+    "environment": "production",
+    "platform": "vercel",
+    "database": "connected",
+    "version": "2.0.0",
+    "features": {
+      "authentication": true,
+      "richTextEditor": false,
+      "graphVisualization": false,
+      "analytics": false
+    }
+  }
+- ✅ Database connection confirmed as "connected"
+- ✅ API responding correctly
+
+Screenshot: test-api-001-health-check.png
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Health check API endpoint returning detailed status information including database connectivity and feature flags.
 
 ---
 
@@ -6437,11 +6555,25 @@ Result:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS (Tested January 12, 2025 - Playwright)
+
+Test Environment: https://bcs-web2.vercel.app/this-page-does-not-exist-404
+
+Verified:
+- ✅ Navigated to non-existent page
+- ✅ 404 page displayed (Next.js default 404 page)
+- ✅ Clear message: "404" and "This page could not be found."
+- ✅ HTTP 404 status returned (verified in console)
+- ✅ Page renders cleanly without errors
+- ✅ Simple, clean design on white background
+
+Screenshot: test-error-001-404-page.png
+
+Note: Currently using Next.js default 404 page. Future enhancement: custom 404 page with navigation links.
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ✅ Pass □ Fail □ NA
+**Notes**: Next.js default 404 page displays correctly. Consider creating custom 404 page with links to home/courses.
 
 ---
 
