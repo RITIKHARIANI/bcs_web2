@@ -3,6 +3,7 @@ import { CourseViewer } from "@/components/public/course-viewer";
 import { PublicLayout } from "@/components/layouts/app-layout";
 import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry';
+import { buildModuleTree, generateModuleNumbering, applyNumberingToTree } from '@/lib/modules/hierarchy-helpers';
 
 async function getCourse(slug: string) {
   try {
@@ -60,6 +61,23 @@ async function getCourse(slug: string) {
       return null;
     }
 
+    // Build hierarchical tree structure from course modules
+    const modules = course.course_modules.map(cm => ({
+      id: cm.modules.id,
+      title: cm.modules.title,
+      slug: cm.modules.slug,
+      description: cm.modules.description,
+      parent_module_id: cm.modules.parent_module_id,
+      sort_order: cm.modules.sort_order,
+      status: cm.modules.status,
+      created_at: cm.modules.created_at,
+      updated_at: cm.modules.updated_at,
+    }))
+
+    const tree = buildModuleTree(modules)
+    const numbering = generateModuleNumbering(tree)
+    applyNumberingToTree(tree, numbering)
+
     // Transform data structure to match component expectations
     return {
       id: course.id,
@@ -93,6 +111,8 @@ async function getCourse(slug: string) {
           updatedAt: cm.modules.updated_at,
         }
       })),
+      moduleTree: tree, // Add hierarchical tree
+      moduleNumbering: Object.fromEntries(numbering), // Add numbering map
       _count: {
         courseModules: course._count.course_modules,
       },

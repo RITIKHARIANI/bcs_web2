@@ -13,9 +13,11 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Loading } from '@/components/ui/loading'
 import { ModuleResources } from '@/components/public/module-resources'
-import { 
-  ArrowLeft, 
-  BookOpen, 
+import { ModuleTreeSidebar } from '@/components/modules/module-tree-sidebar'
+import type { ModuleTreeNode } from '@/lib/modules/hierarchy-helpers'
+import {
+  ArrowLeft,
+  BookOpen,
   User,
   Calendar,
   Layers,
@@ -89,6 +91,8 @@ interface Course {
     university?: string | null
   }
   courseModules: CourseModule[]
+  moduleTree?: ModuleTreeNode[] // Optional hierarchical tree structure
+  moduleNumbering?: Record<string, string> // Optional module numbering (e.g., "1.2.3")
   _count: {
     courseModules: number
   }
@@ -450,86 +454,106 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
             )}
             
             <div className={`${showMobileSidebar ? 'p-4 pt-16' : ''} lg:p-0`}>
-              <Card className="cognitive-card sticky top-24">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center text-base sm:text-lg">
-                    <List className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-neural-primary" />
-                    Course Modules
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    {course.description || 'Interactive learning modules covering key concepts and applications.'}
-                  </CardDescription>
-                  
-                  {/* Search within course */}
-                  <div className="relative mt-3">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="course-search"
-                      placeholder="Search modules..."
-                      className="pl-10 h-9"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2 max-h-96 overflow-y-auto pt-0">
-                  {filteredModules.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">
-                      No modules found matching &quot;{searchQuery}&quot;
-                    </p>
-                  ) : (
-                    filteredModules.map((courseModule, index) => {
-                      const currentModule = courseModule.module
-                      const isSelected = selectedModuleId === currentModule.id
-                      const isCompleted = false // TODO: Add completion tracking
-                      const originalIndex = course.courseModules.findIndex(cm => cm.module.id === currentModule.id)
-                      
-                      return (
-                        <button
-                          key={currentModule.id}
-                          onClick={() => handleModuleSelect(currentModule)}
-                          className={`w-full text-left p-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-neural-primary focus:ring-offset-2 ${
-                            isSelected 
-                              ? 'border-neural-primary bg-neural-primary/10 shadow-sm' 
-                              : 'border-border hover:border-neural-light hover:bg-muted/50'
-                          }`}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                              isCompleted 
-                                ? 'bg-green-500 text-white' 
-                                : isSelected 
-                                  ? 'bg-neural-primary text-white' 
-                                  : 'bg-muted text-muted-foreground'
-                            }`}>
-                              {isCompleted ? (
-                                <CheckCircle className="h-3 w-3" />
-                              ) : (
-                                <span>{originalIndex + 1}</span>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className={`font-medium text-sm ${
-                                isSelected ? 'text-neural-primary' : 'text-foreground'
-                              }`}>
-                                {currentModule.title}
-                              </p>
-                              {currentModule.description && (
-                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                  {currentModule.description}
+              {/* Conditionally render tree sidebar or flat list */}
+              {course.moduleTree && course.moduleTree.length > 0 ? (
+                /* Hierarchical Tree Navigation */
+                <div className="cognitive-card sticky top-24 overflow-hidden rounded-lg border">
+                  <ModuleTreeSidebar
+                    tree={course.moduleTree}
+                    currentModuleId={selectedModuleId || undefined}
+                    baseUrl={`/courses/${course.slug}`}
+                    showSearch={true}
+                  />
+                </div>
+              ) : (
+                /* Fallback: Flat Module List (Backward Compatibility) */
+                <Card className="cognitive-card sticky top-24">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center text-base sm:text-lg">
+                      <List className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-neural-primary" />
+                      Course Modules
+                    </CardTitle>
+                    <CardDescription className="text-sm">
+                      {course.description || 'Interactive learning modules covering key concepts and applications.'}
+                    </CardDescription>
+
+                    {/* Search within course */}
+                    <div className="relative mt-3">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="course-search"
+                        placeholder="Search modules..."
+                        className="pl-10 h-9"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2 max-h-96 overflow-y-auto pt-0">
+                    {filteredModules.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-4 text-center">
+                        No modules found matching &quot;{searchQuery}&quot;
+                      </p>
+                    ) : (
+                      filteredModules.map((courseModule, index) => {
+                        const currentModule = courseModule.module
+                        const isSelected = selectedModuleId === currentModule.id
+                        const isCompleted = false // TODO: Add completion tracking
+                        const originalIndex = course.courseModules.findIndex(
+                          (cm) => cm.module.id === currentModule.id
+                        )
+
+                        return (
+                          <button
+                            key={currentModule.id}
+                            onClick={() => handleModuleSelect(currentModule)}
+                            className={`w-full text-left p-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-neural-primary focus:ring-offset-2 ${
+                              isSelected
+                                ? 'border-neural-primary bg-neural-primary/10 shadow-sm'
+                                : 'border-border hover:border-neural-light hover:bg-muted/50'
+                            }`}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <div
+                                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                                  isCompleted
+                                    ? 'bg-green-500 text-white'
+                                    : isSelected
+                                    ? 'bg-neural-primary text-white'
+                                    : 'bg-muted text-muted-foreground'
+                                }`}
+                              >
+                                {isCompleted ? (
+                                  <CheckCircle className="h-3 w-3" />
+                                ) : (
+                                  <span>{originalIndex + 1}</span>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p
+                                  className={`font-medium text-sm ${
+                                    isSelected ? 'text-neural-primary' : 'text-foreground'
+                                  }`}
+                                >
+                                  {currentModule.title}
                                 </p>
+                                {currentModule.description && (
+                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                    {currentModule.description}
+                                  </p>
+                                )}
+                              </div>
+                              {isSelected && (
+                                <ChevronRight className="h-4 w-4 text-neural-primary flex-shrink-0" />
                               )}
                             </div>
-                            {isSelected && (
-                              <ChevronRight className="h-4 w-4 text-neural-primary flex-shrink-0" />
-                            )}
-                          </div>
-                        </button>
-                      )
-                    })
-                  )}
-                </CardContent>
-              </Card>
+                          </button>
+                        )
+                      })
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
 
