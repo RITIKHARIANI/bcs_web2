@@ -14,6 +14,8 @@ import { Separator } from '@/components/ui/separator'
 import { Loading } from '@/components/ui/loading'
 import { ModuleResources } from '@/components/public/module-resources'
 import { ModuleTreeSidebar } from '@/components/modules/module-tree-sidebar'
+import { InstructorSection } from '@/components/public/instructor-section'
+import { ReadingProgressBar } from '@/components/public/reading-progress-bar'
 import type { ModuleTreeNode } from '@/lib/modules/tree-utils'
 import {
   ArrowLeft,
@@ -89,6 +91,12 @@ interface Course {
     avatar_url?: string | null
     speciality?: string | null
     university?: string | null
+    about?: string | null
+    google_scholar_url?: string | null
+    personal_website_url?: string | null
+    linkedin_url?: string | null
+    twitter_url?: string | null
+    github_url?: string | null
   }
   courseModules: CourseModule[]
   moduleTree?: ModuleTreeNode[] // Optional hierarchical tree structure
@@ -122,7 +130,6 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
-  const [readingProgress, setReadingProgress] = useState(0)
   
   // Find current module and navigation
   const selectedModule = course.courseModules.find(
@@ -179,18 +186,6 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
     }
   }, [selectedModule, searchQuery, searchParams])
 
-  // Reading progress tracking
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.pageYOffset
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight
-      const progress = Math.min((scrollTop / docHeight) * 100, 100)
-      setReadingProgress(progress)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   // Handle module selection
   const handleModuleSelect = (module: Module) => {
@@ -265,11 +260,8 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
 
   return (
     <div className={`min-h-screen bg-background ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
-      {/* Reading Progress Bar */}
-      <div 
-        className="fixed top-0 left-0 h-1 bg-neural-primary transition-all duration-200 z-50"
-        style={{ width: `${readingProgress}%` }}
-      />
+      {/* Reading Progress Bar - Only show when viewing a module */}
+      {selectedModule && <ReadingProgressBar />}
 
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -399,42 +391,7 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
             </Card>
 
             {/* Instructor Section */}
-            <Card className="cognitive-card">
-              <CardHeader>
-                <CardTitle className="text-2xl flex items-center gap-2">
-                  <User className="h-6 w-6 text-neural-primary" />
-                  Instructor
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Link href={`/profile/${course.author.id}`} className="flex items-center gap-4 hover:bg-muted/50 p-4 rounded-lg transition-colors">
-                  {course.author.avatar_url ? (
-                    <Image
-                      src={course.author.avatar_url}
-                      alt={course.author.name}
-                      width={64}
-                      height={64}
-                      className="w-16 h-16 rounded-full border-2 border-neural-primary object-cover"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full border-2 border-neural-primary bg-gradient-to-br from-neural-primary to-synapse-primary flex items-center justify-center text-white text-2xl font-bold">
-                      {course.author.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-foreground hover:text-neural-primary transition-colors">
-                      {course.author.name}
-                    </h3>
-                    {course.author.speciality && (
-                      <p className="text-sm text-muted-foreground">{course.author.speciality}</p>
-                    )}
-                    {course.author.university && (
-                      <p className="text-sm text-muted-foreground">{course.author.university}</p>
-                    )}
-                  </div>
-                </Link>
-              </CardContent>
-            </Card>
+            <InstructorSection instructor={course.author} />
           </div>
         )}
 

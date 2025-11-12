@@ -5221,11 +5221,29 @@ Verified:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS - All expected elements displayed correctly
+- Course title "Neural Networks 101" displayed prominently
+- Author information "by Ritik Hariani • 8 modules" shown in header
+- First module "Neural Networks" auto-selected and displayed
+- Module content shows title, description, metadata (Module 1 of 8, 1 min read)
+- Last updated date shown: "Updated 11/11/2025"
+- Author name: "Ritik Hariani"
+- Featured badge displayed in header
+- "All Course Modules" section shows grid of all 8 modules with descriptions
+- Hierarchical tree navigation sidebar displayed on left (desktop)
+- Breadcrumb navigation: Home > Courses > Neural Networks 101 > Neural Networks
+
+NEW FEATURES (from redesign):
+- Hierarchical tree sidebar with expandable/collapsible nodes
+- Module numbering: 1, 1.1, 1.2, 1.2.1, etc.
+- Search functionality in tree sidebar
+- Expand All / Collapse controls
+- Auto-expansion of current module's ancestors
+- "8 modules total" counter at bottom of sidebar
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: Layout completely redesigned with hierarchical tree navigation. All core features working correctly.
 
 ---
 
@@ -5246,11 +5264,21 @@ Verified:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+⚠️ PARTIAL PASS - Instructor information displayed but not as dedicated section
+- Instructor name shown in course header: "by Ritik Hariani"
+- Instructor name shown in module metadata: "Ritik Hariani" with icon
+- No dedicated instructor bio section visible
+- No instructor avatar/photo displayed
+- No speciality or university information shown
+- No clickable link to instructor profile
+
+CURRENT IMPLEMENTATION:
+- Basic author attribution in header and metadata
+- Missing: dedicated instructor section with bio, avatar, credentials
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: □ Pass ☑ Fail □ NA
+**Notes**: Redesign focused on module navigation. Instructor section needs to be added with full profile information, avatar, and clickable link to profile page.
 
 ---
 
@@ -5273,11 +5301,33 @@ Verified:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS - Hierarchical tree navigation working perfectly
+- Clicking module in tree loads content instantly
+- Current module highlighted with blue background and border
+- URL updates: ?module=neural-networks, ?module=nn-introduction, etc.
+- Breadcrumb updates to show current module path
+- Content rendered with proper formatting (headings, paragraphs, metadata)
+- Tree auto-expands parent nodes when child is selected
+- Smooth transitions between modules
+
+NEW HIERARCHICAL FEATURES:
+- Expandable/collapsible tree nodes with chevron icons
+- Parent modules show Layers icon, children show Circle icon
+- Root modules show BookOpen icon
+- Hierarchical numbering: 1, 1.1, 1.1.1, 1.2, 1.2.1, etc.
+- Visual hierarchy with indentation (16px per level)
+- Color coding by depth level (neural-primary, synapse-primary, cognition-teal)
+- Auto-expansion of ancestors when navigating to child module
+
+TESTED NAVIGATION:
+- Clicked "1.1. Introduction" → expanded to show children
+- Children displayed: "1.1.1. History", "1.1.2. Basic Concepts"
+- Clicked "1.2. Architectures" → expanded to show children
+- Children displayed: "1.2.1. Feedforward", "1.2.2. Recurrent"
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: Hierarchical tree navigation exceeds expectations. Major improvement over flat list.
 
 ---
 
@@ -5299,11 +5349,27 @@ Verified:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS - Search functionality working excellently with smart auto-expansion
+- Search box prominently displayed in MODULE NAVIGATION sidebar
+- Typed "feedforward" → tree instantly filtered
+- Matching module "1.2.1. Feedforward Networks" displayed
+- Parent nodes auto-expanded to show matching children
+- Tree automatically opened "1. Neural Networks" → "1.2. Architectures" → "1.2.1. Feedforward Networks"
+- Non-matching modules remain visible (tree structure preserved)
+- Clear search button (X icon) appears when typing
+- Clicked clear → tree returns to normal state
+- Search appears to match: title, description, and numbering
+
+TESTED:
+- Search term: "feedforward"
+- Result: Found "1.2.1. Feedforward Networks"
+- Parent "1.2. Architectures" auto-expanded
+- Grandparent "1. Neural Networks" auto-expanded
+- Clear button worked perfectly
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: Search with smart auto-expansion of ancestors is a great UX feature. Makes finding nested modules easy.
 
 ---
 
@@ -5325,11 +5391,28 @@ Verified:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS - Keyboard navigation working perfectly with smart tree behavior
+- Started on Module 1 "Neural Networks"
+- Pressed Right Arrow → Navigated to Module 2 "Introduction"
+- URL updated: ?module=nn-introduction
+- Content updated instantly with smooth transition
+- Tree auto-expanded "1.1. Introduction" and showed children
+- Breadcrumb updated: "...> Introduction"
+- Module counter updated: "Module 2 of 8"
+- Pressed Left Arrow → Navigated back to Module 1 "Neural Networks"
+- URL updated: ?module=neural-networks
+- Content and tree state restored
+- No errors at boundaries
+
+SMART TREE BEHAVIOR:
+- When navigating to parent module, children collapse
+- When navigating to child module, parent auto-expands
+- Maintains hierarchical context visually
+- Keyboard tip displayed: "💡 Tip: Use keyboard arrows (← →) to navigate between modules..."
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: Keyboard navigation with automatic tree expansion/collapse provides excellent UX. Works seamlessly.
 
 ---
 
@@ -5351,11 +5434,18 @@ Verified:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+✅ PASS - Share functionality working with clear feedback
+- Share button visible in course header (share icon)
+- Located next to Featured badge and fullscreen button
+- Clicked share button → Button text changed to "URL Copied"
+- Visual feedback provided (button state change)
+- URL includes current module: /courses/neural-networks-101?module=neural-networks
+- Button returns to normal state after brief delay
+- Functionality works on both course and module views
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: ☑ Pass □ Fail □ NA
+**Notes**: Share button provides clear visual feedback. URL includes module parameter for direct linking.
 
 ---
 
@@ -5377,11 +5467,29 @@ Verified:
 
 ### Actual Result:
 ```
-[Enter what actually happened]
+⚠️ PARTIAL PASS - Progress indicators present but no scroll-based progress bar
+- No progress bar at top of page that fills as you scroll
+- Multiple progress indicators present:
+  - "Module 1 of 8" showing position in course
+  - "1 min read" showing estimated reading time
+  - "Current" badge on active module in grid
+  - Progress dots at bottom: "1 of 8 modules"
+  - Visual indicator (blue dot) next to current module in tree
+  - Module counter updates as you navigate
+
+MISSING FEATURE:
+- Scroll-based reading progress bar (thin bar at top that fills 0-100% as you scroll)
+- This was expected but not implemented in current design
+
+EXISTING PROGRESS FEATURES:
+- Course-level progress: "1 of 8 modules" with pagination dots
+- Module position: "Module 1 of 8"
+- Reading time estimate: "1 min read"
+- Visual highlighting of current module
 ```
 
-**Status**: □ Pass □ Fail □ NA
-**Notes**:
+**Status**: □ Pass ☑ Fail □ NA
+**Notes**: Multiple progress indicators exist but the specific scroll-based progress bar feature is not implemented. Consider adding thin progress bar at top that fills as user scrolls through module content.
 
 ---
 
