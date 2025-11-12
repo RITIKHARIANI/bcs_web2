@@ -153,6 +153,19 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
   const [availableTags, setAvailableTags] = useState<string[]>([])
   const [insertImageFn, setInsertImageFn] = useState<((url: string, alt?: string, caption?: string) => void) | null>(null)
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (showDeleteConfirm) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showDeleteConfirm])
+
   const { data: module, isLoading: isLoadingModule, error: moduleError } = useQuery({
     queryKey: ['module', moduleId],
     queryFn: () => fetchModule(moduleId),
@@ -647,7 +660,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
   // ============================================================================
 
   return (
-    <>
+    <div>
       <ResponsiveEditLayout
         header={{
           title: "Edit Module",
@@ -669,8 +682,8 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center px-2 sm:px-4 pt-8 sm:pt-12 pb-4 z-[100]">
+          <Card className="w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle className="flex items-center text-red-600">
                 <AlertCircle className="mr-2 h-5 w-5" />
@@ -703,6 +716,6 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
           </Card>
         </div>
       )}
-    </>
+    </div>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { NeuralButton } from '@/components/ui/neural-button'
@@ -83,6 +83,20 @@ export function CollaboratorPanel({
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null)
   const [cascadeToModules, setCascadeToModules] = useState(false)
   const queryClient = useQueryClient()
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    const isModalOpen = showAddDialog || confirmRemoveId !== null
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showAddDialog, confirmRemoveId])
 
   const {
     data,
@@ -186,112 +200,110 @@ export function CollaboratorPanel({
   const count = data?.count || 0
 
   return (
-    <>
-      <Card className="cognitive-card">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center">
-                <Users className="mr-2 h-5 w-5 text-neural-primary" />
-                Collaborators
-              </CardTitle>
-              <CardDescription>
-                {count === 0
-                  ? 'No collaborators yet'
-                  : `${count} ${count === 1 ? 'collaborator' : 'collaborators'}`}
-              </CardDescription>
+    <Card className="cognitive-card">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center">
+              <Users className="mr-2 h-5 w-5 text-neural-primary" />
+              Collaborators
+            </CardTitle>
+            <CardDescription>
+              {count === 0
+                ? 'No collaborators yet'
+                : `${count} ${count === 1 ? 'collaborator' : 'collaborators'}`}
+            </CardDescription>
+          </div>
+          <NeuralButton
+            variant="neural"
+            size="sm"
+            onClick={() => setShowAddDialog(true)}
+          >
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add
+          </NeuralButton>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {count === 0 ? (
+          <div className="text-center py-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-neural/10 mb-4">
+              <Users className="h-8 w-8 text-neural-primary opacity-50" />
             </div>
+            <h3 className="font-medium text-foreground mb-2">No collaborators yet</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Add faculty members to collaborate on this {entityType}.
+            </p>
             <NeuralButton
               variant="neural"
               size="sm"
               onClick={() => setShowAddDialog(true)}
             >
               <UserPlus className="mr-2 h-4 w-4" />
-              Add
+              Add First Collaborator
             </NeuralButton>
           </div>
-        </CardHeader>
-        <CardContent>
-          {count === 0 ? (
-            <div className="text-center py-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-neural/10 mb-4">
-                <Users className="h-8 w-8 text-neural-primary opacity-50" />
-              </div>
-              <h3 className="font-medium text-foreground mb-2">No collaborators yet</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Add faculty members to collaborate on this {entityType}.
-              </p>
-              <NeuralButton
-                variant="neural"
-                size="sm"
-                onClick={() => setShowAddDialog(true)}
+        ) : (
+          <div className="space-y-3">
+            {collaborators.map((collaborator) => (
+              <div
+                key={collaborator.id}
+                className="flex items-center justify-between p-3 rounded-lg border border-border/40 hover:border-neural-primary/30 transition-colors"
               >
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add First Collaborator
-              </NeuralButton>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {collaborators.map((collaborator) => (
-                <div
-                  key={collaborator.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border/40 hover:border-neural-primary/30 transition-colors"
-                >
-                  <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gradient-neural flex-shrink-0">
-                      {collaborator.user.avatar_url ? (
-                        <Image
-                          src={collaborator.user.avatar_url}
-                          alt={collaborator.user.name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center text-primary-foreground font-semibold">
-                          {collaborator.user.name
-                            .split(' ')
-                            .map((n) => n[0])
-                            .join('')
-                            .toUpperCase()
-                            .slice(0, 2)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground truncate">
-                        {collaborator.user.name}
-                      </p>
-                      <div className="flex items-center space-x-3 text-xs text-muted-foreground">
-                        <span className="flex items-center">
-                          <Edit className="mr-1 h-3 w-3" />
-                          {collaborator.editCount} edits
-                        </span>
-                        <span className="flex items-center">
-                          <Clock className="mr-1 h-3 w-3" />
-                          {new Date(collaborator.lastAccessed).toLocaleDateString()}
-                        </span>
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gradient-neural flex-shrink-0">
+                    {collaborator.user.avatar_url ? (
+                      <Image
+                        src={collaborator.user.avatar_url}
+                        alt={collaborator.user.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-primary-foreground font-semibold">
+                        {collaborator.user.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()
+                          .slice(0, 2)}
                       </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground truncate">
+                      {collaborator.user.name}
+                    </p>
+                    <div className="flex items-center space-x-3 text-xs text-muted-foreground">
+                      <span className="flex items-center">
+                        <Edit className="mr-1 h-3 w-3" />
+                        {collaborator.editCount} edits
+                      </span>
+                      <span className="flex items-center">
+                        <Clock className="mr-1 h-3 w-3" />
+                        {new Date(collaborator.lastAccessed).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
-                  <NeuralButton
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setConfirmRemoveId(collaborator.userId)}
-                    disabled={removeMutation.isPending}
-                  >
-                    <X className="h-4 w-4 text-red-500" />
-                  </NeuralButton>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <NeuralButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setConfirmRemoveId(collaborator.userId)}
+                  disabled={removeMutation.isPending}
+                >
+                  <X className="h-4 w-4 text-red-500" />
+                </NeuralButton>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
 
       {/* Add Collaborator Dialog */}
       {showAddDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <Card className="w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center px-2 sm:px-4 pt-8 sm:pt-12 pb-4 z-[100]">
+          <Card className="w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <UserPlus className="mr-2 h-5 w-5 text-neural-primary" />
@@ -353,8 +365,8 @@ export function CollaboratorPanel({
 
       {/* Remove Confirmation Dialog */}
       {confirmRemoveId && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <Card className="w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center px-2 sm:px-4 pt-8 sm:pt-12 pb-4 z-[100]">
+          <Card className="w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle className="flex items-center text-red-600">
                 <AlertCircle className="mr-2 h-5 w-5" />
@@ -388,6 +400,6 @@ export function CollaboratorPanel({
           </Card>
         </div>
       )}
-    </>
+    </Card>
   )
 }

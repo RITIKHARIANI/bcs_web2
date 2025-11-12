@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -85,6 +85,19 @@ export function ModuleViewer({ moduleId }: ModuleViewerProps) {
     cloneMedia: true,
     cloneCollaborators: false,
   })
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (showCloneDialog) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showCloneDialog])
 
   const { data: module, isLoading, error } = useQuery({
     queryKey: ['module', moduleId],
@@ -394,8 +407,8 @@ export function ModuleViewer({ moduleId }: ModuleViewerProps) {
 
       {/* Clone Module Dialog */}
       {showCloneDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <Card className="w-full max-w-lg">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center px-2 sm:px-4 pt-8 sm:pt-12 pb-4 z-[100]">
+          <Card className="w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>

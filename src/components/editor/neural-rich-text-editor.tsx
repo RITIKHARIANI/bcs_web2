@@ -69,6 +69,19 @@ export function NeuralRichTextEditor({
   const [showMediaUpload, setShowMediaUpload] = useState(false)
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (showMediaUpload) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showMediaUpload])
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -472,8 +485,8 @@ export function NeuralRichTextEditor({
 
       {/* Media Upload Dialog */}
       {showMediaUpload && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-[100] px-2 sm:px-4 pt-8 sm:pt-12 pb-4">
+          <div className="bg-background rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Upload Media</h3>
               <NeuralButton

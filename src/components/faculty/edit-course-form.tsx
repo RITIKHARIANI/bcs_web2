@@ -265,6 +265,20 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [editingNotesForModule, setEditingNotesForModule] = useState<string | null>(null)
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    const isModalOpen = showDeleteConfirm || editingNotesForModule !== null
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showDeleteConfirm, editingNotesForModule])
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -904,7 +918,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
   // ============================================================================
 
   return (
-    <>
+    <div>
       <ResponsiveEditLayout
         header={{
           title: "Edit Course",
@@ -927,8 +941,8 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <Card className="w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center px-2 sm:px-4 pt-8 sm:pt-12 pb-4 z-[100]">
+          <Card className="w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle className="flex items-center text-red-600">
                 <AlertCircle className="mr-2 h-5 w-5" />
@@ -974,6 +988,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
           />
         ) : null;
       })()}
-    </>
+    </div>
   )
 }

@@ -64,6 +64,19 @@ export function MediaLibraryPanel({
   const [altText, setAltText] = useState('');
   const [caption, setCaption] = useState('');
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (showAltTextDialog) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showAltTextDialog])
+
   const { data: mediaFiles = [], isLoading, refetch } = useQuery({
     queryKey: ['media-files', moduleId],
     queryFn: () => fetchMediaFiles(moduleId),
@@ -316,8 +329,8 @@ export function MediaLibraryPanel({
 
       {/* Alt Text Dialog */}
       {showAltTextDialog && selectedFile && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-[100] px-2 sm:px-4 pt-8 sm:pt-12 pb-4">
+          <div className="bg-background rounded-lg shadow-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Add Image Description</h3>
               <NeuralButton

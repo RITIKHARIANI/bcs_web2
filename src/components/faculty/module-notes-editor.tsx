@@ -40,6 +40,14 @@ export function ModuleNotesEditor({
   const [customContext, setCustomContext] = useState(currentContext || '');
   const [customObjectives, setCustomObjectives] = useState(currentObjectives || '');
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [])
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/courses/${courseId}/modules/${moduleId}`, {
@@ -72,8 +80,8 @@ export function ModuleNotesEditor({
   });
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <Card className="w-full max-w-4xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/50 flex items-start justify-center px-2 sm:px-4 pt-8 sm:pt-12 pb-4 z-[100]">
+      <Card className="w-full max-w-4xl max-h-[90vh] flex flex-col shadow-xl overflow-hidden">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>

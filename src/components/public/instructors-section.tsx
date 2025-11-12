@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { User, GraduationCap, Building2, ExternalLink, Users } from 'lucide-react'
 import { Card } from '@/components/ui/card'
@@ -31,6 +31,20 @@ interface InstructorsSectionProps {
 export function InstructorsSection({ author, collaborators = [], className }: InstructorsSectionProps) {
   const [showAllModal, setShowAllModal] = useState(false)
   const totalInstructors = 1 + collaborators.length
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (showAllModal) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showAllModal])
 
   // Get initials from name
   const getInitials = (name: string) => {
@@ -242,31 +256,29 @@ export function InstructorsSection({ author, collaborators = [], className }: In
   }
 
   return (
-    <>
-      <Card className={cn('overflow-hidden', className)}>
-        <div className="p-6">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide flex items-center gap-2">
-            {totalInstructors === 1 ? (
-              <>
-                <User className="h-4 w-4" />
-                Instructor
-              </>
-            ) : (
-              <>
-                <Users className="h-4 w-4" />
-                Instructors ({totalInstructors})
-              </>
-            )}
-          </h3>
-          {renderInstructors()}
-        </div>
-      </Card>
+    <Card className={cn('overflow-hidden', className)}>
+      <div className="p-6">
+        <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide flex items-center gap-2">
+          {totalInstructors === 1 ? (
+            <>
+              <User className="h-4 w-4" />
+              Instructor
+            </>
+          ) : (
+            <>
+              <Users className="h-4 w-4" />
+              Instructors ({totalInstructors})
+            </>
+          )}
+        </h3>
+        {renderInstructors()}
+      </div>
 
       {/* Modal for viewing all instructors (7+ case) */}
       {showAllModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowAllModal(false)}>
-          <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-background border-b p-4 flex items-center justify-between">
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-start justify-center px-2 sm:px-4 pt-8 sm:pt-12 pb-4" onClick={() => setShowAllModal(false)}>
+          <div className="bg-background rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex-shrink-0 bg-background border-b p-4 flex items-center justify-between">
               <h2 className="text-xl font-bold">All Instructors ({totalInstructors})</h2>
               <button
                 onClick={() => setShowAllModal(false)}
@@ -277,13 +289,13 @@ export function InstructorsSection({ author, collaborators = [], className }: In
                 </svg>
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {renderFullCard(author, 'Course Creator')}
               {collaborators.map(collab => renderFullCard(collab, 'Co-Instructor'))}
             </div>
           </div>
         </div>
       )}
-    </>
+    </Card>
   )
 }
