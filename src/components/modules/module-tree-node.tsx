@@ -3,7 +3,7 @@
 import { ChevronRight, ChevronDown, BookOpen, Layers, Circle, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import type { ModuleTreeNode } from '@/lib/modules/hierarchy-helpers'
+import type { ModuleTreeNode } from '@/lib/modules/tree-utils'
 
 interface ModuleTreeNodeProps {
   node: ModuleTreeNode

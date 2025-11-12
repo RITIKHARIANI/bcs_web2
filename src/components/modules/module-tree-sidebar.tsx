@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Search, ChevronsRight, ChevronsDown, X } from 'lucide-react'
 import { ModuleTreeNodeComponent } from './module-tree-node'
-import { getAncestorIds, flattenTree, type ModuleTreeNode } from '@/lib/modules/hierarchy-helpers'
+import { getAncestorIds, flattenTree, type ModuleTreeNode } from '@/lib/modules/tree-utils'
 import { Input } from '@/components/ui/input'
 import { NeuralButton } from '@/components/ui/neural-button'
 import { cn } from '@/lib/utils'

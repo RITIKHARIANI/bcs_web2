@@ -5,7 +5,7 @@ import { Menu, X } from 'lucide-react'
 import { NeuralButton } from '@/components/ui/neural-button'
 import { ModuleTreeSidebar } from './module-tree-sidebar'
 import { cn } from '@/lib/utils'
-import type { ModuleTreeNode } from '@/lib/modules/hierarchy-helpers'
+import type { ModuleTreeNode } from '@/lib/modules/tree-utils'
 
 interface MobileModuleDrawerProps {
   tree: ModuleTreeNode[]

@@ -14,7 +14,7 @@ import { Separator } from '@/components/ui/separator'
 import { Loading } from '@/components/ui/loading'
 import { ModuleResources } from '@/components/public/module-resources'
 import { ModuleTreeSidebar } from '@/components/modules/module-tree-sidebar'
-import type { ModuleTreeNode } from '@/lib/modules/hierarchy-helpers'
+import type { ModuleTreeNode } from '@/lib/modules/tree-utils'
 import {
   ArrowLeft,
   BookOpen,
