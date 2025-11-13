@@ -4523,24 +4523,33 @@ Component Implementation Verified:
 - ✅ **Download Test**: Successfully downloaded 14KB PNG file (474x176px)
 - ✅ **API Verified**: Resources API returns correct full URL
 
-✅ **UI Test - End-to-End Verification (Playwright)**:
+🐛 **CORS Issue Discovered and Fixed**:
+- ❌ **Issue**: Client-side fetch from Supabase Storage blocked by CORS
+- ❌ **Error**: "Fetch API cannot load... Failed to fetch"
+- ✅ **Solution**: Created server-side download proxy at /api/media/download
+- ✅ **Implementation**: Proxy fetches from Supabase and returns with Content-Disposition header
+- ✅ **Security**: Validates URLs to ensure only Supabase Storage URLs allowed
+
+✅ **Final UI Test - Full Download Verification (Playwright)**:
 - ✅ Navigated to module page with Playwright
-- ✅ Resources section displays with full Supabase URL in download link
-- ✅ Clicked download button
-- ✅ Image opened successfully in new tab (Tab 1)
-- ✅ Browser title: "1762161394128_m3d61zw5sx.png (474×176)"
-- ✅ Image rendered correctly showing "Media File Upload" content
-- ✅ No 404 errors in console (previously failed)
-- ✅ Screenshot captured: test-media-004-download-success.png
+- ✅ Download link uses proxy: `/api/media/download?url=...&name=...`
+- ✅ File automatically downloaded to user's computer
+- ✅ Downloaded file verified: 14KB PNG (474×176px)
+- ✅ File path: `.playwright-mcp/Screenshot-2025-11-03-at-12-00-30 AM.png`
+- ✅ Browser triggers native download dialog (not opening in new tab)
+- ✅ No CORS errors in console
+- ✅ Download completes successfully
 
 Fix Details:
-- Code change: src/app/api/media/upload/route.ts:70
+- Code change 1: src/app/api/media/upload/route.ts:70 - Store full URLs
+- Code change 2: src/app/api/media/download/route.ts - Download proxy endpoint
+- Code change 3: src/components/public/module-resources.tsx - Use proxy URL
 - Database migration: Updated media_1762161394562_vmbllvclyo record
-- Verification: curl + Playwright UI test both successful
+- Verification: curl + Playwright automated download successful
 ```
 
-**Status**: ✅ Pass (Bug fixed and verified)
-**Notes**: Download functionality now works correctly. Bug in upload handler has been fixed to store full Supabase Storage public URLs. Future uploads will store correct URLs automatically.
+**Status**: ✅ Pass (2 bugs found and fixed)
+**Notes**: Download functionality fully operational. Fixed upload handler to store full URLs (not relative paths) and created download proxy to handle CORS restrictions. Files now download directly to user's computer with proper filename. Server-side proxy ensures cross-origin downloads work reliably.
 
 ---
 
