@@ -212,6 +212,14 @@
 
 **Note:** Additional NA tests exist in Module Cloning (4) and Course Notes (1) categories that require multi-user setup for proper testing. These are appropriately marked NA as they cannot be fully automated in single-user environments.
 
+**📖 Manual Testing Guide Available:**
+For detailed step-by-step instructions on manually testing multi-user scenarios and accessibility features, see **[MANUAL_TESTING_GUIDE.md](./MANUAL_TESTING_GUIDE.md)**. This guide includes:
+- Complete test procedures for all 10 manual/NA tests
+- Test user credentials and setup instructions
+- Browser configuration for multi-user testing
+- Testing checklist templates
+- Expected results and verification steps
+
 ---
 
 # 1. Authentication & Authorization
