@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { User, GraduationCap, Building2, ExternalLink } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -56,9 +57,11 @@ export function InstructorSection({ instructor, className }: InstructorSectionPr
               className="group block"
             >
               {instructor.avatar_url ? (
-                <img
+                <Image
                   src={instructor.avatar_url}
                   alt={instructor.name}
+                  width={96}
+                  height={96}
                   className="w-24 h-24 rounded-full object-cover ring-4 ring-white shadow-lg group-hover:ring-neural-primary transition-all"
                 />
               ) : (

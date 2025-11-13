@@ -770,7 +770,7 @@ export function ModuleLibrary() {
                   </h3>
                   <p className="text-muted-foreground mb-6">
                     Modules that other faculty members share with you will appear here.
-                    You'll have edit access to all shared modules and their submodules.
+                    You&apos;ll have edit access to all shared modules and their submodules.
                   </p>
                 </>
               ) : (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { User, GraduationCap, Building2, ExternalLink, Users } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { NeuralButton } from '@/components/ui/neural-button'
@@ -73,9 +74,11 @@ export function InstructorsSection({ author, collaborators = [], className }: In
           <div className="flex-shrink-0">
             <Link href={`/profile/${instructor.id}`} className="group block">
               {instructor.avatar_url ? (
-                <img
+                <Image
                   src={instructor.avatar_url}
                   alt={instructor.name}
+                  width={80}
+                  height={80}
                   className="w-20 h-20 rounded-full object-cover ring-4 ring-white shadow-lg group-hover:ring-neural-primary transition-all"
                 />
               ) : (
@@ -155,9 +158,11 @@ export function InstructorsSection({ author, collaborators = [], className }: In
         className="group flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-muted/50 transition-colors"
       >
         {instructor.avatar_url ? (
-          <img
+          <Image
             src={instructor.avatar_url}
             alt={instructor.name}
+            width={48}
+            height={48}
             className="w-12 h-12 rounded-full object-cover ring-2 ring-border group-hover:ring-neural-primary transition-all"
           />
         ) : (
