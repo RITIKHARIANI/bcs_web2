@@ -30,6 +30,32 @@ interface ModuleResourcesProps {
 }
 
 export function ModuleResources({ resources, className = '' }: ModuleResourcesProps) {
+  const handleDownload = async (file: MediaFile) => {
+    try {
+      // Fetch the file from Supabase Storage
+      const response = await fetch(file.url)
+      const blob = await response.blob()
+
+      // Create a temporary URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob)
+
+      // Create a temporary anchor element and trigger download
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = file.name
+      document.body.appendChild(link)
+      link.click()
+
+      // Cleanup
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(blobUrl)
+    } catch (error) {
+      console.error('Download failed:', error)
+      // Fallback: open in new tab if download fails
+      window.open(file.url, '_blank')
+    }
+  }
+
   const getFileIcon = (mimeType: string) => {
     if (mimeType.startsWith('image/')) return <ImageIcon className="h-4 w-4" />
     if (mimeType.startsWith('video/')) return <Video className="h-4 w-4" />
@@ -127,16 +153,14 @@ export function ModuleResources({ resources, className = '' }: ModuleResourcesPr
                     {formatFileSize(file.size)}
                   </td>
                   <td className="py-4 pl-4 text-right">
-                    <a
-                      href={file.url}
-                      download={file.name}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <NeuralButton
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDownload(file)}
+                      aria-label={`Download ${file.name}`}
                     >
-                      <NeuralButton variant="ghost" size="sm">
-                        <Download className="h-4 w-4" />
-                      </NeuralButton>
-                    </a>
+                      <Download className="h-4 w-4" />
+                    </NeuralButton>
                   </td>
                 </tr>
               ))}

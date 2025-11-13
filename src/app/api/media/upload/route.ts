@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
           original_name: file.name,
           file_size: BigInt(file.size),
           mime_type: file.type,
-          storage_path: uploadResult.path,
+          storage_path: uploadResult.url, // Store full Supabase public URL, not relative path
           uploaded_by: session.user.id,
         },
       });
