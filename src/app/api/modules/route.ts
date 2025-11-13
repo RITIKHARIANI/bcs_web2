@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
 
-      const whereClause = {
+      const whereClause: any = {
         author_id: session.user.id,
         ...(status && { status }),
       }
@@ -271,7 +271,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Get modules where user is a direct collaborator
-      const whereClause = {
+      const whereClause: any = {
         collaborators: {
           some: { user_id: session.user.id }
         },
