@@ -84,6 +84,8 @@ async function fetchModules(params: {
   sortOrder?: string
   page?: number
   limit?: number
+  authorOnly?: string
+  collaboratorOnly?: string
 }): Promise<ModulesResponse> {
   return withFetchRetry(async () => {
     const searchParams = new URLSearchParams()
@@ -123,6 +125,7 @@ export function ModuleLibrary() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [activeTab, setActiveTab] = useState<'authored' | 'collaborated'>('authored')
   const itemsPerPage = 50
 
   // Memoize query params to prevent unnecessary re-fetches
@@ -134,8 +137,10 @@ export function ModuleLibrary() {
     sortBy,
     sortOrder,
     page: currentPage,
-    limit: itemsPerPage
-  }), [searchTerm, statusFilter, selectedTags, parentFilter, sortBy, sortOrder, currentPage, itemsPerPage])
+    limit: itemsPerPage,
+    authorOnly: activeTab === 'authored' ? 'true' : undefined,
+    collaboratorOnly: activeTab === 'collaborated' ? 'true' : undefined
+  }), [searchTerm, statusFilter, selectedTags, parentFilter, sortBy, sortOrder, currentPage, itemsPerPage, activeTab])
 
   const {
     data = { modules: [], availableTags: [] },
@@ -280,6 +285,26 @@ export function ModuleLibrary() {
                 </NeuralButton>
               </Link>
             </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex items-center space-x-2 mb-6">
+            <NeuralButton
+              variant={activeTab === 'authored' ? 'neural' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('authored')}
+            >
+              <BookOpen className="mr-2 h-4 w-4" />
+              My Modules
+            </NeuralButton>
+            <NeuralButton
+              variant={activeTab === 'collaborated' ? 'neural' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('collaborated')}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Shared With Me
+            </NeuralButton>
           </div>
 
           {/* Enhanced Stats Dashboard */}
@@ -731,12 +756,22 @@ export function ModuleLibrary() {
                   <p className="text-muted-foreground mb-6">
                     Try adjusting your search terms or filters.
                   </p>
-                  <NeuralButton 
-                    variant="neural" 
+                  <NeuralButton
+                    variant="neural"
                     onClick={clearAllFilters}
                   >
                     Clear Filters
                   </NeuralButton>
+                </>
+              ) : activeTab === 'collaborated' ? (
+                <>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                    No shared modules yet
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    Modules that other faculty members share with you will appear here.
+                    You'll have edit access to all shared modules and their submodules.
+                  </p>
                 </>
               ) : (
                 <>

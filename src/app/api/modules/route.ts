@@ -142,6 +142,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search')
     const sortBy = searchParams.get('sortBy') || 'sort_order'
     const sortOrder = searchParams.get('sortOrder') || 'asc'
+    const authorOnly = searchParams.get('authorOnly')
+    const collaboratorOnly = searchParams.get('collaboratorOnly')
     const page = parseInt(searchParams.get('page') || '1', 10)
     const limit = parseInt(searchParams.get('limit') || '50', 10)
 
@@ -149,6 +151,234 @@ export async function GET(request: NextRequest) {
     const validPage = Math.max(1, page)
     const validLimit = Math.min(Math.max(1, limit), 100) // Max 100 items per page
     const skip = (validPage - 1) * validLimit
+
+    // If authorOnly is specified, require authentication
+    if (authorOnly === 'true') {
+      if (!session?.user || session.user.role !== 'faculty') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
+      const whereClause = {
+        author_id: session.user.id,
+        ...(status && { status }),
+      }
+
+      // Apply parent filtering
+      if (parentId === 'root') {
+        whereClause.parent_module_id = null
+      } else if (parentId === 'sub') {
+        whereClause.parent_module_id = { not: null }
+      } else if (parentId && parentId !== 'all') {
+        whereClause.parent_module_id = parentId
+      }
+
+      // Apply tag filtering
+      if (tags) {
+        const tagList = tags.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag.length > 0)
+        if (tagList.length > 0) {
+          whereClause.tags = { hasSome: tagList }
+        }
+      }
+
+      // Apply search filtering
+      if (search && search.trim().length > 0) {
+        const searchTerm = search.trim()
+        whereClause.OR = [
+          { title: { contains: searchTerm, mode: 'insensitive' } },
+          { description: { contains: searchTerm, mode: 'insensitive' } },
+          { slug: { contains: searchTerm, mode: 'insensitive' } },
+          { tags: { hasSome: [searchTerm.toLowerCase()] } }
+        ]
+      }
+
+      // Build order by clause
+      let orderByClause: any
+      switch (sortBy) {
+        case 'title':
+          orderByClause = { title: sortOrder }
+          break
+        case 'created_at':
+          orderByClause = { created_at: sortOrder }
+          break
+        case 'updated_at':
+          orderByClause = { updated_at: sortOrder }
+          break
+        case 'status':
+          orderByClause = { status: sortOrder }
+          break
+        default:
+          orderByClause = { sort_order: sortOrder }
+      }
+
+      const [modules, totalCount] = await withDatabaseRetry(async () => {
+        return await Promise.all([
+          prisma.modules.findMany({
+            where: whereClause,
+            include: {
+              users: { select: { name: true, email: true } },
+              modules: { select: { id: true, title: true } },
+              _count: { select: { other_modules: true, course_modules: true } }
+            },
+            orderBy: orderByClause,
+            skip,
+            take: validLimit,
+          }),
+          prisma.modules.count({ where: whereClause })
+        ])
+      })
+
+      const transformedModules = modules.map(module => ({
+        ...module,
+        author: module.users,
+        parentModule: module.modules,
+        subModulesCount: module._count.other_modules,
+        courseModulesCount: module._count.course_modules,
+        createdAt: module.created_at,
+        updatedAt: module.updated_at,
+      }))
+
+      const availableTags = await withDatabaseRetry(async () => {
+        const modulesWithTags = await prisma.modules.findMany({
+          where: { author_id: session.user.id },
+          select: { tags: true }
+        })
+        const tagsSet = new Set<string>()
+        modulesWithTags.forEach(module => {
+          if (Array.isArray(module.tags)) {
+            module.tags.forEach(tag => tagsSet.add(tag))
+          }
+        })
+        return Array.from(tagsSet).sort()
+      })
+
+      return NextResponse.json({
+        modules: transformedModules,
+        availableTags,
+        pagination: {
+          page: validPage,
+          limit: validLimit,
+          totalCount,
+          totalPages: Math.ceil(totalCount / validLimit)
+        }
+      })
+    }
+
+    // If collaboratorOnly is specified, return modules where user is a collaborator
+    // This includes both direct collaboration and inherited through parent modules
+    if (collaboratorOnly === 'true') {
+      if (!session?.user || session.user.role !== 'faculty') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
+      // Get modules where user is a direct collaborator
+      const whereClause = {
+        collaborators: {
+          some: { user_id: session.user.id }
+        },
+        ...(status && { status }),
+      }
+
+      // Apply parent filtering
+      if (parentId === 'root') {
+        whereClause.parent_module_id = null
+      } else if (parentId === 'sub') {
+        whereClause.parent_module_id = { not: null }
+      } else if (parentId && parentId !== 'all') {
+        whereClause.parent_module_id = parentId
+      }
+
+      // Apply tag filtering
+      if (tags) {
+        const tagList = tags.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag.length > 0)
+        if (tagList.length > 0) {
+          whereClause.tags = { hasSome: tagList }
+        }
+      }
+
+      // Apply search filtering
+      if (search && search.trim().length > 0) {
+        const searchTerm = search.trim()
+        whereClause.OR = [
+          { title: { contains: searchTerm, mode: 'insensitive' } },
+          { description: { contains: searchTerm, mode: 'insensitive' } },
+          { slug: { contains: searchTerm, mode: 'insensitive' } },
+          { tags: { hasSome: [searchTerm.toLowerCase()] } }
+        ]
+      }
+
+      // Build order by clause
+      let orderByClause: any
+      switch (sortBy) {
+        case 'title':
+          orderByClause = { title: sortOrder }
+          break
+        case 'created_at':
+          orderByClause = { created_at: sortOrder }
+          break
+        case 'updated_at':
+          orderByClause = { updated_at: sortOrder }
+          break
+        case 'status':
+          orderByClause = { status: sortOrder }
+          break
+        default:
+          orderByClause = { sort_order: sortOrder }
+      }
+
+      const [directCollaborationModules, totalCount] = await withDatabaseRetry(async () => {
+        return await Promise.all([
+          prisma.modules.findMany({
+            where: whereClause,
+            include: {
+              users: { select: { name: true, email: true } },
+              modules: { select: { id: true, title: true } },
+              _count: { select: { other_modules: true, course_modules: true } }
+            },
+            orderBy: orderByClause,
+            skip,
+            take: validLimit,
+          }),
+          prisma.modules.count({ where: whereClause })
+        ])
+      })
+
+      const transformedModules = directCollaborationModules.map(module => ({
+        ...module,
+        author: module.users,
+        parentModule: module.modules,
+        subModulesCount: module._count.other_modules,
+        courseModulesCount: module._count.course_modules,
+        createdAt: module.created_at,
+        updatedAt: module.updated_at,
+      }))
+
+      const availableTags = await withDatabaseRetry(async () => {
+        const modulesWithTags = await prisma.modules.findMany({
+          where: {
+            collaborators: { some: { user_id: session.user.id } }
+          },
+          select: { tags: true }
+        })
+        const tagsSet = new Set<string>()
+        modulesWithTags.forEach(module => {
+          if (Array.isArray(module.tags)) {
+            module.tags.forEach(tag => tagsSet.add(tag))
+          }
+        })
+        return Array.from(tagsSet).sort()
+      })
+
+      return NextResponse.json({
+        modules: transformedModules,
+        availableTags,
+        pagination: {
+          page: validPage,
+          limit: validLimit,
+          totalCount,
+          totalPages: Math.ceil(totalCount / validLimit)
+        }
+      })
+    }
 
     // Handle different access patterns
     let whereClause: any = {}
