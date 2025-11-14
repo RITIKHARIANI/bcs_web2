@@ -1,3 +1,5 @@
+"use client"
+
 import Link from 'next/link'
 import { UserCircle, Users, FileText, Shield, BarChart3, Activity } from 'lucide-react'
 
