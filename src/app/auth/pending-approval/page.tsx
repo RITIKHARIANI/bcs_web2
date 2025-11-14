@@ -52,7 +52,7 @@ export default async function PendingApprovalPage() {
                   <li className="flex items-start gap-2">
                     <span className="text-blue-600 mt-0.5">3.</span>
                     <span>
-                      If approved, you'll gain full access to create and manage courses
+                      If approved, you&apos;ll gain full access to create and manage courses
                     </span>
                   </li>
                 </ul>
@@ -64,7 +64,7 @@ export default async function PendingApprovalPage() {
                   <div>
                     <p className="text-sm font-medium">Check your email</p>
                     <p className="text-sm text-muted-foreground">
-                      We'll send updates to <strong>{session.user.email}</strong>
+                      We&apos;ll send updates to <strong>{session.user.email}</strong>
                     </p>
                   </div>
                 </div>

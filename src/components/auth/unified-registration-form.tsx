@@ -287,7 +287,7 @@ export function UnifiedRegistrationForm() {
           <CardHeader>
             <CardTitle>Select Your Role</CardTitle>
             <CardDescription>
-              Choose whether you're registering as a student or faculty member
+              Choose whether you&apos;re registering as a student or faculty member
             </CardDescription>
           </CardHeader>
           <CardContent>
