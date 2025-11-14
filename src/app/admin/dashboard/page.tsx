@@ -6,7 +6,6 @@ import { AdminLayout } from '@/components/admin/admin-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, UserCheck, UserX, Clock, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
-import { NeuralButton } from '@/components/ui/neural-button'
 
 export default async function AdminDashboardPage() {
   const session = await auth()
@@ -154,10 +153,11 @@ export default async function AdminDashboardPage() {
                     {pendingRequests.length} request(s) awaiting review
                   </CardDescription>
                 </div>
-                <Link href="/admin/faculty-requests">
-                  <NeuralButton variant="outline" size="sm">
-                    View All
-                  </NeuralButton>
+                <Link
+                  href="/admin/faculty-requests"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-neural-primary text-neural-primary hover:bg-neural-primary hover:text-white h-9 px-3"
+                >
+                  View All
                 </Link>
               </div>
             </CardHeader>
@@ -181,10 +181,11 @@ export default async function AdminDashboardPage() {
                       <p className="text-sm text-muted-foreground">
                         {new Date(request.requested_at).toLocaleDateString()}
                       </p>
-                      <Link href={`/admin/faculty-requests?highlight=${request.id}`}>
-                        <NeuralButton variant="neural" size="sm" className="mt-2">
-                          Review
-                        </NeuralButton>
+                      <Link
+                        href={`/admin/faculty-requests?highlight=${request.id}`}
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-neural-primary to-synapse-primary text-white hover:opacity-90 h-9 px-4 mt-2"
+                      >
+                        Review
                       </Link>
                     </div>
                   </div>
