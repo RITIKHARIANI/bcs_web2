@@ -136,14 +136,30 @@ model users {
   email         String @unique
   password_hash String
   name          String
-  role          String @default("faculty")
 
-  // Profile fields
-  about             String?  @db.Text
-  speciality        String?
-  interested_fields String[] @default([])
-  university        String?
-  avatar_url        String?
+  // Enhanced role system
+  role              String  @default("student") // student | faculty | pending_faculty | admin
+  is_super_admin    Boolean @default(false)
+  account_status    String  @default("active") // active | suspended | pending_approval | deleted
+
+  // Student-specific fields
+  major              String?
+  graduation_year    Int?
+  academic_interests String[] @default([])
+
+  // Faculty-specific fields
+  title         String? // Professor, Lecturer, Researcher, etc.
+  department    String?
+  research_area String? // Primary research area/speciality
+
+  // General profile fields (both student and faculty)
+  about       String?  @db.Text
+  university  String?
+  avatar_url  String?
+
+  // Legacy field (kept for backward compatibility)
+  speciality        String? // Deprecated: use research_area instead
+  interested_fields String[] @default([]) // Deprecated: use academic_interests instead
 
   // Academic & Social Links
   google_scholar_url   String?
@@ -166,6 +182,7 @@ model users {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  // Content relations
   courses              courses[]
   media_files          media_files[]
   modules              modules[]
@@ -179,6 +196,15 @@ model users {
   module_collaborations_as_user    module_collaborators[]   @relation("ModuleCollaborator")
   module_collaborations_as_inviter module_collaborators[]   @relation("ModuleInviter")
   collaboration_activities         collaboration_activity[]
+
+  // Admin & approval relations
+  faculty_request       faculty_requests?       @relation("FacultyRequester")
+  reviewed_requests     faculty_requests[]      @relation("FacultyReviewer")
+  admin_actions         admin_audit_logs[]      @relation("AdminActor")
+
+  @@index([role])
+  @@index([account_status])
+  @@index([email])
 }
 
 // ==================== PLAYGROUND BUILDER MODELS ====================
@@ -351,4 +377,57 @@ model collaboration_activity {
   @@index([user_id, created_at(sort: Desc)]) // User activity history
   @@index([action]) // Filter by action type
   @@index([created_at(sort: Desc)]) // Cleanup old records
+}
+
+// ==================== ADMIN & APPROVAL MODELS ====================
+
+model faculty_requests {
+  id      String @id @default(cuid())
+  user_id String @unique
+
+  // Request details
+  request_statement String   @db.Text
+  requested_at      DateTime @default(now())
+
+  // Review tracking
+  approval_status String    @default("pending") // pending | approved | declined
+  reviewed_by     String? // admin user_id
+  reviewed_at     DateTime?
+  admin_note      String?   @db.Text
+  decline_reason  String?   @db.Text
+
+  // Relations
+  requester users  @relation("FacultyRequester", fields: [user_id], references: [id], onDelete: Cascade)
+  reviewer  users? @relation("FacultyReviewer", fields: [reviewed_by], references: [id], onDelete: SetNull)
+
+  @@index([approval_status])
+  @@index([requested_at(sort: Desc)])
+  @@index([reviewed_by])
+}
+
+model admin_audit_logs {
+  id       String @id @default(cuid())
+  admin_id String
+
+  // Action details
+  action      String // approved_faculty | declined_faculty | deleted_user | edited_content | etc.
+  target_type String? // user | course | module | content_flag
+  target_id   String?
+
+  // Metadata
+  reason      String? @db.Text
+  details     Json? // Additional context (old_value, new_value, cascade info, etc.)
+  ip_address  String?
+  user_agent  String?
+
+  // Timestamp
+  created_at DateTime @default(now())
+
+  // Relations
+  admin users @relation("AdminActor", fields: [admin_id], references: [id], onDelete: Cascade)
+
+  @@index([admin_id])
+  @@index([action])
+  @@index([created_at(sort: Desc)])
+  @@index([target_type, target_id])
 }
