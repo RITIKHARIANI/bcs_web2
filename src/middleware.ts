@@ -23,7 +23,7 @@ export default auth((req) => {
 
     // Logged in but not admin - redirect to home with error
     if (userRole !== 'admin') {
-      const homeUrl = new URL('/?error=unauthorized', req.url)
+      const homeUrl = new URL('/?error=admin_required', req.url)
       return NextResponse.redirect(homeUrl)
     }
   }
@@ -39,7 +39,7 @@ export default auth((req) => {
 
     // Logged in but not faculty or admin - redirect to home with error
     if (userRole !== 'faculty' && userRole !== 'admin') {
-      const homeUrl = new URL('/?error=unauthorized', req.url)
+      const homeUrl = new URL('/?error=faculty_required', req.url)
       return NextResponse.redirect(homeUrl)
     }
   }

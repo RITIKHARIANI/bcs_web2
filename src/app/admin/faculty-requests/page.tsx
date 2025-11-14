@@ -43,8 +43,10 @@ export default function FacultyRequestsPage() {
   const [error, setError] = useState('')
   const [processing, setProcessing] = useState<string | null>(null)
   const [showDeclineModal, setShowDeclineModal] = useState<string | null>(null)
+  const [showApproveModal, setShowApproveModal] = useState<string | null>(null)
   const [declineReason, setDeclineReason] = useState('')
   const [adminNote, setAdminNote] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
     fetchRequests()
@@ -69,13 +71,10 @@ export default function FacultyRequestsPage() {
   }
 
   const handleApprove = async (requestId: string) => {
-    if (!confirm('Are you sure you want to approve this faculty request?')) {
-      return
-    }
-
     try {
       setProcessing(requestId)
       setError('')
+      setSuccessMessage('')
 
       const response = await fetch(`/api/admin/faculty-requests/${requestId}`, {
         method: 'PUT',
@@ -95,7 +94,11 @@ export default function FacultyRequestsPage() {
       // Remove from list
       setRequests((prev) => prev.filter((r) => r.id !== requestId))
       setAdminNote('')
-      alert('Faculty request approved successfully!')
+      setShowApproveModal(null)
+      setSuccessMessage('Faculty request approved successfully!')
+
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setSuccessMessage(''), 5000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to approve request')
     } finally {
@@ -105,7 +108,7 @@ export default function FacultyRequestsPage() {
 
   const handleDecline = async (requestId: string) => {
     if (!declineReason.trim()) {
-      alert('Please provide a reason for declining')
+      setError('Please provide a reason for declining')
       return
     }
 
@@ -134,7 +137,10 @@ export default function FacultyRequestsPage() {
       setDeclineReason('')
       setAdminNote('')
       setShowDeclineModal(null)
-      alert('Faculty request declined')
+      setSuccessMessage('Faculty request declined')
+
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setSuccessMessage(''), 5000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to decline request')
     } finally {
@@ -171,6 +177,13 @@ export default function FacultyRequestsPage() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {successMessage && (
+          <Alert className="border-green-200 bg-green-50 text-green-900">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription>{successMessage}</AlertDescription>
           </Alert>
         )}
 
@@ -295,7 +308,7 @@ export default function FacultyRequestsPage() {
                   <div className="flex gap-3 pt-4 border-t border-neural-light/30">
                     <NeuralButton
                       variant="neural"
-                      onClick={() => handleApprove(request.id)}
+                      onClick={() => setShowApproveModal(request.id)}
                       disabled={processing === request.id}
                       className="flex-1"
                     >
@@ -312,6 +325,45 @@ export default function FacultyRequestsPage() {
                       Decline Request
                     </NeuralButton>
                   </div>
+
+                  {/* Approve Modal */}
+                  {showApproveModal === request.id && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                      <Card className="max-w-md w-full">
+                        <CardHeader>
+                          <CardTitle>Approve Faculty Request</CardTitle>
+                          <CardDescription>
+                            Confirm approval for {request.requester.name}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-sm text-blue-900">
+                              This will grant faculty access to <strong>{request.requester.name}</strong> ({request.requester.email}), allowing them to create and manage courses and modules.
+                            </p>
+                          </div>
+                          <div className="flex gap-3">
+                            <NeuralButton
+                              variant="neural"
+                              onClick={() => handleApprove(request.id)}
+                              disabled={processing === request.id}
+                              className="flex-1"
+                            >
+                              {processing === request.id ? 'Approving...' : 'Confirm Approval'}
+                            </NeuralButton>
+                            <NeuralButton
+                              variant="outline"
+                              onClick={() => setShowApproveModal(null)}
+                              disabled={processing === request.id}
+                              className="flex-1"
+                            >
+                              Cancel
+                            </NeuralButton>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
 
                   {/* Decline Modal */}
                   {showDeclineModal === request.id && (
