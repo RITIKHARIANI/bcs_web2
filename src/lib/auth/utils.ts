@@ -252,8 +252,12 @@ export function getProfileUrl(userId: string): string {
 }
 
 /**
- * Get edit profile URL for current user
+ * Get edit profile URL for current user (role-based)
  */
-export function getEditProfileUrl(): string {
-  return '/profile/edit'
+export function getEditProfileUrl(session: Session | null): string {
+  if (isAdmin(session)) return '/admin/profile/edit'
+  if (isFaculty(session)) return '/faculty/profile/edit'
+  if (isStudent(session)) return '/student/profile/edit'
+
+  return '/auth/login'
 }

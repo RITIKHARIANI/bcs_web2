@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Header } from '@/components/Header'
 
-export default function EditProfilePage() {
+export default function FacultyEditProfilePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -31,7 +31,7 @@ export default function EditProfilePage() {
   // Fetch current profile data
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/signin')
+      router.push('/auth/login')
       return
     }
 
@@ -126,7 +126,7 @@ export default function EditProfilePage() {
       <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow rounded-lg p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Profile</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Faculty Profile</h1>
 
           {message && (
             <div

@@ -97,7 +97,12 @@ export function ProfileView({ user, moduleCount, isOwnProfile }: ProfileViewProp
         {isOwnProfile && (
           <div className="absolute top-6 right-6 z-10">
             <Link
-              href="/profile/edit"
+              href={
+                user.role === 'admin' ? '/admin/profile/edit' :
+                user.role === 'faculty' ? '/faculty/profile/edit' :
+                user.role === 'student' ? '/student/profile/edit' :
+                '/profile/edit'
+              }
               className="flex items-center gap-2 px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors shadow-lg font-medium"
             >
               <Edit className="h-4 w-4" />
