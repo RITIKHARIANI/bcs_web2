@@ -146,7 +146,7 @@ export default async function AdminDashboardPage() {
         {pendingRequests.length > 0 && (
           <Card className="cognitive-card">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <CardTitle>Pending Faculty Requests</CardTitle>
                   <CardDescription>
@@ -155,7 +155,7 @@ export default async function AdminDashboardPage() {
                 </div>
                 <Link
                   href="/admin/faculty-requests"
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-neural-primary text-neural-primary hover:bg-neural-primary hover:text-white h-9 px-3"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-neural-primary text-neural-primary hover:bg-neural-primary hover:text-white h-9 px-3 self-start sm:self-auto"
                 >
                   View All
                 </Link>
@@ -166,24 +166,24 @@ export default async function AdminDashboardPage() {
                 {pendingRequests.map((request) => (
                   <div
                     key={request.id}
-                    className="flex items-center justify-between p-4 border border-neural-light/30 rounded-lg hover:bg-neural-light/5 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 border border-neural-light/30 rounded-lg hover:bg-neural-light/5 transition-colors"
                   >
-                    <div>
-                      <p className="font-medium">{request.requester.name}</p>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{request.requester.name}</p>
+                      <p className="text-sm text-muted-foreground truncate">
                         {request.requester.email}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {request.requester.university}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">
+                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:gap-0">
+                      <p className="text-sm text-muted-foreground whitespace-nowrap">
                         {new Date(request.requested_at).toLocaleDateString()}
                       </p>
                       <Link
                         href={`/admin/faculty-requests?highlight=${request.id}`}
-                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-neural-primary to-synapse-primary text-white hover:opacity-90 h-9 px-4 mt-2"
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-neural-primary to-synapse-primary text-white hover:opacity-90 h-9 px-4 sm:mt-2 whitespace-nowrap"
                       >
                         Review
                       </Link>
@@ -206,15 +206,15 @@ export default async function AdminDashboardPage() {
               {recentRegistrations.map((user) => (
                 <div
                   key={user.id}
-                  className="flex items-center justify-between p-3 border border-neural-light/20 rounded"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 p-3 border border-neural-light/20 rounded"
                 >
-                  <div>
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{user.name}</p>
+                    <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:gap-0">
                     <span
-                      className={`inline-block px-2 py-1 text-xs rounded ${
+                      className={`inline-block px-2 py-1 text-xs rounded whitespace-nowrap ${
                         user.role === 'student'
                           ? 'bg-green-100 text-green-800'
                           : user.role === 'faculty'
@@ -226,7 +226,7 @@ export default async function AdminDashboardPage() {
                     >
                       {user.role === 'pending_faculty' ? 'Pending' : user.role}
                     </span>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-muted-foreground sm:mt-1 whitespace-nowrap">
                       {new Date(user.created_at).toLocaleDateString()}
                     </p>
                   </div>
