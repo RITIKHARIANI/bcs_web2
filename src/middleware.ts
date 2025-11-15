@@ -28,7 +28,7 @@ export default auth((req) => {
     }
   }
 
-  // Protect faculty routes - allow admin and faculty
+  // Protect faculty routes - ONLY faculty (strict)
   if (isFacultyRoute) {
     // Not logged in - redirect to login with callback
     if (!isLoggedIn) {
@@ -37,14 +37,14 @@ export default auth((req) => {
       return NextResponse.redirect(loginUrl)
     }
 
-    // Logged in but not faculty or admin - redirect to home with error
-    if (userRole !== 'faculty' && userRole !== 'admin') {
-      const homeUrl = new URL('/?error=faculty_required', req.url)
+    // Logged in but not faculty - redirect to home with error
+    if (userRole !== 'faculty') {
+      const homeUrl = new URL('/?error=faculty_access_only', req.url)
       return NextResponse.redirect(homeUrl)
     }
   }
 
-  // Protect student routes - allow student, faculty, and admin
+  // Protect student routes - ONLY students (strict)
   if (isStudentRoute) {
     // Not logged in - redirect to login with callback
     if (!isLoggedIn) {
@@ -59,9 +59,9 @@ export default auth((req) => {
       return NextResponse.redirect(pendingUrl)
     }
 
-    // Allow student, faculty, and admin
-    if (!['student', 'faculty', 'admin'].includes(userRole || '')) {
-      const homeUrl = new URL('/?error=unauthorized', req.url)
+    // Only allow students
+    if (userRole !== 'student') {
+      const homeUrl = new URL('/?error=student_access_only', req.url)
       return NextResponse.redirect(homeUrl)
     }
   }
