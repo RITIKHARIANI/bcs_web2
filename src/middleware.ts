@@ -28,7 +28,7 @@ export default auth((req) => {
     }
   }
 
-  // Protect faculty routes - ONLY faculty (strict)
+  // Protect faculty routes - faculty OR admin (admin is superuser)
   if (isFacultyRoute) {
     // Not logged in - redirect to login with callback
     if (!isLoggedIn) {
@@ -37,9 +37,9 @@ export default auth((req) => {
       return NextResponse.redirect(loginUrl)
     }
 
-    // Logged in but not faculty - redirect to home with error
-    if (userRole !== 'faculty') {
-      const homeUrl = new URL('/?error=faculty_access_only', req.url)
+    // Logged in but not faculty or admin - redirect to home with error
+    if (userRole !== 'faculty' && userRole !== 'admin') {
+      const homeUrl = new URL('/?error=faculty_required', req.url)
       return NextResponse.redirect(homeUrl)
     }
   }
