@@ -391,8 +391,8 @@ export async function GET(request: NextRequest) {
       whereClause.status = 'published'
       whereClause.visibility = 'public'
     }
-    // Faculty access: can see their own modules + published public modules from others
-    else if (session.user.role === 'faculty') {
+    // Faculty/Admin access: can see their own modules + published public modules from others
+    else if (session.user.role === 'faculty' || session.user.role === 'admin') {
       // Build own modules filter (respects status if provided)
       const ownModulesFilter: any = { author_id: session.user.id }
       if (status) {
@@ -565,8 +565,8 @@ export async function GET(request: NextRequest) {
       allUserTags = await withDatabaseRetry(async () => {
         let tagQuery = {}
         
-        // For faculty, get their own module tags; for public, get all published module tags
-        if (session?.user?.role === 'faculty') {
+        // For faculty/admin, get their own module tags; for public, get all published module tags
+        if (session?.user?.role === 'faculty' || session?.user?.role === 'admin') {
           tagQuery = { author_id: session.user.id }
         } else {
           tagQuery = { status: 'published' }

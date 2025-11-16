@@ -73,7 +73,8 @@ export function Header() {
 
   // Get navigation items based on user role
   const getNavigationItems = () => {
-    if (session?.user?.role === "faculty") {
+    // Admin has faculty access (superuser)
+    if (session?.user?.role === "faculty" || session?.user?.role === "admin") {
       return navigationConfig.faculty;
     } else if (session?.user?.role === "student") {
       return navigationConfig.student;
@@ -202,7 +203,7 @@ export function Header() {
                   <DropdownMenuSeparator />
 
                   {/* User-specific actions */}
-                  {session.user.role === "faculty" && (
+                  {(session.user.role === "faculty" || session.user.role === "admin") && (
                     <>
                       <DropdownMenuItem asChild>
                         <Link href="/faculty/dashboard" className="flex items-center">

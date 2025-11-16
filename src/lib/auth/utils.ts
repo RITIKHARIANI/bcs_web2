@@ -72,6 +72,21 @@ export function canCreateContent(session: Session | null): boolean {
 }
 
 /**
+ * Check if user has faculty access (faculty or admin as superuser)
+ * Use this for UI/UX checks where admin should see faculty features
+ */
+export function hasFacultyAccess(session: Session | null): boolean {
+  return isFaculty(session) || isAdmin(session)
+}
+
+/**
+ * Check if a role string has faculty access (for API routes)
+ */
+export function roleHasFacultyAccess(role?: string): boolean {
+  return role === USER_ROLES.FACULTY || role === USER_ROLES.ADMIN
+}
+
+/**
  * Check if user can enroll in courses (student, faculty, or admin)
  */
 export function canEnroll(session: Session | null): boolean {
