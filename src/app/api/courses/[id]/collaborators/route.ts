@@ -135,9 +135,9 @@ export async function POST(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    if (userToAdd.role !== 'faculty') {
+    if (userToAdd.role !== 'faculty' && userToAdd.role !== 'admin') {
       return NextResponse.json(
-        { error: 'Only faculty members can be added as collaborators' },
+        { error: 'Only faculty or admin can be added as collaborators' },
         { status: 400 }
       )
     }
