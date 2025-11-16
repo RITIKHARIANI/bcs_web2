@@ -68,6 +68,11 @@ export default auth((req) => {
 
   // Redirect to home if already logged in and trying to access auth pages
   if (isAuthPage && isLoggedIn) {
+    // Check if there's a callback URL to redirect to
+    const callbackUrl = nextUrl.searchParams.get('callbackUrl')
+    if (callbackUrl) {
+      return NextResponse.redirect(new URL(callbackUrl, req.url))
+    }
     return NextResponse.redirect(new URL('/', req.url))
   }
 
