@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Loading } from '@/components/ui/loading'
 import { ModuleResources } from '@/components/public/module-resources'
+import { StartCourseButton } from '@/components/student/StartCourseButton'
 import { ModuleTreeSidebar } from '@/components/modules/module-tree-sidebar'
 import { InstructorsSection } from '@/components/public/instructors-section'
 import { ReadingProgressBar } from '@/components/public/reading-progress-bar'
@@ -129,9 +130,11 @@ interface EnhancedCourseViewerProps {
   course: Course
   initialModule?: string
   initialSearch?: string
+  session?: any
+  isStarted?: boolean
 }
 
-export function EnhancedCourseViewer({ course, initialModule, initialSearch = '' }: EnhancedCourseViewerProps) {
+export function EnhancedCourseViewer({ course, initialModule, initialSearch = '', session, isStarted = false }: EnhancedCourseViewerProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -408,6 +411,17 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
                     </div>
                   )}
                 </div>
+
+                {/* Start Course Button - Only for students */}
+                {session?.user?.role === 'student' && (
+                  <div className="pt-4">
+                    <StartCourseButton
+                      courseId={course.id}
+                      courseName={course.title}
+                      isStarted={isStarted}
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
 
