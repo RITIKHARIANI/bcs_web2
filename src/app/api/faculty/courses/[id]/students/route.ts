@@ -1,0 +1,107 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth/config';
+import { prisma } from '@/lib/db';
+import { withDatabaseRetry } from '@/lib/retry';
+import { isFacultyOrAdmin, canEditCourse } from '@/lib/auth/utils';
+
+/**
+ * GET /api/faculty/courses/[id]/students
+ * Faculty views students who started their course
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    const { id: courseId } = await params;
+
+    // Check authentication
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Only faculty/admin can access
+    if (!isFacultyOrAdmin(session.user)) {
+      return NextResponse.json(
+        { error: 'Only faculty can access this endpoint' },
+        { status: 403 }
+      );
+    }
+
+    const userId = session.user.id;
+
+    // Check if user has permission to view this course
+    const hasAccess = await canEditCourse(userId, courseId);
+    if (!hasAccess) {
+      return NextResponse.json(
+        { error: 'You do not have permission to view this course' },
+        { status: 403 }
+      );
+    }
+
+    // Get students who started this course
+    const students = await withDatabaseRetry(async () => {
+      return await prisma.course_tracking.findMany({
+        where: {
+          course_id: courseId,
+          status: 'active',
+        },
+        include: {
+          student: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              avatar_url: true,
+              major: true,
+              graduation_year: true,
+              university: true,
+            },
+          },
+        },
+        orderBy: { started_at: 'desc' },
+      });
+    });
+
+    // Calculate active count (accessed in last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const activeCount = students.filter(
+      (s) => s.last_accessed >= thirtyDaysAgo
+    ).length;
+
+    // Transform data for response
+    const studentsData = students.map((tracking) => ({
+      trackingId: tracking.id,
+      startedAt: tracking.started_at.toISOString(),
+      lastAccessed: tracking.last_accessed.toISOString(),
+      student: {
+        id: tracking.student.id,
+        name: tracking.student.name,
+        email: tracking.student.email,
+        avatarUrl: tracking.student.avatar_url,
+        major: tracking.student.major,
+        graduationYear: tracking.student.graduation_year,
+        university: tracking.student.university,
+      },
+    }));
+
+    return NextResponse.json({
+      students: studentsData,
+      totalCount: students.length,
+      activeCount, // Students who accessed in last 30 days
+    });
+
+  } catch (error) {
+    console.error('Error fetching course students:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch students' },
+      { status: 500 }
+    );
+  }
+}

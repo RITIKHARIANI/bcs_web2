@@ -30,23 +30,26 @@ model course_modules {
 }
 
 model courses {
-  id             String                 @id
-  title          String
-  slug           String                 @unique
-  description    String?
-  author_id      String
-  status         String                 @default("draft")
-  featured       Boolean                @default(false)
-  tags           String[]
-  created_at     DateTime               @default(now())
-  updated_at     DateTime               @updatedAt
-  course_modules course_modules[]
-  users          users                  @relation(fields: [author_id], references: [id], onDelete: Restrict)
-  collaborators  course_collaborators[]
+  id              String                 @id
+  title           String
+  slug            String                 @unique
+  description     String?
+  author_id       String
+  status          String                 @default("draft")
+  featured        Boolean                @default(false)
+  tags            String[]
+  tracking_count  Int                    @default(0) // Number of students who started this course
+  created_at      DateTime               @default(now())
+  updated_at      DateTime               @updatedAt
+  course_modules  course_modules[]
+  users           users                  @relation(fields: [author_id], references: [id], onDelete: Restrict)
+  collaborators   course_collaborators[]
+  course_tracking course_tracking[]
 
   @@index([author_id])
   @@index([slug])
   @@index([status])
+  @@index([tracking_count])
 }
 
 model media_files {
@@ -197,6 +200,9 @@ model users {
   module_collaborations_as_inviter module_collaborators[]   @relation("ModuleInviter")
   collaboration_activities         collaboration_activity[]
 
+  // Course tracking relations (student learning)
+  started_courses course_tracking[] @relation("CourseTracking")
+
   // Admin & approval relations
   faculty_request       faculty_requests?       @relation("FacultyRequester")
   reviewed_requests     faculty_requests[]      @relation("FacultyReviewer")
@@ -327,6 +333,24 @@ model course_collaborators {
   @@index([course_id]) // Fast lookup by course
   @@index([user_id]) // Fast lookup by user
   @@index([added_by]) // For audit trails
+}
+
+model course_tracking {
+  id            String   @id @default(cuid())
+  course_id     String
+  student_id    String
+  started_at    DateTime @default(now())
+  last_accessed DateTime @default(now())
+  status        String   @default("active") // active (for future: completed, dropped)
+
+  // Relations
+  course  courses @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  student users   @relation("CourseTracking", fields: [student_id], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([course_id, student_id]) // Prevent duplicate course starts
+  @@index([student_id, started_at(sort: Desc)]) // Fast lookup for student dashboard
+  @@index([course_id, started_at(sort: Desc)]) // Fast lookup for faculty view
 }
 
 model module_collaborators {
