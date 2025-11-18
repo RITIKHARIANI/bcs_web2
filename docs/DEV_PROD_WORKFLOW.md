@@ -32,13 +32,14 @@ This guide documents the complete development and production workflow for the BC
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     DEVELOPMENT (Personal)                   │
+│           DEVELOPMENT/TESTING (Current Environment)          │
 ├─────────────────────────────────────────────────────────────┤
 │ GitHub:    Your fork (RITIKHARIANI/bcs_web2)               │
 │ Vercel:    Personal account → bcs-web2.vercel.app          │
-│ Supabase:  Personal project → Dev database                  │
+│ Supabase:  Personal project → Dev/test database             │
 │ Resend:    Personal account → Dev email                     │
 │ Domain:    bcs-web2.vercel.app (free Vercel subdomain)     │
+│ Testing:   ALL testing done on Vercel (NOT locally)         │
 └─────────────────────────────────────────────────────────────┘
                               ↓
                     Git Push → Your Fork
@@ -48,7 +49,7 @@ This guide documents the complete development and production workflow for the BC
                     Professor Reviews & Merges
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                    PRODUCTION (University)                   │
+│              PRODUCTION (Future - Not Yet Set Up)            │
 ├─────────────────────────────────────────────────────────────┤
 │ GitHub:    Professor's repo (University org)                │
 │ Vercel:    University account → brainandcognitivescience.org│
@@ -60,11 +61,11 @@ This guide documents the complete development and production workflow for the BC
 
 ### Key Principles
 
-1. **Isolation**: Development and production are completely isolated
-2. **Fork Model**: You work on your fork, PR to professor's repo for production
-3. **Automatic Deployments**: Push to fork → dev deploy, merge to main → prod deploy
-4. **Separate Databases**: Dev data never touches production
-5. **Separate Email**: Dev emails go to personal Resend, prod to university Resend
+1. **Single Environment**: Currently only development/testing environment exists (bcs-web2.vercel.app)
+2. **No Local Development**: All testing done on Vercel deployment, NOT locally
+3. **Fork Model**: You work on your fork, PR to professor's repo when production is set up
+4. **Automatic Deployments**: Push to fork → auto-deploy to bcs-web2.vercel.app
+5. **Future Production**: Production environment will be set up later with university accounts
 
 ---
 
@@ -194,9 +195,9 @@ NEXT_PUBLIC_ENABLE_GRAPH_VISUALIZATION=true
 NEXT_PUBLIC_ENABLE_ANALYTICS=true  # Enable analytics in prod
 ```
 
-### Local Development Variables
+### Local Development Variables (Rarely Used)
 
-**File:** `.env.local` (gitignored)
+**File:** `.env.local` (gitignored, only if running locally)
 
 ```bash
 # Database (Use port 5432 for local development - session pooler)
@@ -220,8 +221,9 @@ NEXT_PUBLIC_ENABLE_ANALYTICS=false
 ```
 
 **Important Notes:**
+- **Testing is done on Vercel** (bcs-web2.vercel.app), NOT locally
 - **Port 6543**: Use for Vercel (serverless) - transaction pooler
-- **Port 5432**: Use for local dev - session pooler
+- **Port 5432**: Use for local dev (if running locally) - session pooler
 - See `/.env.development.example` and `/.env.production.example` for templates
 
 ---

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Development
 ```bash
-npm run dev              # Start dev server with Turbopack
+npm run dev              # Start dev server with Turbopack (rarely used - testing done on Vercel)
 npm run build            # Build for production (includes Prisma generation)
 npm run start            # Start production server
 npm run lint             # Run ESLint
@@ -17,8 +17,9 @@ npm run lint             # Run ESLint
 npm run db:studio        # Open Prisma Studio (visual DB editor)
 npm run db:migrate:dev   # ✅ CORRECT: Create and apply migration (ALWAYS USE THIS)
 npm run db:generate      # Generate Prisma Client
-npm run local:setup      # Full local setup: generate + migrate + dev
 ```
+
+**Note:** Development and testing is done on Vercel deployment at https://bcs-web2.vercel.app, NOT locally.
 
 **⚠️ CRITICAL CHANGE (Nov 2025):**
 - ✅ **ALWAYS use `db:migrate:dev`** - Creates migration files and keeps sync
@@ -338,8 +339,8 @@ The project uses manual testing. When adding features:
 - Use Context7 to check up-to-date docs when needed for implementing new libraries or frameworks, or adding features using them.
 - When you need to access supabase production through MCP, the MCP server name is supabasePROD
 - Whenever database schema changes is made, remember to create migrations locally, commit them, and let Vercel apply them automatically.
-- https://bcs-web2.vercel.app/ is the development environment referred in @docs/DEV_PROD_WORKFLOW.md 
-https://www.brainandcognitivescience.com/ is the production environment referred in @docs/DEV_PROD_WORKFLOW.md
+- https://bcs-web2.vercel.app/ is the development/testing environment
+- Production environment (https://www.brainandcognitivescience.com/) is not yet set up
 - For faculty user in development environment and testing, use:
 
 email/username: ritikh2@illinois.edu
