@@ -1,5 +1,4 @@
 import { BookOpen, CheckCircle, TrendingUp } from 'lucide-react'
-import { EmptyEnrollmentsState } from './EmptyEnrollmentsState'
 
 interface StudentDashboardProps {
   userName: string
@@ -70,23 +69,6 @@ export function StudentDashboard({
             </div>
           )
         })}
-      </div>
-
-      {/* Main Content */}
-      <div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">
-          My Courses
-        </h3>
-
-        {enrolledCoursesCount === 0 ? (
-          <EmptyEnrollmentsState />
-        ) : (
-          <div className="cognitive-card p-6">
-            <p className="text-muted-foreground">
-              Course enrollment display will be implemented in Week 3
-            </p>
-          </div>
-        )}
       </div>
     </div>
   )
