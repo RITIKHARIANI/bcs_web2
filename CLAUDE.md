@@ -15,13 +15,15 @@ npm run lint             # Run ESLint
 ### Database Operations
 ```bash
 npm run db:studio        # Open Prisma Studio (visual DB editor)
-npm run db:push          # Push schema changes to DB (use this for schema drift)
-npm run db:migrate:dev   # Create and apply migration (development)
+npm run db:migrate:dev   # ✅ CORRECT: Create and apply migration (ALWAYS USE THIS)
 npm run db:generate      # Generate Prisma Client
-npm run local:setup      # Full local setup: generate + push + dev
+npm run local:setup      # Full local setup: generate + migrate + dev
 ```
 
-**Important**: Use `db:push` instead of `db:migrate` when there's schema drift to avoid reset.
+**⚠️ CRITICAL CHANGE (Nov 2025):**
+- ✅ **ALWAYS use `db:migrate:dev`** - Creates migration files and keeps sync
+- ❌ **NEVER use `db:push`** - Causes migration drift and deployment failures
+- 📖 **See [DATABASE_MIGRATION_GUIDE.md](./docs/DATABASE_MIGRATION_GUIDE.md)** for complete workflow
 
 ### Vercel Deployment
 ```bash
@@ -254,7 +256,7 @@ See `/docs/EMAIL_SETUP_GUIDE.md` for detailed setup instructions.
 
 ## Common Gotchas
 
-1. **Schema Changes**: Always use `npm run db:push` in development. Migrations are for production only.
+1. **Schema Changes**: ✅ ALWAYS use `npm run db:migrate:dev` for ALL schema changes. This creates migration files that work in both dev and production. See [DATABASE_MIGRATION_GUIDE.md](./docs/DATABASE_MIGRATION_GUIDE.md).
 
 2. **NextAuth Session**: User data is in `session.user.id` and `session.user.role`, not `session.userId`.
 

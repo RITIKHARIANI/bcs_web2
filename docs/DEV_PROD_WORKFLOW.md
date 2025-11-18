@@ -418,28 +418,28 @@ git push origin --delete feature/add-new-feature
 
 ### Schema Synchronization
 
-**Process:**
+**⚠️ IMPORTANT: Complete migration guide at [DATABASE_MIGRATION_GUIDE.md](./DATABASE_MIGRATION_GUIDE.md)**
 
-1. **Make schema changes in development:**
+**Correct Process (Updated Nov 2025):**
+
+1. **Make schema changes and create migration in ONE step:**
    ```bash
    # Edit prisma/schema.prisma locally
 
-   # Push to dev database to test
-   npx prisma db push
+   # Create migration (generates SQL + applies to dev DB)
+   npx prisma migrate dev --name add_user_avatar_field
+
+   # This creates: prisma/migrations/[timestamp]_add_user_avatar_field/
+   # AND applies it to your development database
 
    # Test locally
    npm run dev
    ```
 
-2. **Create migration when ready:**
+2. **Commit migration file:**
    ```bash
-   # Generate migration file
-   npx prisma migrate dev --name add_user_avatar_field
-
-   # This creates: prisma/migrations/[timestamp]_add_user_avatar_field/
-
-   # Commit migration file
-   git add prisma/migrations
+   # Commit both schema and migration
+   git add prisma/schema.prisma prisma/migrations
    git commit -m "Add user avatar field migration"
    git push origin main
    ```
@@ -452,6 +452,9 @@ git push origin --delete feature/add-new-feature
 
    # Migration applies to production database automatically
    ```
+
+**❌ NEVER use `npx prisma db push` - it causes migration drift!**
+**✅ ALWAYS use `npx prisma migrate dev` - keeps everything in sync**
 
 ### Database Backup
 
