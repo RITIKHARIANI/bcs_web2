@@ -213,17 +213,17 @@ export default async function CoursePage({
     notFound();
   }
 
-  // Check if user is logged in and if student has started this course
+  // Check if user is logged in and if they have enrolled in this course
   const session = await auth();
   let isStarted = false;
 
-  if (session?.user?.id && session.user.role === 'student') {
+  if (session?.user?.id) {
     const tracking = await withDatabaseRetry(async () => {
       return await prisma.course_tracking.findUnique({
         where: {
-          course_id_student_id: {
+          course_id_user_id: {
             course_id: course.id,
-            student_id: session.user.id,
+            user_id: session.user.id,
           },
         },
       });
