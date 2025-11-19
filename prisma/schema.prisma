@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")   // Transaction pooler (6543) - app queries (prepared statements disabled in src/lib/db.ts)
+  directUrl = env("DIRECT_URL")     // Session pooler (5432) - migrations only (supports DDL)
 }
 
 model course_modules {
