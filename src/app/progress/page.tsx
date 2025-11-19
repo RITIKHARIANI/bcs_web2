@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { auth } from '@/lib/auth/config';
 import { AuthenticatedLayout } from '@/components/layouts/app-layout';
 import { CourseProgressCard } from '@/components/progress/CourseProgressCard';
@@ -138,12 +139,12 @@ export default async function ProgressPage() {
               <p className="text-muted-foreground mb-6">
                 Start your learning journey by enrolling in a course
               </p>
-              <a
+              <Link
                 href="/courses"
                 className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-neural-primary to-synapse-primary text-white rounded-lg hover:opacity-90 transition-opacity font-medium"
               >
                 Browse Courses
-              </a>
+              </Link>
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2">
