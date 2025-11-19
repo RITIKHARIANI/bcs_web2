@@ -431,8 +431,8 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
                   )}
                 </div>
 
-                {/* Start Course Button - Only for students */}
-                {session?.user?.role === 'student' && (
+                {/* Start Course Button - Available to all authenticated users (Week 3: Inclusive Enrollment) */}
+                {session?.user && (
                   <div className="pt-4">
                     <StartCourseButton
                       courseId={course.id}

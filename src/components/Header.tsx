@@ -29,6 +29,7 @@ const navigationConfig = {
     { href: "/modules", label: "Modules", icon: BookOpen },
     { href: "/network", label: "Network", icon: BarChart3 },
     { href: "/faculty/dashboard", label: "Dashboard", icon: BarChart3 },
+    { href: "/progress", label: "Progress", icon: BarChart3 },
     { href: "/faculty/visualization", label: "Visualization", icon: BarChart3 },
     { href: "/faculty/modules", label: "My Modules", icon: BookOpen },
     { href: "/faculty/courses", label: "My Courses", icon: BookOpen },

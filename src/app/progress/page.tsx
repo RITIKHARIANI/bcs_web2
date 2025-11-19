@@ -4,24 +4,146 @@ import { auth } from '@/lib/auth/config';
 import { AuthenticatedLayout } from '@/components/layouts/app-layout';
 import { CourseProgressCard } from '@/components/progress/CourseProgressCard';
 import { BookOpen, CheckCircle, TrendingUp, Clock } from 'lucide-react';
+import { prisma } from '@/lib/db';
+import { withDatabaseRetry } from '@/lib/retry';
 
 async function getUserProgress(userId: string) {
   try {
-    const response = await fetch(
-      `${process.env.NEXTAUTH_URL}/api/progress/user`,
-      {
-        headers: {
-          Cookie: `next-auth.session-token=${userId}`,
+    // Direct database query instead of API fetch (fixes Bug #1)
+    const enrolledCourses = await withDatabaseRetry(async () => {
+      return await prisma.course_tracking.findMany({
+        where: {
+          user_id: userId,
+          status: 'active',
         },
-        cache: 'no-store',
-      }
-    );
+        include: {
+          course: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              description: true,
+              users: {
+                select: {
+                  id: true,
+                  name: true,
+                  avatar_url: true,
+                },
+              },
+              _count: {
+                select: {
+                  course_modules: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          last_accessed: 'desc',
+        },
+      });
+    });
 
-    if (!response.ok) {
-      return null;
-    }
+    // Get total completed modules across all courses
+    const totalCompletedModules = await withDatabaseRetry(async () => {
+      return await prisma.module_progress.count({
+        where: {
+          user_id: userId,
+          status: 'completed',
+        },
+      });
+    });
 
-    return await response.json();
+    // Get recently completed modules (last 10)
+    const recentActivity = await withDatabaseRetry(async () => {
+      return await prisma.module_progress.findMany({
+        where: {
+          user_id: userId,
+          status: 'completed',
+          completed_at: {
+            not: null,
+          },
+        },
+        include: {
+          module: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+            },
+          },
+          course: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+            },
+          },
+        },
+        orderBy: {
+          completed_at: 'desc',
+        },
+        take: 10,
+      });
+    });
+
+    // Calculate overall stats
+    const totalEnrolledCourses = enrolledCourses.length;
+    const totalCompletedCourses = enrolledCourses.filter(
+      e => e.completion_pct === 100
+    ).length;
+
+    // Calculate average progress across all courses
+    const avgProgress = totalEnrolledCourses > 0
+      ? Math.round(
+          enrolledCourses.reduce((sum, e) => sum + e.completion_pct, 0) /
+            totalEnrolledCourses
+        )
+      : 0;
+
+    // Transform enrolled courses data
+    const coursesWithProgress = enrolledCourses.map(enrollment => ({
+      trackingId: enrollment.id,
+      startedAt: enrollment.started_at.toISOString(),
+      lastAccessed: enrollment.last_accessed.toISOString(),
+      completionPct: enrollment.completion_pct,
+      modulesCompleted: enrollment.modules_completed,
+      modulesTotal: enrollment.modules_total,
+      course: {
+        id: enrollment.course.id,
+        title: enrollment.course.title,
+        slug: enrollment.course.slug,
+        description: enrollment.course.description,
+        moduleCount: enrollment.course._count.course_modules,
+        instructor: {
+          id: enrollment.course.users.id,
+          name: enrollment.course.users.name,
+          avatarUrl: enrollment.course.users.avatar_url,
+        },
+      },
+    }));
+
+    // Transform recent activity
+    const recentCompletions = recentActivity.map(activity => ({
+      moduleId: activity.module.id,
+      moduleTitle: activity.module.title,
+      moduleSlug: activity.module.slug,
+      courseId: activity.course.id,
+      courseTitle: activity.course.title,
+      courseSlug: activity.course.slug,
+      completedAt: activity.completed_at,
+    }));
+
+    return {
+      stats: {
+        totalEnrolledCourses,
+        totalCompletedCourses,
+        totalCompletedModules,
+        averageProgress: avgProgress,
+      },
+      enrolledCourses: coursesWithProgress,
+      recentActivity: recentCompletions,
+    };
   } catch (error) {
     console.error('Error fetching user progress:', error);
     return null;
