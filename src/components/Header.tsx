@@ -212,6 +212,12 @@ export function Header() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
+                        <Link href="/faculty/courses" className="flex items-center">
+                          <BookOpen className="mr-2 h-4 w-4" />
+                          My Courses
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
                         <Link href="/faculty/modules" className="flex items-center">
                           <BookOpen className="mr-2 h-4 w-4" />
                           My Modules
