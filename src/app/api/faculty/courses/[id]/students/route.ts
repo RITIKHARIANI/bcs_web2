@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/config';
 import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry';
-import { isFacultyOrAdmin, canEditCourse } from '@/lib/auth/utils';
+import { hasFacultyAccess } from '@/lib/auth/utils';
+import { canEditCourseWithRetry } from '@/lib/collaboration/permissions';
 
 /**
  * GET /api/faculty/courses/[id]/students
@@ -25,7 +26,7 @@ export async function GET(
     }
 
     // Only faculty/admin can access
-    if (!isFacultyOrAdmin(session.user)) {
+    if (!hasFacultyAccess(session)) {
       return NextResponse.json(
         { error: 'Only faculty can access this endpoint' },
         { status: 403 }
@@ -35,7 +36,7 @@ export async function GET(
     const userId = session.user.id;
 
     // Check if user has permission to view this course
-    const hasAccess = await canEditCourse(userId, courseId);
+    const hasAccess = await canEditCourseWithRetry(userId, courseId);
     if (!hasAccess) {
       return NextResponse.json(
         { error: 'You do not have permission to view this course' },
