@@ -38,7 +38,7 @@ model courses {
   status          String                 @default("draft")
   featured        Boolean                @default(false)
   tags            String[]
-  tracking_count  Int                    @default(0) // Number of students who started this course
+  tracking_count  Int                    @default(0) // Number of users (learners) who started this course
   created_at      DateTime               @default(now())
   updated_at      DateTime               @updatedAt
   course_modules  course_modules[]
@@ -200,7 +200,7 @@ model users {
   module_collaborations_as_inviter module_collaborators[]   @relation("ModuleInviter")
   collaboration_activities         collaboration_activity[]
 
-  // Course tracking relations (student learning)
+  // Course tracking relations (learning - any user can enroll)
   started_courses course_tracking[] @relation("CourseTracking")
 
   // Admin & approval relations
@@ -338,18 +338,18 @@ model course_collaborators {
 model course_tracking {
   id            String   @id @default(cuid())
   course_id     String
-  student_id    String
+  user_id       String   // Changed from student_id - allows any user (student, faculty, admin) to enroll
   started_at    DateTime @default(now())
   last_accessed DateTime @default(now())
   status        String   @default("active") // active (for future: completed, dropped)
 
   // Relations
-  course  courses @relation(fields: [course_id], references: [id], onDelete: Cascade)
-  student users   @relation("CourseTracking", fields: [student_id], references: [id], onDelete: Cascade)
+  course courses @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  user   users   @relation("CourseTracking", fields: [user_id], references: [id], onDelete: Cascade)
 
   // Constraints
-  @@unique([course_id, student_id]) // Prevent duplicate course starts
-  @@index([student_id, started_at(sort: Desc)]) // Fast lookup for student dashboard
+  @@unique([course_id, user_id]) // Prevent duplicate course starts
+  @@index([user_id, started_at(sort: Desc)]) // Fast lookup for user dashboard
   @@index([course_id, started_at(sort: Desc)]) // Fast lookup for faculty view
 }
 

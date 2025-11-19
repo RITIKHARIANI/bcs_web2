@@ -5,7 +5,7 @@ import { withDatabaseRetry } from '@/lib/retry';
 
 /**
  * POST /api/courses/[id]/start
- * Student starts a course (adds to "My Courses")
+ * User enrolls in a course (any authenticated user can enroll - student, faculty, or admin)
  */
 export async function POST(
   request: NextRequest,
@@ -15,19 +15,11 @@ export async function POST(
     const session = await auth();
     const { id: courseId } = await params;
 
-    // Check authentication
+    // Check authentication - any authenticated user can enroll
     if (!session || !session.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
-      );
-    }
-
-    // Only students can start courses
-    if (session.user.role !== 'student') {
-      return NextResponse.json(
-        { error: 'Only students can start courses' },
-        { status: 403 }
       );
     }
 
@@ -59,20 +51,20 @@ export async function POST(
       );
     }
 
-    // Check if already started (idempotent operation)
+    // Check if already enrolled (idempotent operation)
     const existingTracking = await withDatabaseRetry(async () => {
       return await prisma.course_tracking.findUnique({
         where: {
-          course_id_student_id: {
+          course_id_user_id: {
             course_id: courseId,
-            student_id: userId,
+            user_id: userId,
           },
         },
       });
     });
 
     if (existingTracking) {
-      // Already started - just update last_accessed
+      // Already enrolled - just update last_accessed
       const updated = await withDatabaseRetry(async () => {
         return await prisma.course_tracking.update({
           where: { id: existingTracking.id },
@@ -99,7 +91,7 @@ export async function POST(
         const newTracking = await tx.course_tracking.create({
           data: {
             course_id: courseId,
-            student_id: userId,
+            user_id: userId,
           },
         });
 

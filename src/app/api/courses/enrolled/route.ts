@@ -4,27 +4,19 @@ import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry';
 
 /**
- * GET /api/student/courses
- * Get student's started courses list
+ * GET /api/courses/enrolled
+ * Get user's enrolled courses list (for any authenticated user - student, faculty, or admin)
  * Query params: sort=recent|alphabetical, limit=20
  */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
 
-    // Check authentication
+    // Check authentication - any authenticated user can access
     if (!session || !session.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
-      );
-    }
-
-    // Only students can access this endpoint
-    if (session.user.role !== 'student') {
-      return NextResponse.json(
-        { error: 'Only students can access this endpoint' },
-        { status: 403 }
       );
     }
 
@@ -33,11 +25,11 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort') || 'recent'; // recent | alphabetical
     const limit = parseInt(searchParams.get('limit') || '20', 10);
 
-    // Get started courses with course details
-    const startedCourses = await withDatabaseRetry(async () => {
+    // Get enrolled courses with course details
+    const enrolledCourses = await withDatabaseRetry(async () => {
       return await prisma.course_tracking.findMany({
         where: {
-          student_id: userId,
+          user_id: userId,
           status: 'active',
         },
         include: {
@@ -73,7 +65,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform data for response
-    const courses = startedCourses.map((tracking) => ({
+    const courses = enrolledCourses.map((tracking) => ({
       trackingId: tracking.id,
       startedAt: tracking.started_at.toISOString(),
       lastAccessed: tracking.last_accessed.toISOString(),
@@ -99,7 +91,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error fetching started courses:', error);
+    console.error('Error fetching enrolled courses:', error);
     return NextResponse.json(
       { error: 'Failed to fetch courses' },
       { status: 500 }

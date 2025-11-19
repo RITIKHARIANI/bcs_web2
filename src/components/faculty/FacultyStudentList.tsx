@@ -5,15 +5,17 @@ import Image from 'next/image';
 import { User, Mail, GraduationCap, School, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RoleBadge } from '@/components/ui/RoleBadge';
 
-interface Student {
+interface Learner {
   trackingId: string;
   startedAt: string;
   lastAccessed: string;
-  student: {
+  learner: {
     id: string;
     name: string;
     email: string;
+    role: string;
     avatarUrl: string | null;
     major: string | null;
     graduationYear: number | null;
@@ -26,43 +28,43 @@ interface FacultyStudentListProps {
 }
 
 export function FacultyStudentList({ courseId }: FacultyStudentListProps) {
-  const [students, setStudents] = useState<Student[]>([]);
+  const [learners, setLearners] = useState<Learner[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [activeCount, setActiveCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchLearners = async () => {
       try {
         const response = await fetch(`/api/faculty/courses/${courseId}/students`);
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch students');
+          throw new Error(data.error || 'Failed to fetch learners');
         }
 
-        setStudents(data.students);
+        setLearners(data.learners);
         setTotalCount(data.totalCount);
         setActiveCount(data.activeCount);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load students');
+        setError(err instanceof Error ? err.message : 'Failed to load learners');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchStudents();
+    fetchLearners();
   }, [courseId]);
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Students</CardTitle>
+          <CardTitle>Learners</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Loading students...</p>
+          <p className="text-muted-foreground">Loading learners...</p>
         </CardContent>
       </Card>
     );
@@ -72,7 +74,7 @@ export function FacultyStudentList({ courseId }: FacultyStudentListProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Students</CardTitle>
+          <CardTitle>Learners</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-red-600">{error}</p>
@@ -81,14 +83,14 @@ export function FacultyStudentList({ courseId }: FacultyStudentListProps) {
     );
   }
 
-  if (students.length === 0) {
+  if (learners.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Students</CardTitle>
+          <CardTitle>Learners</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">No students have started this course yet.</p>
+          <p className="text-muted-foreground">No one has enrolled in this course yet.</p>
         </CardContent>
       </Card>
     );
@@ -97,7 +99,7 @@ export function FacultyStudentList({ courseId }: FacultyStudentListProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Students ({totalCount})</CardTitle>
+        <CardTitle>Enrolled Learners ({totalCount})</CardTitle>
         <p className="text-sm text-muted-foreground">
           {activeCount} active in the last 30 days
         </p>
@@ -107,21 +109,22 @@ export function FacultyStudentList({ courseId }: FacultyStudentListProps) {
           <table className="w-full">
             <thead>
               <tr className="border-b">
-                <th className="text-left py-3 px-4 font-medium text-sm text-gray-700">Student</th>
+                <th className="text-left py-3 px-4 font-medium text-sm text-gray-700">Learner</th>
+                <th className="text-left py-3 px-4 font-medium text-sm text-gray-700">Role</th>
                 <th className="text-left py-3 px-4 font-medium text-sm text-gray-700">Major</th>
                 <th className="text-left py-3 px-4 font-medium text-sm text-gray-700">Started</th>
                 <th className="text-left py-3 px-4 font-medium text-sm text-gray-700">Last Accessed</th>
               </tr>
             </thead>
             <tbody>
-              {students.map((data) => (
+              {learners.map((data) => (
                 <tr key={data.trackingId} className="border-b last:border-0 hover:bg-gray-50">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
-                      {data.student.avatarUrl ? (
+                      {data.learner.avatarUrl ? (
                         <Image
-                          src={data.student.avatarUrl}
-                          alt={data.student.name}
+                          src={data.learner.avatarUrl}
+                          alt={data.learner.name}
                           width={40}
                           height={40}
                           className="rounded-full"
@@ -132,32 +135,35 @@ export function FacultyStudentList({ courseId }: FacultyStudentListProps) {
                         </div>
                       )}
                       <div>
-                        <div className="font-medium text-gray-900">{data.student.name}</div>
+                        <div className="font-medium text-gray-900">{data.learner.name}</div>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Mail className="h-3 w-3" />
-                          {data.student.email}
+                          {data.learner.email}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="py-3 px-4">
-                    {data.student.major && (
+                    <RoleBadge role={data.learner.role} />
+                  </td>
+                  <td className="py-3 px-4">
+                    {data.learner.major && (
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1.5 text-sm">
                           <GraduationCap className="h-4 w-4 text-gray-500" />
-                          {data.student.major}
+                          {data.learner.major}
                         </div>
-                        {data.student.graduationYear && (
+                        {data.learner.graduationYear && (
                           <div className="text-xs text-muted-foreground">
-                            Class of {data.student.graduationYear}
+                            Class of {data.learner.graduationYear}
                           </div>
                         )}
                       </div>
                     )}
-                    {data.student.university && !data.student.major && (
+                    {data.learner.university && !data.learner.major && (
                       <div className="flex items-center gap-1.5 text-sm">
                         <School className="h-4 w-4 text-gray-500" />
-                        {data.student.university}
+                        {data.learner.university}
                       </div>
                     )}
                   </td>

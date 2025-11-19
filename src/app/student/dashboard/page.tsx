@@ -14,11 +14,11 @@ export default async function StudentDashboardPage() {
     redirect('/auth/login?callbackUrl=/student/dashboard')
   }
 
-  // Fetch started courses
-  const startedCourses = await withDatabaseRetry(async () => {
+  // Fetch enrolled courses
+  const enrolledCourses = await withDatabaseRetry(async () => {
     return await prisma.course_tracking.findMany({
       where: {
-        student_id: session.user.id,
+        user_id: session.user.id,
         status: 'active',
       },
       include: {
@@ -50,7 +50,7 @@ export default async function StudentDashboardPage() {
   });
 
   // Transform data for components
-  const courses = startedCourses.map((tracking) => ({
+  const courses = enrolledCourses.map((tracking) => ({
     trackingId: tracking.id,
     startedAt: tracking.started_at.toISOString(),
     lastAccessed: tracking.last_accessed.toISOString(),
