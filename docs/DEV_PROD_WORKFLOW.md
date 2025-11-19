@@ -32,13 +32,14 @@ This guide documents the complete development and production workflow for the BC
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│           DEVELOPMENT/TESTING (Current Environment)          │
+│              DEVELOPMENT/TESTING ENVIRONMENT                 │
 ├─────────────────────────────────────────────────────────────┤
+│ URL:       https://bcs-web2.vercel.app                     │
 │ GitHub:    Your fork (RITIKHARIANI/bcs_web2)               │
 │ Vercel:    Personal account → bcs-web2.vercel.app          │
-│ Supabase:  Personal project → Dev/test database             │
+│ Database:  Supabase dev/test (via DATABASE_URL env var)     │
+│ MCP:       'supabase' (for Claude debugging only)           │
 │ Resend:    Personal account → Dev email                     │
-│ Domain:    bcs-web2.vercel.app (free Vercel subdomain)     │
 │ Testing:   ALL testing done on Vercel (NOT locally)         │
 └─────────────────────────────────────────────────────────────┘
                               ↓
@@ -49,47 +50,55 @@ This guide documents the complete development and production workflow for the BC
                     Professor Reviews & Merges
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
-│              PRODUCTION (Future - Not Yet Set Up)            │
+│                   PRODUCTION ENVIRONMENT                     │
 ├─────────────────────────────────────────────────────────────┤
+│ URL:       https://www.brainandcognitivescience.com        │
 │ GitHub:    Professor's repo (University org)                │
-│ Vercel:    University account → brainandcognitivescience.org│
-│ Supabase:  University project → Prod database               │
-│ Resend:    University account → Prod email                  │
-│ Domain:    brainandcognitivescience.org (custom domain)     │
+│ Vercel:    University account → brainandcognitivescience.com│
+│ Database:  Supabase production (via DATABASE_URL env var)   │
+│ MCP:       'supabasePROD' (for Claude debugging only)       │
+│ Resend:    University account → Production email            │
+│ Users:     Real users, published courses, live data         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ### Key Principles
 
-1. **Single Environment**: Currently only development/testing environment exists (bcs-web2.vercel.app)
+1. **Two Environments**: Development/testing (bcs-web2.vercel.app) and Production (brainandcognitivescience.com)
 2. **No Local Development**: All testing done on Vercel deployment, NOT locally
-3. **Fork Model**: You work on your fork, PR to professor's repo when production is set up
-4. **Automatic Deployments**: Push to fork → auto-deploy to bcs-web2.vercel.app
-5. **Future Production**: Production environment will be set up later with university accounts
+3. **Fork Model**: Work on your fork → test on dev → PR to professor's repo → deploys to production
+4. **Automatic Deployments**:
+   - Push to fork → auto-deploy to bcs-web2.vercel.app (development)
+   - Merge to professor's repo → auto-deploy to brainandcognitivescience.com (production)
+5. **Database Connections**:
+   - Websites connect via `DATABASE_URL` environment variable (set in Vercel)
+   - MCP servers (`supabase` and `supabasePROD`) are for Claude-assisted debugging only
 
 ---
 
 ## 🔧 Service Configuration
 
-### Development (Your Personal Accounts)
+### Development/Testing (Your Personal Accounts)
 
-| Service | Account | Resource | URL/Details |
-|---------|---------|----------|-------------|
+| Service | Account | Resource | Connection Method |
+|---------|---------|----------|-------------------|
 | **GitHub** | Your personal | Your fork | `RITIKHARIANI/bcs_web2` |
 | **Vercel** | Personal | Project | `bcs-web2.vercel.app` |
-| **Supabase** | Personal | Dev database | `bcs-dev` project |
-| **Resend** | Personal | Dev email | Personal API key, custom domain |
-| **GoDaddy** | N/A | No access needed | Domain managed by university |
+| **Supabase** | Personal | Dev/test database | `DATABASE_URL` env var in Vercel |
+| **MCP** | Personal | Debug access | `supabase` MCP server (for Claude) |
+| **Resend** | Personal | Dev email | Personal API key |
+| **Testing** | Vercel-based | No local dev | All testing on deployed site |
 
 ### Production (University Accounts)
 
-| Service | Account | Resource | URL/Details |
-|---------|---------|----------|-------------|
+| Service | Account | Resource | Connection Method |
+|---------|---------|----------|-------------------|
 | **GitHub** | University org | Main repository | Professor's repo |
-| **Vercel** | University | Project | `brainandcognitivescience.org` |
-| **Supabase** | University | Prod database | `bcs-prod` project |
-| **Resend** | University | Prod email | University API key, verified domain |
-| **GoDaddy** | University | Domain | `brainandcognitivescience.org` |
+| **Vercel** | University | Project | `brainandcognitivescience.com` |
+| **Supabase** | University | Production database | `DATABASE_URL` env var in Vercel |
+| **MCP** | University | Debug access | `supabasePROD` MCP server (for Claude) |
+| **Resend** | University | Production email | University API key |
+| **Domain** | University | GoDaddy | `brainandcognitivescience.com` |
 
 ---
 
@@ -407,16 +416,16 @@ git push origin --delete feature/add-new-feature
 ### Database Separation
 
 **Development Database (Your Supabase):**
-- Project: `bcs-dev`
-- Purpose: Testing, development, can be reset
-- Data: Fake users, test courses, experimental data
-- Access: Only you
+- **Purpose**: Testing, development, can be reset
+- **Data**: Fake users, test courses, experimental data
+- **Website Connection**: Via `DATABASE_URL` environment variable in your Vercel project
+- **Claude Access**: Via `supabase` MCP server for debugging/inspection
 
 **Production Database (University Supabase):**
-- Project: `bcs-prod`
-- Purpose: Real user data, stable
-- Data: Real users, real courses, published content
-- Access: University admin + you (read-only for debugging)
+- **Purpose**: Real user data, stable production environment
+- **Data**: Real users, real courses, published content
+- **Website Connection**: Via `DATABASE_URL` environment variable in university Vercel project
+- **Claude Access**: Via `supabasePROD` MCP server for debugging/inspection (use carefully)
 
 ### Schema Synchronization
 
@@ -621,15 +630,17 @@ Tracked in university Resend dashboard
 
 ### Supabase Access
 
-**Personal Supabase:**
-- Owner: You
-- Full access to dev database
-- Can reset, modify schema, view data
+**Development Supabase:**
+- **Owner**: You
+- **Website Access**: Via `DATABASE_URL` in Vercel (automatic)
+- **Claude Access**: Via `supabase` MCP server (for debugging/inspection)
+- **Permissions**: Full access - can reset, modify schema, view data
 
-**University Supabase:**
-- Owner: University
-- Your access: Read-only or limited (for debugging)
-- Cannot modify production data directly
+**Production Supabase:**
+- **Owner**: University
+- **Website Access**: Via `DATABASE_URL` in university Vercel (automatic)
+- **Claude Access**: Via `supabasePROD` MCP server (for debugging/inspection)
+- **Permissions**: Use MCP carefully - contains real user data
 
 ### Resend Access
 

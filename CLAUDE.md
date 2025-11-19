@@ -336,11 +336,28 @@ The project uses manual testing. When adding features:
 - `UNIVERSITY_OF_ILLINOIS_BRANDING.md` - Design guidelines
 
 **Note**: Outdated files have been removed. All AI development prompts, task reports, and debug documentation have been cleaned up.
-- Use Context7 to check up-to-date docs when needed for implementing new libraries or frameworks, or adding features using them.
-- When you need to access supabase production through MCP, the MCP server name is supabasePROD
-- Whenever database schema changes is made, remember to create migrations locally, commit them, and let Vercel apply them automatically.
-- https://bcs-web2.vercel.app/ is the development/testing environment
-- Production environment (https://www.brainandcognitivescience.com/) is not yet set up
+
+## Environment Setup
+
+### Development/Testing Environment
+- **URL**: https://bcs-web2.vercel.app/
+- **Database Connection**: Uses `DATABASE_URL` environment variable (set in your Vercel project settings)
+- **Database**: Supabase dev/test database
+- **Testing**: ALL testing done on Vercel deployment (NOT locally)
+
+### Production Environment
+- **URL**: https://www.brainandcognitivescience.com/
+- **Database Connection**: Uses `DATABASE_URL` environment variable (set in university Vercel project settings)
+- **Database**: Supabase production database
+
+### MCP Servers (For Claude-Assisted Debugging Only)
+- **`supabase` MCP**: Allows Claude to inspect/debug dev/test database
+- **`supabasePROD` MCP**: Allows Claude to inspect/debug production database (use carefully)
+- **Important**: MCP is NOT how websites connect to databases - websites use `DATABASE_URL` environment variables
+
+### Other Notes
+- Use Context7 to check up-to-date docs when needed for implementing new libraries or frameworks
+- Whenever database schema changes are made, create migrations and commit them - Vercel applies them automatically
 - For faculty user in development environment and testing, use:
 
 email/username: ritikh2@illinois.edu
