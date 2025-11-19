@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { BookOpen, Clock, ArrowRight, User } from 'lucide-react';
+import { BookOpen, Clock, ArrowRight, User, CheckCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { ProgressBar } from '../progress/ProgressBar';
 
 interface StartedCourseCardProps {
   course: {
@@ -19,9 +20,20 @@ interface StartedCourseCardProps {
   };
   startedAt: string;
   lastAccessed: string;
+  // Progress tracking (Week 4)
+  completionPct?: number;
+  modulesCompleted?: number;
+  modulesTotal?: number;
 }
 
-export function StartedCourseCard({ course, startedAt, lastAccessed }: StartedCourseCardProps) {
+export function StartedCourseCard({
+  course,
+  startedAt,
+  lastAccessed,
+  completionPct = 0,
+  modulesCompleted = 0,
+  modulesTotal = 0,
+}: StartedCourseCardProps) {
   const startedDate = new Date(startedAt);
   const accessedDate = new Date(lastAccessed);
 
@@ -62,11 +74,27 @@ export function StartedCourseCard({ course, startedAt, lastAccessed }: StartedCo
             )}
           </div>
 
-          {/* Module Count */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <BookOpen className="h-4 w-4" />
-            <span>{course.moduleCount} {course.moduleCount === 1 ? 'module' : 'modules'}</span>
-          </div>
+          {/* Progress Bar (Week 4) */}
+          {modulesTotal > 0 && (
+            <div className="mb-4">
+              <ProgressBar percentage={completionPct} showLabel={false} height="sm" />
+              <div className="flex items-center justify-between mt-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3" />
+                  <span>{modulesCompleted}/{modulesTotal} modules</span>
+                </div>
+                <span className="font-medium">{completionPct}%</span>
+              </div>
+            </div>
+          )}
+
+          {/* Module Count (shown if no progress data) */}
+          {modulesTotal === 0 && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+              <BookOpen className="h-4 w-4" />
+              <span>{course.moduleCount} {course.moduleCount === 1 ? 'module' : 'modules'}</span>
+            </div>
+          )}
 
           {/* Timestamps */}
           <div className="flex flex-col gap-1 text-xs text-muted-foreground mb-4">
@@ -82,7 +110,7 @@ export function StartedCourseCard({ course, startedAt, lastAccessed }: StartedCo
 
           {/* Continue Learning Button */}
           <button className="mt-auto flex items-center justify-center gap-2 w-full py-2 px-4 bg-gradient-to-r from-neural-primary to-synapse-primary text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium">
-            Continue Learning
+            {completionPct === 100 ? 'Review Course' : 'Continue Learning'}
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>

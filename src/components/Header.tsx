@@ -41,7 +41,7 @@ const navigationConfig = {
     { href: "/modules", label: "Modules", icon: BookOpen },
     { href: "/network", label: "Network", icon: BarChart3 },
     { href: "/student/dashboard", label: "Dashboard", icon: BarChart3 },
-    { href: "/student/progress", label: "Progress", icon: BarChart3 },
+    { href: "/progress", label: "Progress", icon: BarChart3 },
   ]
 };
 
@@ -236,7 +236,7 @@ export function Header() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/student/progress" className="flex items-center">
+                        <Link href="/progress" className="flex items-center">
                           <BarChart3 className="mr-2 h-4 w-4" />
                           Progress
                         </Link>

@@ -49,11 +49,14 @@ export default async function StudentDashboardPage() {
     });
   });
 
-  // Transform data for components
+  // Transform data for components (now includes progress from Week 4)
   const courses = enrolledCourses.map((tracking) => ({
     trackingId: tracking.id,
     startedAt: tracking.started_at.toISOString(),
     lastAccessed: tracking.last_accessed.toISOString(),
+    completionPct: tracking.completion_pct,
+    modulesCompleted: tracking.modules_completed,
+    modulesTotal: tracking.modules_total,
     course: {
       id: tracking.course.id,
       title: tracking.course.title,
@@ -70,9 +73,12 @@ export default async function StudentDashboardPage() {
     },
   }));
 
+  // Calculate stats from progress data (Week 4)
   const enrolledCoursesCount = courses.length;
-  const completedModulesCount = 0; // Week 4 feature
-  const progressPercentage = 0; // Week 4 feature
+  const completedModulesCount = courses.reduce((sum, c) => sum + c.modulesCompleted, 0);
+  const progressPercentage = enrolledCoursesCount > 0
+    ? Math.round(courses.reduce((sum, c) => sum + c.completionPct, 0) / enrolledCoursesCount)
+    : 0;
 
   return (
     <AuthenticatedLayout>
