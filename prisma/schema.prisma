@@ -46,6 +46,9 @@ model courses {
   collaborators   course_collaborators[]
   course_tracking course_tracking[]
 
+  // Progress tracking (Week 4)
+  module_progress module_progress[]      @relation("CourseProgress")
+
   @@index([author_id])
   @@index([slug])
   @@index([status])
@@ -114,6 +117,9 @@ model modules {
   // Clone lineage relation (self-referential)
   original_module  modules?               @relation("ModuleClones", fields: [cloned_from], references: [id], onDelete: SetNull)
   cloned_modules   modules[]              @relation("ModuleClones")
+
+  // Progress tracking (Week 4)
+  progress_records module_progress[]      @relation("ModuleProgressRecords")
 
   @@unique([parent_module_id, sort_order])
   @@index([author_id])
@@ -202,6 +208,9 @@ model users {
 
   // Course tracking relations (learning - any user can enroll)
   started_courses course_tracking[] @relation("CourseTracking")
+
+  // Progress tracking (Week 4)
+  module_progress module_progress[] @relation("ModuleProgress")
 
   // Admin & approval relations
   faculty_request       faculty_requests?       @relation("FacultyRequester")
@@ -343,6 +352,11 @@ model course_tracking {
   last_accessed DateTime @default(now())
   status        String   @default("active") // active (for future: completed, dropped)
 
+  // Progress tracking (Week 4)
+  completion_pct    Float @default(0) // 0-100 percentage
+  modules_completed Int   @default(0) // Count of completed modules
+  modules_total     Int   @default(0) // Total modules in course
+
   // Relations
   course courses @relation(fields: [course_id], references: [id], onDelete: Cascade)
   user   users   @relation("CourseTracking", fields: [user_id], references: [id], onDelete: Cascade)
@@ -454,4 +468,34 @@ model admin_audit_logs {
   @@index([action])
   @@index([created_at(sort: Desc)])
   @@index([target_type, target_id])
+}
+
+// ==================== PROGRESS TRACKING (WEEK 4) ====================
+
+model module_progress {
+  id           String    @id @default(cuid())
+  user_id      String    // Learner (student, faculty, or admin)
+  module_id    String
+  course_id    String    // Link to enrolled course
+
+  // Completion tracking (simplified - no time tracking)
+  status       String    @default("not_started") // not_started | completed
+  completed_at DateTime? // When marked complete
+
+  // Metadata
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relations
+  user   users   @relation("ModuleProgress", fields: [user_id], references: [id], onDelete: Cascade)
+  module modules @relation("ModuleProgressRecords", fields: [module_id], references: [id], onDelete: Cascade)
+  course courses @relation("CourseProgress", fields: [course_id], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([user_id, module_id, course_id]) // One progress record per user+module+course
+  @@index([user_id]) // Fast lookup by user
+  @@index([module_id]) // Fast lookup by module
+  @@index([course_id]) // Fast lookup by course
+  @@index([status]) // Filter by completion status
+  @@index([user_id, course_id]) // Common query pattern
 }
