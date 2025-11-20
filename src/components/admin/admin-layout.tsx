@@ -18,32 +18,29 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       icon: BarChart3,
     },
     {
-      name: 'Faculty Requests',
-      href: '/admin/faculty-requests',
-      icon: UserCircle,
+      name: 'Analytics',
+      href: '/admin/analytics',
+      icon: Activity,
     },
     {
       name: 'Users',
       href: '/admin/users',
       icon: Users,
-      soon: true,
+    },
+    {
+      name: 'Faculty Requests',
+      href: '/admin/faculty-requests',
+      icon: UserCircle,
+    },
+    {
+      name: 'Audit Logs',
+      href: '/admin/audit-logs',
+      icon: Shield,
     },
     {
       name: 'Content',
       href: '/admin/content',
       icon: FileText,
-      soon: true,
-    },
-    {
-      name: 'Security',
-      href: '/admin/security',
-      icon: Shield,
-      soon: true,
-    },
-    {
-      name: 'Audit Logs',
-      href: '/admin/audit-logs',
-      icon: Activity,
       soon: true,
     },
   ]
