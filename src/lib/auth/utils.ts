@@ -253,7 +253,7 @@ export function getDashboardUrl(session: Session | null): string {
 
   if (isAdmin(session)) return '/admin/dashboard'
   if (isFaculty(session)) return '/faculty/dashboard'
-  if (isStudent(session)) return '/student/dashboard'
+  if (isStudent(session)) return '/learning'
   if (isPendingFaculty(session)) return '/auth/pending-approval'
 
   return '/'

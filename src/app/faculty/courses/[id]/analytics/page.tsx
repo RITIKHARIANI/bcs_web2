@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/config';
+import { hasFacultyAccess } from '@/lib/auth/utils';
+import { AuthenticatedLayout } from '@/components/layouts/app-layout';
 import CourseAnalyticsDashboard from '@/components/faculty/analytics/CourseAnalyticsDashboard';
 
 interface PageProps {
@@ -11,23 +13,19 @@ export default async function CourseAnalyticsPage({ params }: PageProps) {
   const session = await auth();
   const { id } = await params;
 
-  // Check authentication
   if (!session?.user) {
     redirect('/auth/login');
   }
 
-  // Only faculty and admin can access
-  if (session.user.role !== 'faculty' && session.user.role !== 'admin') {
+  if (!hasFacultyAccess(session)) {
     redirect('/');
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neural-900 via-neural-800 to-synapse-900 py-8">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Suspense fallback={<div className="text-white">Loading analytics...</div>}>
-          <CourseAnalyticsDashboard courseId={id} />
-        </Suspense>
-      </div>
-    </div>
+    <AuthenticatedLayout>
+      <Suspense fallback={<div className="text-muted-foreground">Loading analytics...</div>}>
+        <CourseAnalyticsDashboard courseId={id} />
+      </Suspense>
+    </AuthenticatedLayout>
   );
 }

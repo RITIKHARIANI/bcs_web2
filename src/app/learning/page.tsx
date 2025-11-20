@@ -1,22 +1,13 @@
-import { NextResponse } from 'next/server';
+import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/config';
+import { AuthenticatedLayout } from '@/components/layouts/app-layout';
+import { LearningDashboard } from '@/components/learning/LearningDashboard';
 import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry';
 
-export async function GET(request: Request) {
+async function getUserLearningData(userId: string) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const userId = session.user.id;
-
-    // Get all enrolled courses with progress
+    // Fetch enrolled courses
     const enrolledCourses = await withDatabaseRetry(async () => {
       return await prisma.course_tracking.findMany({
         where: {
@@ -30,11 +21,13 @@ export async function GET(request: Request) {
               title: true,
               slug: true,
               description: true,
+              status: true,
               users: {
                 select: {
                   id: true,
                   name: true,
                   avatar_url: true,
+                  university: true,
                 },
               },
               _count: {
@@ -94,54 +87,57 @@ export async function GET(request: Request) {
       });
     });
 
-    // Calculate overall stats
+    // Calculate stats
     const totalEnrolledCourses = enrolledCourses.length;
     const totalCompletedCourses = enrolledCourses.filter(
-      e => e.completion_pct === 100
+      (e) => e.completion_pct === 100
     ).length;
 
-    // Calculate average progress across all courses
-    const avgProgress = totalEnrolledCourses > 0
-      ? Math.round(
-          enrolledCourses.reduce((sum, e) => sum + e.completion_pct, 0) /
-            totalEnrolledCourses
-        )
-      : 0;
+    const avgProgress =
+      totalEnrolledCourses > 0
+        ? Math.round(
+            enrolledCourses.reduce((sum, e) => sum + e.completion_pct, 0) /
+              totalEnrolledCourses
+          )
+        : 0;
 
     // Transform enrolled courses data
-    const coursesWithProgress = enrolledCourses.map(enrollment => ({
+    const coursesWithProgress = enrolledCourses.map((enrollment) => ({
       trackingId: enrollment.id,
-      startedAt: enrollment.started_at,
-      lastAccessed: enrollment.last_accessed,
+      startedAt: enrollment.started_at.toISOString(),
+      lastAccessed: enrollment.last_accessed.toISOString(),
       completionPct: enrollment.completion_pct,
       modulesCompleted: enrollment.modules_completed,
       modulesTotal: enrollment.modules_total,
+      status: enrollment.status,
       course: {
         id: enrollment.course.id,
         title: enrollment.course.title,
         slug: enrollment.course.slug,
         description: enrollment.course.description,
+        status: enrollment.course.status,
+        moduleCount: enrollment.course._count.course_modules,
         instructor: {
           id: enrollment.course.users.id,
           name: enrollment.course.users.name,
           avatarUrl: enrollment.course.users.avatar_url,
+          university: enrollment.course.users.university,
         },
-        moduleCount: enrollment.course._count.course_modules,
       },
     }));
 
     // Transform recent activity
-    const recentCompletions = recentActivity.map(activity => ({
+    const recentCompletions = recentActivity.map((activity) => ({
       moduleId: activity.module.id,
       moduleTitle: activity.module.title,
       moduleSlug: activity.module.slug,
       courseId: activity.course.id,
       courseTitle: activity.course.title,
       courseSlug: activity.course.slug,
-      completedAt: activity.completed_at,
+      completedAt: activity.completed_at?.toISOString() || null,
     }));
 
-    return NextResponse.json({
+    return {
       stats: {
         totalEnrolledCourses,
         totalCompletedCourses,
@@ -150,12 +146,34 @@ export async function GET(request: Request) {
       },
       enrolledCourses: coursesWithProgress,
       recentActivity: recentCompletions,
-    });
+    };
   } catch (error) {
-    console.error('Error fetching user progress:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch user progress' },
-      { status: 500 }
-    );
+    console.error('Error fetching user learning data:', error);
+    return null;
   }
+}
+
+export const metadata = {
+  title: 'My Learning - Brain & Cognitive Sciences',
+  description: 'Track your learning progress and manage your enrolled courses',
+};
+
+export default async function LearningPage() {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect('/auth/login?callbackUrl=/learning');
+  }
+
+  const learningData = await getUserLearningData(session.user.id);
+
+  return (
+    <AuthenticatedLayout>
+      <LearningDashboard
+        userName={session.user.name || 'Learner'}
+        userRole={session.user.role}
+        data={learningData}
+      />
+    </AuthenticatedLayout>
+  );
 }

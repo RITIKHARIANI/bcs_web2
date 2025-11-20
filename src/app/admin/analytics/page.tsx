@@ -1,31 +1,23 @@
-import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/config';
+import { isAdmin } from '@/lib/auth/utils';
 import AdminAnalyticsDashboard from '@/components/admin/AdminAnalyticsDashboard';
-import { AuthenticatedLayout } from '@/components/layouts/app-layout';
+import { AdminLayout } from '@/components/admin/admin-layout';
 
 export default async function AdminAnalyticsPage() {
   const session = await auth();
 
-  // Check authentication
   if (!session?.user) {
-    redirect('/auth/login');
+    redirect('/auth/login?callbackUrl=/admin/analytics');
   }
 
-  // Only admin can access
-  if (session.user.role !== 'admin') {
+  if (!isAdmin(session)) {
     redirect('/');
   }
 
   return (
-    <AuthenticatedLayout>
-      <div className="min-h-screen bg-gradient-to-br from-neural-900 via-neural-800 to-synapse-900 py-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Suspense fallback={<div className="text-white">Loading analytics...</div>}>
-            <AdminAnalyticsDashboard />
-          </Suspense>
-        </div>
-      </div>
-    </AuthenticatedLayout>
+    <AdminLayout>
+      <AdminAnalyticsDashboard />
+    </AdminLayout>
   );
 }
