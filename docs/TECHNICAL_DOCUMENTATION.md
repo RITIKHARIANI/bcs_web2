@@ -1635,3 +1635,348 @@ const queryLogger = Prisma.middleware(async (params, next) => {
 **Last Updated**: January 19, 2025  
 **Platform Version**: 2.0.0  
 **Next Review**: April 19, 2025
+
+---
+
+## Quest Map and Gamification System
+
+The Quest Map and Gamification system adds game-like elements to the learning experience, including XP rewards, achievements, and visual learning paths.
+
+### Architecture Overview
+
+**Components**:
+- Quest Map Visualizer (public and authenticated views)
+- Achievement System (definitions, checker, UI components)
+- XP and Leveling System (user_gamification_stats)
+- Visual Quest Map Editor (faculty tool)
+
+**Database Tables**:
+- `user_gamification_stats`: XP, level, streaks
+- `achievements`: Achievement definitions
+- `user_achievements`: Earned achievements per user
+- `learning_sessions`: Daily activity tracking
+- `learning_paths`: Curated learning journeys
+- `curriculum_maps`: Course relationship mapping
+
+### Module Quest Map Fields
+
+**Database Schema** (`modules` table):
+```typescript
+interface ModuleQuestMap {
+  prerequisite_module_ids: string[];     // Array of prerequisite module IDs
+  quest_map_position_x: number;         // 0-100 (percentage)
+  quest_map_position_y: number;         // 0-100 (percentage)
+  xp_reward: number;                    // 0-10000
+  difficulty_level: 'beginner' | 'intermediate' | 'advanced' | 'boss';
+  estimated_minutes: number | null;      // 0-999
+  quest_type: 'standard' | 'challenge' | 'boss' | 'bonus';
+}
+```
+
+**API Endpoints**:
+- `PUT /api/modules/[id]`: Update module with quest map fields
+- `POST /api/modules`: Create module with quest map fields (defaults apply)
+- `GET /api/faculty/quest-map/layout`: Fetch all modules for layout editor
+- `PUT /api/faculty/quest-map/layout`: Bulk update positions and prerequisites
+
+### Achievement System
+
+**Achievement Definitions** (`src/lib/achievements/definitions.ts`):
+```typescript
+interface AchievementDefinition {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;  // Emoji or Lucide icon name
+  category: 'completion' | 'speed' | 'consistency' | 'mastery';
+  xp_reward: number;
+  badge_color: 'gray' | 'bronze' | 'silver' | 'gold';
+  criteria: {
+    type: string;
+    [key: string]: any;
+  };
+}
+```
+
+**Achievement Criteria Types**:
+- `modules_completed`: Completed N modules total
+- `courses_completed`: Completed N courses at 100%
+- `streak`: Learned for N consecutive days
+- `perfect_course`: Completed a course with 100%
+- `module_difficulty`: Completed a boss/advanced module
+- `challenge_modules_completed`: Completed N challenge modules
+- `modules_per_day`: Completed N modules in one day
+- `level_reached`: Reached level N
+- `learning_paths_completed`: Completed N learning paths
+- `prerequisite_chain_completed`: Completed a course with prerequisites
+- `foundation_courses_completed`: Completed all foundation courses
+
+**Achievement Checker** (`src/lib/achievements/checker.ts`):
+```typescript
+// Called after module completion
+await checkAchievementsAfterModuleCompletion(
+  userId: string,
+  completedModuleId: string,
+  courseId?: string
+);
+
+// Returns:
+{
+  newAchievements: Achievement[];
+  totalXPAwarded: number;
+}
+```
+
+**Achievement UI Components**:
+- `AchievementBadge`: Visual badge with lock state
+- `AchievementCard`: Detailed achievement display
+- `AchievementToast`: Animated unlock notifications
+- `AchievementsView`: Full achievements profile page (`/profile/achievements`)
+
+### XP and Leveling System
+
+**XP Calculation**:
+```typescript
+// Module completion XP
+const moduleXP = module.xp_reward; // From module settings
+
+// Achievement XP
+const achievementXP = newAchievements.reduce((sum, a) => sum + a.xp_reward, 0);
+
+// Total XP awarded
+const totalXP = moduleXP + achievementXP;
+```
+
+**Level Progression**:
+```typescript
+// Level up formula: Level² × 100 = Total XP required
+// Level 1: 0 XP
+// Level 2: 100 XP (1² × 100)
+// Level 3: 400 XP (2² × 100)
+// Level 4: 900 XP (3² × 100)
+// Level 5: 1600 XP (4² × 100)
+// ...
+// Level 50: 250,000 XP (50² × 100)
+
+function calculateLevel(totalXP: number): number {
+  return Math.floor(Math.sqrt(totalXP / 100)) + 1;
+}
+
+function xpRequiredForLevel(level: number): number {
+  return Math.pow(level, 2) * 100;
+}
+```
+
+**User Gamification Stats**:
+```typescript
+interface UserGamificationStats {
+  user_id: string;
+  total_xp: number;
+  level: number;
+  current_streak: number;
+  longest_streak: number;
+  last_activity_date: Date;
+  modules_completed_count: number;
+  courses_completed_count: number;
+}
+```
+
+### Quest Map Visualization
+
+**Public Quest Map** (`/courses/[slug]/quest-map`):
+- Shows all modules in a course
+- Visual difficulty-based colors
+- Prerequisite connection lines (SVG paths)
+- Shows completion status for authenticated users
+- Click module to view details or navigate to content
+
+**Authenticated Quest Map** (same route, with auth):
+- Shows personal progress (completed modules highlighted)
+- Locked modules if prerequisites not met
+- XP rewards displayed
+- "Mark as Complete" quick action
+
+**Faculty Quest Map Editor** (`/faculty/quest-map`):
+- Drag-and-drop module positioning
+- Visual prerequisite editing (checkbox sidebar)
+- Auto-layout algorithm (by dependency depth)
+- Bulk save positions and prerequisites
+- Prerequisite validation (no circular dependencies)
+
+### Quest Map Layout Algorithm
+
+**Auto-Layout** (`src/lib/quest-map-layout.ts`):
+```typescript
+// Calculates dependency depth for each module
+function calculateDepths(modules: Module[]): Map<string, number> {
+  // Depth = max(prerequisite depths) + 1
+  // Foundation modules (no prereqs) = depth 0
+}
+
+// Arranges modules in grid based on depth
+function autoLayoutModules(modules: Module[]): ModuleWithDepth[] {
+  // X position: depth level (0-100%)
+  // Y position: evenly spaced within depth level
+}
+
+// Validates prerequisite structure
+function validatePrerequisites(modules: Module[]): {
+  valid: boolean;
+  errors: string[];
+} {
+  // Checks:
+  // - No circular dependencies
+  // - All prerequisite IDs exist
+  // - No self-references
+}
+```
+
+### Integration with Progress Tracking
+
+**Module Completion Flow** (`/api/progress/module/complete`):
+```typescript
+1. Mark module as completed
+2. Award module XP
+3. Check for achievements (calls checkAchievementsAfterModuleCompletion)
+4. Award achievement XP
+5. Calculate new level
+6. Update user_gamification_stats
+7. Update learning_sessions (daily tracking)
+8. Return:
+   - success: boolean
+   - xpAwarded: number
+   - achievements: Achievement[]
+   - leveledUp: boolean
+   - level: number
+```
+
+**Frontend Integration** (`MarkCompleteButton`):
+```typescript
+// Show achievement toasts
+if (data.achievements && data.achievements.length > 0) {
+  setTimeout(() => {
+    showAchievementsSequence(data.achievements);
+  }, 500);
+}
+
+// Show level up toast
+if (data.leveledUp && data.level) {
+  const nextLevelXP = Math.pow(data.level + 1, 2) * 100;
+  setTimeout(() => {
+    showLevelUpToast(data.level, nextLevelXP);
+  }, 1500);
+}
+```
+
+### Responsive Design Considerations
+
+All quest map and achievement UI components are fully responsive:
+
+**Mobile** (< 640px):
+- Single column layouts
+- Smaller module nodes (80x80px)
+- Compact controls and badges
+- Touch-friendly tap targets
+- Reduced map height (500px)
+
+**Tablet** (640px - 1024px):
+- Two column layouts where appropriate
+- Medium module nodes (96x96px)
+- Full map height (700px)
+
+**Desktop** (> 1024px):
+- Multi-column layouts (3:1 grid for editor)
+- Large module nodes (96x96px)
+- Sidebar panels
+- Optimal spacing
+
+### Security and Permissions
+
+**Faculty-Only Endpoints**:
+- `/api/faculty/quest-map/layout` (GET/PUT)
+- Quest map editor page (`/faculty/quest-map`)
+
+**Auth Checks**:
+```typescript
+const session = await auth();
+if (!hasFacultyAccess(session)) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+}
+```
+
+**Student Access**:
+- View quest maps (public and authenticated)
+- See own progress and achievements
+- Cannot edit module positions or prerequisites
+- Can mark modules as complete (with proper validation)
+
+### Performance Optimizations
+
+**Quest Map Rendering**:
+- SVG paths calculated with useMemo
+- Module positions stored as percentages (relative, not absolute pixels)
+- Drag-and-drop uses transform for smooth animations
+- Lazy loading for large module sets
+
+**Achievement Checking**:
+- Only checks on module completion (not on every page load)
+- Parallel queries for stats (modules, courses, sessions)
+- Database indexes on user_id foreign keys
+- Upsert pattern for achievements table
+
+**XP Calculations**:
+- Level calculated from total XP (not stored separately, computed on read)
+- Atomic increments for XP updates (no race conditions)
+- Transaction-based achievement awarding
+
+### Data Migration and Seeding
+
+**Seed Achievements**:
+```typescript
+import { seedAchievements } from '@/lib/achievements/checker';
+
+// Upserts all achievement definitions into database
+await seedAchievements();
+```
+
+**Default Quest Map Values**:
+```typescript
+// Module creation defaults (in API schema)
+{
+  prerequisite_module_ids: [],
+  quest_map_position_x: 50,
+  quest_map_position_y: 50,
+  xp_reward: 100,
+  difficulty_level: 'beginner',
+  quest_type: 'standard'
+}
+```
+
+### Testing Recommendations
+
+**Unit Tests** (not yet implemented, recommended):
+- Quest map layout algorithm (depth calculation, auto-layout)
+- Achievement criteria checkers (each type)
+- XP and level calculations
+- Prerequisite validation (circular dependency detection)
+
+**Integration Tests**:
+- Module completion flow end-to-end
+- Achievement unlocking on module completion
+- Quest map API endpoints (GET/PUT)
+- XP accumulation and level up
+
+**E2E Tests**:
+- Complete a module and verify XP awarded
+- Unlock an achievement and verify toast shown
+- Drag module in quest map editor and save
+- Set prerequisites and verify validation
+
+### Related Documentation
+
+- [Quest Map Faculty Guide](./QUEST_MAP_FACULTY_GUIDE.md) - How to use the editor
+- [Quest Map Student Guide](./QUEST_MAP_STUDENT_GUIDE.md) - Student-facing features
+- [Quest Map Implementation Plan](./QUEST_MAP_IMPLEMENTATION_PLAN.md) - Full feature spec
+
+---
+
