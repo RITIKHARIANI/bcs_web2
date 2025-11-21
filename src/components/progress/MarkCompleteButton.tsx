@@ -8,8 +8,9 @@ import { toast } from 'sonner';
 
 interface MarkCompleteButtonProps {
   moduleId: string;
-  courseId: string;
+  courseId?: string; // Optional - if not provided, will use smart detection
   initialStatus: 'not_started' | 'completed';
+  context?: 'course' | 'standalone'; // Show different messaging
   onComplete?: () => void;
 }
 
@@ -17,6 +18,7 @@ export function MarkCompleteButton({
   moduleId,
   courseId,
   initialStatus,
+  context = 'course',
   onComplete,
 }: MarkCompleteButtonProps) {
   const router = useRouter();
@@ -27,16 +29,26 @@ export function MarkCompleteButton({
     setIsLoading(true);
 
     try {
+      const requestBody: {
+        moduleId: string;
+        courseId?: string;
+        completed: boolean;
+      } = {
+        moduleId,
+        completed: !isCompleted,
+      };
+
+      // Only include courseId if provided
+      if (courseId) {
+        requestBody.courseId = courseId;
+      }
+
       const response = await fetch('/api/progress/module/complete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          moduleId,
-          courseId,
-          completed: !isCompleted,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -48,6 +60,23 @@ export function MarkCompleteButton({
       if (data.success) {
         setIsCompleted(!isCompleted);
         onComplete?.();
+
+        // Show success message with mode info
+        if (!isCompleted) {
+          if (data.mode === 'auto-linked') {
+            toast.success('Progress Saved!', {
+              description: `Module marked complete and linked to ${data.linkedCourses} course(s)!`,
+            });
+          } else if (data.mode === 'standalone') {
+            toast.success('Progress Saved!', {
+              description: `Module marked as read. Progress will sync when you enroll in courses.`,
+            });
+          } else {
+            toast.success('Progress Saved!', {
+              description: `Module marked complete! +${data.xpAwarded || 0} XP`,
+            });
+          }
+        }
 
         // Refresh the page to update progress indicators
         router.refresh();
@@ -62,6 +91,9 @@ export function MarkCompleteButton({
     }
   };
 
+  const buttonText = context === 'standalone' ? 'Mark as Read' : 'Mark as Complete';
+  const completedText = context === 'standalone' ? 'Read' : 'Completed';
+
   if (isCompleted) {
     return (
       <NeuralButton
@@ -75,7 +107,7 @@ export function MarkCompleteButton({
         ) : (
           <Check className="h-4 w-4" />
         )}
-        <span>Completed</span>
+        <span>{completedText}</span>
       </NeuralButton>
     );
   }
@@ -95,7 +127,7 @@ export function MarkCompleteButton({
       ) : (
         <>
           <Check className="h-4 w-4" />
-          <span>Mark as Complete</span>
+          <span>{buttonText}</span>
         </>
       )}
     </NeuralButton>

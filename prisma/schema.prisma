@@ -500,7 +500,7 @@ model module_progress {
   id           String    @id @default(cuid())
   user_id      String    // Learner (student, faculty, or admin)
   module_id    String
-  course_id    String    // Link to enrolled course
+  course_id    String?   // Link to enrolled course (NULL for standalone progress)
 
   // Completion tracking (enhanced for quest map)
   status       String    @default("not_started") // not_started | available | in_progress | completed
@@ -516,17 +516,18 @@ model module_progress {
   updated_at DateTime @updatedAt
 
   // Relations
-  user   users   @relation("ModuleProgress", fields: [user_id], references: [id], onDelete: Cascade)
-  module modules @relation("ModuleProgressRecords", fields: [module_id], references: [id], onDelete: Cascade)
-  course courses @relation("CourseProgress", fields: [course_id], references: [id], onDelete: Cascade)
+  user   users    @relation("ModuleProgress", fields: [user_id], references: [id], onDelete: Cascade)
+  module modules  @relation("ModuleProgressRecords", fields: [module_id], references: [id], onDelete: Cascade)
+  course courses? @relation("CourseProgress", fields: [course_id], references: [id], onDelete: Cascade)
 
   // Constraints
-  @@unique([user_id, module_id, course_id]) // One progress record per user+module+course
+  @@unique([user_id, module_id, course_id]) // One progress record per user+module+course (nulls allowed)
   @@index([user_id]) // Fast lookup by user
   @@index([module_id]) // Fast lookup by module
   @@index([course_id]) // Fast lookup by course
   @@index([status]) // Filter by completion status
   @@index([user_id, course_id]) // Common query pattern
+  @@index([user_id, module_id]) // For standalone progress queries
 }
 
 // ==================== GAMIFICATION (QUEST MAP FEATURE) ====================
