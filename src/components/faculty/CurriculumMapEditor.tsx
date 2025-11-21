@@ -348,22 +348,29 @@ export function CurriculumMapEditor() {
                     <div className="space-y-2 max-h-80 overflow-y-auto">
                       {courses
                         .filter(c => c.id !== selectedCourse.id)
-                        .map(course => (
-                          <label key={course.id} className="flex items-start gap-2 text-sm">
-                            <input
-                              type="checkbox"
-                              checked={selectedCourse.prerequisite_course_ids.includes(course.id)}
-                              onChange={(e) => {
-                                const newPrereqs = e.target.checked
-                                  ? [...selectedCourse.prerequisite_course_ids, course.id]
-                                  : selectedCourse.prerequisite_course_ids.filter(id => id !== course.id);
-                                updatePrerequisites(selectedCourse.id, newPrereqs);
-                              }}
-                              className="mt-1"
-                            />
-                            <span className="flex-1">{course.title}</span>
-                          </label>
-                        ))}
+                        .map(course => {
+                          // Always read from courses array, not selectedCourse (which may be stale)
+                          const currentCourse = courses.find(c => c.id === selectedCourse.id);
+                          const isChecked = currentCourse?.prerequisite_course_ids.includes(course.id) ?? false;
+
+                          return (
+                            <label key={course.id} className="flex items-start gap-2 text-sm">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  const currentPrereqs = currentCourse?.prerequisite_course_ids || [];
+                                  const newPrereqs = e.target.checked
+                                    ? [...currentPrereqs, course.id]
+                                    : currentPrereqs.filter(id => id !== course.id);
+                                  updatePrerequisites(selectedCourse.id, newPrereqs);
+                                }}
+                                className="mt-1"
+                              />
+                              <span className="flex-1">{course.title}</span>
+                            </label>
+                          );
+                        })}
                     </div>
                   </div>
                 </div>

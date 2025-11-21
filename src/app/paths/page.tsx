@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry';
 import { NeuralButton } from '@/components/ui/neural-button';
 import { Map, BookOpen, Users, ArrowRight } from 'lucide-react';
+import { Header } from '@/components/Header';
 
 export const metadata = {
   title: 'Learning Paths | BCS E-Textbook',
@@ -40,28 +41,30 @@ export default async function LearningPathsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      {/* Header */}
-      <div className="bg-slate-900/80 border-b border-slate-800 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-          <div className="flex items-center gap-3 mb-4">
-            <Map className="h-8 w-8 text-blue-400" />
-            <h1 className="text-3xl font-bold">Learning Paths</h1>
-          </div>
-          <p className="text-slate-400 max-w-2xl">
-            Follow curated learning paths designed by expert instructors. Each path guides you through
-            a structured curriculum to achieve specific learning goals.
-          </p>
-          <div className="mt-6">
-            <Link href="/curriculum/map">
-              <NeuralButton variant="outline">
-                <Map className="h-4 w-4 mr-2" />
-                View Full Curriculum Map
-              </NeuralButton>
-            </Link>
+    <>
+      <Header />
+      <div className="min-h-screen bg-slate-950 text-slate-100">
+        {/* Header */}
+        <div className="bg-slate-900/80 border-b border-slate-800 backdrop-blur-md">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+            <div className="flex items-center gap-3 mb-4">
+              <Map className="h-8 w-8 text-blue-400" />
+              <h1 className="text-3xl font-bold">Learning Paths</h1>
+            </div>
+            <p className="text-slate-400 max-w-2xl">
+              Follow curated learning paths designed by expert instructors. Each path guides you through
+              a structured curriculum to achieve specific learning goals.
+            </p>
+            <div className="mt-6">
+              <Link href="/curriculum/map">
+                <NeuralButton className="bg-blue-600 text-white hover:bg-blue-700 border-blue-500">
+                  <Map className="h-4 w-4 mr-2" />
+                  View Full Curriculum Map
+                </NeuralButton>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Learning Paths Grid */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
@@ -120,6 +123,7 @@ export default async function LearningPathsPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
