@@ -3,6 +3,8 @@ import { CurriculumMapAuthenticated } from '@/components/curriculum/CurriculumMa
 import { CurriculumMapPublic } from '@/components/curriculum/CurriculumMapPublic';
 import { Header } from '@/components/Header';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Curriculum Map | BCS E-Textbook',
   description: 'Explore the complete curriculum and course relationships'

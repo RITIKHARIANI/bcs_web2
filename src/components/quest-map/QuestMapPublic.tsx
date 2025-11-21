@@ -170,20 +170,20 @@ export function QuestMapPublic({ courseSlug }: QuestMapPublicProps) {
         </div>
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 ml-2">
           <Link href={`/courses/${courseSlug}`}>
-            <NeuralButton variant="outline" size="sm" className="hidden sm:flex">
+            <NeuralButton size="sm" className="hidden sm:flex bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
               <Eye className="h-4 w-4 mr-2" />
               View Course
             </NeuralButton>
-            <NeuralButton variant="outline" size="sm" className="sm:hidden">
+            <NeuralButton size="sm" className="sm:hidden bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
               <Eye className="h-4 w-4" />
             </NeuralButton>
           </Link>
           <Link href="/auth/login">
-            <NeuralButton variant="neural" size="sm" className="hidden sm:flex">
+            <NeuralButton size="sm" className="hidden sm:flex bg-blue-600 hover:bg-blue-700 text-white border-blue-500">
               <LogIn className="h-4 w-4 mr-2" />
               Sign In to Track Progress
             </NeuralButton>
-            <NeuralButton variant="neural" size="sm" className="sm:hidden">
+            <NeuralButton size="sm" className="sm:hidden bg-blue-600 hover:bg-blue-700 text-white border-blue-500">
               <LogIn className="h-4 w-4" />
             </NeuralButton>
           </Link>
@@ -253,12 +253,13 @@ export function QuestMapPublic({ courseSlug }: QuestMapPublicProps) {
           </div>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/auth/login">
-              <NeuralButton variant="neural" className="w-full sm:w-auto">
+              <NeuralButton className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white border-blue-500">
+                <LogIn className="h-4 w-4 mr-2" />
                 Sign In
               </NeuralButton>
             </Link>
             <Link href="/auth/register">
-              <NeuralButton variant="outline" className="w-full sm:w-auto">
+              <NeuralButton className="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
                 Create Account
               </NeuralButton>
             </Link>
