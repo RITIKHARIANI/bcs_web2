@@ -67,14 +67,14 @@ function calculateDepths(modules: Module[]): Map<string, number> {
 
     visited.add(moduleId);
 
-    const module = modules.find(m => m.id === moduleId);
-    if (!module || module.prerequisite_module_ids.length === 0) {
+    const currentModule = modules.find(m => m.id === moduleId);
+    if (!currentModule || currentModule.prerequisite_module_ids.length === 0) {
       depths.set(moduleId, 0);
       visited.delete(moduleId);
       return 0;
     }
 
-    const prereqDepths = module.prerequisite_module_ids.map(prereqId => getDepth(prereqId));
+    const prereqDepths = currentModule.prerequisite_module_ids.map(prereqId => getDepth(prereqId));
     const maxPrereqDepth = Math.max(...prereqDepths, -1);
     const depth = maxPrereqDepth + 1;
 
@@ -168,13 +168,13 @@ export function validatePrerequisites(modules: Module[]): {
       return false;
     }
 
-    const module = modules.find(m => m.id === moduleId);
-    if (!module) return false;
+    const currentModule = modules.find(m => m.id === moduleId);
+    if (!currentModule) return false;
 
     visited.add(moduleId);
     recursionStack.add(moduleId);
 
-    for (const prereqId of module.prerequisite_module_ids) {
+    for (const prereqId of currentModule.prerequisite_module_ids) {
       if (hasCircularDependency(prereqId, [...path, moduleId])) {
         recursionStack.delete(moduleId);
         return true;
