@@ -80,7 +80,7 @@ export default async function LearningPathsPage() {
               <Link
                 key={path.id}
                 href={`/paths/${path.slug}`}
-                className="cognitive-card p-6 hover:border-blue-500/50 transition-all duration-300 hover:scale-105 group"
+                className="block p-6 bg-slate-900/50 border border-slate-800 rounded-lg hover:border-blue-500/50 hover:bg-slate-900/80 transition-all duration-300 hover:scale-105 group backdrop-blur-sm"
               >
                 {/* Featured Badge */}
                 {path.is_featured && (

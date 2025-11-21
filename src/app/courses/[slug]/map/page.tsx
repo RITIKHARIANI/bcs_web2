@@ -4,7 +4,6 @@ import { prisma } from '@/lib/db';
 import { QuestMapPublic } from '@/components/quest-map/QuestMapPublic';
 import { QuestMapAuthenticated } from '@/components/quest-map/QuestMapAuthenticated';
 import { redirect } from 'next/navigation';
-import { Header } from '@/components/Header';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,20 +66,10 @@ export default async function QuestMapPage({ params }: PageProps) {
 
     if (enrollment) {
       // User is enrolled - show personalized quest map
-      return (
-        <>
-          <Header />
-          <QuestMapAuthenticated courseSlug={slug} userId={session.user.id} />
-        </>
-      );
+      return <QuestMapAuthenticated courseSlug={slug} userId={session.user.id} />;
     }
   }
 
   // Not logged in or not enrolled - show public preview
-  return (
-    <>
-      <Header />
-      <QuestMapPublic courseSlug={slug} />
-    </>
-  );
+  return <QuestMapPublic courseSlug={slug} />;
 }
