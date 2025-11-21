@@ -96,7 +96,7 @@ export function showLevelUpToast(newLevel: number, xpRequired: number) {
             Level Up!
           </div>
           <p className="text-sm opacity-90">
-            You've reached Level {newLevel}! Next level at {xpRequired} XP
+            You&apos;ve reached Level {newLevel}! Next level at {xpRequired} XP
           </p>
         </div>
       </div>
