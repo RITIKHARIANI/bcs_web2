@@ -46,7 +46,8 @@ import {
   Minimize2,
   Eye,
   FileText,
-  Navigation
+  Navigation,
+  Map
 } from 'lucide-react'
 
 interface MediaFile {
@@ -377,9 +378,20 @@ export function EnhancedCourseViewer({ course, initialModule, initialSearch = ''
                   Featured
                 </Badge>
               )}
-              <NeuralButton 
-                variant="ghost" 
-                size="sm" 
+              <Link href={`/courses/${course.slug}/map`}>
+                <NeuralButton
+                  variant="outline"
+                  size="sm"
+                  aria-label="View Quest Map"
+                  className="hidden sm:inline-flex"
+                >
+                  <Map className="h-4 w-4 mr-2" />
+                  Quest Map
+                </NeuralButton>
+              </Link>
+              <NeuralButton
+                variant="ghost"
+                size="sm"
                 onClick={handleShare}
                 aria-label={copiedUrl ? "URL Copied" : "Share course"}
               >

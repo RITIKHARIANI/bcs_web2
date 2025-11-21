@@ -96,8 +96,8 @@ export function QuestMapAuthenticated({ courseSlug, userId }: QuestMapAuthentica
     const updateDimensions = () => {
       if (containerRef.current) {
         setMapDimensions({
-          width: containerRef.current.scrollWidth,
-          height: containerRef.current.scrollHeight
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight
         });
       }
     };
@@ -247,8 +247,8 @@ export function QuestMapAuthenticated({ courseSlug, userId }: QuestMapAuthentica
       </div>
 
       {/* Map Area */}
-      <div className="relative flex-1 overflow-auto custom-scrollbar" ref={containerRef}>
-        <div className="relative w-full min-h-[800px] max-w-5xl mx-auto py-20 px-4">
+      <div className="relative flex-1 overflow-auto custom-scrollbar">
+        <div className="relative w-full min-h-[800px] max-w-5xl mx-auto py-20 px-4" ref={containerRef}>
           {/* SVG Connections */}
           <svg className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible z-0">
             {connectionPaths}
