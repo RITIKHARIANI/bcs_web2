@@ -193,7 +193,7 @@ export function CurriculumMapAuthenticated({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-950 text-white">
+      <div className="flex items-center justify-center h-full bg-slate-950 text-white">
         <div className="text-center">
           <MapIcon className="h-12 w-12 animate-pulse mx-auto mb-4 text-blue-400" />
           <p className="text-lg">Loading curriculum map...</p>
@@ -204,7 +204,7 @@ export function CurriculumMapAuthenticated({
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-950 text-white">
+      <div className="flex items-center justify-center h-full bg-slate-950 text-white">
         <div className="text-center">
           <p className="text-lg text-red-400">Failed to load curriculum map</p>
         </div>
@@ -221,7 +221,7 @@ export function CurriculumMapAuthenticated({
     : [{ label: 'Curriculum Map' }];
 
   return (
-    <div className="flex flex-col h-screen bg-slate-950 text-slate-100 overflow-hidden">
+    <div className="flex flex-col h-full bg-slate-950 text-slate-100 overflow-hidden">
       {/* Progress HUD */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 bg-slate-900/80 border-b border-slate-800 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3 min-w-0 flex-1">

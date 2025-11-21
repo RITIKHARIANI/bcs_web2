@@ -4,6 +4,7 @@ import { withDatabaseRetry } from '@/lib/retry';
 import { redirect, notFound } from 'next/navigation';
 import { CurriculumMapAuthenticated } from '@/components/curriculum/CurriculumMapAuthenticated';
 import { CurriculumMapPublic } from '@/components/curriculum/CurriculumMapPublic';
+import { Header } from '@/components/Header';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,20 +57,23 @@ export default async function LearningPathPage({ params }: PageProps) {
     notFound();
   }
 
-  if (session?.user?.id) {
-    return (
-      <CurriculumMapAuthenticated
-        userId={session.user.id}
-        pathTitle={path.title}
-        pathSlug={path.slug}
-      />
-    );
-  }
-
   return (
-    <CurriculumMapPublic
-      pathTitle={path.title}
-      pathSlug={path.slug}
-    />
+    <div className="flex flex-col h-screen overflow-hidden">
+      <Header />
+      <div className="flex-1 overflow-hidden">
+        {session?.user?.id ? (
+          <CurriculumMapAuthenticated
+            userId={session.user.id}
+            pathTitle={path.title}
+            pathSlug={path.slug}
+          />
+        ) : (
+          <CurriculumMapPublic
+            pathTitle={path.title}
+            pathSlug={path.slug}
+          />
+        )}
+      </div>
+    </div>
   );
 }

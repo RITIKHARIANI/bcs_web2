@@ -129,7 +129,7 @@ export function QuestMapPublic({ courseSlug }: QuestMapPublicProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-950 text-white">
+      <div className="flex items-center justify-center h-full bg-slate-950 text-white">
         <div className="text-center">
           <MapIcon className="h-12 w-12 animate-pulse mx-auto mb-4 text-blue-400" />
           <p className="text-lg">Loading quest map...</p>
@@ -140,7 +140,7 @@ export function QuestMapPublic({ courseSlug }: QuestMapPublicProps) {
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-950 text-white">
+      <div className="flex items-center justify-center h-full bg-slate-950 text-white">
         <div className="text-center">
           <p className="text-lg text-red-400">Failed to load quest map</p>
           <Link href={`/courses/${courseSlug}`}>
@@ -154,7 +154,7 @@ export function QuestMapPublic({ courseSlug }: QuestMapPublicProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-slate-950 text-slate-100">
+    <div className="flex flex-col h-full bg-slate-950 text-slate-100">
       {/* Public Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 bg-slate-900/80 border-b border-slate-800 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3 min-w-0 flex-1">

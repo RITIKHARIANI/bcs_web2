@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { QuestMapPublic } from '@/components/quest-map/QuestMapPublic';
 import { QuestMapAuthenticated } from '@/components/quest-map/QuestMapAuthenticated';
 import { redirect } from 'next/navigation';
+import { Header } from '@/components/Header';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +54,7 @@ export default async function QuestMapPage({ params }: PageProps) {
   }
 
   // Determine which component to render based on authentication
+  let content;
   if (session?.user) {
     // Check if user is enrolled
     const enrollment = await prisma.course_tracking.findUnique({
@@ -66,10 +68,22 @@ export default async function QuestMapPage({ params }: PageProps) {
 
     if (enrollment) {
       // User is enrolled - show personalized quest map
-      return <QuestMapAuthenticated courseSlug={slug} userId={session.user.id} />;
+      content = <QuestMapAuthenticated courseSlug={slug} userId={session.user.id} />;
+    } else {
+      // Not enrolled - show public preview
+      content = <QuestMapPublic courseSlug={slug} />;
     }
+  } else {
+    // Not logged in - show public preview
+    content = <QuestMapPublic courseSlug={slug} />;
   }
 
-  // Not logged in or not enrolled - show public preview
-  return <QuestMapPublic courseSlug={slug} />;
+  return (
+    <div className="flex flex-col h-screen overflow-hidden">
+      <Header />
+      <div className="flex-1 overflow-hidden">
+        {content}
+      </div>
+    </div>
+  );
 }
