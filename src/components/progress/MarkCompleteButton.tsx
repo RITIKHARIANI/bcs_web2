@@ -100,14 +100,14 @@ export function MarkCompleteButton({
         variant="ghost"
         onClick={handleToggle}
         disabled={isLoading}
-        className="gap-2 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
+        className="gap-2 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 border-2 border-green-500"
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
           <Check className="h-4 w-4" />
         )}
-        <span>{completedText}</span>
+        <span className="font-semibold">{completedText}</span>
       </NeuralButton>
     );
   }
