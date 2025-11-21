@@ -242,3 +242,116 @@ function calculateCourseStatus(
   // If prerequisites met but not started
   return 'available';
 }
+
+/**
+ * PUT /api/paths/[slug]
+ * Update learning path
+ * Faculty/Admin only (must be creator or admin)
+ */
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { slug } = await params;
+
+  // Get current path
+  const currentPath = await prisma.learning_paths.findUnique({
+    where: { slug },
+    select: { created_by: true }
+  });
+
+  if (!currentPath) {
+    return NextResponse.json({ error: 'Learning path not found' }, { status: 404 });
+  }
+
+  // Check permissions (must be creator or admin)
+  const user = await prisma.users.findUnique({
+    where: { id: session.user.id },
+    select: { role: true }
+  });
+
+  if (currentPath.created_by !== session.user.id && user?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden - Not authorized to edit this path' }, { status: 403 });
+  }
+
+  const { title, description, course_ids, is_featured, sort_order, newSlug } = await request.json();
+
+  // If changing slug, check it's available
+  if (newSlug && newSlug !== slug) {
+    const existing = await prisma.learning_paths.findUnique({
+      where: { slug: newSlug }
+    });
+
+    if (existing) {
+      return NextResponse.json({ error: 'New slug already exists' }, { status: 400 });
+    }
+  }
+
+  const updatedPath = await withDatabaseRetry(async () => {
+    return await prisma.learning_paths.update({
+      where: { slug },
+      data: {
+        ...(title && { title }),
+        ...(newSlug && { slug: newSlug }),
+        ...(description !== undefined && { description }),
+        ...(course_ids && { course_ids }),
+        ...(is_featured !== undefined && { is_featured }),
+        ...(sort_order !== undefined && { sort_order })
+      }
+    });
+  });
+
+  return NextResponse.json({ path: updatedPath });
+}
+
+/**
+ * DELETE /api/paths/[slug]
+ * Delete learning path
+ * Faculty/Admin only (must be creator or admin)
+ */
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { slug } = await params;
+
+  // Get current path
+  const currentPath = await prisma.learning_paths.findUnique({
+    where: { slug },
+    select: { created_by: true }
+  });
+
+  if (!currentPath) {
+    return NextResponse.json({ error: 'Learning path not found' }, { status: 404 });
+  }
+
+  // Check permissions (must be creator or admin)
+  const user = await prisma.users.findUnique({
+    where: { id: session.user.id },
+    select: { role: true }
+  });
+
+  if (currentPath.created_by !== session.user.id && user?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden - Not authorized to delete this path' }, { status: 403 });
+  }
+
+  await withDatabaseRetry(async () => {
+    await prisma.learning_paths.delete({
+      where: { slug }
+    });
+  });
+
+  return NextResponse.json({ success: true });
+}
