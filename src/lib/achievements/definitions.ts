@@ -255,6 +255,61 @@ export const ACHIEVEMENT_DEFINITIONS: AchievementDefinition[] = [
     }
   },
 
+  // ============ LEARNING PATH ACHIEVEMENTS ============
+  {
+    id: 'first-path',
+    title: 'Path Walker',
+    description: 'Complete your first learning path',
+    icon: '🛤️',
+    category: 'completion',
+    xp_reward: 300,
+    badge_color: 'silver',
+    criteria: {
+      type: 'learning_paths_completed',
+      count: 1
+    }
+  },
+  {
+    id: 'three-paths',
+    title: 'Path Master',
+    description: 'Complete 3 learning paths',
+    icon: '🗺️',
+    category: 'completion',
+    xp_reward: 750,
+    badge_color: 'gold',
+    criteria: {
+      type: 'learning_paths_completed',
+      count: 3
+    }
+  },
+
+  // ============ CURRICULUM MAP ACHIEVEMENTS ============
+  {
+    id: 'prerequisite-chain',
+    title: 'Chain Breaker',
+    description: 'Complete a course with prerequisites',
+    icon: '⛓️',
+    category: 'mastery',
+    xp_reward: 200,
+    badge_color: 'silver',
+    criteria: {
+      type: 'prerequisite_chain_completed',
+      min_prerequisites: 1
+    }
+  },
+  {
+    id: 'foundation-scholar',
+    title: 'Foundation Scholar',
+    description: 'Complete all foundation courses',
+    icon: '🏛️',
+    category: 'mastery',
+    xp_reward: 500,
+    badge_color: 'gold',
+    criteria: {
+      type: 'foundation_courses_completed'
+    }
+  },
+
   // ============ LEVEL MILESTONES ============
   {
     id: 'level-5',
@@ -293,6 +348,19 @@ export const ACHIEVEMENT_DEFINITIONS: AchievementDefinition[] = [
     criteria: {
       type: 'level_reached',
       level: 25
+    }
+  },
+  {
+    id: 'level-50',
+    title: 'Level 50',
+    description: 'Reach Level 50',
+    icon: '👑',
+    category: 'mastery',
+    xp_reward: 1000,
+    badge_color: 'gold',
+    criteria: {
+      type: 'level_reached',
+      level: 50
     }
   }
 ];

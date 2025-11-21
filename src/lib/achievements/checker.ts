@@ -164,6 +164,80 @@ export async function checkAchievementsAfterModuleCompletion(
         case 'level_reached':
           earned = currentLevel >= achievement.criteria.level;
           break;
+
+        case 'learning_paths_completed':
+          // Check if user has completed learning paths
+          // A learning path is complete when all its courses are completed
+          const completedPaths = await withDatabaseRetry(async () => {
+            const paths = await prisma.learning_paths.findMany({
+              select: {
+                id: true,
+                course_ids: true
+              }
+            });
+
+            let count = 0;
+            for (const path of paths) {
+              if (path.course_ids.length === 0) continue;
+
+              // Check if all courses in path are completed
+              const completedInPath = await prisma.course_tracking.count({
+                where: {
+                  user_id: userId,
+                  course_id: { in: path.course_ids },
+                  completion_pct: 100
+                }
+              });
+
+              if (completedInPath === path.course_ids.length) {
+                count++;
+              }
+            }
+            return count;
+          });
+          earned = completedPaths >= achievement.criteria.count;
+          break;
+
+        case 'prerequisite_chain_completed':
+          // Check if user completed a course that had prerequisites
+          if (courseId) {
+            const courseWithPrereqs = await withDatabaseRetry(async () => {
+              return await prisma.courses.findUnique({
+                where: { id: courseId },
+                select: { prerequisite_course_ids: true }
+              });
+            });
+
+            earned = (courseWithPrereqs?.prerequisite_course_ids.length || 0) >= achievement.criteria.min_prerequisites;
+          }
+          break;
+
+        case 'foundation_courses_completed':
+          // Foundation courses are those with no prerequisites
+          const foundationCourses = await withDatabaseRetry(async () => {
+            return await prisma.courses.findMany({
+              where: {
+                status: 'published',
+                prerequisite_course_ids: { isEmpty: true }
+              },
+              select: { id: true }
+            });
+          });
+
+          if (foundationCourses.length > 0) {
+            const completedFoundation = await withDatabaseRetry(async () => {
+              return await prisma.course_tracking.count({
+                where: {
+                  user_id: userId,
+                  course_id: { in: foundationCourses.map(c => c.id) },
+                  completion_pct: 100
+                }
+              });
+            });
+
+            earned = completedFoundation === foundationCourses.length;
+          }
+          break;
       }
 
       if (earned) {
