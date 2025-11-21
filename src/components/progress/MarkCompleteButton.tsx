@@ -5,6 +5,7 @@ import { Check, Loader2 } from 'lucide-react';
 import { NeuralButton } from '../ui/neural-button';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { showAchievementsSequence, showLevelUpToast } from '../achievements/AchievementToast';
 
 interface MarkCompleteButtonProps {
   moduleId: string;
@@ -75,6 +76,22 @@ export function MarkCompleteButton({
             toast.success('Progress Saved!', {
               description: `Module marked complete! +${data.xpAwarded || 0} XP`,
             });
+          }
+
+          // Show achievement toasts if any were earned
+          if (data.achievements && data.achievements.length > 0) {
+            // Wait a moment before showing achievements to avoid overlapping with success toast
+            setTimeout(() => {
+              showAchievementsSequence(data.achievements);
+            }, 500);
+          }
+
+          // Show level up toast if leveled up
+          if (data.leveledUp && data.level) {
+            const nextLevelXP = Math.pow(data.level + 1, 2) * 100;
+            setTimeout(() => {
+              showLevelUpToast(data.level, nextLevelXP);
+            }, data.achievements && data.achievements.length > 0 ? 1500 : 500);
           }
         }
 
