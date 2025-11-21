@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Map as MapIcon, LogIn, Eye, BookOpen, Trophy } from 'lucide-react';
+import { Map as MapIcon, LogIn, Eye, BookOpen, Trophy, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { NeuralButton } from '@/components/ui/neural-button';
 
@@ -157,6 +157,16 @@ export function QuestMapPublic({ courseSlug }: QuestMapPublicProps) {
       {/* Public Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 bg-slate-900/80 border-b border-slate-800 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3 min-w-0 flex-1">
+          <Link href={`/courses/${courseSlug}`}>
+            <NeuralButton
+              variant="ghost"
+              size="sm"
+              aria-label="Back to course"
+              className="flex-shrink-0"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </NeuralButton>
+          </Link>
           <div className="p-2 bg-blue-600/20 rounded-lg text-blue-400 flex-shrink-0">
             <MapIcon size={24} />
           </div>
