@@ -59,7 +59,7 @@ export function QuestMapPublic({ courseSlug }: QuestMapPublicProps) {
     async function fetchData() {
       try {
         setLoading(true);
-        const response = await fetch(`/api/courses/${courseSlug}/map`);
+        const response = await fetch(`/api/courses/by-slug/${courseSlug}/map`);
         if (!response.ok) {
           throw new Error('Failed to fetch quest map');
         }

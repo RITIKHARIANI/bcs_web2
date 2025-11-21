@@ -71,7 +71,7 @@ export function QuestMapAuthenticated({ courseSlug, userId }: QuestMapAuthentica
     async function fetchData() {
       try {
         setLoading(true);
-        const response = await fetch(`/api/courses/${courseSlug}/quest-map`);
+        const response = await fetch(`/api/courses/by-slug/${courseSlug}/quest-map`);
         if (!response.ok) {
           if (response.status === 403) {
             // Not enrolled - redirect to course page
