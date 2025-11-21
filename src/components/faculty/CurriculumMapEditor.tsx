@@ -14,6 +14,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { autoLayoutCourses, needsAutoLayout, validatePrerequisites } from '@/lib/curriculum-layout';
+import { toast } from 'sonner';
 
 interface Course {
   id: string;
@@ -134,7 +135,9 @@ export function CurriculumMapEditor() {
       // Validate prerequisites first
       const validation = validatePrerequisites(courses);
       if (!validation.valid) {
-        alert('Error: ' + validation.errors.join('\n'));
+        toast.error('Validation Error', {
+          description: validation.errors.join('. '),
+        });
         setSaving(false);
         return;
       }
@@ -148,10 +151,14 @@ export function CurriculumMapEditor() {
       if (!response.ok) throw new Error('Failed to save');
 
       setHasUnsavedChanges(false);
-      alert('Curriculum layout saved successfully!');
+      toast.success('Success!', {
+        description: 'Curriculum layout saved successfully!',
+      });
     } catch (error) {
       console.error('Error saving:', error);
-      alert('Failed to save curriculum layout');
+      toast.error('Save Failed', {
+        description: 'Failed to save curriculum layout. Please try again.',
+      });
     } finally {
       setSaving(false);
     }

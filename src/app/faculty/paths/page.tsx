@@ -7,6 +7,7 @@ import { NeuralButton } from '@/components/ui/neural-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Eye, Star, Map } from 'lucide-react';
+import { Header } from '@/components/Header';
 
 export const metadata = {
   title: 'Learning Paths | Faculty Dashboard',
@@ -57,7 +58,9 @@ export default async function FacultyLearningPathsPage() {
   const paths = await getLearningPaths(session.user.id);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <>
+      <Header />
+      <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Learning Paths</h1>
@@ -161,6 +164,7 @@ export default async function FacultyLearningPathsPage() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

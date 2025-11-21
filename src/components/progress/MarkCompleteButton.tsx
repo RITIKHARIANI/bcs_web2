@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import { NeuralButton } from '../ui/neural-button';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface MarkCompleteButtonProps {
   moduleId: string;
@@ -53,7 +54,9 @@ export function MarkCompleteButton({
       }
     } catch (error) {
       console.error('Error toggling completion:', error);
-      alert('Failed to update progress. Please try again.');
+      toast.error('Update Failed', {
+        description: 'Failed to update progress. Please try again.',
+      });
     } finally {
       setIsLoading(false);
     }

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { NeuralButton } from '@/components/ui/neural-button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, Save, GripVertical, X, Plus, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   DndContext,
   closestCenter,
@@ -166,11 +167,16 @@ export function LearningPathForm({ initialData, isEdit = false }: LearningPathFo
         throw new Error(error.error || 'Failed to save learning path');
       }
 
+      toast.success('Success!', {
+        description: `Learning path ${isEdit ? 'updated' : 'created'} successfully!`,
+      });
       router.push('/faculty/paths');
       router.refresh();
     } catch (error) {
       console.error('Error saving path:', error);
-      alert(error instanceof Error ? error.message : 'Failed to save learning path');
+      toast.error('Save Failed', {
+        description: error instanceof Error ? error.message : 'Failed to save learning path. Please try again.',
+      });
     } finally {
       setSaving(false);
     }

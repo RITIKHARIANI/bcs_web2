@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry';
 import { LearningPathForm } from '@/components/faculty/LearningPathForm';
+import { Header } from '@/components/Header';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -65,25 +66,28 @@ export default async function EditLearningPathPage({ params }: PageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900">Edit Learning Path</h1>
-        <p className="text-slate-600 mt-2">
-          Update path details, reorder courses, or change prerequisites
-        </p>
-      </div>
+    <>
+      <Header />
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-slate-900">Edit Learning Path</h1>
+          <p className="text-slate-600 mt-2">
+            Update path details, reorder courses, or change prerequisites
+          </p>
+        </div>
 
-      <LearningPathForm
-        initialData={{
-          title: path.title,
-          slug: path.slug,
-          description: path.description,
-          course_ids: path.course_ids,
-          is_featured: path.is_featured,
-          sort_order: path.sort_order
-        }}
-        isEdit
-      />
-    </div>
+        <LearningPathForm
+          initialData={{
+            title: path.title,
+            slug: path.slug,
+            description: path.description,
+            course_ids: path.course_ids,
+            is_featured: path.is_featured,
+            sort_order: path.sort_order
+          }}
+          isEdit
+        />
+      </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth/config';
 import { CurriculumMapAuthenticated } from '@/components/curriculum/CurriculumMapAuthenticated';
 import { CurriculumMapPublic } from '@/components/curriculum/CurriculumMapPublic';
+import { Header } from '@/components/Header';
 
 export const metadata = {
   title: 'Curriculum Map | BCS E-Textbook',
@@ -10,9 +11,14 @@ export const metadata = {
 export default async function CurriculumMapPage() {
   const session = await auth();
 
-  if (session?.user?.id) {
-    return <CurriculumMapAuthenticated userId={session.user.id} />;
-  }
-
-  return <CurriculumMapPublic />;
+  return (
+    <>
+      <Header />
+      {session?.user?.id ? (
+        <CurriculumMapAuthenticated userId={session.user.id} />
+      ) : (
+        <CurriculumMapPublic />
+      )}
+    </>
+  );
 }
