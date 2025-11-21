@@ -5,16 +5,17 @@
  * Similar to curriculum-layout but for modules instead of courses.
  */
 
-interface Module {
+// Base interface with required fields for layout calculations
+export interface LayoutModule {
   id: string;
   title: string;
   prerequisite_module_ids: string[];
   quest_map_position_x: number;
   quest_map_position_y: number;
-  difficulty_level?: 'beginner' | 'intermediate' | 'advanced' | 'boss';
 }
 
-interface ModuleWithDepth extends Module {
+// For internal use with depth calculation
+interface ModuleWithDepth<T extends LayoutModule> extends T {
   depth: number;
 }
 
@@ -22,7 +23,7 @@ interface ModuleWithDepth extends Module {
  * Check if modules need auto-layout
  * Returns true if any module has default positioning (50, 50) or if there are overlaps
  */
-export function needsAutoLayout(modules: Module[]): boolean {
+export function needsAutoLayout<T extends LayoutModule>(modules: T[]): boolean {
   if (modules.length === 0) return false;
 
   // Check if any module is at default position (50, 50)
@@ -51,7 +52,7 @@ export function needsAutoLayout(modules: Module[]): boolean {
 /**
  * Calculate depth (level) of each module in the dependency tree
  */
-function calculateDepths(modules: Module[]): Map<string, number> {
+function calculateDepths<T extends LayoutModule>(modules: T[]): Map<string, number> {
   const depths = new Map<string, number>();
   const visited = new Set<string>();
 
@@ -91,37 +92,37 @@ function calculateDepths(modules: Module[]): Map<string, number> {
  * Auto-layout modules in a hierarchical structure
  * Returns modules with updated positions
  */
-export function autoLayoutModules(modules: Module[]): ModuleWithDepth[] {
+export function autoLayoutModules<T extends LayoutModule>(modules: T[]): ModuleWithDepth<T>[] {
   if (modules.length === 0) return [];
 
   const depths = calculateDepths(modules);
   const maxDepth = Math.max(...Array.from(depths.values()), 0);
 
   // Group modules by depth
-  const modulesByDepth: ModuleWithDepth[][] = [];
+  const modulesByDepth: ModuleWithDepth<T>[][] = [];
   for (let d = 0; d <= maxDepth; d++) {
     modulesByDepth[d] = [];
   }
 
-  modules.forEach(module => {
-    const depth = depths.get(module.id) || 0;
-    modulesByDepth[depth].push({ ...module, depth });
+  modules.forEach(mod => {
+    const depth = depths.get(mod.id) || 0;
+    modulesByDepth[depth].push({ ...mod, depth } as ModuleWithDepth<T>);
   });
 
   // Calculate positions
-  const result: ModuleWithDepth[] = [];
+  const result: ModuleWithDepth<T>[] = [];
   const horizontalSpacing = 100 / (maxDepth + 2); // Spacing between depth levels
 
   modulesByDepth.forEach((modulesAtDepth, depth) => {
     const verticalSpacing = 100 / (modulesAtDepth.length + 1);
 
-    modulesAtDepth.forEach((module, index) => {
+    modulesAtDepth.forEach((mod, index) => {
       result.push({
-        ...module,
+        ...mod,
         quest_map_position_x: horizontalSpacing * (depth + 1),
         quest_map_position_y: verticalSpacing * (index + 1),
         depth
-      });
+      } as ModuleWithDepth<T>);
     });
   });
 
@@ -132,7 +133,7 @@ export function autoLayoutModules(modules: Module[]): ModuleWithDepth[] {
  * Validate prerequisite relationships
  * Returns validation result with any errors found
  */
-export function validatePrerequisites(modules: Module[]): {
+export function validatePrerequisites<T extends LayoutModule>(modules: T[]): {
   valid: boolean;
   errors: string[];
 } {

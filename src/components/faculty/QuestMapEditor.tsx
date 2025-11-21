@@ -73,7 +73,7 @@ export function QuestMapEditor() {
         if (needsAutoLayout(data.modules)) {
           const layouted = autoLayoutModules(data.modules);
           // Remove depth property
-          modulesToSet = layouted.map(({ depth, ...module }) => module);
+          modulesToSet = layouted.map(({ depth, ...rest }) => rest as Module);
           setHasUnsavedChanges(true); // Mark as unsaved since we auto-layouted
         }
 
@@ -143,7 +143,7 @@ export function QuestMapEditor() {
   const handleAutoLayout = () => {
     const layouted = autoLayoutModules(modules);
     // Remove the depth property from layouted modules
-    const modulesWithoutDepth = layouted.map(({ depth, ...module }) => module);
+    const modulesWithoutDepth = layouted.map(({ depth, ...rest }) => rest as Module);
     setModules(modulesWithoutDepth);
     setHasUnsavedChanges(true);
   };
