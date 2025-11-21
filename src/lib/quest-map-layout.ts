@@ -14,8 +14,8 @@ export interface LayoutModule {
   quest_map_position_y: number;
 }
 
-// For internal use with depth calculation
-interface ModuleWithDepth<T extends LayoutModule> extends T {
+// For internal use with depth calculation - using type alias with intersection
+type ModuleWithDepth<T extends LayoutModule> = T & {
   depth: number;
 }
 
