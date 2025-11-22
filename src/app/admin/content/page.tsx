@@ -1,8 +1,8 @@
 import { auth } from '@/lib/auth/config';
 import { redirect } from 'next/navigation';
-import { AuthenticatedLayout } from '@/components/layouts/app-layout';
+import { isAdmin } from '@/lib/auth/utils';
+import { AdminLayout } from '@/components/admin/admin-layout';
 import { ContentModerationView } from '@/components/admin/ContentModerationView';
-import { FileText } from 'lucide-react';
 
 export const metadata = {
   title: 'Content Management | Admin Dashboard',
@@ -14,37 +14,28 @@ export default async function AdminContentPage() {
 
   // Check authentication
   if (!session?.user) {
-    redirect('/auth/login');
+    redirect('/auth/login?callbackUrl=/admin/content');
   }
 
   // Check admin role
-  if (session.user.role !== 'admin') {
+  if (!isAdmin(session)) {
     redirect('/');
   }
 
   return (
-    <AuthenticatedLayout>
-      <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
-        {/* Page Header */}
-        <div className="mb-6 md:mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-gradient-to-br from-neural-primary to-synapse-primary rounded-lg">
-              <FileText className="h-6 w-6 md:h-8 md:w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
-                Content Management
-              </h1>
-              <p className="text-sm md:text-base text-muted-foreground mt-1">
-                View and moderate all courses and modules
-              </p>
-            </div>
-          </div>
+    <AdminLayout>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold text-neural-primary mb-2">
+            Content Management
+          </h2>
+          <p className="text-muted-foreground">
+            View and moderate all courses and modules across the platform
+          </p>
         </div>
 
-        {/* Content Moderation Interface */}
         <ContentModerationView />
       </div>
-    </AuthenticatedLayout>
+    </AdminLayout>
   );
 }
