@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth/config';
 import { redirect } from 'next/navigation';
 import { hasFacultyAccess } from '@/lib/auth/utils';
 import { QuestMapEditor } from '@/components/faculty/QuestMapEditor';
+import { AuthenticatedLayout } from '@/components/layouts/app-layout';
 import { Loader2, Map } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -22,12 +23,16 @@ function LoadingState() {
 export default async function QuestMapPage() {
   const session = await auth();
 
-  if (!hasFacultyAccess(session)) {
+  if (!session?.user) {
     redirect('/auth/login');
   }
 
+  if (!hasFacultyAccess(session)) {
+    redirect('/');
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <AuthenticatedLayout>
       <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
         {/* Page Header */}
         <div className="mb-6 md:mb-8">
@@ -73,6 +78,6 @@ export default async function QuestMapPage() {
           <QuestMapEditor />
         </Suspense>
       </div>
-    </div>
+    </AuthenticatedLayout>
   );
 }
