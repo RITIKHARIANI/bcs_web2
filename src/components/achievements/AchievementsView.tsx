@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AchievementCard } from './AchievementCard';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Trophy,
   Zap,
@@ -66,6 +65,7 @@ export function AchievementsView({ userId }: AchievementsViewProps) {
   const [data, setData] = useState<AchievementsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<'completion' | 'speed' | 'consistency' | 'mastery'>('completion');
 
   useEffect(() => {
     async function fetchAchievements() {
@@ -229,48 +229,60 @@ export function AchievementsView({ userId }: AchievementsViewProps) {
         </Card>
       )}
 
-      {/* Achievement Categories */}
-      <Tabs defaultValue="completion" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          {Object.entries(categoryIcons).map(([category, Icon]) => (
-            <TabsTrigger key={category} value={category} className="gap-2">
-              <Icon className="h-4 w-4" />
-              <span className="hidden sm:inline">
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      {/* Achievement Categories - Underline Tab Navigation */}
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto">
+          {(Object.keys(categoryIcons) as Array<keyof typeof categoryIcons>).map(category => {
+            const Icon = categoryIcons[category];
+            return (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category as any)}
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm sm:text-base transition-colors whitespace-nowrap flex items-center gap-2 ${
+                  activeCategory === category
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
 
-        {(Object.keys(data.achievements) as Array<keyof typeof data.achievements>).map(category => {
-          const Icon = categoryIcons[category];
-          const achievements = data.achievements[category];
-          const earnedCount = achievements.filter(a => a.isEarned).length;
+      {/* Active Category Content */}
+      {(() => {
+        const Icon = categoryIcons[activeCategory];
+        const achievements = data.achievements[activeCategory];
+        const earnedCount = achievements.filter(a => a.isEarned).length;
 
-          return (
-            <TabsContent key={category} value={category} className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon className="h-5 w-5 text-neural-primary" />
-                    {category.charAt(0).toUpperCase() + category.slice(1)} Achievements
-                  </CardTitle>
-                  <CardDescription>
-                    {categoryDescriptions[category]} • {earnedCount}/{achievements.length} earned
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {achievements.map(achievement => (
-                      <AchievementCard key={achievement.id} {...achievement} />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          );
-        })}
-      </Tabs>
+        return (
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Icon className="h-5 w-5 text-neural-primary" />
+                  {activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} Achievements
+                </CardTitle>
+                <CardDescription>
+                  {categoryDescriptions[activeCategory]} • {earnedCount}/{achievements.length} earned
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {achievements.map(achievement => (
+                    <AchievementCard key={achievement.id} {...achievement} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      })()}
     </div>
   );
 }
