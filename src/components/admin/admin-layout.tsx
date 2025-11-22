@@ -41,7 +41,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       name: 'Content',
       href: '/admin/content',
       icon: FileText,
-      soon: true,
     },
   ]
 
@@ -95,23 +94,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      item.soon
-                        ? 'text-muted-foreground cursor-not-allowed opacity-50'
-                        : 'hover:bg-neural-light/10 text-foreground'
-                    }`}
-                    onClick={(e) => {
-                      if (item.soon) e.preventDefault()
-                      setSidebarOpen(false) // Close sidebar on mobile after clicking
-                    }}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-neural-light/10 text-foreground"
+                    onClick={() => setSidebarOpen(false)} // Close sidebar on mobile after clicking
                   >
                     <Icon className="h-5 w-5" />
                     <span className="font-medium">{item.name}</span>
-                    {item.soon && (
-                      <span className="ml-auto text-xs bg-muted px-2 py-0.5 rounded">
-                        Soon
-                      </span>
-                    )}
                   </Link>
                 )
               })}

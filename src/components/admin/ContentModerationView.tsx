@@ -6,6 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { NeuralButton } from '@/components/ui/neural-button';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Search,
   Eye,
   Edit,
@@ -15,6 +23,8 @@ import {
   BookOpen,
   FileText,
   AlertCircle,
+  AlertTriangle,
+  Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -30,6 +40,7 @@ interface Course {
   };
   status: string;
   moduleCount: number;
+  enrolledCount?: number;
   updatedAt: string;
 }
 
@@ -48,12 +59,26 @@ interface Module {
   updatedAt: string;
 }
 
+type ConfirmAction = {
+  type: 'unpublish' | 'delete';
+  contentType: 'course' | 'module';
+  id: string;
+  title: string;
+  metadata?: {
+    moduleCount?: number;
+    courseCount?: number;
+    enrolledCount?: number;
+  };
+} | null;
+
 export function ContentModerationView() {
   const [activeTab, setActiveTab] = useState<'courses' | 'modules'>('courses');
   const [courses, setCourses] = useState<Course[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+  const [actionInProgress, setActionInProgress] = useState<string | null>(null);
 
   // Fetch data
   useEffect(() => {
@@ -65,18 +90,20 @@ export function ContentModerationView() {
           fetch('/api/admin/content/modules'),
         ]);
 
-        if (coursesRes.ok) {
-          const coursesData = await coursesRes.json();
-          setCourses(coursesData.courses || []);
+        if (!coursesRes.ok || !modulesRes.ok) {
+          throw new Error('Failed to fetch content');
         }
 
-        if (modulesRes.ok) {
-          const modulesData = await modulesRes.json();
-          setModules(modulesData.modules || []);
-        }
+        const [coursesData, modulesData] = await Promise.all([
+          coursesRes.json(),
+          modulesRes.json(),
+        ]);
+
+        setCourses(coursesData.courses || []);
+        setModules(modulesData.modules || []);
       } catch (error) {
         console.error('Error fetching content:', error);
-        toast.error('Failed to load content');
+        toast.error('Failed to load content. Please refresh the page.');
       } finally {
         setLoading(false);
       }
@@ -85,65 +112,100 @@ export function ContentModerationView() {
     fetchData();
   }, []);
 
+  // Open confirmation dialog
+  const openConfirmDialog = (action: ConfirmAction) => {
+    setConfirmAction(action);
+  };
+
+  // Close confirmation dialog
+  const closeConfirmDialog = () => {
+    setConfirmAction(null);
+  };
+
   // Unpublish course/module
-  const handleUnpublish = async (type: 'course' | 'module', id: string, title: string) => {
-    if (!confirm(`Unpublish "${title}"? This will hide it from students immediately.`)) {
-      return;
-    }
+  const handleUnpublish = async () => {
+    if (!confirmAction) return;
+
+    const { contentType, id, title } = confirmAction;
+    const actionId = `${contentType}-${id}-unpublish`;
 
     try {
+      setActionInProgress(actionId);
+
       const response = await fetch('/api/admin/content/update-status', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, id, status: 'draft' }),
+        body: JSON.stringify({ type: contentType, id, status: 'draft' }),
       });
 
-      if (!response.ok) throw new Error('Failed to unpublish');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to unpublish');
+      }
 
-      // Update local state
-      if (type === 'course') {
+      // Optimistic update
+      if (contentType === 'course') {
         setCourses(courses.map(c => c.id === id ? { ...c, status: 'draft' } : c));
       } else {
         setModules(modules.map(m => m.id === id ? { ...m, status: 'draft' } : m));
       }
 
-      toast.success(`${type === 'course' ? 'Course' : 'Module'} unpublished successfully`);
+      toast.success(`${contentType === 'course' ? 'Course' : 'Module'} "${title}" unpublished successfully`, {
+        description: 'It is now hidden from students',
+      });
+
+      closeConfirmDialog();
     } catch (error) {
       console.error('Error unpublishing:', error);
-      toast.error('Failed to unpublish');
+      toast.error(`Failed to unpublish ${contentType}`, {
+        description: error instanceof Error ? error.message : 'Please try again',
+      });
+    } finally {
+      setActionInProgress(null);
     }
   };
 
   // Delete course/module
-  const handleDelete = async (type: 'course' | 'module', id: string, title: string) => {
-    const confirmMessage = type === 'course'
-      ? `Permanently delete course "${title}"? This will remove it and all its relationships. This action cannot be undone.`
-      : `Permanently delete module "${title}"? This action cannot be undone.`;
+  const handleDelete = async () => {
+    if (!confirmAction) return;
 
-    if (!confirm(confirmMessage)) {
-      return;
-    }
+    const { contentType, id, title } = confirmAction;
+    const actionId = `${contentType}-${id}-delete`;
 
     try {
+      setActionInProgress(actionId);
+
       const response = await fetch('/api/admin/content/delete', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, id }),
+        body: JSON.stringify({ type: contentType, id }),
       });
 
-      if (!response.ok) throw new Error('Failed to delete');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete');
+      }
 
-      // Update local state
-      if (type === 'course') {
+      // Optimistic update
+      if (contentType === 'course') {
         setCourses(courses.filter(c => c.id !== id));
       } else {
         setModules(modules.filter(m => m.id !== id));
       }
 
-      toast.success(`${type === 'course' ? 'Course' : 'Module'} deleted successfully`);
+      toast.success(`${contentType === 'course' ? 'Course' : 'Module'} "${title}" deleted permanently`, {
+        description: 'This action cannot be undone',
+        duration: 5000,
+      });
+
+      closeConfirmDialog();
     } catch (error) {
       console.error('Error deleting:', error);
-      toast.error('Failed to delete');
+      toast.error(`Failed to delete ${contentType}`, {
+        description: error instanceof Error ? error.message : 'Please try again',
+      });
+    } finally {
+      setActionInProgress(null);
     }
   };
 
@@ -169,7 +231,7 @@ export function ContentModerationView() {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -274,57 +336,87 @@ export function ContentModerationView() {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredCourses.map(course => (
-                  <div
-                    key={course.id}
-                    className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-lg truncate">{course.title}</h3>
-                          <Badge variant={course.status === 'published' ? 'default' : 'outline'}>
-                            {course.status}
-                          </Badge>
+                {filteredCourses.map(course => {
+                  const isUnpublishing = actionInProgress === `course-${course.id}-unpublish`;
+                  const isDeleting = actionInProgress === `course-${course.id}-delete`;
+                  const isDisabled = isUnpublishing || isDeleting;
+
+                  return (
+                    <div
+                      key={course.id}
+                      className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-lg truncate">{course.title}</h3>
+                            <Badge variant={course.status === 'published' ? 'default' : 'outline'}>
+                              {course.status}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            <p>Author: {course.author.name} ({course.author.email})</p>
+                            <p>Modules: {course.moduleCount} • Updated {formatDistanceToNow(new Date(course.updatedAt), { addSuffix: true })}</p>
+                          </div>
                         </div>
-                        <div className="text-sm text-muted-foreground space-y-1">
-                          <p>Author: {course.author.name} ({course.author.email})</p>
-                          <p>Modules: {course.moduleCount} • Updated {formatDistanceToNow(new Date(course.updatedAt), { addSuffix: true })}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <Link href={`/courses/${course.slug}`} target="_blank">
-                          <NeuralButton size="sm" variant="outline" title="View as student">
-                            <Eye className="h-4 w-4" />
-                          </NeuralButton>
-                        </Link>
-                        <Link href={`/faculty/courses/edit/${course.id}`}>
-                          <NeuralButton size="sm" variant="outline" title="Edit course">
-                            <Edit className="h-4 w-4" />
-                          </NeuralButton>
-                        </Link>
-                        {course.status === 'published' && (
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Link href={`/courses/${course.slug}`} target="_blank">
+                            <NeuralButton size="sm" variant="outline" title="View as student" disabled={isDisabled}>
+                              <Eye className="h-4 w-4" />
+                            </NeuralButton>
+                          </Link>
+                          <Link href={`/faculty/courses/edit/${course.id}`}>
+                            <NeuralButton size="sm" variant="outline" title="Edit course" disabled={isDisabled}>
+                              <Edit className="h-4 w-4" />
+                            </NeuralButton>
+                          </Link>
+                          {course.status === 'published' && (
+                            <NeuralButton
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openConfirmDialog({
+                                type: 'unpublish',
+                                contentType: 'course',
+                                id: course.id,
+                                title: course.title,
+                              })}
+                              title="Unpublish (hide from students)"
+                              disabled={isDisabled}
+                            >
+                              {isUnpublishing ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <EyeOff className="h-4 w-4" />
+                              )}
+                            </NeuralButton>
+                          )}
                           <NeuralButton
                             size="sm"
-                            variant="outline"
-                            onClick={() => handleUnpublish('course', course.id, course.title)}
-                            title="Unpublish (hide from students)"
+                            variant="destructive"
+                            onClick={() => openConfirmDialog({
+                              type: 'delete',
+                              contentType: 'course',
+                              id: course.id,
+                              title: course.title,
+                              metadata: {
+                                moduleCount: course.moduleCount,
+                                enrolledCount: course.enrolledCount,
+                              },
+                            })}
+                            title="Delete permanently"
+                            disabled={isDisabled}
                           >
-                            <EyeOff className="h-4 w-4" />
+                            {isDeleting ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
                           </NeuralButton>
-                        )}
-                        <NeuralButton
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDelete('course', course.id, course.title)}
-                          title="Delete permanently"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </NeuralButton>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -348,71 +440,216 @@ export function ContentModerationView() {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredModules.map(module => (
-                  <div
-                    key={module.id}
-                    className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h3 className="font-semibold text-lg truncate">{module.title}</h3>
-                          <Badge variant={module.status === 'published' ? 'default' : 'outline'}>
-                            {module.status}
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs">
-                            {module.difficultyLevel}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {module.questType}
-                          </Badge>
+                {filteredModules.map(module => {
+                  const isUnpublishing = actionInProgress === `module-${module.id}-unpublish`;
+                  const isDeleting = actionInProgress === `module-${module.id}-delete`;
+                  const isDisabled = isUnpublishing || isDeleting;
+
+                  return (
+                    <div
+                      key={module.id}
+                      className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <h3 className="font-semibold text-lg truncate">{module.title}</h3>
+                            <Badge variant={module.status === 'published' ? 'default' : 'outline'}>
+                              {module.status}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {module.difficultyLevel}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {module.questType}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            <p>Author: {module.author.name} ({module.author.email})</p>
+                            <p>
+                              Used in {module.courseCount} course{module.courseCount !== 1 ? 's' : ''} •
+                              Updated {formatDistanceToNow(new Date(module.updatedAt), { addSuffix: true })}
+                            </p>
+                          </div>
                         </div>
-                        <div className="text-sm text-muted-foreground space-y-1">
-                          <p>Author: {module.author.name} ({module.author.email})</p>
-                          <p>
-                            Used in {module.courseCount} course{module.courseCount !== 1 ? 's' : ''} •
-                            Updated {formatDistanceToNow(new Date(module.updatedAt), { addSuffix: true })}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <Link href={`/modules/${module.slug}`} target="_blank">
-                          <NeuralButton size="sm" variant="outline" title="View as student">
-                            <Eye className="h-4 w-4" />
-                          </NeuralButton>
-                        </Link>
-                        <Link href={`/faculty/modules/edit/${module.id}`}>
-                          <NeuralButton size="sm" variant="outline" title="Edit module">
-                            <Edit className="h-4 w-4" />
-                          </NeuralButton>
-                        </Link>
-                        {module.status === 'published' && (
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Link href={`/modules/${module.slug}`} target="_blank">
+                            <NeuralButton size="sm" variant="outline" title="View as student" disabled={isDisabled}>
+                              <Eye className="h-4 w-4" />
+                            </NeuralButton>
+                          </Link>
+                          <Link href={`/faculty/modules/edit/${module.id}`}>
+                            <NeuralButton size="sm" variant="outline" title="Edit module" disabled={isDisabled}>
+                              <Edit className="h-4 w-4" />
+                            </NeuralButton>
+                          </Link>
+                          {module.status === 'published' && (
+                            <NeuralButton
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openConfirmDialog({
+                                type: 'unpublish',
+                                contentType: 'module',
+                                id: module.id,
+                                title: module.title,
+                              })}
+                              title="Unpublish (hide from students)"
+                              disabled={isDisabled}
+                            >
+                              {isUnpublishing ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <EyeOff className="h-4 w-4" />
+                              )}
+                            </NeuralButton>
+                          )}
                           <NeuralButton
                             size="sm"
-                            variant="outline"
-                            onClick={() => handleUnpublish('module', module.id, module.title)}
-                            title="Unpublish (hide from students)"
+                            variant="destructive"
+                            onClick={() => openConfirmDialog({
+                              type: 'delete',
+                              contentType: 'module',
+                              id: module.id,
+                              title: module.title,
+                              metadata: {
+                                courseCount: module.courseCount,
+                              },
+                            })}
+                            title="Delete permanently"
+                            disabled={isDisabled}
                           >
-                            <EyeOff className="h-4 w-4" />
+                            {isDeleting ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
                           </NeuralButton>
-                        )}
-                        <NeuralButton
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDelete('module', module.id, module.title)}
-                          title="Delete permanently"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </NeuralButton>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
         </Card>
       )}
+
+      {/* Confirmation Dialog */}
+      <Dialog open={!!confirmAction} onOpenChange={(open) => !open && closeConfirmDialog()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {confirmAction?.type === 'delete' ? (
+                <>
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                  Confirm Deletion
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="h-5 w-5 text-orange-500" />
+                  Confirm Unpublish
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription asChild>
+              <div className="space-y-3">
+                {confirmAction?.type === 'unpublish' ? (
+                  <>
+                    <p>
+                      Are you sure you want to unpublish <strong>{confirmAction.title}</strong>?
+                    </p>
+                    <p className="text-sm">
+                      This will immediately hide it from students. You can republish it later.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      Are you sure you want to permanently delete <strong>{confirmAction?.title}</strong>?
+                    </p>
+
+                    {/* Warnings for courses */}
+                    {confirmAction?.contentType === 'course' && (
+                      <div className="space-y-2">
+                        {confirmAction.metadata?.moduleCount ? (
+                          <div className="flex items-start gap-2 text-sm bg-orange-50 dark:bg-orange-950/20 p-3 rounded-md border border-orange-200 dark:border-orange-900">
+                            <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="font-medium text-orange-900 dark:text-orange-100">
+                                This course contains {confirmAction.metadata.moduleCount} module{confirmAction.metadata.moduleCount !== 1 ? 's' : ''}
+                              </p>
+                              <p className="text-orange-700 dark:text-orange-300">
+                                The modules will remain, but will be removed from this course.
+                              </p>
+                            </div>
+                          </div>
+                        ) : null}
+
+                        {confirmAction.metadata?.enrolledCount ? (
+                          <div className="flex items-start gap-2 text-sm bg-red-50 dark:bg-red-950/20 p-3 rounded-md border border-red-200 dark:border-red-900">
+                            <Users className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="font-medium text-red-900 dark:text-red-100">
+                                {confirmAction.metadata.enrolledCount} student{confirmAction.metadata.enrolledCount !== 1 ? 's are' : ' is'} enrolled
+                              </p>
+                              <p className="text-red-700 dark:text-red-300">
+                                Their progress will be lost permanently.
+                              </p>
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+
+                    {/* Warnings for modules */}
+                    {confirmAction?.contentType === 'module' && confirmAction.metadata?.courseCount ? (
+                      <div className="flex items-start gap-2 text-sm bg-orange-50 dark:bg-orange-950/20 p-3 rounded-md border border-orange-200 dark:border-orange-900">
+                        <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-medium text-orange-900 dark:text-orange-100">
+                            This module is used in {confirmAction.metadata.courseCount} course{confirmAction.metadata.courseCount !== 1 ? 's' : ''}
+                          </p>
+                          <p className="text-orange-700 dark:text-orange-300">
+                            It will be removed from all courses that use it.
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <p className="text-sm font-semibold text-destructive">
+                      This action cannot be undone.
+                    </p>
+                  </>
+                )}
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <NeuralButton
+              variant="outline"
+              onClick={closeConfirmDialog}
+              disabled={!!actionInProgress}
+            >
+              Cancel
+            </NeuralButton>
+            <NeuralButton
+              variant={confirmAction?.type === 'delete' ? 'destructive' : 'neural'}
+              onClick={confirmAction?.type === 'delete' ? handleDelete : handleUnpublish}
+              disabled={!!actionInProgress}
+            >
+              {actionInProgress ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  {confirmAction?.type === 'delete' ? 'Deleting...' : 'Unpublishing...'}
+                </>
+              ) : (
+                confirmAction?.type === 'delete' ? 'Delete Permanently' : 'Unpublish'
+              )}
+            </NeuralButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

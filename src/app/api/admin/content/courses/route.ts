@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Fetch all courses with author info and module count
+    // Fetch all courses with author info, module count, and enrollment count
     const courses = await withDatabaseRetry(async () => {
       return await prisma.courses.findMany({
         select: {
@@ -33,6 +33,11 @@ export async function GET(request: NextRequest) {
             },
           },
           course_modules: {
+            select: {
+              id: true,
+            },
+          },
+          course_tracking: {
             select: {
               id: true,
             },
@@ -55,6 +60,7 @@ export async function GET(request: NextRequest) {
       },
       status: course.status,
       moduleCount: course.course_modules.length,
+      enrolledCount: course.course_tracking.length,
       updatedAt: course.updated_at.toISOString(),
     }));
 
