@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import { Brain, Search, User, BookOpen, Menu, LogOut, X, Home, BarChart3, Settings, Plus, Users, Activity, Shield, FileText } from "lucide-react";
+import { Brain, Search, User, BookOpen, Menu, LogOut, X, Home, BarChart3, Settings, Plus, Users, Activity, Shield, FileText, Trophy } from "lucide-react";
 import { NeuralButton } from "./ui/neural-button";
 import { Input } from "./ui/input";
 import {
@@ -216,6 +216,14 @@ export function Header() {
                       My Profile
                     </Link>
                   </DropdownMenuItem>
+
+                  {/* My Achievements */}
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile/achievements" className="flex items-center">
+                      <Trophy className="mr-2 h-4 w-4" />
+                      My Achievements
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
 
                   {/* Admin Tools Section */}
@@ -270,6 +278,12 @@ export function Header() {
                           My Modules
                         </Link>
                       </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/faculty/quest-map" className="flex items-center">
+                          <BarChart3 className="mr-2 h-4 w-4" />
+                          Quest Map Editor
+                        </Link>
+                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
                   )}
@@ -293,6 +307,12 @@ export function Header() {
                         <Link href="/faculty/modules" className="flex items-center">
                           <BookOpen className="mr-2 h-4 w-4" />
                           My Modules
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/faculty/quest-map" className="flex items-center">
+                          <BarChart3 className="mr-2 h-4 w-4" />
+                          Quest Map Editor
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />

@@ -157,37 +157,49 @@ export function QuestMapPublic({ courseSlug, isAuthenticated = false }: QuestMap
   return (
     <div className="flex flex-col h-full bg-slate-950 text-slate-100">
       {/* Public Header */}
-      <div className="flex items-center justify-between px-4 sm:px-6 py-4 bg-slate-900/80 border-b border-slate-800 backdrop-blur-md shrink-0">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-slate-900/80 border-b border-slate-800 backdrop-blur-md shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <QuestBreadcrumb
             items={[
               { label: 'Curriculum', href: '/curriculum/map' },
               { label: data.course.title, href: `/courses/${courseSlug}` },
               { label: 'Quest Map' }
             ]}
-            icon={<MapIcon size={24} />}
+            icon={<MapIcon size={20} className="sm:w-6 sm:h-6" />}
           />
-          <p className="text-xs text-slate-400 hidden sm:block">• {data.totalModules} Modules • {data.totalXP} Total XP</p>
+          <p className="text-xs text-slate-400 hidden lg:block whitespace-nowrap">• {data.totalModules} Modules • {data.totalXP} Total XP</p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 ml-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Link href={`/courses/${courseSlug}`}>
-            <NeuralButton size="sm" className="hidden sm:flex bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
+            <NeuralButton size="sm" className="hidden md:flex bg-slate-700 hover:bg-slate-600 text-white border-slate-600 whitespace-nowrap">
               <Eye className="h-4 w-4 mr-2" />
               View Course
             </NeuralButton>
-            <NeuralButton size="sm" className="sm:hidden bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
+            <NeuralButton size="sm" className="md:hidden bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
               <Eye className="h-4 w-4" />
             </NeuralButton>
           </Link>
-          <Link href="/auth/login">
-            <NeuralButton size="sm" className="hidden sm:flex bg-blue-600 hover:bg-blue-700 text-white border-blue-500">
-              <LogIn className="h-4 w-4 mr-2" />
-              Sign In to Track Progress
-            </NeuralButton>
-            <NeuralButton size="sm" className="sm:hidden bg-blue-600 hover:bg-blue-700 text-white border-blue-500">
-              <LogIn className="h-4 w-4" />
-            </NeuralButton>
-          </Link>
+          {isAuthenticated ? (
+            <Link href={`/courses/${courseSlug}`}>
+              <NeuralButton size="sm" className="hidden md:flex bg-blue-600 hover:bg-blue-700 text-white border-blue-500 whitespace-nowrap">
+                <Trophy className="h-4 w-4 mr-2" />
+                Enroll in Course
+              </NeuralButton>
+              <NeuralButton size="sm" className="md:hidden bg-blue-600 hover:bg-blue-700 text-white border-blue-500">
+                <Trophy className="h-4 w-4" />
+              </NeuralButton>
+            </Link>
+          ) : (
+            <Link href="/auth/login">
+              <NeuralButton size="sm" className="hidden md:flex bg-blue-600 hover:bg-blue-700 text-white border-blue-500 whitespace-nowrap">
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign In
+              </NeuralButton>
+              <NeuralButton size="sm" className="md:hidden bg-blue-600 hover:bg-blue-700 text-white border-blue-500">
+                <LogIn className="h-4 w-4" />
+              </NeuralButton>
+            </Link>
+          )}
         </div>
       </div>
 
