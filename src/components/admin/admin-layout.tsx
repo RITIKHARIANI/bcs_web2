@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { UserCircle, Users, FileText, Shield, BarChart3, Activity, Menu, X } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -10,6 +11,7 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const pathname = usePathname()
 
   const navItems = [
     {
@@ -90,11 +92,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <nav className="space-y-1 p-4 lg:p-0 lg:sticky lg:top-8 pt-20 lg:pt-0">
               {navItems.map((item) => {
                 const Icon = item.icon
+                const isActive = pathname === item.href
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-neural-light/10 text-foreground"
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      isActive
+                        ? 'bg-neural-primary text-white hover:bg-neural-primary/90'
+                        : 'hover:bg-neural-light/10 text-foreground'
+                    }`}
                     onClick={() => setSidebarOpen(false)} // Close sidebar on mobile after clicking
                   >
                     <Icon className="h-5 w-5" />

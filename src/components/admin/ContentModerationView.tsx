@@ -344,22 +344,22 @@ export function ContentModerationView() {
                   return (
                     <div
                       key={course.id}
-                      className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                      className="border rounded-lg p-3 sm:p-4 hover:bg-accent/50 transition-colors"
                     >
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg truncate">{course.title}</h3>
-                            <Badge variant={course.status === 'published' ? 'default' : 'outline'}>
+                          <div className="flex items-start flex-wrap gap-2 mb-2">
+                            <h3 className="font-semibold text-base sm:text-lg">{course.title}</h3>
+                            <Badge variant={course.status === 'published' ? 'default' : 'outline'} className="flex-shrink-0">
                               {course.status}
                             </Badge>
                           </div>
-                          <div className="text-sm text-muted-foreground space-y-1">
-                            <p>Author: {course.author.name} ({course.author.email})</p>
+                          <div className="text-xs sm:text-sm text-muted-foreground space-y-0.5">
+                            <p className="truncate">Author: {course.author.name}</p>
                             <p>Modules: {course.moduleCount} • Updated {formatDistanceToNow(new Date(course.updatedAt), { addSuffix: true })}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                           <Link href={`/courses/${course.slug}`} target="_blank">
                             <NeuralButton size="sm" variant="outline" title="View as student" disabled={isDisabled}>
                               <Eye className="h-4 w-4" />
@@ -448,31 +448,31 @@ export function ContentModerationView() {
                   return (
                     <div
                       key={module.id}
-                      className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                      className="border rounded-lg p-3 sm:p-4 hover:bg-accent/50 transition-colors"
                     >
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <h3 className="font-semibold text-lg truncate">{module.title}</h3>
-                            <Badge variant={module.status === 'published' ? 'default' : 'outline'}>
+                          <div className="flex items-start gap-1.5 mb-2 flex-wrap">
+                            <h3 className="font-semibold text-base sm:text-lg">{module.title}</h3>
+                            <Badge variant={module.status === 'published' ? 'default' : 'outline'} className="flex-shrink-0">
                               {module.status}
                             </Badge>
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-xs flex-shrink-0">
                               {module.difficultyLevel}
                             </Badge>
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-xs flex-shrink-0">
                               {module.questType}
                             </Badge>
                           </div>
-                          <div className="text-sm text-muted-foreground space-y-1">
-                            <p>Author: {module.author.name} ({module.author.email})</p>
+                          <div className="text-xs sm:text-sm text-muted-foreground space-y-0.5">
+                            <p className="truncate">Author: {module.author.name}</p>
                             <p>
                               Used in {module.courseCount} course{module.courseCount !== 1 ? 's' : ''} •
                               Updated {formatDistanceToNow(new Date(module.updatedAt), { addSuffix: true })}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                           <Link href={`/modules/${module.slug}`} target="_blank">
                             <NeuralButton size="sm" variant="outline" title="View as student" disabled={isDisabled}>
                               <Eye className="h-4 w-4" />
