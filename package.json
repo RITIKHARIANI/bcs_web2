@@ -15,7 +15,8 @@
     "db:migrate:dev": "npx prisma migrate dev",
     "db:migrate:deploy": "npx prisma migrate deploy",
     "db:generate": "npx prisma generate",
-    "vercel:build": "prisma generate && prisma migrate deploy && next build",
+    "seed:achievements": "npx tsx scripts/seed-achievements.ts",
+    "vercel:build": "prisma generate && prisma migrate deploy && npm run seed:achievements && next build",
     "vercel:install": "npm install --legacy-peer-deps",
     "local:setup": "npm run db:generate && npm run db:push && npm run dev"
   },
@@ -115,6 +116,7 @@
     "globals": "^15.15.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.20.6",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0"
   },

@@ -45,9 +45,10 @@ interface QuestMapData {
 
 interface QuestMapPublicProps {
   courseSlug: string;
+  isAuthenticated?: boolean;
 }
 
-export function QuestMapPublic({ courseSlug }: QuestMapPublicProps) {
+export function QuestMapPublic({ courseSlug, isAuthenticated = false }: QuestMapPublicProps) {
   const [data, setData] = useState<QuestMapData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
@@ -248,21 +249,35 @@ export function QuestMapPublic({ courseSlug }: QuestMapPublicProps) {
           <div className="flex items-center justify-center gap-2 mb-3">
             <BookOpen className="h-5 w-5 text-blue-400" />
             <p className="text-slate-300 text-sm sm:text-base">
-              Sign in to track your progress, earn <span className="font-bold text-blue-400">{data.totalXP} XP</span>, and unlock achievements!
+              {isAuthenticated
+                ? <>Enroll in this course to track your progress, earn <span className="font-bold text-blue-400">{data.totalXP} XP</span>, and unlock achievements!</>
+                : <>Sign in to track your progress, earn <span className="font-bold text-blue-400">{data.totalXP} XP</span>, and unlock achievements!</>
+              }
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/auth/login">
-              <NeuralButton className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white border-blue-500">
-                <LogIn className="h-4 w-4 mr-2" />
-                Sign In
-              </NeuralButton>
-            </Link>
-            <Link href="/auth/register">
-              <NeuralButton className="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
-                Create Account
-              </NeuralButton>
-            </Link>
+            {isAuthenticated ? (
+              <Link href={`/courses/${data.course.slug}`}>
+                <NeuralButton className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white border-blue-500">
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Enroll in Course
+                </NeuralButton>
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth/login">
+                  <NeuralButton className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white border-blue-500">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
+                  </NeuralButton>
+                </Link>
+                <Link href="/auth/register">
+                  <NeuralButton className="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
+                    Create Account
+                  </NeuralButton>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

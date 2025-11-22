@@ -70,12 +70,12 @@ export default async function QuestMapPage({ params }: PageProps) {
       // User is enrolled - show personalized quest map
       content = <QuestMapAuthenticated courseSlug={slug} userId={session.user.id} />;
     } else {
-      // Not enrolled - show public preview
-      content = <QuestMapPublic courseSlug={slug} />;
+      // Not enrolled but authenticated - show public preview with enrollment CTA
+      content = <QuestMapPublic courseSlug={slug} isAuthenticated={true} />;
     }
   } else {
-    // Not logged in - show public preview
-    content = <QuestMapPublic courseSlug={slug} />;
+    // Not logged in - show public preview with sign-in CTA
+    content = <QuestMapPublic courseSlug={slug} isAuthenticated={false} />;
   }
 
   return (

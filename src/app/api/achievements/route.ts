@@ -6,9 +6,22 @@ import { seedAchievements } from '@/lib/achievements/checker';
 /**
  * GET /api/achievements
  * Get all available achievements
+ *
+ * Lazy Initialization: Automatically seeds achievements if table is empty
  */
 export async function GET() {
   try {
+    // Check if achievements are seeded
+    const count = await withDatabaseRetry(async () => {
+      return await prisma.achievements.count();
+    });
+
+    // Lazy initialization: seed if empty
+    if (count === 0) {
+      console.log('Achievements table empty - auto-seeding...');
+      await seedAchievements();
+    }
+
     const achievements = await withDatabaseRetry(async () => {
       return await prisma.achievements.findMany({
         orderBy: [
