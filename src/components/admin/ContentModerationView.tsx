@@ -14,6 +14,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   Search,
   Eye,
   Edit,
@@ -229,9 +235,10 @@ export function ContentModerationView() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <TooltipProvider delayDuration={200}>
+      <div className="space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -360,58 +367,76 @@ export function ContentModerationView() {
                           </div>
                         </div>
                         <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                          <Link href={`/courses/${course.slug}`} target="_blank">
-                            <NeuralButton size="sm" variant="outline" title="View as student" disabled={isDisabled}>
-                              <Eye className="h-4 w-4" />
-                            </NeuralButton>
-                          </Link>
-                          <Link href={`/faculty/courses/edit/${course.id}`}>
-                            <NeuralButton size="sm" variant="outline" title="Edit course" disabled={isDisabled}>
-                              <Edit className="h-4 w-4" />
-                            </NeuralButton>
-                          </Link>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link href={`/courses/${course.slug}`} target="_blank">
+                                <NeuralButton size="sm" variant="outline" disabled={isDisabled}>
+                                  <Eye className="h-4 w-4" />
+                                </NeuralButton>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent>View as student</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link href={`/faculty/courses/edit/${course.id}`}>
+                                <NeuralButton size="sm" variant="outline" disabled={isDisabled}>
+                                  <Edit className="h-4 w-4" />
+                                </NeuralButton>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent>Edit course</TooltipContent>
+                          </Tooltip>
                           {course.status === 'published' && (
-                            <NeuralButton
-                              size="sm"
-                              variant="outline"
-                              onClick={() => openConfirmDialog({
-                                type: 'unpublish',
-                                contentType: 'course',
-                                id: course.id,
-                                title: course.title,
-                              })}
-                              title="Unpublish (hide from students)"
-                              disabled={isDisabled}
-                            >
-                              {isUnpublishing ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <EyeOff className="h-4 w-4" />
-                              )}
-                            </NeuralButton>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <NeuralButton
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => openConfirmDialog({
+                                    type: 'unpublish',
+                                    contentType: 'course',
+                                    id: course.id,
+                                    title: course.title,
+                                  })}
+                                  disabled={isDisabled}
+                                >
+                                  {isUnpublishing ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <EyeOff className="h-4 w-4" />
+                                  )}
+                                </NeuralButton>
+                              </TooltipTrigger>
+                              <TooltipContent>Unpublish (hide from students)</TooltipContent>
+                            </Tooltip>
                           )}
-                          <NeuralButton
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => openConfirmDialog({
-                              type: 'delete',
-                              contentType: 'course',
-                              id: course.id,
-                              title: course.title,
-                              metadata: {
-                                moduleCount: course.moduleCount,
-                                enrolledCount: course.enrolledCount,
-                              },
-                            })}
-                            title="Delete permanently"
-                            disabled={isDisabled}
-                          >
-                            {isDeleting ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
-                          </NeuralButton>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <NeuralButton
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => openConfirmDialog({
+                                  type: 'delete',
+                                  contentType: 'course',
+                                  id: course.id,
+                                  title: course.title,
+                                  metadata: {
+                                    moduleCount: course.moduleCount,
+                                    enrolledCount: course.enrolledCount,
+                                  },
+                                })}
+                                disabled={isDisabled}
+                              >
+                                {isDeleting ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                              </NeuralButton>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete permanently</TooltipContent>
+                          </Tooltip>
                         </div>
                       </div>
                     </div>
@@ -473,57 +498,75 @@ export function ContentModerationView() {
                           </div>
                         </div>
                         <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                          <Link href={`/modules/${module.slug}`} target="_blank">
-                            <NeuralButton size="sm" variant="outline" title="View as student" disabled={isDisabled}>
-                              <Eye className="h-4 w-4" />
-                            </NeuralButton>
-                          </Link>
-                          <Link href={`/faculty/modules/edit/${module.id}`}>
-                            <NeuralButton size="sm" variant="outline" title="Edit module" disabled={isDisabled}>
-                              <Edit className="h-4 w-4" />
-                            </NeuralButton>
-                          </Link>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link href={`/modules/${module.slug}`} target="_blank">
+                                <NeuralButton size="sm" variant="outline" disabled={isDisabled}>
+                                  <Eye className="h-4 w-4" />
+                                </NeuralButton>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent>View as student</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link href={`/faculty/modules/edit/${module.id}`}>
+                                <NeuralButton size="sm" variant="outline" disabled={isDisabled}>
+                                  <Edit className="h-4 w-4" />
+                                </NeuralButton>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent>Edit module</TooltipContent>
+                          </Tooltip>
                           {module.status === 'published' && (
-                            <NeuralButton
-                              size="sm"
-                              variant="outline"
-                              onClick={() => openConfirmDialog({
-                                type: 'unpublish',
-                                contentType: 'module',
-                                id: module.id,
-                                title: module.title,
-                              })}
-                              title="Unpublish (hide from students)"
-                              disabled={isDisabled}
-                            >
-                              {isUnpublishing ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <EyeOff className="h-4 w-4" />
-                              )}
-                            </NeuralButton>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <NeuralButton
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => openConfirmDialog({
+                                    type: 'unpublish',
+                                    contentType: 'module',
+                                    id: module.id,
+                                    title: module.title,
+                                  })}
+                                  disabled={isDisabled}
+                                >
+                                  {isUnpublishing ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <EyeOff className="h-4 w-4" />
+                                  )}
+                                </NeuralButton>
+                              </TooltipTrigger>
+                              <TooltipContent>Unpublish (hide from students)</TooltipContent>
+                            </Tooltip>
                           )}
-                          <NeuralButton
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => openConfirmDialog({
-                              type: 'delete',
-                              contentType: 'module',
-                              id: module.id,
-                              title: module.title,
-                              metadata: {
-                                courseCount: module.courseCount,
-                              },
-                            })}
-                            title="Delete permanently"
-                            disabled={isDisabled}
-                          >
-                            {isDeleting ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
-                          </NeuralButton>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <NeuralButton
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => openConfirmDialog({
+                                  type: 'delete',
+                                  contentType: 'module',
+                                  id: module.id,
+                                  title: module.title,
+                                  metadata: {
+                                    courseCount: module.courseCount,
+                                  },
+                                })}
+                                disabled={isDisabled}
+                              >
+                                {isDeleting ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                              </NeuralButton>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete permanently</TooltipContent>
+                          </Tooltip>
                         </div>
                       </div>
                     </div>
@@ -650,6 +693,7 @@ export function ContentModerationView() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
