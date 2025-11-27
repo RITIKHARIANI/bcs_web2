@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import { Brain, Search, User, BookOpen, Menu, LogOut, X, Home, BarChart3, Settings, Plus, Users, Activity, Shield, FileText, Trophy } from "lucide-react";
+import { Brain, Search, User, BookOpen, Menu, LogOut, X, Home, BarChart3, Settings, Plus, Users, Activity, Shield, FileText, Trophy, Map } from "lucide-react";
 import { NeuralButton } from "./ui/neural-button";
 import { Input } from "./ui/input";
 import {
@@ -21,12 +21,14 @@ const navigationConfig = {
     { href: "/", label: "Home", icon: Home },
     { href: "/courses", label: "Courses", icon: BookOpen },
     { href: "/modules", label: "Modules", icon: BookOpen },
+    { href: "/paths", label: "Learning Paths", icon: Map },
     { href: "/curriculum/map", label: "Curriculum", icon: BarChart3 },
   ],
   admin: [
     { href: "/", label: "Home", icon: Home },
     { href: "/courses", label: "Courses", icon: BookOpen },
     { href: "/modules", label: "Modules", icon: BookOpen },
+    { href: "/paths", label: "Learning Paths", icon: Map },
     { href: "/curriculum/map", label: "Curriculum", icon: BarChart3 },
     { href: "/admin/dashboard", label: "Admin Dashboard", icon: BarChart3 },
     { href: "/admin/users", label: "Users", icon: Users },
@@ -40,6 +42,7 @@ const navigationConfig = {
     { href: "/", label: "Home", icon: Home },
     { href: "/courses", label: "Courses", icon: BookOpen },
     { href: "/modules", label: "Modules", icon: BookOpen },
+    { href: "/paths", label: "Learning Paths", icon: Map },
     { href: "/curriculum/map", label: "Curriculum", icon: BarChart3 },
     { href: "/faculty/dashboard", label: "Dashboard", icon: BarChart3 },
     { href: "/learning", label: "My Learning", icon: BookOpen },
@@ -53,6 +56,7 @@ const navigationConfig = {
     { href: "/", label: "Home", icon: Home },
     { href: "/courses", label: "Courses", icon: BookOpen },
     { href: "/modules", label: "Modules", icon: BookOpen },
+    { href: "/paths", label: "Learning Paths", icon: Map },
     { href: "/curriculum/map", label: "Curriculum", icon: BarChart3 },
     { href: "/learning", label: "My Learning", icon: BookOpen },
     { href: "/network", label: "Network", icon: BarChart3 },
