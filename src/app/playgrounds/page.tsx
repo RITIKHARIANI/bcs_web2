@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { Search, Plus, Eye, Calendar, Box, Brain, BarChart3, GitBranch, Layout, GraduationCap, Folder, Code } from 'lucide-react';
+import { Header } from '@/components/Header';
 import { PLAYGROUND_TEMPLATES } from '@/lib/react-playground/templates';
 import { PlaygroundCategory, CATEGORY_LABELS, CATEGORY_ICONS } from '@/types/react-playground';
 
@@ -99,7 +100,8 @@ export default function PlaygroundsPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
-      {/* Header */}
+      <Header />
+      {/* Page Header */}
       <div className="bg-gray-900 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">

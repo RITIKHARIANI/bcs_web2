@@ -364,7 +364,7 @@ export default function ReactPlaygroundBuilder({
   const files = useMemo(() => getDefaultFiles(sourceCode), [sourceCode]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0f]">
+    <div className="h-screen flex flex-col bg-[#0a0a0f] overflow-hidden">
       {/* Toolbar */}
       <BuilderToolbar
         title={title}
@@ -445,17 +445,17 @@ export default function ReactPlaygroundBuilder({
             {/* Preview Panel */}
             {viewMode !== 'code' && (
               <ResizablePanel defaultSize={50} minSize={30}>
-                <div className="h-full flex flex-col">
-                  <div className="px-4 py-2 bg-gray-900 border-b border-gray-800">
+                <div className="h-full w-full flex flex-col overflow-hidden">
+                  <div className="px-4 py-2 bg-gray-900 border-b border-gray-800 flex-shrink-0">
                     <span className="text-gray-400 text-sm font-medium">
                       Preview
                     </span>
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 w-full overflow-hidden">
                     <SandpackPreview
                       showOpenInCodeSandbox={false}
                       showRefreshButton
-                      style={{ height: '100%' }}
+                      style={{ height: '100%', width: '100%' }}
                     />
                   </div>
                 </div>
