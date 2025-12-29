@@ -874,33 +874,44 @@ Inspired by official UI brand colors: Illini Orange and Illini Blue
 }
 
 /* Sandpack Preview Overrides - Force full width */
-.sp-preview-container {
+[class*="sp-preview"],
+[class*="sp-stack"],
+[class*="sp-wrapper"] {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+[class*="sp-preview-container"] {
   width: 100% !important;
   height: 100% !important;
   flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
-.sp-preview-iframe {
+[class*="sp-preview-iframe"] {
   width: 100% !important;
   height: 100% !important;
+  flex: 1 1 auto !important;
   border: none !important;
 }
 
-.sp-preview-actions {
+[class*="sp-preview-actions"] {
   position: absolute !important;
   top: 8px !important;
   right: 8px !important;
   z-index: 10 !important;
 }
 
-/* Sandpack Stack Layout */
-.sp-stack {
+/* Target iframe directly inside Sandpack containers */
+[class*="sp-preview"] iframe,
+[class*="sp-stack"] iframe {
   width: 100% !important;
   height: 100% !important;
+  border: none !important;
 }
 
-/* Ensure Sandpack wrapper fills container */
-.sp-wrapper {
+/* Ensure all Sandpack divs fill their containers */
+[class*="sp-"] > div {
   width: 100% !important;
-  height: 100% !important;
 }
