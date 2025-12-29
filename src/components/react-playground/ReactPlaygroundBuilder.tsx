@@ -25,15 +25,13 @@ import {
   Eye,
   Code,
   Package,
-  Settings,
-  Maximize2,
-  Minimize2,
   Terminal,
-  ChevronRight,
   Loader2,
   AlertCircle,
   Check,
+  ArrowLeft,
 } from 'lucide-react';
+import Link from 'next/link';
 import {
   neuralTheme,
   getDefaultFiles,
@@ -82,9 +80,17 @@ function BuilderToolbar({
   readOnly?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800">
-      {/* Left side - title */}
+    <div className="flex items-center justify-between px-4 py-3 bg-gray-900 border-b border-gray-800">
+      {/* Left side - back button and title */}
       <div className="flex items-center gap-4">
+        <Link
+          href="/playgrounds"
+          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm">Back</span>
+        </Link>
+        <div className="w-px h-6 bg-gray-700" />
         {readOnly ? (
           <h1 className="text-white font-medium">{title}</h1>
         ) : (
