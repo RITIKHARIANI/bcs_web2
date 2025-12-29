@@ -15,7 +15,11 @@ import {
   SandpackConsole,
   useSandpack,
 } from '@codesandbox/sandpack-react';
-// Note: Resizable panels removed - using CSS flex for view modes to preserve Sandpack state
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
 import {
   Save,
   Eye,
@@ -391,84 +395,82 @@ export default function ReactPlaygroundBuilder({
             autorun: true,
           }}
         >
-          {/* Use flex layout instead of ResizablePanelGroup to avoid unmounting issues */}
-          <div className="flex-1 flex overflow-hidden">
+          <ResizablePanelGroup direction="horizontal" className="flex-1">
             {/* Code Editor Panel */}
-            <div
-              className={cn(
-                'flex flex-col transition-all duration-200',
-                viewMode === 'preview' ? 'w-0 min-w-0 opacity-0 overflow-hidden' : 'flex-1 min-w-0 overflow-hidden'
-              )}
-            >
-              <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800">
-                <span className="text-gray-400 text-sm font-medium">
-                  App.js
-                </span>
-                <button
-                  onClick={() => setShowConsole(!showConsole)}
-                  className={cn(
-                    'p-1 rounded transition-colors',
-                    showConsole
-                      ? 'bg-neural-primary/20 text-neural-primary'
-                      : 'text-gray-500 hover:text-white'
-                  )}
+            {viewMode !== 'preview' && (
+              <>
+                <ResizablePanel
+                  defaultSize={50}
+                  minSize={30}
+                  className="flex flex-col"
                 >
-                  <Terminal className="h-4 w-4" />
-                </button>
-              </div>
-              <div className={cn('flex-1', showConsole ? 'h-[60%]' : 'h-full')}>
-                {readOnly ? (
-                  <SandpackCodeEditor
-                    showTabs={false}
-                    showLineNumbers
-                    readOnly
-                    style={{ height: '100%' }}
-                  />
-                ) : (
-                  <CodeEditorPanel onCodeChange={handleCodeChange} />
-                )}
-              </div>
-              {showConsole && (
-                <div className="h-[40%] border-t border-gray-800">
-                  <SandpackConsole style={{ height: '100%' }} />
-                </div>
-              )}
-            </div>
-
-            {/* Resize Handle - only in split mode */}
-            {viewMode === 'split' && (
-              <div className="w-px bg-gray-800 hover:bg-neural-primary/50 cursor-col-resize flex-shrink-0" />
+                  <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800">
+                    <span className="text-gray-400 text-sm font-medium">
+                      App.js
+                    </span>
+                    <button
+                      onClick={() => setShowConsole(!showConsole)}
+                      className={cn(
+                        'p-1 rounded transition-colors',
+                        showConsole
+                          ? 'bg-neural-primary/20 text-neural-primary'
+                          : 'text-gray-500 hover:text-white'
+                      )}
+                    >
+                      <Terminal className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className={cn('flex-1 overflow-hidden', showConsole ? 'h-[60%]' : 'h-full')}>
+                    {readOnly ? (
+                      <SandpackCodeEditor
+                        showTabs={false}
+                        showLineNumbers
+                        readOnly
+                        style={{ height: '100%' }}
+                      />
+                    ) : (
+                      <CodeEditorPanel onCodeChange={handleCodeChange} />
+                    )}
+                  </div>
+                  {showConsole && (
+                    <div className="h-[40%] border-t border-gray-800">
+                      <SandpackConsole style={{ height: '100%' }} />
+                    </div>
+                  )}
+                </ResizablePanel>
+                {viewMode === 'split' && <ResizableHandle withHandle />}
+              </>
             )}
 
-            {/* Preview Panel - Always mounted to preserve Sandpack state */}
-            <div
-              className={cn(
-                'flex flex-col transition-all duration-200',
-                viewMode === 'code' ? 'w-0 min-w-0 opacity-0 overflow-hidden' : 'flex-1 min-w-0 overflow-hidden'
-              )}
-            >
-              <div className="px-4 py-2 bg-gray-900 border-b border-gray-800 flex-shrink-0">
-                <span className="text-gray-400 text-sm font-medium">
-                  Preview
-                </span>
-              </div>
-              <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0 }}>
-                <SandpackPreview
-                  showOpenInCodeSandbox={false}
-                  showRefreshButton
-                  style={{
-                    height: '100%',
-                    width: '100%',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                  }}
-                />
-              </div>
+            {/* Preview Panel */}
+            {viewMode !== 'code' && (
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <div className="h-full flex flex-col">
+                  <div className="px-4 py-2 bg-gray-900 border-b border-gray-800">
+                    <span className="text-gray-400 text-sm font-medium">
+                      Preview
+                    </span>
+                  </div>
+                  <div className="flex-1 relative overflow-hidden">
+                    <div className="absolute inset-0">
+                      <SandpackPreview
+                        showOpenInCodeSandbox={false}
+                        showRefreshButton
+                        style={{ height: '100%', width: '100%' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </ResizablePanel>
+            )}
+          </ResizablePanelGroup>
+
+          {/* Hidden SandpackPreview to keep Sandpack bundler alive when in code-only mode */}
+          {viewMode === 'code' && (
+            <div className="hidden">
+              <SandpackPreview showOpenInCodeSandbox={false} />
             </div>
-          </div>
+          )}
         </SandpackProvider>
 
         {/* Dependencies Panel */}
