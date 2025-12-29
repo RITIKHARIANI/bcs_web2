@@ -915,3 +915,16 @@ Inspired by official UI brand colors: Illini Orange and Illini Blue
 [class*="sp-"] > div {
   width: 100% !important;
 }
+
+/* Remove any scrollbar gutters */
+[class*="sp-preview"],
+[class*="sp-preview-container"] {
+  overflow: hidden !important;
+  scrollbar-gutter: auto !important;
+}
+
+/* Ensure refresh button doesn't take layout space */
+[class*="sp-preview"] > button,
+[class*="sp-preview-actions"] button {
+  position: absolute !important;
+}
