@@ -15,11 +15,7 @@ import {
   SandpackConsole,
   useSandpack,
 } from '@codesandbox/sandpack-react';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
+// Note: Resizable panels removed - using CSS flex for view modes to preserve Sandpack state
 import {
   Save,
   Eye,
@@ -395,75 +391,78 @@ export default function ReactPlaygroundBuilder({
             autorun: true,
           }}
         >
-          <ResizablePanelGroup direction="horizontal" className="flex-1">
+          {/* Use flex layout instead of ResizablePanelGroup to avoid unmounting issues */}
+          <div className="flex-1 flex overflow-hidden">
             {/* Code Editor Panel */}
-            {viewMode !== 'preview' && (
-              <>
-                <ResizablePanel
-                  defaultSize={50}
-                  minSize={30}
-                  className="flex flex-col"
-                >
-                  <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800">
-                    <span className="text-gray-400 text-sm font-medium">
-                      App.js
-                    </span>
-                    <button
-                      onClick={() => setShowConsole(!showConsole)}
-                      className={cn(
-                        'p-1 rounded transition-colors',
-                        showConsole
-                          ? 'bg-neural-primary/20 text-neural-primary'
-                          : 'text-gray-500 hover:text-white'
-                      )}
-                    >
-                      <Terminal className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className={cn('flex-1', showConsole ? 'h-[60%]' : 'h-full')}>
-                    {readOnly ? (
-                      <SandpackCodeEditor
-                        showTabs={false}
-                        showLineNumbers
-                        readOnly
-                        style={{ height: '100%' }}
-                      />
-                    ) : (
-                      <CodeEditorPanel onCodeChange={handleCodeChange} />
-                    )}
-                  </div>
-                  {showConsole && (
-                    <div className="h-[40%] border-t border-gray-800">
-                      <SandpackConsole style={{ height: '100%' }} />
-                    </div>
+            <div
+              className={cn(
+                'flex flex-col overflow-hidden transition-all duration-200',
+                viewMode === 'preview' ? 'w-0 opacity-0' : 'flex-1'
+              )}
+            >
+              <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800">
+                <span className="text-gray-400 text-sm font-medium">
+                  App.js
+                </span>
+                <button
+                  onClick={() => setShowConsole(!showConsole)}
+                  className={cn(
+                    'p-1 rounded transition-colors',
+                    showConsole
+                      ? 'bg-neural-primary/20 text-neural-primary'
+                      : 'text-gray-500 hover:text-white'
                   )}
-                </ResizablePanel>
-                {viewMode === 'split' && <ResizableHandle withHandle />}
-              </>
+                >
+                  <Terminal className="h-4 w-4" />
+                </button>
+              </div>
+              <div className={cn('flex-1', showConsole ? 'h-[60%]' : 'h-full')}>
+                {readOnly ? (
+                  <SandpackCodeEditor
+                    showTabs={false}
+                    showLineNumbers
+                    readOnly
+                    style={{ height: '100%' }}
+                  />
+                ) : (
+                  <CodeEditorPanel onCodeChange={handleCodeChange} />
+                )}
+              </div>
+              {showConsole && (
+                <div className="h-[40%] border-t border-gray-800">
+                  <SandpackConsole style={{ height: '100%' }} />
+                </div>
+              )}
+            </div>
+
+            {/* Resize Handle - only in split mode */}
+            {viewMode === 'split' && (
+              <div className="w-px bg-gray-800 hover:bg-neural-primary/50 cursor-col-resize flex-shrink-0" />
             )}
 
-            {/* Preview Panel */}
-            {viewMode !== 'code' && (
-              <ResizablePanel defaultSize={50} minSize={30}>
-                <div className="h-full w-full flex flex-col overflow-hidden">
-                  <div className="px-4 py-2 bg-gray-900 border-b border-gray-800 flex-shrink-0">
-                    <span className="text-gray-400 text-sm font-medium">
-                      Preview
-                    </span>
-                  </div>
-                  <div className="flex-1 relative min-h-0">
-                    <div className="absolute inset-0">
-                      <SandpackPreview
-                        showOpenInCodeSandbox={false}
-                        showRefreshButton
-                        style={{ height: '100%', width: '100%' }}
-                      />
-                    </div>
-                  </div>
+            {/* Preview Panel - Always mounted to preserve Sandpack state */}
+            <div
+              className={cn(
+                'flex flex-col overflow-hidden transition-all duration-200',
+                viewMode === 'code' ? 'w-0 opacity-0' : 'flex-1'
+              )}
+            >
+              <div className="px-4 py-2 bg-gray-900 border-b border-gray-800 flex-shrink-0">
+                <span className="text-gray-400 text-sm font-medium">
+                  Preview
+                </span>
+              </div>
+              <div className="flex-1 relative min-h-0">
+                <div className="absolute inset-0">
+                  <SandpackPreview
+                    showOpenInCodeSandbox={false}
+                    showRefreshButton
+                    style={{ height: '100%', width: '100%' }}
+                  />
                 </div>
-              </ResizablePanel>
-            )}
-          </ResizablePanelGroup>
+              </div>
+            </div>
+          </div>
         </SandpackProvider>
 
         {/* Dependencies Panel */}
