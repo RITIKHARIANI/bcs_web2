@@ -872,3 +872,35 @@ Inspired by official UI brand colors: Illini Orange and Illini Blue
 .animate-pulse-slow {
   animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Sandpack Preview Overrides - Force full width */
+.sp-preview-container {
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 1 auto !important;
+}
+
+.sp-preview-iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+}
+
+.sp-preview-actions {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  z-index: 10 !important;
+}
+
+/* Sandpack Stack Layout */
+.sp-stack {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Ensure Sandpack wrapper fills container */
+.sp-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+}

@@ -451,12 +451,14 @@ export default function ReactPlaygroundBuilder({
                       Preview
                     </span>
                   </div>
-                  <div className="flex-1 w-full overflow-hidden">
-                    <SandpackPreview
-                      showOpenInCodeSandbox={false}
-                      showRefreshButton
-                      style={{ height: '100%', width: '100%' }}
-                    />
+                  <div className="flex-1 relative min-h-0">
+                    <div className="absolute inset-0">
+                      <SandpackPreview
+                        showOpenInCodeSandbox={false}
+                        showRefreshButton
+                        style={{ height: '100%', width: '100%' }}
+                      />
+                    </div>
                   </div>
                 </div>
               </ResizablePanel>
