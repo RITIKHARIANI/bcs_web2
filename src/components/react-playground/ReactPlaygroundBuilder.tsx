@@ -396,8 +396,8 @@ export default function ReactPlaygroundBuilder({
             {/* Code Editor Panel */}
             <div
               className={cn(
-                'flex flex-col overflow-hidden transition-all duration-200',
-                viewMode === 'preview' ? 'w-0 opacity-0' : 'flex-1'
+                'flex flex-col transition-all duration-200',
+                viewMode === 'preview' ? 'w-0 min-w-0 opacity-0 overflow-hidden' : 'flex-1 min-w-0 overflow-hidden'
               )}
             >
               <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800">
@@ -443,8 +443,8 @@ export default function ReactPlaygroundBuilder({
             {/* Preview Panel - Always mounted to preserve Sandpack state */}
             <div
               className={cn(
-                'flex flex-col overflow-hidden transition-all duration-200',
-                viewMode === 'code' ? 'w-0 opacity-0' : 'flex-1'
+                'flex flex-col transition-all duration-200',
+                viewMode === 'code' ? 'w-0 min-w-0 opacity-0 overflow-hidden' : 'flex-1 min-w-0 overflow-hidden'
               )}
             >
               <div className="px-4 py-2 bg-gray-900 border-b border-gray-800 flex-shrink-0">
@@ -452,14 +452,20 @@ export default function ReactPlaygroundBuilder({
                   Preview
                 </span>
               </div>
-              <div className="flex-1 relative min-h-0">
-                <div className="absolute inset-0">
-                  <SandpackPreview
-                    showOpenInCodeSandbox={false}
-                    showRefreshButton
-                    style={{ height: '100%', width: '100%' }}
-                  />
-                </div>
+              <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0 }}>
+                <SandpackPreview
+                  showOpenInCodeSandbox={false}
+                  showRefreshButton
+                  style={{
+                    height: '100%',
+                    width: '100%',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                  }}
+                />
               </div>
             </div>
           </div>
