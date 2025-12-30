@@ -479,7 +479,7 @@ export default function ReactPlaygroundBuilder({
               viewMode === 'code'
                 ? 'opacity-0 pointer-events-none w-0 h-0 overflow-hidden'
                 : viewMode === 'split'
-                  ? 'top-0 right-0 bottom-0 w-1/2'
+                  ? 'top-0 left-1/2 right-0 bottom-0'  // Start from middle, extend to right edge
                   : 'inset-0' // preview mode - full width
             )}
           >
