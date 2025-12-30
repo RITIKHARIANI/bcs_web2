@@ -14,7 +14,7 @@ import {
   SandpackConsole,
   useSandpack,
 } from '@codesandbox/sandpack-react';
-import { Maximize2, Minimize2, RefreshCw, Terminal, X } from 'lucide-react';
+import { Maximize2, Minimize2, RefreshCw, Terminal, X, Square } from 'lucide-react';
 import {
   neuralTheme,
   getDefaultFiles,
@@ -34,12 +34,16 @@ interface ReactPlaygroundPreviewProps {
 function PreviewControls({
   isFullscreen,
   onToggleFullscreen,
+  isFullWindow,
+  onToggleFullWindow,
   showConsole,
   onToggleConsole,
   consoleVisible,
 }: {
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
+  isFullWindow: boolean;
+  onToggleFullWindow: () => void;
   showConsole: boolean;
   onToggleConsole: () => void;
   consoleVisible: boolean;
@@ -72,6 +76,17 @@ function PreviewControls({
         title="Refresh Preview"
       >
         <RefreshCw className="h-4 w-4" />
+      </button>
+      <button
+        onClick={onToggleFullWindow}
+        className="p-2 bg-black/50 rounded-md text-gray-400 hover:text-white hover:bg-black/70 transition-colors"
+        title={isFullWindow ? 'Exit Full Window' : 'Full Window'}
+      >
+        {isFullWindow ? (
+          <Minimize2 className="h-4 w-4" />
+        ) : (
+          <Square className="h-4 w-4" />
+        )}
       </button>
       <button
         onClick={onToggleFullscreen}
@@ -140,6 +155,7 @@ export default function ReactPlaygroundPreview({
   autoReload = true,
 }: ReactPlaygroundPreviewProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullWindow, setIsFullWindow] = useState(false);
   const [consoleVisible, setConsoleVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -179,27 +195,31 @@ export default function ReactPlaygroundPreview({
     };
   }, []);
 
-  // Handle Escape key for fullscreen
+  // Handle Escape key for fullscreen and full window modes
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isFullscreen && !document.fullscreenElement) {
-        setIsFullscreen(false);
+      if (e.key === 'Escape') {
+        if (isFullWindow) setIsFullWindow(false);
+        if (isFullscreen && !document.fullscreenElement) setIsFullscreen(false);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFullscreen]);
+  }, [isFullscreen, isFullWindow]);
 
   return (
     <div
       ref={containerRef}
       className={cn(
-        'relative bg-[#0a0a0f] rounded-lg overflow-hidden',
-        isFullscreen && !document.fullscreenElement && 'fixed inset-0 z-50',
+        'relative bg-[#0a0a0f] overflow-hidden',
+        (isFullWindow || (isFullscreen && !document.fullscreenElement)) ? 'fixed inset-0 z-50 rounded-none' : 'rounded-lg',
         className
       )}
-      style={{ height: isFullscreen ? '100vh' : '100%' }}
+      style={{
+        height: (isFullWindow || isFullscreen) ? '100vh' : '100%',
+        width: (isFullWindow || isFullscreen) ? '100vw' : '100%'
+      }}
     >
       <SandpackProvider
         template="react"
@@ -215,13 +235,25 @@ export default function ReactPlaygroundPreview({
           autoReload: autoReload,
         }}
       >
-        {/* Fullscreen close button */}
-        {isFullscreen && !document.fullscreenElement && (
+        {/* Full Window close button */}
+        {isFullWindow && (
+          <button
+            onClick={() => setIsFullWindow(false)}
+            className="absolute top-4 right-4 z-20 p-3 bg-black/80 backdrop-blur-sm rounded-full text-white hover:bg-black transition-colors"
+            title="Exit Full Window (Esc)"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        )}
+
+        {/* Fullscreen close button (fallback mode) */}
+        {isFullscreen && !document.fullscreenElement && !isFullWindow && (
           <button
             onClick={() => setIsFullscreen(false)}
-            className="absolute top-4 right-4 z-20 p-2 bg-black/80 rounded-full text-white hover:bg-black"
+            className="absolute top-4 right-4 z-20 p-3 bg-black/80 backdrop-blur-sm rounded-full text-white hover:bg-black transition-colors"
+            title="Exit Fullscreen (Esc)"
           >
-            <X className="h-5 w-5" />
+            <X className="h-6 w-6" />
           </button>
         )}
 
@@ -229,6 +261,8 @@ export default function ReactPlaygroundPreview({
         <PreviewControls
           isFullscreen={isFullscreen}
           onToggleFullscreen={toggleFullscreen}
+          isFullWindow={isFullWindow}
+          onToggleFullWindow={() => setIsFullWindow(!isFullWindow)}
           showConsole={showConsole}
           onToggleConsole={() => setConsoleVisible(!consoleVisible)}
           consoleVisible={consoleVisible}
