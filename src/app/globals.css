@@ -873,6 +873,12 @@ Inspired by official UI brand colors: Illini Orange and Illini Blue
   animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Nuclear option - remove ALL iframe borders (browser defaults) */
+iframe {
+  border: none !important;
+  outline: none !important;
+}
+
 /* Sandpack Preview Overrides - Claude artifact style (edge-to-edge, no borders) */
 [class*="sp-preview"],
 [class*="sp-stack"],
@@ -882,6 +888,8 @@ Inspired by official UI brand colors: Illini Orange and Illini Blue
   border: none !important;
   border-radius: 0 !important;
   background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 [class*="sp-preview-container"] {
@@ -893,6 +901,8 @@ Inspired by official UI brand colors: Illini Orange and Illini Blue
   border: none !important;
   padding: 0 !important;
   margin: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 [class*="sp-preview-iframe"] {
@@ -900,6 +910,8 @@ Inspired by official UI brand colors: Illini Orange and Illini Blue
   height: 100% !important;
   flex: 1 1 auto !important;
   border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Hide Sandpack's built-in action buttons (we use our own floating button) */
@@ -913,6 +925,8 @@ Inspired by official UI brand colors: Illini Orange and Illini Blue
   width: 100% !important;
   height: 100% !important;
   border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Ensure all Sandpack divs fill their containers */

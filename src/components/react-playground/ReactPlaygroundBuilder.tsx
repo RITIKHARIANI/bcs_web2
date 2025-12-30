@@ -401,7 +401,7 @@ export default function ReactPlaygroundBuilder({
       />
 
       {/* Main content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         <SandpackProvider
           template="react"
           theme={neuralTheme}
@@ -462,31 +462,39 @@ export default function ReactPlaygroundBuilder({
               </>
             )}
 
-            {/* Preview Panel - ALWAYS rendered (Claude artifact style) */}
-            {/* Use conditional rendering for panel but keep SandpackPreview mounted via hidden div */}
+            {/* Preview Panel placeholder - for layout space allocation */}
             {viewMode !== 'code' && (
               <ResizablePanel defaultSize={50} minSize={30}>
-                <div className="h-full relative">
-                {/* Floating refresh button - inside canvas */}
-                <PreviewRefreshButton />
-
-                {/* Preview fills entire space - no header, no borders */}
-                <SandpackPreview
-                  showOpenInCodeSandbox={false}
-                  showRefreshButton={false}
-                  style={{ height: '100%', width: '100%' }}
-                />
-                </div>
+                {/* Empty - actual preview is rendered in absolutely positioned container below */}
               </ResizablePanel>
             )}
           </ResizablePanelGroup>
 
-          {/* Hidden SandpackPreview to keep bundler alive in code-only mode */}
-          {viewMode === 'code' && (
-            <div className="hidden">
-              <SandpackPreview showOpenInCodeSandbox={false} />
+          {/* ★ SINGLE SandpackPreview - ALWAYS MOUNTED ★
+              Uses absolute positioning to overlay the preview panel area.
+              This prevents unmount/remount when switching modes, keeping the compiled state. */}
+          <div
+            className={cn(
+              'absolute bg-[#0a0a0f] transition-opacity duration-100',
+              viewMode === 'code'
+                ? 'opacity-0 pointer-events-none w-0 h-0 overflow-hidden'
+                : viewMode === 'split'
+                  ? 'top-0 right-0 bottom-0 w-1/2'
+                  : 'inset-0' // preview mode - full width
+            )}
+          >
+            <div className="h-full relative">
+              {/* Floating refresh button - inside canvas */}
+              <PreviewRefreshButton />
+
+              {/* Preview fills entire space - no header, no borders */}
+              <SandpackPreview
+                showOpenInCodeSandbox={false}
+                showRefreshButton={false}
+                style={{ height: '100%', width: '100%' }}
+              />
             </div>
-          )}
+          </div>
         </SandpackProvider>
 
         {/* Dependencies Panel */}
