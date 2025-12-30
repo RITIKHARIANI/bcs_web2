@@ -199,7 +199,7 @@ export default function ReactPlaygroundPreview({
         isFullscreen && !document.fullscreenElement && 'fixed inset-0 z-50',
         className
       )}
-      style={{ minHeight: isFullscreen ? '100vh' : '400px' }}
+      style={{ height: isFullscreen ? '100vh' : '100%' }}
     >
       <SandpackProvider
         template="react"
@@ -240,7 +240,6 @@ export default function ReactPlaygroundPreview({
             'w-full transition-all',
             consoleVisible ? 'h-[calc(100%-200px)]' : 'h-full'
           )}
-          style={{ minHeight: isFullscreen ? 'calc(100vh - 200px)' : '400px' }}
         >
           <ErrorBoundary>
             <SandpackPreview

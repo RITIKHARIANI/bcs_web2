@@ -204,7 +204,7 @@ export default async function PlaygroundPage({ params }: PageProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Suspense
           fallback={
-            <div className="bg-[#0a0a0f] rounded-lg border border-gray-800 p-12 text-center min-h-[500px] flex items-center justify-center">
+            <div className="bg-[#0a0a0f] rounded-lg border border-gray-800 p-12 text-center flex items-center justify-center" style={{ height: 'calc(100vh - 280px)', minHeight: '500px' }}>
               <div>
                 <div className="w-8 h-8 border-2 border-neural-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                 <p className="text-gray-400">Loading playground...</p>
@@ -212,12 +212,12 @@ export default async function PlaygroundPage({ params }: PageProps) {
             </div>
           }
         >
-          <div className="rounded-lg border border-gray-800 overflow-hidden">
+          <div className="rounded-lg border border-gray-800 overflow-hidden" style={{ height: 'calc(100vh - 280px)', minHeight: '500px' }}>
             <PlaygroundViewerClient
               code={playground.source_code || ''}
               dependencies={dependencies}
               showConsole={true}
-              className="min-h-[600px]"
+              className="h-full"
             />
           </div>
         </Suspense>
