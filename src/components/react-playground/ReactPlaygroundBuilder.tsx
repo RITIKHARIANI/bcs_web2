@@ -30,6 +30,7 @@ import {
   AlertCircle,
   Check,
   ArrowLeft,
+  RefreshCw,
 } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -221,6 +222,25 @@ function CodeEditorPanel({ onCodeChange }: { onCodeChange: (code: string) => voi
       wrapContent
       style={{ height: '100%' }}
     />
+  );
+}
+
+// Floating refresh button for preview (Claude artifact style)
+function PreviewRefreshButton() {
+  const { sandpack } = useSandpack();
+
+  const handleRefresh = () => {
+    sandpack.runSandpack();
+  };
+
+  return (
+    <button
+      onClick={handleRefresh}
+      className="absolute top-3 right-3 z-10 p-2 bg-black/50 backdrop-blur-sm rounded-lg text-gray-400 hover:text-white hover:bg-black/70 transition-all"
+      title="Refresh preview"
+    >
+      <RefreshCw className="h-4 w-4" />
+    </button>
   );
 }
 
@@ -442,35 +462,28 @@ export default function ReactPlaygroundBuilder({
               </>
             )}
 
-            {/* Preview Panel */}
-            {viewMode !== 'code' && (
-              <ResizablePanel defaultSize={50} minSize={30}>
-                <div className="h-full flex flex-col">
-                  <div className="px-4 py-2 bg-gray-900 border-b border-gray-800">
-                    <span className="text-gray-400 text-sm font-medium">
-                      Preview
-                    </span>
-                  </div>
-                  <div className="flex-1 relative overflow-hidden">
-                    <div className="absolute inset-0">
-                      <SandpackPreview
-                        showOpenInCodeSandbox={false}
-                        showRefreshButton
-                        style={{ height: '100%', width: '100%' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </ResizablePanel>
-            )}
-          </ResizablePanelGroup>
+            {/* Preview Panel - ALWAYS rendered (Claude artifact style) */}
+            <ResizablePanel
+              defaultSize={viewMode === 'code' ? 0 : 50}
+              minSize={0}
+              className={cn(viewMode === 'code' && 'w-0 overflow-hidden')}
+            >
+              <div className={cn(
+                "h-full relative",
+                viewMode === 'code' && 'invisible'
+              )}>
+                {/* Floating refresh button - inside canvas */}
+                <PreviewRefreshButton />
 
-          {/* Hidden SandpackPreview to keep Sandpack bundler alive when in code-only mode */}
-          {viewMode === 'code' && (
-            <div className="hidden">
-              <SandpackPreview showOpenInCodeSandbox={false} />
-            </div>
-          )}
+                {/* Preview fills entire space - no header, no borders */}
+                <SandpackPreview
+                  showOpenInCodeSandbox={false}
+                  showRefreshButton={false}
+                  style={{ height: '100%', width: '100%' }}
+                />
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </SandpackProvider>
 
         {/* Dependencies Panel */}
