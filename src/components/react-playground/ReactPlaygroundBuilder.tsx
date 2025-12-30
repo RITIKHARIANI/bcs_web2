@@ -463,15 +463,10 @@ export default function ReactPlaygroundBuilder({
             )}
 
             {/* Preview Panel - ALWAYS rendered (Claude artifact style) */}
-            <ResizablePanel
-              defaultSize={viewMode === 'code' ? 0 : 50}
-              minSize={0}
-              className={cn(viewMode === 'code' && 'w-0 overflow-hidden')}
-            >
-              <div className={cn(
-                "h-full relative",
-                viewMode === 'code' && 'invisible'
-              )}>
+            {/* Use conditional rendering for panel but keep SandpackPreview mounted via hidden div */}
+            {viewMode !== 'code' && (
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <div className="h-full relative">
                 {/* Floating refresh button - inside canvas */}
                 <PreviewRefreshButton />
 
@@ -481,9 +476,17 @@ export default function ReactPlaygroundBuilder({
                   showRefreshButton={false}
                   style={{ height: '100%', width: '100%' }}
                 />
-              </div>
-            </ResizablePanel>
+                </div>
+              </ResizablePanel>
+            )}
           </ResizablePanelGroup>
+
+          {/* Hidden SandpackPreview to keep bundler alive in code-only mode */}
+          {viewMode === 'code' && (
+            <div className="hidden">
+              <SandpackPreview showOpenInCodeSandbox={false} />
+            </div>
+          )}
         </SandpackProvider>
 
         {/* Dependencies Panel */}
