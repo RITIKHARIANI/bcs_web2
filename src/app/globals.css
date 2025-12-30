@@ -991,3 +991,20 @@ iframe {
   border: none !important;
   border-right: none !important;
 }
+
+/* Ensure Sandpack containers fill their parent and allow flex shrinking */
+[class*="sp-wrapper"],
+[class*="sp-layout"],
+[class*="sp-stack"] {
+  height: 100% !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+/* Sandpack Provider should be a proper flex container */
+.sp-wrapper {
+  display: flex !important;
+  flex-direction: row !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
