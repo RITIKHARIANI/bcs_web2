@@ -251,6 +251,7 @@ export const getDefaultFiles = (appCode: string = DEFAULT_APP_CODE) => ({
     code: `import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import './styles.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -262,7 +263,17 @@ root.render(
     hidden: true,
   },
   '/styles.css': {
-    code: `* {
+    code: `/* Reset to remove white border */
+html, body, #root {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
