@@ -926,3 +926,54 @@ Inspired by official UI brand colors: Illini Orange and Illini Blue
   overflow: hidden !important;
   scrollbar-gutter: auto !important;
 }
+
+/* Dark scrollbars for Sandpack code editor - match the dark theme */
+[class*="sp-code-editor"],
+[class*="sp-cm"],
+[class*="cm-scroller"],
+[class*="sp-editor"] {
+  scrollbar-width: thin !important;
+  scrollbar-color: #333 transparent !important;
+}
+
+[class*="sp-code-editor"]::-webkit-scrollbar,
+[class*="sp-cm"]::-webkit-scrollbar,
+[class*="cm-scroller"]::-webkit-scrollbar,
+[class*="sp-editor"]::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+[class*="sp-code-editor"]::-webkit-scrollbar-track,
+[class*="sp-cm"]::-webkit-scrollbar-track,
+[class*="cm-scroller"]::-webkit-scrollbar-track,
+[class*="sp-editor"]::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+[class*="sp-code-editor"]::-webkit-scrollbar-thumb,
+[class*="sp-cm"]::-webkit-scrollbar-thumb,
+[class*="cm-scroller"]::-webkit-scrollbar-thumb,
+[class*="sp-editor"]::-webkit-scrollbar-thumb {
+  background: #333 !important;
+  border-radius: 4px !important;
+}
+
+[class*="sp-code-editor"]::-webkit-scrollbar-thumb:hover,
+[class*="sp-cm"]::-webkit-scrollbar-thumb:hover,
+[class*="cm-scroller"]::-webkit-scrollbar-thumb:hover,
+[class*="sp-editor"]::-webkit-scrollbar-thumb:hover {
+  background: #444 !important;
+}
+
+/* Remove any borders from Sandpack layout components */
+[class*="sp-layout"] {
+  border: none !important;
+  gap: 0 !important;
+}
+
+/* Ensure code editor has no right border */
+[class*="sp-code-editor"] {
+  border: none !important;
+  border-right: none !important;
+}
