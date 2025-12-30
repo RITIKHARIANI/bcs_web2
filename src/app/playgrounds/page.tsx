@@ -113,7 +113,7 @@ export default function PlaygroundsPage() {
             </div>
             {isFaculty && (
               <Link
-                href="/playgrounds/builder"
+                href="/playgrounds/builder?new=true"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-neural-primary text-white rounded-lg hover:bg-neural-primary/90 transition-colors font-semibold"
               >
                 <Plus className="h-5 w-5" />
@@ -328,7 +328,7 @@ export default function PlaygroundsPage() {
             </p>
             {isFaculty && (
               <Link
-                href="/playgrounds/builder"
+                href="/playgrounds/builder?new=true"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-neural-primary text-white rounded-lg hover:bg-neural-primary/90 transition-colors font-semibold"
               >
                 <Plus className="h-5 w-5" />

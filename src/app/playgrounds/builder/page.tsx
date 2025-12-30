@@ -24,11 +24,47 @@ const ReactPlaygroundBuilder = dynamic(
   }
 );
 
+// Default welcoming code for new playgrounds
+const DEFAULT_NEW_PLAYGROUND_CODE = `export default function App() {
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      fontFamily: 'system-ui, sans-serif',
+      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+      color: 'white',
+      padding: '20px',
+    }}>
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
+        Welcome to Your Playground
+      </h1>
+      <p style={{ color: '#888', marginBottom: '2rem' }}>
+        Start editing to see your changes in real-time
+      </p>
+      <div style={{
+        padding: '1.5rem 2rem',
+        background: 'rgba(99, 102, 241, 0.1)',
+        borderRadius: '12px',
+        border: '1px solid rgba(99, 102, 241, 0.3)',
+      }}>
+        <p style={{ margin: 0, color: '#a5b4fc' }}>
+          💡 Tip: Try importing libraries like Three.js, Chart.js, or Framer Motion!
+        </p>
+      </div>
+    </div>
+  );
+}
+`;
+
 function PlaygroundBuilderContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
   const templateId = searchParams.get('template');
+  const isNew = searchParams.get('new') === 'true';
   const { data: session, status } = useSession();
 
   const [loading, setLoading] = useState(!!editId);
@@ -71,6 +107,13 @@ function PlaygroundBuilderContent() {
   // Get template if specified
   const template = templateId ? getTemplateById(templateId) : null;
 
+  // Clear localStorage draft when creating new playground
+  useEffect(() => {
+    if (isNew && typeof window !== 'undefined') {
+      localStorage.removeItem('playground-draft-new');
+    }
+  }, [isNew]);
+
   // Prepare initial data
   const initialData: Partial<PlaygroundFormData> | undefined = editId
     ? existingPlayground
@@ -89,6 +132,14 @@ function PlaygroundBuilderContent() {
         category: template.category,
         sourceCode: template.sourceCode,
         dependencies: template.dependencies,
+      }
+    : isNew
+    ? {
+        title: 'Untitled Playground',
+        description: '',
+        category: 'other' as PlaygroundCategory,
+        sourceCode: DEFAULT_NEW_PLAYGROUND_CODE,
+        dependencies: [],
       }
     : undefined;
 
