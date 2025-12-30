@@ -295,6 +295,9 @@ export default function ReactPlaygroundBuilder({
   const codePanelRef = useRef<ImperativePanelHandle>(null);
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
 
+  // Track initial mount to avoid setting isDirty on load
+  const isInitialMount = useRef(true);
+
   // Programmatically resize panels based on viewMode
   useEffect(() => {
     // Small delay to ensure panels are mounted
@@ -313,8 +316,12 @@ export default function ReactPlaygroundBuilder({
     return () => clearTimeout(timer);
   }, [viewMode]);
 
-  // Track changes
+  // Track changes - skip on initial mount to avoid false "unsaved changes"
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     setIsDirty(true);
   }, [title, description, category, sourceCode, dependencies]);
 
@@ -385,6 +392,8 @@ export default function ReactPlaygroundBuilder({
       localStorage.removeItem(`playground-draft-${playgroundId || 'new'}`);
     } catch (error) {
       console.error('Failed to save playground:', error);
+      // Show error to user
+      alert('Failed to save playground. Please try again.');
     } finally {
       setIsSaving(false);
     }
