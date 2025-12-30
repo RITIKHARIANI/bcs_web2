@@ -1008,3 +1008,23 @@ iframe {
   height: 100% !important;
   min-height: 0 !important;
 }
+
+/* Nuclear border removal - target ALL possible sources */
+[class*="sp-"] {
+  border: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Specifically target preview left border which may have default styling */
+[class*="sp-preview"],
+[class*="sp-preview"] > div,
+[class*="sp-preview"] > div > div {
+  border-left: none !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
