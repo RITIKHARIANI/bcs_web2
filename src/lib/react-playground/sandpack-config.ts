@@ -281,6 +281,16 @@ body {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>React Playground</title>
+    <style>
+      /* Reset to remove white border - runs inside iframe */
+      html, body, #root {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

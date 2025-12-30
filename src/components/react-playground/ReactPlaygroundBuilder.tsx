@@ -7,7 +7,7 @@
  * Features resizable panels, dependency management, and save functionality.
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   SandpackProvider,
   SandpackCodeEditor,
@@ -15,7 +15,12 @@ import {
   SandpackConsole,
   useSandpack,
 } from '@codesandbox/sandpack-react';
-// Note: ResizablePanelGroup removed - using simple flexbox for cleaner layout
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from '@/components/ui/resizable';
+import type { ImperativePanelHandle } from 'react-resizable-panels';
 import {
   Save,
   Eye,
@@ -286,6 +291,28 @@ export default function ReactPlaygroundBuilder({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isDirty, setIsDirty] = useState(false);
 
+  // Panel refs for programmatic resize
+  const codePanelRef = useRef<ImperativePanelHandle>(null);
+  const previewPanelRef = useRef<ImperativePanelHandle>(null);
+
+  // Programmatically resize panels based on viewMode
+  useEffect(() => {
+    // Small delay to ensure panels are mounted
+    const timer = setTimeout(() => {
+      if (viewMode === 'code') {
+        codePanelRef.current?.resize(100);
+        previewPanelRef.current?.resize(0);
+      } else if (viewMode === 'preview') {
+        codePanelRef.current?.resize(0);
+        previewPanelRef.current?.resize(100);
+      } else {
+        codePanelRef.current?.resize(50);
+        previewPanelRef.current?.resize(50);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [viewMode]);
+
   // Track changes
   useEffect(() => {
     setIsDirty(true);
@@ -396,7 +423,7 @@ export default function ReactPlaygroundBuilder({
         readOnly={readOnly}
       />
 
-      {/* Main content - simple flexbox layout */}
+      {/* Main content - resizable panels */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
         <SandpackProvider
           template="react"
@@ -411,69 +438,75 @@ export default function ReactPlaygroundBuilder({
             autorun: true,
           }}
         >
-          {/* Code Editor Panel - ALWAYS RENDERED, width controlled by CSS */}
-          <div
-            className={cn(
-              'flex flex-col min-h-0 overflow-hidden transition-all duration-200',
-              viewMode === 'preview' ? 'w-0' :
-              viewMode === 'split' ? 'w-1/2' : 'w-full'
-            )}
-          >
-            <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800">
-              <span className="text-gray-400 text-sm font-medium">
-                App.js
-              </span>
-              <button
-                onClick={() => setShowConsole(!showConsole)}
-                className={cn(
-                  'p-1 rounded transition-colors',
-                  showConsole
-                    ? 'bg-neural-primary/20 text-neural-primary'
-                    : 'text-gray-500 hover:text-white'
-                )}
-              >
-                <Terminal className="h-4 w-4" />
-              </button>
-            </div>
-            <div className={cn('flex-1 min-h-0 overflow-hidden', showConsole ? 'h-[60%]' : 'h-full')}>
-              {readOnly ? (
-                <SandpackCodeEditor
-                  showTabs={false}
-                  showLineNumbers
-                  readOnly
-                  style={{ height: '100%' }}
-                />
-              ) : (
-                <CodeEditorPanel onCodeChange={handleCodeChange} />
-              )}
-            </div>
-            {showConsole && (
-              <div className="h-[40%] border-t border-gray-800">
-                <SandpackConsole style={{ height: '100%' }} />
+          <ResizablePanelGroup direction="horizontal" className="flex-1">
+            {/* Code Editor Panel - ALWAYS RENDERED */}
+            <ResizablePanel
+              ref={codePanelRef}
+              defaultSize={50}
+              minSize={0}
+              className="flex flex-col min-h-0 overflow-hidden"
+            >
+              <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800">
+                <span className="text-gray-400 text-sm font-medium">
+                  App.js
+                </span>
+                <button
+                  onClick={() => setShowConsole(!showConsole)}
+                  className={cn(
+                    'p-1 rounded transition-colors',
+                    showConsole
+                      ? 'bg-neural-primary/20 text-neural-primary'
+                      : 'text-gray-500 hover:text-white'
+                  )}
+                >
+                  <Terminal className="h-4 w-4" />
+                </button>
               </div>
-            )}
-          </div>
+              <div className={cn('flex-1 min-h-0 overflow-hidden', showConsole ? 'h-[60%]' : 'h-full')}>
+                {readOnly ? (
+                  <SandpackCodeEditor
+                    showTabs={false}
+                    showLineNumbers
+                    readOnly
+                    style={{ height: '100%' }}
+                  />
+                ) : (
+                  <CodeEditorPanel onCodeChange={handleCodeChange} />
+                )}
+              </div>
+              {showConsole && (
+                <div className="h-[40%] border-t border-gray-800">
+                  <SandpackConsole style={{ height: '100%' }} />
+                </div>
+              )}
+            </ResizablePanel>
 
-          {/* Preview Panel - ALWAYS RENDERED, width controlled by CSS */}
-          <div
-            className={cn(
-              'min-h-0 overflow-hidden transition-all duration-200',
-              viewMode === 'code' ? 'w-0' :
-              viewMode === 'split' ? 'w-1/2' : 'w-full'
-            )}
-          >
-            <div className="h-full relative">
-              {/* Floating refresh button - inside canvas */}
-              <PreviewRefreshButton />
+            {/* Resize Handle - only visible in split mode */}
+            <ResizableHandle
+              withHandle
+              className={cn(viewMode !== 'split' && 'hidden')}
+            />
 
-              {/* Preview fills entire space */}
-              <SandpackPreview
-                showOpenInCodeSandbox={false}
-                showRefreshButton={false}
-                style={{ height: '100%', width: '100%' }}
-              />
-            </div>
-          </div>
+            {/* Preview Panel - ALWAYS RENDERED */}
+            <ResizablePanel
+              ref={previewPanelRef}
+              defaultSize={50}
+              minSize={0}
+              className="min-h-0 overflow-hidden"
+            >
+              <div className="h-full relative">
+                {/* Floating refresh button - inside canvas */}
+                <PreviewRefreshButton />
+
+                {/* Preview fills entire space */}
+                <SandpackPreview
+                  showOpenInCodeSandbox={false}
+                  showRefreshButton={false}
+                  style={{ height: '100%', width: '100%' }}
+                />
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </SandpackProvider>
 
         {/* Dependencies Panel */}
