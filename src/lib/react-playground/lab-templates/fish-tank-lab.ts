@@ -109,6 +109,11 @@ and rest near it - appearing to "love" the light.
     // Physics
     turnSpeed: 0.08,        // How fast worms turn
     sensorSpread: 0.3,      // Distance between sensors
+
+    // Visual effects
+    showBubbles: true,      // Rising bubbles in water
+    bubbleCount: 25,        // Number of bubbles
+    wormWiggle: true,       // Worms undulate as they swim
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -449,20 +454,52 @@ function Simulation3D({ behavior, isPlaying, onReset }) {
     water.position.y = th/2 - 0.6;
     scene.add(water);
 
+    // Create bubbles
+    const bubbles = [];
+    if (simulation.showBubbles) {
+      const bubbleMat = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.4,
+        roughness: 0.1,
+      });
+      for (let i = 0; i < simulation.bubbleCount; i++) {
+        const size = 0.03 + Math.random() * 0.05;
+        const bubble = new THREE.Mesh(
+          new THREE.SphereGeometry(size, 8, 8),
+          bubbleMat
+        );
+        bubble.position.set(
+          (Math.random() - 0.5) * (tw - 0.5),
+          -0.3 + Math.random() * (th - 0.5),
+          (Math.random() - 0.5) * (td - 0.5)
+        );
+        scene.add(bubble);
+        bubbles.push({
+          mesh: bubble,
+          speed: 0.01 + Math.random() * 0.02,
+          wobbleOffset: Math.random() * Math.PI * 2,
+          wobbleSpeed: 1 + Math.random() * 2,
+        });
+      }
+    }
+
     // Create worms
     const worms = [];
     for (let i = 0; i < simulation.wormCount; i++) {
       const group = new THREE.Group();
+      const segments = [];
 
       // Body segments
       const bodyMat = new THREE.MeshLambertMaterial({ color: colors.wormBody });
-      for (let s = 0; s < 4; s++) {
+      for (let s = 0; s < 5; s++) {
         const seg = new THREE.Mesh(
-          new THREE.SphereGeometry(simulation.wormSize * (1 - s * 0.15), 8, 8),
+          new THREE.SphereGeometry(simulation.wormSize * (1 - s * 0.12), 8, 8),
           bodyMat
         );
-        seg.position.z = -s * simulation.wormSize * 1.5;
+        seg.position.z = -s * simulation.wormSize * 1.4;
         group.add(seg);
+        segments.push(seg);
       }
 
       // Random position in tank
@@ -476,8 +513,11 @@ function Simulation3D({ behavior, isPlaying, onReset }) {
       scene.add(group);
       worms.push({
         mesh: group,
+        segments,
         velocity: new THREE.Vector3(0, 0, simulation.wormSpeed),
         sensors: { left: new THREE.Vector3(), right: new THREE.Vector3() },
+        wigglePhase: Math.random() * Math.PI * 2,
+        wiggleSpeed: 3 + Math.random() * 2,
       });
     }
     wormsRef.current = worms;
@@ -667,6 +707,33 @@ function Simulation3D({ behavior, isPlaying, onReset }) {
           if (pos.z > td/2 - margin) { pos.z = td/2 - margin; worm.mesh.rotation.y = -worm.mesh.rotation.y; }
           if (pos.y < 0) pos.y = 0;
           if (pos.y > th - 1) pos.y = th - 1;
+
+          // Worm wiggle animation
+          if (simulation.wormWiggle && worm.segments) {
+            worm.wigglePhase += 0.1 * worm.wiggleSpeed;
+            worm.segments.forEach((seg, idx) => {
+              if (idx > 0) {
+                const wiggle = Math.sin(worm.wigglePhase - idx * 0.8) * 0.04 * idx;
+                seg.position.x = wiggle;
+                seg.position.y = Math.sin(worm.wigglePhase * 0.5 - idx * 0.5) * 0.02 * idx;
+              }
+            });
+          }
+        });
+
+        // Bubble animation
+        bubbles.forEach(bubble => {
+          bubble.mesh.position.y += bubble.speed;
+          const time = Date.now() * 0.001;
+          bubble.mesh.position.x += Math.sin(time * bubble.wobbleSpeed + bubble.wobbleOffset) * 0.002;
+          bubble.mesh.position.z += Math.cos(time * bubble.wobbleSpeed + bubble.wobbleOffset) * 0.002;
+
+          // Reset bubble to bottom when it reaches surface
+          if (bubble.mesh.position.y > th - 0.5) {
+            bubble.mesh.position.y = -0.3;
+            bubble.mesh.position.x = (Math.random() - 0.5) * (tw - 0.5);
+            bubble.mesh.position.z = (Math.random() - 0.5) * (td - 0.5);
+          }
         });
       }
 

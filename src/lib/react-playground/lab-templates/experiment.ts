@@ -146,7 +146,7 @@ Add a description of your experiment here.
 // ╚════════════════════════════════════════════════════════════════════════╝
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Info, RefreshCw, HelpCircle, X } from 'lucide-react';
+import { Info, RefreshCw, HelpCircle, X, RotateCcw } from 'lucide-react';
 
 const ICONS = { info: Info, refresh: RefreshCw, help: HelpCircle };
 
@@ -230,16 +230,52 @@ function TabBar({ activeTab, onTabChange }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// CUSTOM CANVAS CONTENT
-// Edit this component to add your experiment's interactive content
+// INTERACTIVE WIDGET GALLERY
+// This demo shows what's possible - edit it for your experiment!
 // ─────────────────────────────────────────────────────────────────────────
 
-function ExperimentCanvas({ tab }) {
-  const canvasRef = useRef(null);
-  const [clickCount, setClickCount] = useState(0);
+function MiniChart({ data, width = 300, height = 120 }) {
+  if (data.length === 0) return null;
+  const max = Math.max(...data, 1);
+  const points = data.map((v, i) => {
+    const x = (i / Math.max(data.length - 1, 1)) * width;
+    const y = height - (v / max) * (height - 20);
+    return \`\${x},\${y}\`;
+  }).join(' ');
 
-  // Example: A simple interactive demo
-  // Replace this with your actual experiment content
+  return (
+    <svg width={width} height={height} style={{ background: '#0d0d14', borderRadius: '8px' }}>
+      <polyline
+        points={points}
+        fill="none"
+        stroke="#6366f1"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {data.map((v, i) => {
+        const x = (i / Math.max(data.length - 1, 1)) * width;
+        const y = height - (v / max) * (height - 20);
+        return <circle key={i} cx={x} cy={y} r={3} fill="#818cf8" />;
+      })}
+    </svg>
+  );
+}
+
+function ExperimentCanvas({ tab }) {
+  const [value, setValue] = useState(50);
+  const [history, setHistory] = useState([50]);
+
+  const handleSliderChange = (e) => {
+    const newValue = parseInt(e.target.value);
+    setValue(newValue);
+    setHistory(prev => [...prev.slice(-19), newValue]);
+  };
+
+  const handleReset = () => {
+    setValue(50);
+    setHistory([50]);
+  };
 
   return (
     <div style={{
@@ -252,33 +288,77 @@ function ExperimentCanvas({ tab }) {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: '1rem',
+      gap: '1.5rem',
+      padding: '2rem',
     }}>
-      <div style={{ fontSize: '4rem' }}>🔬</div>
-      <h2 style={{ margin: 0, color: '#e0e0e0' }}>Experiment Canvas</h2>
-      <p style={{ color: '#888', textAlign: 'center', maxWidth: '400px' }}>
-        This is a blank canvas for your experiment.
-        Edit the ExperimentCanvas component in the code to add your interactive content.
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <span style={{ fontSize: '2rem' }}>🔬</span>
+        <h2 style={{ margin: 0, color: '#e0e0e0', fontSize: '1.25rem' }}>Interactive Widget Demo</h2>
+      </div>
+
+      <p style={{ color: '#888', textAlign: 'center', margin: 0 }}>
+        Drag the slider to see live updates in the chart:
       </p>
 
-      {/* Example interactive element */}
+      {/* Slider with value display */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', maxWidth: '350px' }}>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={value}
+          onChange={handleSliderChange}
+          style={{
+            flex: 1,
+            height: '8px',
+            borderRadius: '4px',
+            background: \`linear-gradient(to right, #6366f1 \${value}%, #2a2a35 \${value}%)\`,
+            appearance: 'none',
+            cursor: 'pointer',
+          }}
+        />
+        <span style={{
+          fontSize: '2rem',
+          fontWeight: 'bold',
+          color: '#6366f1',
+          minWidth: '60px',
+          textAlign: 'right',
+        }}>
+          {value}
+        </span>
+      </div>
+
+      {/* Chart section */}
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ color: '#666', fontSize: '0.8rem', marginBottom: '0.5rem' }}>
+          Value History (last 20 values)
+        </div>
+        <MiniChart data={history} width={320} height={100} />
+      </div>
+
+      {/* Reset button */}
       <button
-        onClick={() => setClickCount(c => c + 1)}
+        onClick={handleReset}
         style={{
-          padding: '1rem 2rem',
-          fontSize: '1rem',
-          background: '#6366f1',
+          padding: '0.75rem 1.5rem',
+          fontSize: '0.9rem',
+          background: '#374151',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
           cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
         }}
       >
-        Click Me ({clickCount})
+        <RotateCcw size={16} />
+        Reset Chart
       </button>
 
-      <p style={{ color: '#666', fontSize: '0.85rem' }}>
-        Replace this placeholder with your experiment controls
+      <p style={{ color: '#555', fontSize: '0.75rem', textAlign: 'center', maxWidth: '400px' }}>
+        This demo shows how to create interactive controls.
+        Edit the ExperimentCanvas component to build your own experiment!
       </p>
     </div>
   );

@@ -90,6 +90,8 @@ Each connection has a **weight** that determines how much influence one neuron h
     connectionWidth: 2,
     animationSpeed: 300,      // milliseconds per layer
     showWeights: true,        // Show weight values on hover
+    showSignalFlow: true,     // Animated dots on connections
+    pulseOnActivate: true,    // Pulse effect on neurons
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -314,6 +316,9 @@ function NeuralNetworkViz({ onReset }) {
   });
   const [animatingLayers, setAnimatingLayers] = useState(new Set());
   const [hoveredConnection, setHoveredConnection] = useState(null);
+  const [signalFlows, setSignalFlows] = useState([]);
+  const [pulsingNeurons, setPulsingNeurons] = useState([]);
+  const animationFrameRef = useRef(null);
 
   // Calculate positions
   const padding = 80;
@@ -330,9 +335,15 @@ function NeuralNetworkViz({ onReset }) {
     return { x: layerX, y: neuronY };
   };
 
-  // Propagate signal
+  // Propagate signal with visual effects
   const propagateSignal = useCallback((layerIndex, neuronIndex) => {
     const activate = activationFunctions[network.activation] || sigmoid;
+
+    // Trigger pulse effect on clicked neuron
+    if (display.pulseOnActivate) {
+      const pos = getNeuronPos(layerIndex, neuronIndex);
+      setPulsingNeurons(prev => [...prev, { x: pos.x, y: pos.y, id: Date.now() }]);
+    }
 
     // Set input neuron active
     setActivations(prev => {
@@ -346,11 +357,40 @@ function NeuralNetworkViz({ onReset }) {
     let currentLayer = layerIndex;
     const propagateNext = () => {
       if (currentLayer >= layers.length - 1) {
-        // Clear animation state after a delay
         setTimeout(() => {
           setAnimatingLayers(new Set());
+          setSignalFlows([]);
         }, display.animationSpeed);
         return;
+      }
+
+      // Create signal flows for active connections
+      if (display.showSignalFlow) {
+        const newFlows = [];
+        for (let i = 0; i < layers[currentLayer]; i++) {
+          for (let j = 0; j < layers[currentLayer + 1]; j++) {
+            const pos1 = getNeuronPos(currentLayer, i);
+            const pos2 = getNeuronPos(currentLayer + 1, j);
+            newFlows.push({
+              id: \`\${currentLayer}-\${i}-\${j}-\${Date.now()}\`,
+              x1: pos1.x, y1: pos1.y,
+              x2: pos2.x, y2: pos2.y,
+              progress: 0,
+            });
+          }
+        }
+        setSignalFlows(newFlows);
+
+        // Animate the flows
+        let progress = 0;
+        const animateFlows = () => {
+          progress += 0.05;
+          if (progress <= 1) {
+            setSignalFlows(flows => flows.map(f => ({ ...f, progress })));
+            animationFrameRef.current = requestAnimationFrame(animateFlows);
+          }
+        };
+        animateFlows();
       }
 
       setTimeout(() => {
@@ -363,7 +403,14 @@ function NeuralNetworkViz({ onReset }) {
             for (let i = 0; i < layers[currentLayer]; i++) {
               sum += next[currentLayer][i] * weights[currentLayer][i][j];
             }
-            next[currentLayer + 1][j] = activate(sum);
+            const activation = activate(sum);
+            next[currentLayer + 1][j] = activation;
+
+            // Trigger pulse on activated neurons
+            if (display.pulseOnActivate && activation > 0.3) {
+              const pos = getNeuronPos(currentLayer + 1, j);
+              setPulsingNeurons(prev => [...prev, { x: pos.x, y: pos.y, id: Date.now() + j }]);
+            }
           }
 
           return next;
@@ -376,7 +423,7 @@ function NeuralNetworkViz({ onReset }) {
     };
 
     propagateNext();
-  }, [layers, weights, network.activation, display.animationSpeed]);
+  }, [layers, weights, network.activation, display.animationSpeed, display.showSignalFlow, display.pulseOnActivate]);
 
   // Reset handler
   useEffect(() => {
@@ -384,9 +431,24 @@ function NeuralNetworkViz({ onReset }) {
       onReset.current = () => {
         setActivations(layers.map(size => new Array(size).fill(0)));
         setAnimatingLayers(new Set());
+        setSignalFlows([]);
+        setPulsingNeurons([]);
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
       };
     }
   }, [onReset, layers]);
+
+  // Clean up pulses after animation
+  useEffect(() => {
+    if (pulsingNeurons.length > 0) {
+      const timer = setTimeout(() => {
+        setPulsingNeurons([]);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [pulsingNeurons]);
 
   // Clear activations after animation
   useEffect(() => {
@@ -454,6 +516,22 @@ function NeuralNetworkViz({ onReset }) {
             }
           }
           return connections;
+        })}
+
+        {/* Signal flow dots */}
+        {display.showSignalFlow && signalFlows.map(flow => {
+          const x = flow.x1 + (flow.x2 - flow.x1) * flow.progress;
+          const y = flow.y1 + (flow.y2 - flow.y1) * flow.progress;
+          return (
+            <circle
+              key={flow.id}
+              cx={x}
+              cy={y}
+              r={4}
+              fill={colors.connectionActive}
+              opacity={Math.sin(flow.progress * Math.PI)}
+            />
+          );
         })}
 
         {/* Neurons */}
@@ -530,12 +608,41 @@ function NeuralNetworkViz({ onReset }) {
           })
         )}
 
+        {/* Pulse effects */}
+        {display.pulseOnActivate && pulsingNeurons.map(pulse => (
+          <circle
+            key={pulse.id}
+            cx={pulse.x}
+            cy={pulse.y}
+            r={display.neuronRadius}
+            fill="none"
+            stroke={colors.neuronActive}
+            strokeWidth={3}
+            opacity={0}
+            style={{
+              animation: 'pulse 0.6s ease-out forwards',
+            }}
+          />
+        ))}
+
         {/* Layer labels */}
         <text x={padding} y={height - 15} fill={colors.textMuted} fontSize="12" textAnchor="middle">Input</text>
         <text x={width - padding} y={height - 15} fill={colors.textMuted} fontSize="12" textAnchor="middle">Output</text>
         {layers.length > 2 && (
           <text x={width / 2} y={height - 15} fill={colors.textMuted} fontSize="12" textAnchor="middle">Hidden</text>
         )}
+
+        {/* CSS Animation for pulse */}
+        <defs>
+          <style>
+            {\`
+              @keyframes pulse {
+                0% { r: \${display.neuronRadius}; opacity: 0.8; stroke-width: 3; }
+                100% { r: \${display.neuronRadius + 20}; opacity: 0; stroke-width: 1; }
+              }
+            \`}
+          </style>
+        </defs>
       </svg>
 
       <div style={{ marginTop: '1rem', display: 'flex', gap: '2rem', color: '#666', fontSize: '0.8rem' }}>
