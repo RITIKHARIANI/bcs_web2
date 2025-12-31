@@ -107,8 +107,9 @@ and rest near it - appearing to "love" the light.
     tankHeight: 3,          // Y axis (water depth)
 
     // Physics
-    turnSpeed: 0.08,        // How fast worms turn
+    turnSpeed: 0.03,        // How fast worms turn (reduced for smoother motion)
     sensorSpread: 0.3,      // Distance between sensors
+    smoothing: 0.08,        // Rotation smoothing factor (lower = smoother)
 
     // Visual effects
     showBubbles: true,      // Rising bubbles in water
@@ -558,6 +559,8 @@ function Simulation3D({ behavior, isPlaying, onReset }) {
         sensors: { left: new THREE.Vector3(), right: new THREE.Vector3() },
         wigglePhase: Math.random() * Math.PI * 2,
         wiggleSpeed: 3 + Math.random() * 2,
+        targetRotation: group.rotation.y,  // For smooth rotation
+        bobPhase: Math.random() * Math.PI * 2,  // For smooth Y bobbing
       });
     }
     wormsRef.current = worms;
@@ -728,25 +731,45 @@ function Simulation3D({ behavior, isPlaying, onReset }) {
           const leftMotor = evaluateBehavior(behaviorConfig.leftMotor, leftLight, rightLight);
           const rightMotor = evaluateBehavior(behaviorConfig.rightMotor, leftLight, rightLight);
 
-          // Differential steering
+          // Differential steering with smooth rotation
           const avgSpeed = (leftMotor + rightMotor) / 2 * simulation.wormSpeed;
           const turnRate = (rightMotor - leftMotor) * simulation.turnSpeed;
 
-          worm.mesh.rotation.y += turnRate;
+          // Accumulate target rotation and smoothly interpolate
+          worm.targetRotation += turnRate;
+          const smoothing = simulation.smoothing || 0.08;
+          worm.mesh.rotation.y += (worm.targetRotation - worm.mesh.rotation.y) * smoothing;
+
           pos.x += Math.sin(worm.mesh.rotation.y) * avgSpeed;
           pos.z += Math.cos(worm.mesh.rotation.y) * avgSpeed;
 
-          // Simple Y motion (slight bobbing)
-          pos.y += (Math.random() - 0.5) * 0.005;
+          // Smooth Y bobbing (sine wave instead of random noise)
+          worm.bobPhase += 0.02;
+          const targetY = Math.sin(worm.bobPhase) * 0.3 + (th / 2 - 0.5);
+          pos.y += (targetY - pos.y) * 0.02;
 
-          // Boundary collision
-          const margin = 0.3;
-          if (pos.x < -tw/2 + margin) { pos.x = -tw/2 + margin; worm.mesh.rotation.y = Math.PI - worm.mesh.rotation.y; }
-          if (pos.x > tw/2 - margin) { pos.x = tw/2 - margin; worm.mesh.rotation.y = Math.PI - worm.mesh.rotation.y; }
-          if (pos.z < -td/2 + margin) { pos.z = -td/2 + margin; worm.mesh.rotation.y = -worm.mesh.rotation.y; }
-          if (pos.z > td/2 - margin) { pos.z = td/2 - margin; worm.mesh.rotation.y = -worm.mesh.rotation.y; }
-          if (pos.y < 0) pos.y = 0;
-          if (pos.y > th - 1) pos.y = th - 1;
+          // Boundary collision with smooth redirection
+          const margin = 0.4;
+          if (pos.x < -tw/2 + margin) {
+            pos.x = -tw/2 + margin;
+            worm.targetRotation = Math.abs(worm.targetRotation) < Math.PI/2
+              ? Math.PI/4 : Math.PI - Math.PI/4;
+          }
+          if (pos.x > tw/2 - margin) {
+            pos.x = tw/2 - margin;
+            worm.targetRotation = Math.abs(worm.targetRotation) < Math.PI/2
+              ? -Math.PI/4 : -(Math.PI - Math.PI/4);
+          }
+          if (pos.z < -td/2 + margin) {
+            pos.z = -td/2 + margin;
+            worm.targetRotation = worm.targetRotation > 0 ? Math.PI/2 : -Math.PI/2;
+          }
+          if (pos.z > td/2 - margin) {
+            pos.z = td/2 - margin;
+            worm.targetRotation = worm.targetRotation > 0 ? Math.PI - Math.PI/2 : -(Math.PI - Math.PI/2);
+          }
+          if (pos.y < 0.2) pos.y = 0.2;
+          if (pos.y > th - 0.8) pos.y = th - 0.8;
 
           // Worm wiggle animation
           if (simulation.wormWiggle && worm.segments) {
