@@ -151,28 +151,49 @@ and rest near it - appearing to "love" the light.
   },
 
   // ─────────────────────────────────────────────────────────────────────────
-  // COLORS
+  // COLORS - "Deep Ocean Glow" Bioluminescent Theme
   // ─────────────────────────────────────────────────────────────────────────
 
   colors: {
-    // UI
+    // UI - Dark theme with aqua accents
     background: "#0a0a0f",
-    sidebar: "#111118",
-    tabBar: "#1a1a22",
-    tabActive: "#6366f1",
+    sidebar: "#0d1520",
+    tabBar: "#0f1a28",
+    tabActive: "#00CED1",
     text: "#e0e0e0",
-    textMuted: "#888888",
-    border: "#2a2a35",
+    textMuted: "#7aa3b8",
+    border: "#1a3a4a",
 
-    // 3D Scene
-    roomFloor: "#3d3225",
-    roomWalls: "#4a4035",
-    tableTop: "#5c4033",
-    tankGlass: 0x88ccff,
-    water: 0x2288cc,
-    wormBody: "#FF6B35",
-    lampOn: "#FFE066",
-    lampOff: "#333333",
+    // 3D Scene - Deep ocean atmosphere
+    sceneBackground: 0x0a1628,
+    roomFloor: 0x1a2a4a,
+    roomWalls: 0x152238,
+    tableTop: 0x2d4a6a,
+    tankGlass: 0x40e0d0,
+    water: 0x00CED1,
+    waterEmissive: 0x004455,
+
+    // Worms - Bioluminescent rainbow palette
+    wormColors: [
+      0xFF6B6B, // Coral red
+      0x4ECDC4, // Teal
+      0x45B7D1, // Sky blue
+      0x96CEB4, // Seafoam
+      0xFFEAA7, // Warm yellow
+      0xDDA0DD, // Plum
+      0x98D8C8, // Mint
+      0xF7DC6F, // Golden
+      0xBB8FCE, // Lavender
+      0x85C1E9, // Light blue
+    ],
+    wormGlow: 0.3,
+
+    // Lamps - Warm golden glow
+    lampOn: 0xFFA500,
+    lampOff: 0x333344,
+
+    // Bubbles
+    bubbleIridescence: true,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -368,9 +389,9 @@ function Simulation3D({ behavior, isPlaying, onReset }) {
     const { simulation, behaviors, colors } = LAB_CONFIG;
     const behaviorConfig = behaviors[behavior] || behaviors.fear;
 
-    // Scene setup
+    // Scene setup - Deep ocean atmosphere
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a22);
+    scene.background = new THREE.Color(colors.sceneBackground || 0x0a1628);
     sceneRef.current = scene;
 
     // Camera
@@ -385,12 +406,17 @@ function Simulation3D({ behavior, isPlaying, onReset }) {
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // Lighting
-    const ambient = new THREE.AmbientLight(0x404060, 0.5);
+    // Lighting - Ocean-inspired
+    const ambient = new THREE.AmbientLight(0x4080a0, 0.6);
     scene.add(ambient);
-    const directional = new THREE.DirectionalLight(0xffffff, 0.5);
+    const directional = new THREE.DirectionalLight(0xaaccff, 0.5);
     directional.position.set(5, 10, 5);
     scene.add(directional);
+
+    // Underwater glow light (inside tank)
+    const underwaterLight = new THREE.PointLight(0x00ffff, 0.4, 10);
+    underwaterLight.position.set(0, simulation.tankHeight / 2, 0);
+    scene.add(underwaterLight);
 
     // Room - Floor
     const floorGeo = new THREE.PlaneGeometry(20, 20);
@@ -442,26 +468,31 @@ function Simulation3D({ behavior, isPlaying, onReset }) {
       scene.add(mesh);
     });
 
-    // Water
+    // Water - Glowing teal with inner luminosity
     const waterGeo = new THREE.BoxGeometry(tw - 0.2, th - 0.5, td - 0.2);
     const waterMat = new THREE.MeshPhysicalMaterial({
       color: colors.water,
       transparent: true,
-      opacity: 0.4,
-      roughness: 0.2,
+      opacity: 0.35,
+      roughness: 0.1,
+      emissive: colors.waterEmissive || 0x004455,
+      emissiveIntensity: 0.3,
     });
     const water = new THREE.Mesh(waterGeo, waterMat);
     water.position.y = th/2 - 0.6;
     scene.add(water);
 
-    // Create bubbles
+    // Create bubbles - Iridescent rainbow shimmer
     const bubbles = [];
     if (simulation.showBubbles) {
       const bubbleMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         transparent: true,
-        opacity: 0.4,
-        roughness: 0.1,
+        opacity: 0.5,
+        roughness: 0,
+        metalness: colors.bubbleIridescence ? 0.3 : 0,
+        iridescence: colors.bubbleIridescence ? 1 : 0,
+        iridescenceIOR: 1.3,
       });
       for (let i = 0; i < simulation.bubbleCount; i++) {
         const size = 0.03 + Math.random() * 0.05;
@@ -484,14 +515,23 @@ function Simulation3D({ behavior, isPlaying, onReset }) {
       }
     }
 
-    // Create worms
+    // Create worms - Bioluminescent rainbow creatures
     const worms = [];
+    const wormColorPalette = colors.wormColors || [0xFF6B35];
     for (let i = 0; i < simulation.wormCount; i++) {
       const group = new THREE.Group();
       const segments = [];
 
-      // Body segments
-      const bodyMat = new THREE.MeshLambertMaterial({ color: colors.wormBody });
+      // Pick color from rainbow palette for each worm
+      const wormColor = wormColorPalette[i % wormColorPalette.length];
+
+      // Body segments with bioluminescent glow
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: wormColor,
+        emissive: wormColor,
+        emissiveIntensity: colors.wormGlow || 0.25,
+        roughness: 0.4,
+      });
       for (let s = 0; s < 5; s++) {
         const seg = new THREE.Mesh(
           new THREE.SphereGeometry(simulation.wormSize * (1 - s * 0.12), 8, 8),
@@ -534,9 +574,9 @@ function Simulation3D({ behavior, isPlaying, onReset }) {
       bulb.position.y = 0.3;
       group.add(bulb);
 
-      // Stand
+      // Stand - Blue-gray to match ocean theme
       const standGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.3);
-      const standMat = new THREE.MeshLambertMaterial({ color: 0x444444 });
+      const standMat = new THREE.MeshLambertMaterial({ color: 0x3a4a5a });
       const stand = new THREE.Mesh(standGeo, standMat);
       stand.position.y = 0.15;
       group.add(stand);
