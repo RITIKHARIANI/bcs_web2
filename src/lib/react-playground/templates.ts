@@ -3,9 +3,21 @@
  *
  * Pre-built templates for faculty to use as starting points.
  * Includes basic React, THREE.js, and the Braitenberg vehicles simulation.
+ *
+ * Lab Templates: Configuration-driven templates for faculty who know Python but not JS/React.
+ * Faculty edit a simple config object at the top, complex code is hidden below "DO NOT EDIT" line.
  */
 
 import type { PlaygroundTemplate, PlaygroundCategory } from '@/types/react-playground';
+
+// Import lab templates
+import {
+  LAB_TEMPLATES,
+  LAB_SHELL_TEMPLATE,
+  FISH_TANK_LAB_TEMPLATE,
+  NEURAL_NETWORK_LAB_TEMPLATE,
+  EXPERIMENT_TEMPLATE,
+} from './lab-templates';
 
 // Basic React Counter
 export const BASIC_COUNTER_TEMPLATE: PlaygroundTemplate = {
@@ -1370,14 +1382,26 @@ export default function BraitenbergSimulation() {
 `,
 };
 
-// All templates registry
+// All templates registry (includes both basic templates and lab templates)
 export const PLAYGROUND_TEMPLATES: PlaygroundTemplate[] = [
+  // Basic templates
   BASIC_COUNTER_TEMPLATE,
   THREEJS_CUBE_TEMPLATE,
   NEURAL_NETWORK_TEMPLATE,
   DATA_VIZ_TEMPLATE,
   BRAITENBERG_VEHICLES_TEMPLATE,
+  // Lab templates (configuration-driven for faculty)
+  ...LAB_TEMPLATES,
 ];
+
+// Re-export lab templates for direct access
+export {
+  LAB_SHELL_TEMPLATE,
+  FISH_TANK_LAB_TEMPLATE,
+  NEURAL_NETWORK_LAB_TEMPLATE,
+  EXPERIMENT_TEMPLATE,
+  LAB_TEMPLATES,
+};
 
 // Get template by ID
 export const getTemplateById = (id: string): PlaygroundTemplate | undefined => {
