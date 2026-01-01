@@ -178,7 +178,7 @@ export default function PlaygroundsPage() {
               {filteredTemplates.map((template) => (
                 <Link
                   key={template.id}
-                  href={`/playgrounds/builder?template=${template.id}`}
+                  href={`/playgrounds/view/${template.id}`}
                   className="group bg-gray-900 rounded-lg border border-gray-800 hover:border-neural-primary/50 hover:shadow-lg hover:shadow-neural-primary/10 transition-all p-6"
                 >
                   <div className="w-12 h-12 bg-neural-primary/20 rounded-lg flex items-center justify-center mb-4 text-neural-primary">
