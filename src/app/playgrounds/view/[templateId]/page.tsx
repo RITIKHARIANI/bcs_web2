@@ -37,9 +37,9 @@ export default async function PlaygroundViewerPage({ params }: PageProps) {
   const dependencies = arrayToDependencies(template.dependencies || []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex flex-col">
-      {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 bg-gray-900 border-b border-gray-800 shrink-0">
+    <div className="h-screen bg-[#0a0a0f] flex flex-col overflow-hidden">
+      {/* Header - fixed height */}
+      <header className="h-14 flex items-center justify-between px-4 bg-gray-900 border-b border-gray-800 shrink-0">
         <div className="flex items-center gap-4">
           <Link
             href="/playgrounds"
@@ -52,7 +52,7 @@ export default async function PlaygroundViewerPage({ params }: PageProps) {
           <div>
             <h1 className="text-white font-medium">{template.name}</h1>
             {template.description && (
-              <p className="text-sm text-gray-400 truncate max-w-md">{template.description}</p>
+              <p className="text-sm text-gray-400 truncate max-w-md hidden sm:block">{template.description}</p>
             )}
           </div>
         </div>
@@ -64,13 +64,14 @@ export default async function PlaygroundViewerPage({ params }: PageProps) {
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
           >
             <Code className="h-4 w-4" />
-            <span>Edit in Builder</span>
+            <span className="hidden sm:inline">Edit in Builder</span>
+            <span className="sm:hidden">Edit</span>
           </Link>
         )}
       </header>
 
-      {/* Full-screen Preview */}
-      <div className="flex-1 overflow-hidden">
+      {/* Full-screen Preview - takes remaining height */}
+      <div className="flex-1 min-h-0">
         <Suspense
           fallback={
             <div className="h-full flex items-center justify-center">
@@ -85,7 +86,7 @@ export default async function PlaygroundViewerPage({ params }: PageProps) {
             code={template.sourceCode}
             dependencies={dependencies}
             showConsole={true}
-            className="h-full"
+            className="h-full w-full"
           />
         </Suspense>
       </div>
