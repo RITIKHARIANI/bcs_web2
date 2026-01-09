@@ -1405,56 +1405,42 @@ async function seedPlaygrounds() {
   try {
     console.log('🌱 Starting playground template seeding...');
 
-    let created = 0;
-    let updated = 0;
+    let seeded = 0;
 
     for (const template of PLAYGROUND_TEMPLATES) {
-      // Check if it already exists
-      const existing = await prisma.playgrounds.findUnique({
+      // Use upsert to avoid prepared statement issues with PgBouncer
+      await prisma.playgrounds.upsert({
         where: { id: template.id },
+        update: {
+          title: template.name,
+          description: template.description || '',
+          category: template.category,
+          source_code: template.sourceCode,
+          requirements: template.dependencies || [],
+          is_public: true,
+          is_featured: true,
+          is_protected: true,
+          app_type: 'sandpack',
+        },
+        create: {
+          id: template.id,
+          title: template.name,
+          description: template.description || '',
+          category: template.category,
+          source_code: template.sourceCode,
+          requirements: template.dependencies || [],
+          is_public: true,
+          is_featured: true,
+          is_protected: true,
+          app_type: 'sandpack',
+          // Note: created_by is nullable for system-seeded templates
+        },
       });
-
-      if (existing) {
-        // Update existing template
-        await prisma.playgrounds.update({
-          where: { id: template.id },
-          data: {
-            title: template.name,
-            description: template.description || '',
-            category: template.category,
-            source_code: template.sourceCode,
-            requirements: template.dependencies || [],
-            is_public: true,
-            is_featured: true,
-            is_protected: true,
-            app_type: 'sandpack',
-          },
-        });
-        updated++;
-      } else {
-        // Create new template (without created_by since it's system-seeded)
-        await prisma.playgrounds.create({
-          data: {
-            id: template.id,
-            title: template.name,
-            description: template.description || '',
-            category: template.category,
-            source_code: template.sourceCode,
-            requirements: template.dependencies || [],
-            is_public: true,
-            is_featured: true,
-            is_protected: true,
-            app_type: 'sandpack',
-            // Note: created_by is nullable for system-seeded templates
-          },
-        });
-        created++;
-      }
+      seeded++;
     }
 
     console.log(`✅ Playground template seeding complete!`);
-    console.log(`   - Total: ${PLAYGROUND_TEMPLATES.length} templates`);
-    console.log(`   - Created: ${created}, Updated: ${updated}`);
+    console.log(`   - Total: ${PLAYGROUND_TEMPLATES.length} templates seeded`);
 
     await prisma.$disconnect();
     process.exit(0);
