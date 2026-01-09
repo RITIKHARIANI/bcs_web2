@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       requirements,
       template_id,
       is_public,
-      app_type, // 'sandpack' (React/JS) or 'shinylive' (Python)
+      app_type, // 'sandpack' (React/JS)
     } = body;
 
     // Validation

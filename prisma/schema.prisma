@@ -255,12 +255,12 @@ model playground_templates {
   category    String // neural_networks, physics, algorithms, data_viz, etc.
   thumbnail   String?
 
-  // App type (shinylive, pyodide, etc.)
-  app_type String @default("shinylive")
+  // App type
+  app_type String @default("sandpack")
 
-  // Shinylive fields (primary approach)
-  source_code  String?  @db.Text // Full Shiny app.py code
-  requirements String[] @default([]) // Python packages (e.g., ["plotly", "numpy"])
+  // Code fields
+  source_code  String?  @db.Text // React/JS source code
+  requirements String[] @default([]) // npm packages (e.g., ["three", "recharts"])
 
   // Legacy fields (optional, for backward compatibility)
   default_controls      Json? // ControlConfig[] (deprecated)
@@ -308,12 +308,12 @@ model playgrounds {
   featured_at  DateTime?                 // When admin featured it
   featured_by  String?                   // Admin who featured it
 
-  // App type (shinylive, pyodide, etc.)
-  app_type String @default("shinylive")
+  // App type
+  app_type String @default("sandpack")
 
-  // Shinylive fields (primary approach)
-  source_code  String?  @db.Text // Full Shiny app.py code
-  requirements String[] @default([]) // Python packages
+  // Code fields
+  source_code  String?  @db.Text // React/JS source code
+  requirements String[] @default([]) // npm packages
 
   // Template & Configuration
   template_id String?

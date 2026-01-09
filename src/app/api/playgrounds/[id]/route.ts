@@ -129,7 +129,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       sourceCode,
       requirements,
       is_public,
-      app_type, // 'sandpack' (React/JS) or 'shinylive' (Python)
+      app_type, // 'sandpack' (React/JS)
     } = body;
 
     // Update playground
