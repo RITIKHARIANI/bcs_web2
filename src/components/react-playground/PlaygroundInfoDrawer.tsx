@@ -9,7 +9,7 @@
 
 import { useEffect } from 'react';
 import Image from 'next/image';
-import { X, User, Eye, Calendar, Tag, Package } from 'lucide-react';
+import { X, User, Eye, Calendar, Tag, Package, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CATEGORY_LABELS } from '@/types/react-playground';
 
@@ -30,6 +30,7 @@ interface PlaygroundInfoDrawerProps {
   category?: string;
   dependencies?: string[];
   tags?: string[];
+  isFeatured?: boolean;
 }
 
 export default function PlaygroundInfoDrawer({
@@ -42,6 +43,7 @@ export default function PlaygroundInfoDrawer({
   category,
   dependencies,
   tags,
+  isFeatured,
 }: PlaygroundInfoDrawerProps) {
   // Close on Escape key
   useEffect(() => {
@@ -111,9 +113,17 @@ export default function PlaygroundInfoDrawer({
 
         {/* Content */}
         <div className="p-6 overflow-y-auto h-[calc(100%-65px)] space-y-6">
-          {/* Title */}
+          {/* Title + Featured Badge */}
           <div>
-            <h3 className="text-xl font-bold text-white">{title}</h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-xl font-bold text-white">{title}</h3>
+              {isFeatured && (
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs font-medium rounded-full">
+                  <Star className="h-3 w-3 fill-current" />
+                  Featured
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Author */}

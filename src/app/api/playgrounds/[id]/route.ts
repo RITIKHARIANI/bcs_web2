@@ -50,7 +50,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Check access permissions
-    if (!playground.is_public && playground.created_by !== session?.user?.id) {
+    const isAdmin = session?.user?.role === 'admin';
+    const isOwner = playground.created_by === session?.user?.id;
+
+    if (!playground.is_public && !isOwner && !isAdmin) {
       return NextResponse.json(
         { error: 'Access denied' },
         { status: 403 }
@@ -91,11 +94,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Check ownership
+    // Check ownership and permissions
     const existing = await withDatabaseRetry(async () => {
       return prisma.playgrounds.findUnique({
         where: { id },
-        select: { created_by: true },
+        select: { created_by: true, is_protected: true },
       });
     });
 
@@ -106,7 +109,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    if (existing.created_by !== session.user.id) {
+    const isAdmin = session.user.role === 'admin';
+    const isOwner = existing.created_by === session.user.id;
+
+    // Only owner or admin can edit
+    if (!isOwner && !isAdmin) {
       return NextResponse.json(
         { error: 'Access denied' },
         { status: 403 }
@@ -177,11 +184,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Check ownership
+    // Check ownership and permissions
     const existing = await withDatabaseRetry(async () => {
       return prisma.playgrounds.findUnique({
         where: { id },
-        select: { created_by: true },
+        select: { created_by: true, is_protected: true },
       });
     });
 
@@ -192,9 +199,21 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    if (existing.created_by !== session.user.id) {
+    const isAdmin = session.user.role === 'admin';
+    const isOwner = existing.created_by === session.user.id;
+
+    // Only owner or admin can delete
+    if (!isOwner && !isAdmin) {
       return NextResponse.json(
         { error: 'Access denied' },
+        { status: 403 }
+      );
+    }
+
+    // Protected playgrounds cannot be deleted (even by admin, use unprotect first)
+    if (existing.is_protected) {
+      return NextResponse.json(
+        { error: 'Cannot delete protected playground. Remove protection first.' },
         { status: 403 }
       );
     }

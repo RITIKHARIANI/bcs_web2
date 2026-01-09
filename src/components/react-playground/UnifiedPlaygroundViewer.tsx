@@ -10,7 +10,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { ArrowLeft, Info, Code } from 'lucide-react';
+import { ArrowLeft, Info, Code, Star } from 'lucide-react';
 import PlaygroundInfoDrawer from './PlaygroundInfoDrawer';
 
 // Lazy load the preview component (Sandpack doesn't support SSR)
@@ -53,6 +53,10 @@ export interface UnifiedPlaygroundViewerProps {
   // Access control
   canEdit?: boolean;
   editUrl?: string;
+
+  // Status flags
+  isFeatured?: boolean;
+  isProtected?: boolean;
 }
 
 export default function UnifiedPlaygroundViewer({
@@ -67,11 +71,13 @@ export default function UnifiedPlaygroundViewer({
   requirementsList,
   canEdit,
   editUrl,
+  isFeatured,
+  isProtected,
 }: UnifiedPlaygroundViewerProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Check if we have any metadata to show
-  const hasMetadata = description || author || stats || category || tags?.length || requirementsList?.length;
+  const hasMetadata = description || author || stats || category || tags?.length || requirementsList?.length || isFeatured;
 
   return (
     <div className="h-screen bg-[#0a0a0f] flex flex-col overflow-hidden">
@@ -88,6 +94,12 @@ export default function UnifiedPlaygroundViewer({
           </Link>
           <div className="w-px h-5 bg-gray-700 shrink-0" />
           <h1 className="text-white font-medium truncate">{title}</h1>
+          {isFeatured && (
+            <span className="flex items-center gap-1 px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs font-medium rounded-full shrink-0">
+              <Star className="h-3 w-3 fill-current" />
+              Featured
+            </span>
+          )}
         </div>
 
         {/* Right: Info + Edit */}
@@ -135,6 +147,7 @@ export default function UnifiedPlaygroundViewer({
         category={category}
         tags={tags}
         dependencies={requirementsList}
+        isFeatured={isFeatured}
       />
     </div>
   );

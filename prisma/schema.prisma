@@ -302,6 +302,12 @@ model playgrounds {
   is_public       Boolean @default(false)
   share_url       String  @unique @default(cuid())
 
+  // Featured & Protection (for unified template system)
+  is_featured  Boolean   @default(false) // Shows in Featured section
+  is_protected Boolean   @default(false) // Core content, can't be deleted
+  featured_at  DateTime?                 // When admin featured it
+  featured_by  String?                   // Admin who featured it
+
   // App type (shinylive, pyodide, etc.)
   app_type String @default("shinylive")
 
@@ -337,6 +343,7 @@ model playgrounds {
   @@index([template_id])
   @@index([category])
   @@index([is_public])
+  @@index([is_featured])
   @@index([share_url])
   @@index([app_type])
 }
