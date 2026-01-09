@@ -297,7 +297,7 @@ model playgrounds {
   category    String
 
   // Ownership & Permissions
-  created_by      String
+  created_by      String? // Nullable for system-seeded templates
   organization_id String?
   is_public       Boolean @default(false)
   share_url       String  @unique @default(cuid())
@@ -336,7 +336,7 @@ model playgrounds {
   updated_at DateTime @updatedAt
 
   // Relations
-  author   users                 @relation(fields: [created_by], references: [id], onDelete: Cascade)
+  author   users?                @relation(fields: [created_by], references: [id], onDelete: SetNull)
   template playground_templates? @relation(fields: [template_id], references: [id], onDelete: SetNull)
 
   @@index([created_by])

@@ -16,7 +16,8 @@
     "db:migrate:deploy": "npx prisma migrate deploy",
     "db:generate": "npx prisma generate",
     "seed:achievements": "npx tsx scripts/seed-achievements.ts",
-    "vercel:build": "prisma generate && prisma migrate deploy && npm run seed:achievements && next build",
+    "seed:playgrounds": "npx tsx scripts/seed-playgrounds.ts",
+    "vercel:build": "prisma generate && prisma migrate deploy && npm run seed:achievements && npm run seed:playgrounds && next build",
     "vercel:install": "npm install --legacy-peer-deps",
     "local:setup": "npm run db:generate && npm run db:push && npm run dev"
   },

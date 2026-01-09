@@ -99,11 +99,15 @@ export default async function PlaygroundPage({ params }: PageProps) {
         sourceCode={playground.source_code || ''}
         dependencies={arrayToDependencies(playground.requirements || [])}
         description={playground.description || undefined}
-        author={{
-          name: playground.author.name,
-          avatar: playground.author.avatar_url || undefined,
-          university: playground.author.university || undefined,
-        }}
+        author={
+          playground.author
+            ? {
+                name: playground.author.name,
+                avatar: playground.author.avatar_url || undefined,
+                university: playground.author.university || undefined,
+              }
+            : undefined
+        }
         stats={{
           viewCount: playground.view_count,
           createdAt: playground.created_at,
