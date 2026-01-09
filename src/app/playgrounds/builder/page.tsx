@@ -89,10 +89,26 @@ function PlaygroundBuilderContent() {
 
   // Load existing playground if editing
   useEffect(() => {
-    if (editId) {
+    if (editId && session?.user) {
       fetch(`/api/playgrounds/${editId}`)
         .then((res) => res.json())
         .then((data) => {
+          if (data.error) {
+            alert(data.error);
+            router.push('/playgrounds');
+            return;
+          }
+
+          // Check if user has permission to edit
+          const isOwner = data.created_by === session.user.id;
+          const isAdmin = session.user.role === 'admin';
+
+          if (!isOwner && !isAdmin) {
+            alert('You do not have permission to edit this playground');
+            router.push(`/playgrounds/${editId}`);
+            return;
+          }
+
           setExistingPlayground(data);
           setLoading(false);
         })
@@ -102,7 +118,7 @@ function PlaygroundBuilderContent() {
           setLoading(false);
         });
     }
-  }, [editId]);
+  }, [editId, session?.user, router]);
 
   // Get template if specified
   const template = templateId ? getTemplateById(templateId) : null;
