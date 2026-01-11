@@ -31,7 +31,6 @@ import {
   User,
 } from 'lucide-react';
 import { Header } from '@/components/Header';
-import { PLAYGROUND_TEMPLATES } from '@/lib/react-playground/templates';
 import { PlaygroundCategory, CATEGORY_LABELS } from '@/types/react-playground';
 
 type TabType = 'all' | 'featured' | 'community' | 'my-playgrounds';
@@ -156,36 +155,6 @@ export default function PlaygroundsPage() {
       });
   }, [isLoggedIn, activeTab, session?.user?.id]);
 
-  // Fallback: Get featured templates from hardcoded list if DB is empty
-  const hardcodedTemplates = PLAYGROUND_TEMPLATES.filter((template) => {
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const matches =
-        template.name.toLowerCase().includes(query) ||
-        template.description.toLowerCase().includes(query) ||
-        template.tags.some((tag) => tag.toLowerCase().includes(query));
-      if (!matches) return false;
-    }
-    if (activeFilter !== 'all' && template.category !== activeFilter) {
-      return false;
-    }
-    return true;
-  });
-
-  // Use DB featured if available, otherwise fallback to hardcoded
-  const displayFeatured =
-    featuredPlaygrounds.length > 0
-      ? featuredPlaygrounds
-      : hardcodedTemplates.map((t) => ({
-          id: t.id,
-          title: t.name,
-          description: t.description,
-          category: t.category,
-          view_count: 0,
-          created_at: new Date().toISOString(),
-          is_featured: true,
-        }));
-
   // Filter by search query
   const filterBySearch = (items: Playground[]) => {
     if (!searchQuery) return items;
@@ -197,7 +166,7 @@ export default function PlaygroundsPage() {
     );
   };
 
-  const filteredFeatured = filterBySearch(displayFeatured);
+  const filteredFeatured = filterBySearch(featuredPlaygrounds);
   const filteredCommunity = filterBySearch(communityPlaygrounds);
   const filteredMine = filterBySearch(myPlaygrounds);
 

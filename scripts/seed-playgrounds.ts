@@ -1426,24 +1426,25 @@ async function seedPlaygrounds() {
   try {
     console.log('🌱 Starting playground template seeding...');
 
-    let seeded = 0;
+    let created = 0;
+    let skipped = 0;
 
     for (const template of PLAYGROUND_TEMPLATES) {
-      // Use upsert to avoid prepared statement issues with PgBouncer
-      await prisma.playgrounds.upsert({
+      // Check if template already exists - if so, skip (don't overwrite user edits)
+      const existing = await prisma.playgrounds.findUnique({
         where: { id: template.id },
-        update: {
-          title: template.name,
-          description: template.description || '',
-          category: template.category,
-          source_code: template.sourceCode,
-          requirements: template.dependencies || [],
-          is_public: true,
-          is_featured: true,
-          is_protected: true,
-          app_type: 'sandpack',
-        },
-        create: {
+        select: { id: true },
+      });
+
+      if (existing) {
+        console.log(`   ⏭️  Skipping "${template.name}" (already exists)`);
+        skipped++;
+        continue;
+      }
+
+      // Create new template
+      await prisma.playgrounds.create({
+        data: {
           id: template.id,
           title: template.name,
           description: template.description || '',
@@ -1457,11 +1458,13 @@ async function seedPlaygrounds() {
           // Note: created_by is nullable for system-seeded templates
         },
       });
-      seeded++;
+      console.log(`   ✅ Created "${template.name}"`);
+      created++;
     }
 
-    console.log(`✅ Playground template seeding complete!`);
-    console.log(`   - Total: ${PLAYGROUND_TEMPLATES.length} templates seeded`);
+    console.log(`\n✅ Playground template seeding complete!`);
+    console.log(`   - Created: ${created} new templates`);
+    console.log(`   - Skipped: ${skipped} existing templates`);
 
     await prisma.$disconnect();
     process.exit(0);
