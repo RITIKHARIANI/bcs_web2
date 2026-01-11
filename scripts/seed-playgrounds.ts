@@ -1420,6 +1420,457 @@ export default function ExperimentLab() {
   );
 }`,
   },
+  // ============ CLIENT PLAYGROUNDS ============
+  {
+    id: 'client-vehicles-demo',
+    name: 'Braitenberg Vehicles 3D Lab',
+    description: 'Interactive 3D simulation with fish tank, draggable lamps, and nematodes',
+    category: 'simulations',
+    tags: ['3d', 'three.js', 'braitenberg', 'simulation', 'client'],
+    dependencies: ['react', 'react-dom', 'three', '@react-three/fiber', '@react-three/drei'],
+    sourceCode: `import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import * as THREE from 'three';
+
+function MobileWarning({ onContinue }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: '#0a0a0f', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', padding: '2rem', textAlign: 'center', color: 'white', fontFamily: 'system-ui' }}>
+      <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🖥️</div>
+      <h2>Desktop Recommended</h2>
+      <p style={{ color: '#888', marginBottom: '2rem', maxWidth: 400 }}>This 3D simulation is optimized for desktop or tablet.</p>
+      <button onClick={onContinue} style={{ padding: '12px 24px', background: '#6366f1', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Continue Anyway</button>
+    </div>
+  );
+}
+
+function Room() {
+  return (
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow><planeGeometry args={[20, 20]} /><meshStandardMaterial color="#1a1a2a" /></mesh>
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 8, 0]}><planeGeometry args={[20, 20]} /><meshStandardMaterial color="#2a2a3a" side={THREE.DoubleSide} /></mesh>
+      {[[0, 4, -10, 0], [0, 4, 10, Math.PI], [-10, 4, 0, Math.PI/2], [10, 4, 0, -Math.PI/2]].map(([x, y, z, r], i) => (
+        <mesh key={i} position={[x, y, z]} rotation={[0, r, 0]}><planeGeometry args={[20, 8]} /><meshStandardMaterial color="#2a2a3a" side={THREE.DoubleSide} /></mesh>
+      ))}
+    </group>
+  );
+}
+
+function Table() {
+  return <mesh position={[0, 1.5, 0]} castShadow receiveShadow><boxGeometry args={[6, 0.3, 4]} /><meshStandardMaterial color="#4a3728" /></mesh>;
+}
+
+function FishTank({ children }) {
+  return (
+    <group position={[0, 2.4, 0]}>
+      {[[0, 0.75, 1.6, 5, 1.5, 0.05], [0, 0.75, -1.6, 5, 1.5, 0.05], [2.45, 0.75, 0, 0.05, 1.5, 3.2], [-2.45, 0.75, 0, 0.05, 1.5, 3.2]].map(([x, y, z, w, h, d], i) => (
+        <mesh key={i} position={[x, y, z]}><boxGeometry args={[w, h, d]} /><meshPhysicalMaterial color="#88ccff" transparent opacity={0.3} transmission={0.9} /></mesh>
+      ))}
+      <mesh position={[0, 0.5, 0]}><boxGeometry args={[4.8, 1, 3]} /><meshStandardMaterial color="#1a4a6a" transparent opacity={0.4} /></mesh>
+      <mesh position={[0, 0, 0]}><boxGeometry args={[5, 0.1, 3.2]} /><meshStandardMaterial color="#2a5a4a" /></mesh>
+      {children}
+    </group>
+  );
+}
+
+function Nematode({ initialPosition, behaviorType, isPaused }) {
+  const ref = useRef();
+  const vel = useRef(new THREE.Vector3((Math.random()-0.5)*0.02, (Math.random()-0.5)*0.01, (Math.random()-0.5)*0.02));
+  useFrame((state, delta) => {
+    if (!ref.current || isPaused) return;
+    const pos = ref.current.position;
+    const t = state.clock.elapsedTime;
+    if (behaviorType === 1) { vel.current.x += Math.sin(t * 2 + pos.z) * 0.001; vel.current.z += Math.cos(t * 1.5 + pos.x) * 0.001; }
+    else { vel.current.x += (Math.random() - 0.5) * 0.002; vel.current.z += (Math.random() - 0.5) * 0.002; }
+    vel.current.clampLength(0, 0.03);
+    pos.add(vel.current.clone().multiplyScalar(delta * 60));
+    if (pos.x > 2.2) { pos.x = 2.2; vel.current.x *= -1; } if (pos.x < -2.2) { pos.x = -2.2; vel.current.x *= -1; }
+    if (pos.z > 1.4) { pos.z = 1.4; vel.current.z *= -1; } if (pos.z < -1.4) { pos.z = -1.4; vel.current.z *= -1; }
+    if (pos.y > 1.3) { pos.y = 1.3; vel.current.y *= -1; } if (pos.y < 0.2) { pos.y = 0.2; vel.current.y *= -1; }
+    ref.current.lookAt(pos.clone().add(vel.current));
+  });
+  return <mesh ref={ref} position={initialPosition} castShadow><capsuleGeometry args={[0.08, 0.4, 8, 16]} /><meshStandardMaterial color={behaviorType === 1 ? '#ff9999' : '#99ff99'} /></mesh>;
+}
+
+function Lamp({ position, isOn, onToggle }) {
+  return (
+    <group position={position} onDoubleClick={onToggle}>
+      <mesh position={[0, 0.05, 0]} castShadow><cylinderGeometry args={[0.3, 0.35, 0.1, 16]} /><meshStandardMaterial color="#333" /></mesh>
+      <mesh position={[0, 0.6, 0]} castShadow><cylinderGeometry args={[0.03, 0.03, 1, 8]} /><meshStandardMaterial color="#444" /></mesh>
+      <mesh position={[0, 1.2, 0]}><sphereGeometry args={[0.15, 16, 16]} /><meshStandardMaterial color={isOn ? '#ffff88' : '#666'} emissive={isOn ? '#ffaa00' : '#000'} emissiveIntensity={isOn ? 0.5 : 0} /></mesh>
+      {isOn && <pointLight position={[0, 1.2, 0]} intensity={2} distance={8} color="#ffdd88" />}
+    </group>
+  );
+}
+
+function Scene({ behaviorType, isPaused, lamps, onLampToggle }) {
+  const positions = useMemo(() => Array.from({ length: 8 }, () => [(Math.random() - 0.5) * 4, 0.3 + Math.random() * 0.8, (Math.random() - 0.5) * 2.5]), []);
+  return (
+    <>
+      <ambientLight intensity={0.3} /><directionalLight position={[10, 15, 10]} intensity={0.5} />
+      <Room /><Table />
+      <FishTank>{positions.map((pos, i) => <Nematode key={i} initialPosition={pos} behaviorType={behaviorType} isPaused={isPaused} />)}</FishTank>
+      {lamps.map((lamp, i) => <Lamp key={i} position={lamp.position} isOn={lamp.isOn} onToggle={() => onLampToggle(i)} />)}
+      <OrbitControls makeDefault minDistance={5} maxDistance={25} />
+    </>
+  );
+}
+
+function LabDescription() {
+  return (
+    <div style={{ padding: '2rem', color: 'white', maxWidth: 800, margin: '0 auto', fontFamily: 'system-ui' }}>
+      <h1 style={{ color: '#6366f1' }}>Braitenberg Vehicles 3D Lab</h1>
+      <p style={{ lineHeight: 1.8, marginBottom: '1.5rem' }}>Welcome to the Braitenberg Vehicles laboratory. Watch emergent behavior from simple sensor-motor connections.</p>
+      <h2 style={{ color: '#a5b4fc' }}>Instructions</h2>
+      <ul style={{ lineHeight: 2, color: '#ccc' }}>
+        <li><strong>Camera:</strong> Click and drag to orbit, scroll to zoom</li>
+        <li><strong>Lamps:</strong> Double-click to toggle on/off</li>
+        <li><strong>Nematodes:</strong> Watch how they move in the tank</li>
+      </ul>
+    </div>
+  );
+}
+
+function VehicleTab({ behaviorType, tabState, setTabState }) {
+  const [isPaused, setIsPaused] = useState(tabState?.isPaused || false);
+  const [lamps, setLamps] = useState(tabState?.lamps || [{ position: [-3, 0, -3], isOn: false }, { position: [3, 0, 3], isOn: true }]);
+  useEffect(() => { setTabState({ isPaused, lamps }); }, [isPaused, lamps]);
+  const handleReset = () => { setIsPaused(false); setLamps([{ position: [-3, 0, -3], isOn: false }, { position: [3, 0, 3], isOn: true }]); };
+  const handleLampToggle = (i) => { setLamps(prev => prev.map((l, idx) => idx === i ? { ...l, isOn: !l.isOn } : l)); };
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ height: 50, background: '#1a1a2e', borderBottom: '1px solid #333', display: 'flex', alignItems: 'center', padding: '0 1rem', gap: '0.5rem' }}>
+        <button onClick={() => setIsPaused(!isPaused)} style={{ padding: '8px 16px', background: isPaused ? '#22c55e' : '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{isPaused ? '▶ Start' : '⏸ Pause'}</button>
+        <button onClick={handleReset} style={{ padding: '8px 16px', background: '#333', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>↺ Reset</button>
+        <span style={{ color: '#888', marginLeft: 'auto' }}>Vehicle {behaviorType}: {behaviorType === 1 ? 'Sinusoidal' : 'Erratic'}</span>
+      </div>
+      <div style={{ flex: 1 }}><Canvas shadows camera={{ position: [12, 10, 12], fov: 50 }}><Scene behaviorType={behaviorType} isPaused={isPaused} lamps={lamps} onLampToggle={handleLampToggle} /></Canvas></div>
+    </div>
+  );
+}
+
+function AppShell({ tabs, leftMenuButtons }) {
+  const [activeTab, setActiveTab] = useState(0);
+  const [tabStates, setTabStates] = useState({});
+  return (
+    <div style={{ display: 'flex', height: '100vh', background: '#0a0a0f', fontFamily: 'system-ui' }}>
+      <div style={{ width: 30, background: '#0f0f1a', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 8 }}>
+        {leftMenuButtons.map(btn => <button key={btn.id} onClick={btn.onClick} title={btn.title} style={{ width: 24, height: 24, background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', marginBottom: 8 }}>{btn.icon}</button>)}
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', background: '#0f0f1a', borderBottom: '1px solid #222' }}>
+          {tabs.map((tab, i) => <button key={tab.id} onClick={() => setActiveTab(i)} style={{ padding: '12px 20px', background: activeTab === i ? '#1a1a2e' : 'transparent', color: activeTab === i ? '#fff' : '#666', border: 'none', borderBottom: activeTab === i ? '2px solid #6366f1' : '2px solid transparent', cursor: 'pointer' }}>{tab.label}</button>)}
+        </div>
+        <div style={{ flex: 1, overflow: 'auto' }}>{tabs[activeTab].render(tabStates[tabs[activeTab].id], (s) => setTabStates(prev => ({ ...prev, [tabs[activeTab].id]: s })))}</div>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [showMobile, setShowMobile] = useState(false);
+  const [bypass, setBypass] = useState(false);
+  useEffect(() => { setShowMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768); }, []);
+  if (showMobile && !bypass) return <MobileWarning onContinue={() => setBypass(true)} />;
+  const tabs = [
+    { id: 'desc', label: 'Lab Description', render: () => <LabDescription /> },
+    { id: 'v1', label: 'Vehicle 1', render: (s, set) => <VehicleTab behaviorType={1} tabState={s} setTabState={set} /> },
+    { id: 'v2', label: 'Vehicle 2', render: (s, set) => <VehicleTab behaviorType={2} tabState={s} setTabState={set} /> },
+  ];
+  const leftMenuButtons = [
+    { id: 'info', icon: 'ℹ', title: 'Info', onClick: () => { const w = window.open('', '_blank'); w.document.write('<h1>Braitenberg Vehicles Demo</h1><p>A 3D simulation of emergent behavior.</p>'); } },
+    { id: 'reset', icon: '↺', title: 'Reset', onClick: () => window.confirm('Reset all simulations?') && window.location.reload() },
+  ];
+  return <AppShell tabs={tabs} leftMenuButtons={leftMenuButtons} />;
+}`,
+  },
+  {
+    id: 'client-neural-network',
+    name: 'Neural Network Simulator',
+    description: 'Interactive neural network visualization with adjustable layers',
+    category: 'neural_networks',
+    tags: ['neural network', 'visualization', 'educational', 'client'],
+    dependencies: ['react', 'react-dom'],
+    sourceCode: `import React, { useState, useEffect } from 'react';
+
+function MobileWarning({ onContinue }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: '#0a0a0f', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', padding: '2rem', textAlign: 'center', color: 'white', fontFamily: 'system-ui' }}>
+      <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🖥️</div>
+      <h2>Desktop Recommended</h2>
+      <p style={{ color: '#888', marginBottom: '2rem' }}>This simulation is optimized for desktop or tablet.</p>
+      <button onClick={onContinue} style={{ padding: '12px 24px', background: '#6366f1', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Continue Anyway</button>
+    </div>
+  );
+}
+
+function NetworkViz({ layers, activations, onNeuronClick }) {
+  const width = 700, height = 400, layerSpacing = width / (layers.length + 1);
+  const getNeuronY = (li, ni) => { const spacing = Math.min(50, (height - 60) / layers[li]); return height / 2 - ((layers[li] - 1) * spacing) / 2 + ni * spacing; };
+  return (
+    <svg width={width} height={height} style={{ background: '#1a1a2e', borderRadius: 8 }}>
+      {layers.slice(0, -1).map((size, li) => Array.from({ length: size }).flatMap((_, i) => Array.from({ length: layers[li + 1] }).map((_, j) => (
+        <line key={\`\${li}-\${i}-\${j}\`} x1={(li + 1) * layerSpacing} y1={getNeuronY(li, i)} x2={(li + 2) * layerSpacing} y2={getNeuronY(li + 1, j)} stroke={\`rgba(99, 102, 241, \${0.1 + (activations[li]?.[i] || 0) * 0.5})\`} strokeWidth={1 + (activations[li]?.[i] || 0) * 2} />
+      ))))}
+      {layers.map((size, li) => Array.from({ length: size }).map((_, ni) => {
+        const act = activations[li]?.[ni] || 0;
+        return (
+          <g key={\`\${li}-\${ni}\`} onClick={() => onNeuronClick(li, ni)} style={{ cursor: 'pointer' }}>
+            <circle cx={(li + 1) * layerSpacing} cy={getNeuronY(li, ni)} r={15} fill={\`hsl(240, \${50 + act * 30}%, \${30 + act * 40}%)\`} stroke="#6366f1" strokeWidth={2} />
+            <text x={(li + 1) * layerSpacing} y={getNeuronY(li, ni) + 4} fill="white" fontSize="10" textAnchor="middle">{act.toFixed(1)}</text>
+          </g>
+        );
+      }))}
+      {['Input', ...layers.slice(1, -1).map((_, i) => \`Hidden \${i + 1}\`), 'Output'].map((label, i) => <text key={label} x={(i + 1) * layerSpacing} y={height - 10} fill="#888" fontSize="12" textAnchor="middle">{label}</text>)}
+    </svg>
+  );
+}
+
+function IntroTab() {
+  return (
+    <div style={{ padding: '2rem', color: 'white', maxWidth: 800, margin: '0 auto' }}>
+      <h1 style={{ color: '#6366f1' }}>Neural Network Simulator</h1>
+      <p style={{ lineHeight: 1.8, color: '#ccc' }}>Neural networks are computational models inspired by the brain.</p>
+      <h2 style={{ color: '#a5b4fc', marginTop: '2rem' }}>Key Concepts</h2>
+      <ul style={{ lineHeight: 2, color: '#ccc' }}>
+        <li><strong>Neurons:</strong> Basic units that process information</li>
+        <li><strong>Weights:</strong> Connection strengths</li>
+        <li><strong>Activation:</strong> How strongly a neuron fires</li>
+        <li><strong>Layers:</strong> Input, hidden, and output</li>
+      </ul>
+    </div>
+  );
+}
+
+function BuildTab({ tabState, setTabState }) {
+  const [layers, setLayers] = useState(tabState?.layers || [3, 4, 4, 2]);
+  useEffect(() => { setTabState({ layers }); }, [layers]);
+  const updateLayer = (i, delta) => { const newLayers = [...layers]; newLayers[i] = Math.max(1, Math.min(8, newLayers[i] + delta)); setLayers(newLayers); };
+  return (
+    <div style={{ padding: '2rem', color: 'white' }}>
+      <h2>Build Your Network</h2>
+      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+        <div>
+          {layers.map((size, i) => (
+            <div key={i} style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ width: 80 }}>{i === 0 ? 'Input' : i === layers.length - 1 ? 'Output' : \`Hidden \${i}\`}:</span>
+              <button onClick={() => updateLayer(i, -1)} style={{ padding: '4px 12px' }}>-</button>
+              <span style={{ width: 30, textAlign: 'center' }}>{size}</span>
+              <button onClick={() => updateLayer(i, 1)} style={{ padding: '4px 12px' }}>+</button>
+            </div>
+          ))}
+          <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+            <button onClick={() => layers.length < 6 && setLayers([...layers.slice(0, -1), 4, layers[layers.length - 1]])} style={{ padding: '8px 16px' }}>+ Add Layer</button>
+            <button onClick={() => layers.length > 2 && setLayers([...layers.slice(0, -2), layers[layers.length - 1]])} style={{ padding: '8px 16px' }}>- Remove</button>
+          </div>
+        </div>
+        <div><h3 style={{ color: '#a5b4fc', marginBottom: '1rem' }}>Preview</h3><NetworkViz layers={layers} activations={[]} onNeuronClick={() => {}} /></div>
+      </div>
+    </div>
+  );
+}
+
+function TrainTab({ tabState }) {
+  const layers = tabState?.layers || [3, 4, 4, 2];
+  const [activations, setActivations] = useState([]);
+  const [isRunning, setIsRunning] = useState(false);
+  useEffect(() => { if (!isRunning) return; const interval = setInterval(() => { setActivations(layers.map(count => Array.from({ length: count }, () => Math.random()))); }, 500); return () => clearInterval(interval); }, [isRunning, layers]);
+  return (
+    <div style={{ padding: '2rem', color: 'white' }}>
+      <h2>Train & Visualize</h2>
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+        <button onClick={() => setIsRunning(!isRunning)} style={{ padding: '8px 16px', background: isRunning ? '#ef4444' : '#22c55e', color: 'white', border: 'none', borderRadius: 4 }}>{isRunning ? 'Stop' : 'Start'}</button>
+        <button onClick={() => setActivations([])} style={{ padding: '8px 16px' }}>Clear</button>
+      </div>
+      <p style={{ color: '#888', marginBottom: '1rem' }}>Click neurons to see signal propagation.</p>
+      <NetworkViz layers={layers} activations={activations} onNeuronClick={(li, ni) => { setActivations(layers.map((c, l) => Array.from({ length: c }, (_, n) => l === li && n === ni ? 1 : l > li ? Math.random() * 0.8 : 0))); }} />
+    </div>
+  );
+}
+
+function AppShell({ tabs, leftMenuButtons }) {
+  const [activeTab, setActiveTab] = useState(0);
+  const [tabStates, setTabStates] = useState({});
+  return (
+    <div style={{ display: 'flex', height: '100vh', background: '#0a0a0f', fontFamily: 'system-ui' }}>
+      <div style={{ width: 30, background: '#0f0f1a', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 8 }}>
+        {leftMenuButtons.map(btn => <button key={btn.id} onClick={btn.onClick} title={btn.title} style={{ width: 24, height: 24, background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', marginBottom: 8 }}>{btn.icon}</button>)}
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', background: '#0f0f1a', borderBottom: '1px solid #222' }}>
+          {tabs.map((tab, i) => <button key={tab.id} onClick={() => setActiveTab(i)} style={{ padding: '12px 20px', background: activeTab === i ? '#1a1a2e' : 'transparent', color: activeTab === i ? '#fff' : '#666', border: 'none', borderBottom: activeTab === i ? '2px solid #6366f1' : '2px solid transparent', cursor: 'pointer' }}>{tab.label}</button>)}
+        </div>
+        <div style={{ flex: 1, overflow: 'auto' }}>{tabs[activeTab].render(tabStates, (s) => setTabStates(prev => ({ ...prev, [tabs[activeTab].id]: { ...prev[tabs[activeTab].id], ...s } })))}</div>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [showMobile, setShowMobile] = useState(false);
+  const [bypass, setBypass] = useState(false);
+  useEffect(() => { setShowMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768); }, []);
+  if (showMobile && !bypass) return <MobileWarning onContinue={() => setBypass(true)} />;
+  const tabs = [
+    { id: 'intro', label: 'Introduction', render: () => <IntroTab /> },
+    { id: 'build', label: 'Build Network', render: (states, setState) => <BuildTab tabState={states?.build} setTabState={(s) => setState({ build: s })} /> },
+    { id: 'train', label: 'Train & Visualize', render: (states) => <TrainTab tabState={states?.build} /> },
+  ];
+  const leftMenuButtons = [
+    { id: 'info', icon: 'ℹ', title: 'Info', onClick: () => alert('Neural Network Simulator') },
+    { id: 'reset', icon: '↺', title: 'Reset', onClick: () => window.confirm('Reset?') && window.location.reload() },
+  ];
+  return <AppShell tabs={tabs} leftMenuButtons={leftMenuButtons} />;
+}`,
+  },
+  {
+    id: 'client-experiment',
+    name: 'Experiment Lab',
+    description: 'A/B testing simulation with statistical analysis',
+    category: 'statistics',
+    tags: ['statistics', 'a/b testing', 'experiment', 'client'],
+    dependencies: ['react', 'react-dom'],
+    sourceCode: `import React, { useState, useEffect } from 'react';
+
+function MobileWarning({ onContinue }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: '#0a0a0f', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', padding: '2rem', textAlign: 'center', color: 'white', fontFamily: 'system-ui' }}>
+      <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🖥️</div>
+      <h2>Desktop Recommended</h2>
+      <p style={{ color: '#888', marginBottom: '2rem' }}>This simulation is optimized for desktop.</p>
+      <button onClick={onContinue} style={{ padding: '12px 24px', background: '#6366f1', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Continue Anyway</button>
+    </div>
+  );
+}
+
+function normalCDF(x) {
+  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+  const sign = x < 0 ? -1 : 1; x = Math.abs(x) / Math.sqrt(2);
+  const t = 1.0 / (1.0 + p * x);
+  const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return 0.5 * (1.0 + sign * y);
+}
+
+function SetupTab({ tabState, setTabState }) {
+  const [controlRate, setControlRate] = useState(tabState?.controlRate || 0.10);
+  const [treatmentRate, setTreatmentRate] = useState(tabState?.treatmentRate || 0.12);
+  const [sampleSize, setSampleSize] = useState(tabState?.sampleSize || 1000);
+  useEffect(() => { setTabState({ controlRate, treatmentRate, sampleSize }); }, [controlRate, treatmentRate, sampleSize]);
+  return (
+    <div style={{ padding: '2rem', color: 'white', maxWidth: 600 }}>
+      <h2 style={{ color: '#22c55e', marginBottom: '1.5rem' }}>Experiment Setup</h2>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Control Rate: {(controlRate * 100).toFixed(1)}%</label>
+        <input type="range" min="0.01" max="0.30" step="0.01" value={controlRate} onChange={(e) => setControlRate(Number(e.target.value))} style={{ width: '100%' }} />
+      </div>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Treatment Rate: {(treatmentRate * 100).toFixed(1)}%</label>
+        <input type="range" min="0.01" max="0.30" step="0.01" value={treatmentRate} onChange={(e) => setTreatmentRate(Number(e.target.value))} style={{ width: '100%' }} />
+      </div>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Sample Size: {sampleSize.toLocaleString()}</label>
+        <input type="range" min="100" max="10000" step="100" value={sampleSize} onChange={(e) => setSampleSize(Number(e.target.value))} style={{ width: '100%' }} />
+      </div>
+      <div style={{ background: '#1a1a2e', padding: '1rem', borderRadius: 8 }}>
+        <h3 style={{ color: '#a5b4fc' }}>Expected Lift</h3>
+        <p style={{ fontSize: '2rem', color: treatmentRate > controlRate ? '#22c55e' : '#ef4444' }}>{(((treatmentRate - controlRate) / controlRate) * 100).toFixed(1)}%</p>
+      </div>
+    </div>
+  );
+}
+
+function RunTab({ tabState, setTabState }) {
+  const config = tabState || { controlRate: 0.10, treatmentRate: 0.12, sampleSize: 1000 };
+  const [results, setResults] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const runExperiment = () => {
+    setIsRunning(true); setResults(null); setProgress(0);
+    let controlSuccess = 0, treatmentSuccess = 0; const iterations = 20; let current = 0;
+    const interval = setInterval(() => {
+      current++; const samplesPerIteration = config.sampleSize / iterations;
+      for (let i = 0; i < samplesPerIteration; i++) { if (Math.random() < config.controlRate) controlSuccess++; if (Math.random() < config.treatmentRate) treatmentSuccess++; }
+      const n = current * samplesPerIteration;
+      const cRate = controlSuccess / n, tRate = treatmentSuccess / n;
+      const cSE = Math.sqrt((cRate * (1 - cRate)) / n), tSE = Math.sqrt((tRate * (1 - tRate)) / n);
+      const pooled = (controlSuccess + treatmentSuccess) / (2 * n);
+      const pooledSE = Math.sqrt(2 * pooled * (1 - pooled) / n);
+      const z = pooledSE > 0 ? (tRate - cRate) / pooledSE : 0;
+      const pValue = 2 * (1 - normalCDF(Math.abs(z)));
+      setProgress(current / iterations);
+      const newResults = { controlRate: cRate, treatmentRate: tRate, controlCI: [cRate - 1.96 * cSE, cRate + 1.96 * cSE], treatmentCI: [tRate - 1.96 * tSE, tRate + 1.96 * tSE], lift: ((tRate - cRate) / cRate) * 100, pValue, significant: pValue < 0.05, n };
+      setResults(newResults); setTabState({ results: newResults });
+      if (current >= iterations) { clearInterval(interval); setIsRunning(false); }
+    }, 150);
+  };
+  return (
+    <div style={{ padding: '2rem', color: 'white' }}>
+      <h2 style={{ color: '#22c55e', marginBottom: '1rem' }}>Run Experiment</h2>
+      <button onClick={runExperiment} disabled={isRunning} style={{ padding: '12px 24px', background: isRunning ? '#666' : '#22c55e', color: 'white', border: 'none', borderRadius: 8, cursor: isRunning ? 'not-allowed' : 'pointer', marginBottom: '1rem' }}>{isRunning ? \`Running... \${Math.round(progress * 100)}%\` : 'Start Experiment'}</button>
+      {results && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginTop: '1rem' }}>
+          <div style={{ background: '#1a1a2e', padding: '1.5rem', borderRadius: 8, textAlign: 'center' }}><p style={{ color: '#888' }}>Control</p><p style={{ fontSize: '2rem', color: '#60a5fa' }}>{(results.controlRate * 100).toFixed(2)}%</p></div>
+          <div style={{ background: '#1a1a2e', padding: '1.5rem', borderRadius: 8, textAlign: 'center' }}><p style={{ color: '#888' }}>Treatment</p><p style={{ fontSize: '2rem', color: '#22c55e' }}>{(results.treatmentRate * 100).toFixed(2)}%</p></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ResultsTab({ tabState }) {
+  const results = tabState?.results;
+  if (!results) return <div style={{ padding: '2rem', color: '#888', textAlign: 'center' }}>Run an experiment first.</div>;
+  return (
+    <div style={{ padding: '2rem', color: 'white' }}>
+      <h2 style={{ color: '#22c55e', marginBottom: '1rem' }}>Results</h2>
+      <div style={{ padding: '1.5rem', borderRadius: 8, marginBottom: '1rem', background: results.significant ? 'rgba(34, 197, 94, 0.2)' : 'rgba(234, 179, 8, 0.2)', border: \`1px solid \${results.significant ? '#22c55e' : '#eab308'}\` }}>
+        <h3 style={{ color: results.significant ? '#22c55e' : '#eab308' }}>{results.significant ? '✓ Statistically Significant!' : '⚠ Not Significant'}</h3>
+        <p style={{ color: '#888' }}>p-value: {results.pValue.toFixed(4)}</p>
+      </div>
+      <div style={{ background: '#1a1a2e', padding: '1.5rem', borderRadius: 8 }}>
+        <h3>Relative Lift</h3>
+        <p style={{ fontSize: '3rem', color: results.lift > 0 ? '#22c55e' : '#ef4444' }}>{results.lift > 0 ? '+' : ''}{results.lift.toFixed(2)}%</p>
+        <p style={{ color: '#888' }}>Based on {results.n.toLocaleString()} samples per group</p>
+      </div>
+    </div>
+  );
+}
+
+function AppShell({ tabs, leftMenuButtons }) {
+  const [activeTab, setActiveTab] = useState(0);
+  const [tabStates, setTabStates] = useState({});
+  return (
+    <div style={{ display: 'flex', height: '100vh', background: '#0a0a0f', fontFamily: 'system-ui' }}>
+      <div style={{ width: 30, background: '#0f0f1a', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 8 }}>
+        {leftMenuButtons.map(btn => <button key={btn.id} onClick={btn.onClick} title={btn.title} style={{ width: 24, height: 24, background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', marginBottom: 8 }}>{btn.icon}</button>)}
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', background: '#0f0f1a', borderBottom: '1px solid #222' }}>
+          {tabs.map((tab, i) => <button key={tab.id} onClick={() => setActiveTab(i)} style={{ padding: '12px 20px', background: activeTab === i ? '#1a1a2e' : 'transparent', color: activeTab === i ? '#fff' : '#666', border: 'none', borderBottom: activeTab === i ? '2px solid #22c55e' : '2px solid transparent', cursor: 'pointer' }}>{tab.label}</button>)}
+        </div>
+        <div style={{ flex: 1, overflow: 'auto' }}>{tabs[activeTab].render(tabStates, (s) => setTabStates(prev => ({ ...prev, [tabs[activeTab].id]: { ...prev[tabs[activeTab].id], ...s } })))}</div>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [showMobile, setShowMobile] = useState(false);
+  const [bypass, setBypass] = useState(false);
+  useEffect(() => { setShowMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768); }, []);
+  if (showMobile && !bypass) return <MobileWarning onContinue={() => setBypass(true)} />;
+  const tabs = [
+    { id: 'setup', label: 'Setup', render: (states, setState) => <SetupTab tabState={states?.setup} setTabState={(s) => setState({ setup: s })} /> },
+    { id: 'run', label: 'Run Experiment', render: (states, setState) => <RunTab tabState={states?.setup} setTabState={(s) => setState({ run: s })} /> },
+    { id: 'results', label: 'Results', render: (states) => <ResultsTab tabState={states?.run} /> },
+  ];
+  const leftMenuButtons = [
+    { id: 'info', icon: 'ℹ', title: 'Info', onClick: () => alert('Experiment Lab - A/B Testing Simulator') },
+    { id: 'reset', icon: '↺', title: 'Reset', onClick: () => window.confirm('Reset?') && window.location.reload() },
+  ];
+  return <AppShell tabs={tabs} leftMenuButtons={leftMenuButtons} />;
+}`,
+  },
 ];
 
 async function seedPlaygrounds() {
