@@ -30,7 +30,9 @@ const PLAYGROUND_TEMPLATES = [
     category: 'react_basics',
     tags: ['react', 'useState', 'beginner'],
     dependencies: ['react', 'react-dom'],
-    sourceCode: `export default function Counter() {
+    sourceCode: `import React from 'react';
+
+export default function Counter() {
   const [count, setCount] = React.useState(0);
 
   return (
@@ -121,7 +123,9 @@ export default function App() {
     category: 'neural_networks',
     tags: ['neural network', 'visualization', 'svg', 'intermediate'],
     dependencies: ['react', 'react-dom'],
-    sourceCode: `export default function NeuralNetworkViz() {
+    sourceCode: `import React from 'react';
+
+export default function NeuralNetworkViz() {
   const [activeLayer, setActiveLayer] = React.useState(null);
 
   const layers = [
@@ -272,7 +276,9 @@ export default function DataViz() {
     category: 'simulations',
     tags: ['simulation', 'ai', 'behavior', 'advanced'],
     dependencies: ['react', 'react-dom'],
-    sourceCode: `export default function BraitenbergVehicles() {
+    sourceCode: `import React from 'react';
+
+export default function BraitenbergVehicles() {
   const canvasRef = React.useRef(null);
   const [vehicleType, setVehicleType] = React.useState('fear');
 
@@ -481,7 +487,9 @@ export default function DataViz() {
     category: 'templates',
     tags: ['template', 'lab', 'starter'],
     dependencies: ['react', 'react-dom'],
-    sourceCode: `export default function LabShell() {
+    sourceCode: `import React from 'react';
+
+export default function LabShell() {
   const [params, setParams] = React.useState({
     speed: 50,
     size: 30,
@@ -598,7 +606,9 @@ export default function DataViz() {
     category: 'simulations',
     tags: ['simulation', 'biology', 'behavior', 'intermediate'],
     dependencies: ['react', 'react-dom'],
-    sourceCode: `export default function FishTankLab() {
+    sourceCode: `import React from 'react';
+
+export default function FishTankLab() {
   const canvasRef = React.useRef(null);
   const [params, setParams] = React.useState({
     fishCount: 15,
@@ -917,7 +927,9 @@ export default function DataViz() {
     category: 'neural_networks',
     tags: ['neural network', 'deep learning', 'visualization', 'advanced'],
     dependencies: ['react', 'react-dom'],
-    sourceCode: `export default function NeuralNetworkLab() {
+    sourceCode: `import React from 'react';
+
+export default function NeuralNetworkLab() {
   const [layers, setLayers] = React.useState([4, 6, 6, 2]);
   const [activeNeuron, setActiveNeuron] = React.useState(null);
   const [activations, setActivations] = React.useState([]);
@@ -1136,7 +1148,9 @@ export default function DataViz() {
     category: 'statistics',
     tags: ['statistics', 'a/b testing', 'data science', 'intermediate'],
     dependencies: ['react', 'react-dom'],
-    sourceCode: `export default function ExperimentLab() {
+    sourceCode: `import React from 'react';
+
+export default function ExperimentLab() {
   const [controlRate, setControlRate] = React.useState(0.10);
   const [treatmentRate, setTreatmentRate] = React.useState(0.12);
   const [sampleSize, setSampleSize] = React.useState(1000);
