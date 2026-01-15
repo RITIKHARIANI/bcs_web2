@@ -1544,16 +1544,22 @@ function ThreeScene({ behaviorType, isPaused, lamps, onLampToggle }) {
     tankGroup.add(bottom);
     scene.add(tankGroup);
 
-    // Nematodes
-    const nematodeGeo = new THREE.CapsuleGeometry(0.08, 0.4, 8, 16);
+    // Nematodes - elongated worm-like shapes
+    const nematodeGeo = new THREE.CapsuleGeometry(0.04, 0.35, 4, 8);
     const nematodeColor = behaviorType === 1 ? 0xff9999 : 0x99ff99;
     const nematodeMat = new THREE.MeshStandardMaterial({ color: nematodeColor });
 
     for (let i = 0; i < 8; i++) {
       const nematode = new THREE.Mesh(nematodeGeo, nematodeMat);
       nematode.position.set((Math.random() - 0.5) * 4, 2.4 + 0.3 + Math.random() * 0.8, (Math.random() - 0.5) * 2.5);
+      // Rotate to horizontal orientation
+      nematode.rotation.z = Math.PI / 2;
       nematode.castShadow = true;
-      nematode.userData.velocity = new THREE.Vector3((Math.random() - 0.5) * 0.02, (Math.random() - 0.5) * 0.01, (Math.random() - 0.5) * 0.02);
+      const vx = (Math.random() - 0.5) * 0.02;
+      const vz = (Math.random() - 0.5) * 0.02;
+      nematode.userData.velocity = new THREE.Vector3(vx, (Math.random() - 0.5) * 0.005, vz);
+      // Set initial facing direction
+      nematode.rotation.y = Math.atan2(vx, vz);
       scene.add(nematode);
       nematodesRef.current.push(nematode);
     }
@@ -1633,7 +1639,10 @@ function ThreeScene({ behaviorType, isPaused, lamps, onLampToggle }) {
           if (pos.y > 3.7) { pos.y = 3.7; vel.y *= -1; }
           if (pos.y < 2.6) { pos.y = 2.6; vel.y *= -1; }
 
-          nematode.lookAt(pos.clone().add(vel));
+          // Orient worm to face movement direction (horizontal body)
+          nematode.rotation.z = Math.PI / 2; // Keep horizontal
+          nematode.rotation.y = Math.atan2(vel.x, vel.z); // Face direction of travel
+          nematode.rotation.x = Math.atan2(vel.y, Math.sqrt(vel.x * vel.x + vel.z * vel.z)) * 0.5; // Slight pitch
         });
       }
 
