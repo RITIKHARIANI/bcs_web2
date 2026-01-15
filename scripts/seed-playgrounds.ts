@@ -2290,7 +2290,7 @@ function SetupTab({ tabState, setTabState }) {
 }
 
 function RunTab({ tabState, setTabState }) {
-  const config = tabState || { controlRate: 0.10, treatmentRate: 0.12, sampleSize: 1000 };
+  const config = { controlRate: tabState?.controlRate ?? 0.10, treatmentRate: tabState?.treatmentRate ?? 0.12, sampleSize: tabState?.sampleSize ?? 1000 };
   const [results, setResults] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -2370,8 +2370,8 @@ export default function App() {
   useEffect(() => { setShowMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768); }, []);
   if (showMobile && !bypass) return <MobileWarning onContinue={() => setBypass(true)} />;
   const tabs = [
-    { id: 'setup', label: 'Setup', render: (states, setState) => <SetupTab tabState={states?.setup} setTabState={(s) => setState({ ...states, setup: s })} /> },
-    { id: 'run', label: 'Run Experiment', render: (states, setState) => <RunTab tabState={states?.setup} setTabState={(s) => setState({ ...states, run: s })} /> },
+    { id: 'setup', label: 'Setup', render: (states, setState) => <SetupTab tabState={states?.setup} setTabState={setState} /> },
+    { id: 'run', label: 'Run Experiment', render: (states, setState) => <RunTab tabState={states?.setup} setTabState={setState} /> },
     { id: 'results', label: 'Results', render: (states) => <ResultsTab tabState={states?.run} /> },
   ];
   const leftMenuButtons = [
