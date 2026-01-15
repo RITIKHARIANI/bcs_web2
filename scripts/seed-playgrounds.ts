@@ -1427,10 +1427,8 @@ export default function ExperimentLab() {
     description: 'Interactive 3D simulation with fish tank, draggable lamps, and nematodes',
     category: 'simulations',
     tags: ['3d', 'three.js', 'braitenberg', 'simulation', 'client'],
-    dependencies: ['react', 'react-dom', 'three', '@react-three/fiber', '@react-three/drei'],
-    sourceCode: `import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+    dependencies: ['react', 'react-dom', 'three'],
+    sourceCode: `import React, { useState, useRef, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 
 function MobileWarning({ onContinue }) {
@@ -1444,78 +1442,6 @@ function MobileWarning({ onContinue }) {
   );
 }
 
-function Room() {
-  return (
-    <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow><planeGeometry args={[20, 20]} /><meshStandardMaterial color="#1a1a2a" /></mesh>
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 8, 0]}><planeGeometry args={[20, 20]} /><meshStandardMaterial color="#2a2a3a" side={THREE.DoubleSide} /></mesh>
-      {[[0, 4, -10, 0], [0, 4, 10, Math.PI], [-10, 4, 0, Math.PI/2], [10, 4, 0, -Math.PI/2]].map(([x, y, z, r], i) => (
-        <mesh key={i} position={[x, y, z]} rotation={[0, r, 0]}><planeGeometry args={[20, 8]} /><meshStandardMaterial color="#2a2a3a" side={THREE.DoubleSide} /></mesh>
-      ))}
-    </group>
-  );
-}
-
-function Table() {
-  return <mesh position={[0, 1.5, 0]} castShadow receiveShadow><boxGeometry args={[6, 0.3, 4]} /><meshStandardMaterial color="#4a3728" /></mesh>;
-}
-
-function FishTank({ children }) {
-  return (
-    <group position={[0, 2.4, 0]}>
-      {[[0, 0.75, 1.6, 5, 1.5, 0.05], [0, 0.75, -1.6, 5, 1.5, 0.05], [2.45, 0.75, 0, 0.05, 1.5, 3.2], [-2.45, 0.75, 0, 0.05, 1.5, 3.2]].map(([x, y, z, w, h, d], i) => (
-        <mesh key={i} position={[x, y, z]}><boxGeometry args={[w, h, d]} /><meshPhysicalMaterial color="#88ccff" transparent opacity={0.3} transmission={0.9} /></mesh>
-      ))}
-      <mesh position={[0, 0.5, 0]}><boxGeometry args={[4.8, 1, 3]} /><meshStandardMaterial color="#1a4a6a" transparent opacity={0.4} /></mesh>
-      <mesh position={[0, 0, 0]}><boxGeometry args={[5, 0.1, 3.2]} /><meshStandardMaterial color="#2a5a4a" /></mesh>
-      {children}
-    </group>
-  );
-}
-
-function Nematode({ initialPosition, behaviorType, isPaused }) {
-  const ref = useRef();
-  const vel = useRef(new THREE.Vector3((Math.random()-0.5)*0.02, (Math.random()-0.5)*0.01, (Math.random()-0.5)*0.02));
-  useFrame((state, delta) => {
-    if (!ref.current || isPaused) return;
-    const pos = ref.current.position;
-    const t = state.clock.elapsedTime;
-    if (behaviorType === 1) { vel.current.x += Math.sin(t * 2 + pos.z) * 0.001; vel.current.z += Math.cos(t * 1.5 + pos.x) * 0.001; }
-    else { vel.current.x += (Math.random() - 0.5) * 0.002; vel.current.z += (Math.random() - 0.5) * 0.002; }
-    vel.current.clampLength(0, 0.03);
-    pos.add(vel.current.clone().multiplyScalar(delta * 60));
-    if (pos.x > 2.2) { pos.x = 2.2; vel.current.x *= -1; } if (pos.x < -2.2) { pos.x = -2.2; vel.current.x *= -1; }
-    if (pos.z > 1.4) { pos.z = 1.4; vel.current.z *= -1; } if (pos.z < -1.4) { pos.z = -1.4; vel.current.z *= -1; }
-    if (pos.y > 1.3) { pos.y = 1.3; vel.current.y *= -1; } if (pos.y < 0.2) { pos.y = 0.2; vel.current.y *= -1; }
-    ref.current.lookAt(pos.clone().add(vel.current));
-  });
-  return <mesh ref={ref} position={initialPosition} castShadow><capsuleGeometry args={[0.08, 0.4, 8, 16]} /><meshStandardMaterial color={behaviorType === 1 ? '#ff9999' : '#99ff99'} /></mesh>;
-}
-
-function Lamp({ position, isOn, onToggle }) {
-  return (
-    <group position={position} onDoubleClick={onToggle}>
-      <mesh position={[0, 0.05, 0]} castShadow><cylinderGeometry args={[0.3, 0.35, 0.1, 16]} /><meshStandardMaterial color="#333" /></mesh>
-      <mesh position={[0, 0.6, 0]} castShadow><cylinderGeometry args={[0.03, 0.03, 1, 8]} /><meshStandardMaterial color="#444" /></mesh>
-      <mesh position={[0, 1.2, 0]}><sphereGeometry args={[0.15, 16, 16]} /><meshStandardMaterial color={isOn ? '#ffff88' : '#666'} emissive={isOn ? '#ffaa00' : '#000'} emissiveIntensity={isOn ? 0.5 : 0} /></mesh>
-      {isOn && <pointLight position={[0, 1.2, 0]} intensity={2} distance={8} color="#ffdd88" />}
-    </group>
-  );
-}
-
-function Scene({ behaviorType, isPaused, lamps, onLampToggle }) {
-  const positions = useMemo(() => Array.from({ length: 8 }, () => [(Math.random() - 0.5) * 4, 0.3 + Math.random() * 0.8, (Math.random() - 0.5) * 2.5]), []);
-  return (
-    <>
-      <ambientLight intensity={0.3} /><directionalLight position={[10, 15, 10]} intensity={0.5} />
-      <Room /><Table />
-      <FishTank>{positions.map((pos, i) => <Nematode key={i} initialPosition={pos} behaviorType={behaviorType} isPaused={isPaused} />)}</FishTank>
-      {lamps.map((lamp, i) => <Lamp key={i} position={lamp.position} isOn={lamp.isOn} onToggle={() => onLampToggle(i)} />)}
-      <OrbitControls makeDefault minDistance={5} maxDistance={25} />
-    </>
-  );
-}
-
 function LabDescription() {
   return (
     <div style={{ padding: '2rem', color: 'white', maxWidth: 800, margin: '0 auto', fontFamily: 'system-ui' }}>
@@ -1524,19 +1450,315 @@ function LabDescription() {
       <h2 style={{ color: '#a5b4fc' }}>Instructions</h2>
       <ul style={{ lineHeight: 2, color: '#ccc' }}>
         <li><strong>Camera:</strong> Click and drag to orbit, scroll to zoom</li>
-        <li><strong>Lamps:</strong> Double-click to toggle on/off</li>
+        <li><strong>Lamps:</strong> Double-click lamp bulb to toggle on/off</li>
         <li><strong>Nematodes:</strong> Watch how they move in the tank</li>
       </ul>
     </div>
   );
 }
 
+function ThreeScene({ behaviorType, isPaused, lamps, onLampToggle }) {
+  const containerRef = useRef(null);
+  const sceneRef = useRef(null);
+  const rendererRef = useRef(null);
+  const cameraRef = useRef(null);
+  const nematodesRef = useRef([]);
+  const lampMeshesRef = useRef([]);
+  const lampLightsRef = useRef([]);
+  const animationRef = useRef(null);
+  const clockRef = useRef(new THREE.Clock());
+  const orbitRef = useRef({ theta: Math.PI / 4, phi: Math.PI / 3, radius: 15 });
+  const isDraggingRef = useRef(false);
+  const lastMouseRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const container = containerRef.current;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    // Scene setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0a0f);
+    sceneRef.current = scene;
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+    cameraRef.current = camera;
+    updateCameraPosition();
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(width, height);
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(10, 15, 10);
+    scene.add(directionalLight);
+
+    // Room
+    const floorGeo = new THREE.PlaneGeometry(20, 20);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2a });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    // Table
+    const tableGeo = new THREE.BoxGeometry(6, 0.3, 4);
+    const tableMat = new THREE.MeshStandardMaterial({ color: 0x4a3728 });
+    const table = new THREE.Mesh(tableGeo, tableMat);
+    table.position.set(0, 1.5, 0);
+    table.castShadow = true;
+    scene.add(table);
+
+    // Fish tank
+    const tankGroup = new THREE.Group();
+    tankGroup.position.set(0, 2.4, 0);
+
+    // Tank glass walls
+    const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x88ccff, transparent: true, opacity: 0.3, roughness: 0.1 });
+    [[0, 0.75, 1.6, 5, 1.5, 0.05], [0, 0.75, -1.6, 5, 1.5, 0.05], [2.45, 0.75, 0, 0.05, 1.5, 3.2], [-2.45, 0.75, 0, 0.05, 1.5, 3.2]].forEach(([x, y, z, w, h, d]) => {
+      const wallGeo = new THREE.BoxGeometry(w, h, d);
+      const wall = new THREE.Mesh(wallGeo, glassMat);
+      wall.position.set(x, y, z);
+      tankGroup.add(wall);
+    });
+
+    // Water
+    const waterGeo = new THREE.BoxGeometry(4.8, 1, 3);
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x1a4a6a, transparent: true, opacity: 0.4 });
+    const water = new THREE.Mesh(waterGeo, waterMat);
+    water.position.set(0, 0.5, 0);
+    tankGroup.add(water);
+
+    // Tank bottom
+    const bottomGeo = new THREE.BoxGeometry(5, 0.1, 3.2);
+    const bottomMat = new THREE.MeshStandardMaterial({ color: 0x2a5a4a });
+    const bottom = new THREE.Mesh(bottomGeo, bottomMat);
+    tankGroup.add(bottom);
+    scene.add(tankGroup);
+
+    // Nematodes
+    const nematodeGeo = new THREE.CapsuleGeometry(0.08, 0.4, 8, 16);
+    const nematodeColor = behaviorType === 1 ? 0xff9999 : 0x99ff99;
+    const nematodeMat = new THREE.MeshStandardMaterial({ color: nematodeColor });
+
+    for (let i = 0; i < 8; i++) {
+      const nematode = new THREE.Mesh(nematodeGeo, nematodeMat);
+      nematode.position.set((Math.random() - 0.5) * 4, 2.4 + 0.3 + Math.random() * 0.8, (Math.random() - 0.5) * 2.5);
+      nematode.castShadow = true;
+      nematode.userData.velocity = new THREE.Vector3((Math.random() - 0.5) * 0.02, (Math.random() - 0.5) * 0.01, (Math.random() - 0.5) * 0.02);
+      scene.add(nematode);
+      nematodesRef.current.push(nematode);
+    }
+
+    // Lamps
+    lamps.forEach((lamp, idx) => {
+      const lampGroup = new THREE.Group();
+      lampGroup.position.set(lamp.position[0], lamp.position[1], lamp.position[2]);
+
+      // Base
+      const baseGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.1, 16);
+      const baseMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+      const base = new THREE.Mesh(baseGeo, baseMat);
+      base.position.y = 0.05;
+      lampGroup.add(base);
+
+      // Pole
+      const poleGeo = new THREE.CylinderGeometry(0.03, 0.03, 1, 8);
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.y = 0.6;
+      lampGroup.add(pole);
+
+      // Bulb
+      const bulbGeo = new THREE.SphereGeometry(0.15, 16, 16);
+      const bulbMat = new THREE.MeshStandardMaterial({
+        color: lamp.isOn ? 0xffff88 : 0x666666,
+        emissive: lamp.isOn ? 0xffaa00 : 0x000000,
+        emissiveIntensity: lamp.isOn ? 0.5 : 0
+      });
+      const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+      bulb.position.y = 1.2;
+      bulb.userData.lampIndex = idx;
+      lampGroup.add(bulb);
+
+      // Light
+      if (lamp.isOn) {
+        const light = new THREE.PointLight(0xffdd88, 2, 8);
+        light.position.y = 1.2;
+        lampGroup.add(light);
+        lampLightsRef.current[idx] = light;
+      }
+
+      scene.add(lampGroup);
+      lampMeshesRef.current[idx] = { group: lampGroup, bulb, mat: bulbMat };
+    });
+
+    // Animation loop
+    function animate() {
+      animationRef.current = requestAnimationFrame(animate);
+      const delta = clockRef.current.getDelta();
+      const elapsed = clockRef.current.getElapsedTime();
+
+      if (!isPaused) {
+        nematodesRef.current.forEach(nematode => {
+          const pos = nematode.position;
+          const vel = nematode.userData.velocity;
+
+          if (behaviorType === 1) {
+            vel.x += Math.sin(elapsed * 2 + pos.z) * 0.001;
+            vel.z += Math.cos(elapsed * 1.5 + pos.x) * 0.001;
+          } else {
+            vel.x += (Math.random() - 0.5) * 0.002;
+            vel.z += (Math.random() - 0.5) * 0.002;
+          }
+          vel.clampLength(0, 0.03);
+
+          pos.x += vel.x * delta * 60;
+          pos.y += vel.y * delta * 60;
+          pos.z += vel.z * delta * 60;
+
+          // Tank bounds (relative to tank position at y=2.4)
+          if (pos.x > 2.2) { pos.x = 2.2; vel.x *= -1; }
+          if (pos.x < -2.2) { pos.x = -2.2; vel.x *= -1; }
+          if (pos.z > 1.4) { pos.z = 1.4; vel.z *= -1; }
+          if (pos.z < -1.4) { pos.z = -1.4; vel.z *= -1; }
+          if (pos.y > 3.7) { pos.y = 3.7; vel.y *= -1; }
+          if (pos.y < 2.6) { pos.y = 2.6; vel.y *= -1; }
+
+          nematode.lookAt(pos.clone().add(vel));
+        });
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize handler
+    function handleResize() {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', handleResize);
+
+    // Orbit controls
+    function handleMouseDown(e) {
+      isDraggingRef.current = true;
+      lastMouseRef.current = { x: e.clientX, y: e.clientY };
+    }
+    function handleMouseMove(e) {
+      if (!isDraggingRef.current) return;
+      const dx = e.clientX - lastMouseRef.current.x;
+      const dy = e.clientY - lastMouseRef.current.y;
+      orbitRef.current.theta -= dx * 0.01;
+      orbitRef.current.phi = Math.max(0.1, Math.min(Math.PI - 0.1, orbitRef.current.phi - dy * 0.01));
+      updateCameraPosition();
+      lastMouseRef.current = { x: e.clientX, y: e.clientY };
+    }
+    function handleMouseUp() { isDraggingRef.current = false; }
+    function handleWheel(e) {
+      e.preventDefault();
+      orbitRef.current.radius = Math.max(5, Math.min(25, orbitRef.current.radius + e.deltaY * 0.01));
+      updateCameraPosition();
+    }
+    function handleDblClick(e) {
+      const rect = container.getBoundingClientRect();
+      const mouse = new THREE.Vector2(
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1
+      );
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, camera);
+      const bulbs = lampMeshesRef.current.map(l => l.bulb);
+      const intersects = raycaster.intersectObjects(bulbs);
+      if (intersects.length > 0) {
+        const idx = intersects[0].object.userData.lampIndex;
+        if (idx !== undefined) onLampToggle(idx);
+      }
+    }
+
+    renderer.domElement.addEventListener('mousedown', handleMouseDown);
+    renderer.domElement.addEventListener('mousemove', handleMouseMove);
+    renderer.domElement.addEventListener('mouseup', handleMouseUp);
+    renderer.domElement.addEventListener('mouseleave', handleMouseUp);
+    renderer.domElement.addEventListener('wheel', handleWheel, { passive: false });
+    renderer.domElement.addEventListener('dblclick', handleDblClick);
+
+    function updateCameraPosition() {
+      if (!cameraRef.current) return;
+      const { theta, phi, radius } = orbitRef.current;
+      cameraRef.current.position.x = radius * Math.sin(phi) * Math.cos(theta);
+      cameraRef.current.position.y = radius * Math.cos(phi);
+      cameraRef.current.position.z = radius * Math.sin(phi) * Math.sin(theta);
+      cameraRef.current.lookAt(0, 2, 0);
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      renderer.domElement.removeEventListener('mousedown', handleMouseDown);
+      renderer.domElement.removeEventListener('mousemove', handleMouseMove);
+      renderer.domElement.removeEventListener('mouseup', handleMouseUp);
+      renderer.domElement.removeEventListener('mouseleave', handleMouseUp);
+      renderer.domElement.removeEventListener('wheel', handleWheel);
+      renderer.domElement.removeEventListener('dblclick', handleDblClick);
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      renderer.dispose();
+      if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
+    };
+  }, [behaviorType]);
+
+  // Update lamps when toggled
+  useEffect(() => {
+    lamps.forEach((lamp, idx) => {
+      const meshData = lampMeshesRef.current[idx];
+      if (!meshData) return;
+      meshData.mat.color.setHex(lamp.isOn ? 0xffff88 : 0x666666);
+      meshData.mat.emissive.setHex(lamp.isOn ? 0xffaa00 : 0x000000);
+      meshData.mat.emissiveIntensity = lamp.isOn ? 0.5 : 0;
+
+      const existingLight = lampLightsRef.current[idx];
+      if (lamp.isOn && !existingLight) {
+        const light = new THREE.PointLight(0xffdd88, 2, 8);
+        light.position.y = 1.2;
+        meshData.group.add(light);
+        lampLightsRef.current[idx] = light;
+      } else if (!lamp.isOn && existingLight) {
+        meshData.group.remove(existingLight);
+        existingLight.dispose();
+        lampLightsRef.current[idx] = null;
+      }
+    });
+  }, [lamps]);
+
+  return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
+}
+
 function VehicleTab({ behaviorType, tabState, setTabState }) {
   const [isPaused, setIsPaused] = useState(tabState?.isPaused || false);
   const [lamps, setLamps] = useState(tabState?.lamps || [{ position: [-3, 0, -3], isOn: false }, { position: [3, 0, 3], isOn: true }]);
+  const [key, setKey] = useState(0);
+
   useEffect(() => { setTabState({ isPaused, lamps }); }, [isPaused, lamps]);
-  const handleReset = () => { setIsPaused(false); setLamps([{ position: [-3, 0, -3], isOn: false }, { position: [3, 0, 3], isOn: true }]); };
-  const handleLampToggle = (i) => { setLamps(prev => prev.map((l, idx) => idx === i ? { ...l, isOn: !l.isOn } : l)); };
+
+  const handleReset = () => {
+    setIsPaused(false);
+    setLamps([{ position: [-3, 0, -3], isOn: false }, { position: [3, 0, 3], isOn: true }]);
+    setKey(k => k + 1);
+  };
+  const handleLampToggle = useCallback((i) => {
+    setLamps(prev => prev.map((l, idx) => idx === i ? { ...l, isOn: !l.isOn } : l));
+  }, []);
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ height: 50, background: '#1a1a2e', borderBottom: '1px solid #333', display: 'flex', alignItems: 'center', padding: '0 1rem', gap: '0.5rem' }}>
@@ -1544,7 +1766,9 @@ function VehicleTab({ behaviorType, tabState, setTabState }) {
         <button onClick={handleReset} style={{ padding: '8px 16px', background: '#333', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>↺ Reset</button>
         <span style={{ color: '#888', marginLeft: 'auto' }}>Vehicle {behaviorType}: {behaviorType === 1 ? 'Sinusoidal' : 'Erratic'}</span>
       </div>
-      <div style={{ flex: 1 }}><Canvas shadows camera={{ position: [12, 10, 12], fov: 50 }}><Scene behaviorType={behaviorType} isPaused={isPaused} lamps={lamps} onLampToggle={handleLampToggle} /></Canvas></div>
+      <div style={{ flex: 1 }}>
+        <ThreeScene key={key} behaviorType={behaviorType} isPaused={isPaused} lamps={lamps} onLampToggle={handleLampToggle} />
+      </div>
     </div>
   );
 }
