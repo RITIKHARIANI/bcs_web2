@@ -1777,7 +1777,7 @@ function AppShell({ tabs, leftMenuButtons }) {
   const [activeTab, setActiveTab] = useState(0);
   const [tabStates, setTabStates] = useState({});
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#0a0a0f', fontFamily: 'system-ui' }}>
+    <div style={{ display: 'flex', height: '100vh', paddingTop: 40, boxSizing: 'border-box', background: '#0a0a0f', fontFamily: 'system-ui' }}>
       <div style={{ width: 30, background: '#0f0f1a', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 8 }}>
         {leftMenuButtons.map(btn => <button key={btn.id} onClick={btn.onClick} title={btn.title} style={{ width: 24, height: 24, background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', marginBottom: 8 }}>{btn.icon}</button>)}
       </div>
@@ -1916,7 +1916,7 @@ function AppShell({ tabs, leftMenuButtons }) {
   const [activeTab, setActiveTab] = useState(0);
   const [tabStates, setTabStates] = useState({});
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#0a0a0f', fontFamily: 'system-ui' }}>
+    <div style={{ display: 'flex', height: '100vh', paddingTop: 40, boxSizing: 'border-box', background: '#0a0a0f', fontFamily: 'system-ui' }}>
       <div style={{ width: 30, background: '#0f0f1a', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 8 }}>
         {leftMenuButtons.map(btn => <button key={btn.id} onClick={btn.onClick} title={btn.title} style={{ width: 24, height: 24, background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', marginBottom: 8 }}>{btn.icon}</button>)}
       </div>
@@ -2064,7 +2064,7 @@ function AppShell({ tabs, leftMenuButtons }) {
   const [activeTab, setActiveTab] = useState(0);
   const [tabStates, setTabStates] = useState({});
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#0a0a0f', fontFamily: 'system-ui' }}>
+    <div style={{ display: 'flex', height: '100vh', paddingTop: 40, boxSizing: 'border-box', background: '#0a0a0f', fontFamily: 'system-ui' }}>
       <div style={{ width: 30, background: '#0f0f1a', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 8 }}>
         {leftMenuButtons.map(btn => <button key={btn.id} onClick={btn.onClick} title={btn.title} style={{ width: 24, height: 24, background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', marginBottom: 8 }}>{btn.icon}</button>)}
       </div>
