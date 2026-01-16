@@ -80,7 +80,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 /**
  * PUT /api/playgrounds/[id]
- * Update a playground
+ * Update a playground (with version history)
  */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
@@ -94,11 +94,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Check ownership and permissions
+    // Fetch current playground content for versioning
     const existing = await withDatabaseRetry(async () => {
       return prisma.playgrounds.findUnique({
         where: { id },
-        select: { created_by: true, is_protected: true },
+        select: {
+          created_by: true,
+          is_protected: true,
+          title: true,
+          description: true,
+          source_code: true,
+          requirements: true,
+        },
       });
     });
 
@@ -129,8 +136,62 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       sourceCode,
       requirements,
       is_public,
-      app_type, // 'sandpack' (React/JS)
+      app_type,
+      change_note, // Optional note about what changed
     } = body;
+
+    // Create version snapshot BEFORE updating (if source_code is being changed)
+    const newSourceCode = source_code || sourceCode;
+    if (newSourceCode && existing.source_code) {
+      await withDatabaseRetry(async () => {
+        // Get current max version number
+        const latestVersion = await prisma.playground_versions.findFirst({
+          where: { playground_id: id },
+          orderBy: { version: 'desc' },
+          select: { version: true },
+        });
+
+        const nextVersion = (latestVersion?.version || 0) + 1;
+
+        // Create version snapshot
+        await prisma.playground_versions.create({
+          data: {
+            playground_id: id,
+            version: nextVersion,
+            title: existing.title,
+            description: existing.description || '',
+            source_code: existing.source_code,
+            requirements: existing.requirements || [],
+            created_by: session.user.id,
+            change_note: change_note || null,
+            save_type: 'manual',
+          },
+        });
+
+        // Cleanup: keep only last 10 versions
+        const allVersions = await prisma.playground_versions.findMany({
+          where: { playground_id: id },
+          orderBy: { version: 'desc' },
+          select: { id: true, version: true, save_type: true },
+        });
+
+        // Find versions to delete (older than 10th, excluding fork_source)
+        const versionsToKeep = allVersions
+          .filter((v) => v.save_type !== 'fork_source')
+          .slice(0, 10)
+          .map((v) => v.id);
+
+        const versionsToDelete = allVersions
+          .filter((v) => !versionsToKeep.includes(v.id) && v.save_type !== 'fork_source')
+          .map((v) => v.id);
+
+        if (versionsToDelete.length > 0) {
+          await prisma.playground_versions.deleteMany({
+            where: { id: { in: versionsToDelete } },
+          });
+        }
+      });
+    }
 
     // Update playground
     const playground = await withDatabaseRetry(async () => {
@@ -140,7 +201,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           ...(title && { title }),
           ...(description !== undefined && { description }),
           ...(category && { category }),
-          ...(( source_code || sourceCode) && { source_code: source_code || sourceCode }),
+          ...(newSourceCode && { source_code: newSourceCode }),
           ...(requirements && { requirements }),
           ...(is_public !== undefined && { is_public }),
           ...(app_type && { app_type }),

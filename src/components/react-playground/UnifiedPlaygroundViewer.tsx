@@ -7,11 +7,13 @@
  * Used for both Featured Templates and Community Playgrounds.
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { ArrowLeft, Info, Code, Star } from 'lucide-react';
+import { ArrowLeft, Info, Code, Star, History, GitFork, Loader2 } from 'lucide-react';
 import PlaygroundInfoDrawer from './PlaygroundInfoDrawer';
+import VersionHistoryDrawer from './VersionHistoryDrawer';
 
 // Lazy load the preview component (Sandpack doesn't support SSR)
 const PlaygroundViewerClient = dynamic(
@@ -36,6 +38,7 @@ export interface UnifiedPlaygroundViewerProps {
   dependencies: Record<string, string>;
 
   // Optional metadata
+  playgroundId?: string; // Required for versioning and forking
   description?: string;
   author?: {
     name: string;
@@ -53,6 +56,8 @@ export interface UnifiedPlaygroundViewerProps {
   // Access control
   canEdit?: boolean;
   editUrl?: string;
+  canFork?: boolean; // Show fork button (non-owner viewing public playground)
+  canViewHistory?: boolean; // Show version history (owner/admin only)
 
   // Status flags
   isFeatured?: boolean;
@@ -63,6 +68,7 @@ export default function UnifiedPlaygroundViewer({
   title,
   sourceCode,
   dependencies,
+  playgroundId,
   description,
   author,
   stats,
@@ -71,13 +77,52 @@ export default function UnifiedPlaygroundViewer({
   requirementsList,
   canEdit,
   editUrl,
+  canFork,
+  canViewHistory,
   isFeatured,
   isProtected,
 }: UnifiedPlaygroundViewerProps) {
+  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
+  const [forking, setForking] = useState(false);
+  const [currentCode, setCurrentCode] = useState(sourceCode);
 
   // Check if we have any metadata to show
   const hasMetadata = description || author || stats || category || tags?.length || requirementsList?.length || isFeatured;
+
+  // Handle fork
+  const handleFork = useCallback(async () => {
+    if (!playgroundId || forking) return;
+
+    setForking(true);
+    try {
+      const response = await fetch(`/api/playgrounds/${playgroundId}/fork`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to fork');
+      }
+
+      const data = await response.json();
+      // Redirect to builder with the new forked playground
+      router.push(`/playgrounds/builder?edit=${data.playground.id}`);
+    } catch (err) {
+      console.error('Failed to fork:', err);
+      alert(err instanceof Error ? err.message : 'Failed to fork playground');
+    } finally {
+      setForking(false);
+    }
+  }, [playgroundId, forking, router]);
+
+  // Handle revert - refresh the playground
+  const handleRevert = useCallback(() => {
+    // Reload the page to get updated content
+    window.location.reload();
+  }, []);
 
   return (
     <div className="h-screen bg-[#0a0a0f] flex flex-col overflow-hidden">
@@ -102,7 +147,7 @@ export default function UnifiedPlaygroundViewer({
           )}
         </div>
 
-        {/* Right: Info + Edit */}
+        {/* Right: Info + History + Fork + Edit */}
         <div className="flex items-center gap-2 shrink-0">
           {hasMetadata && (
             <button
@@ -112,6 +157,31 @@ export default function UnifiedPlaygroundViewer({
               title="About this playground"
             >
               <Info className="h-5 w-5" />
+            </button>
+          )}
+          {canViewHistory && playgroundId && (
+            <button
+              onClick={() => setHistoryDrawerOpen(true)}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+              aria-label="Version history"
+              title="Version history"
+            >
+              <History className="h-5 w-5" />
+            </button>
+          )}
+          {canFork && playgroundId && (
+            <button
+              onClick={handleFork}
+              disabled={forking}
+              className="flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50"
+              title="Create your own copy"
+            >
+              {forking ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <GitFork className="h-4 w-4" />
+              )}
+              <span className="hidden sm:inline">Fork</span>
             </button>
           )}
           {canEdit && editUrl && (
@@ -149,6 +219,16 @@ export default function UnifiedPlaygroundViewer({
         dependencies={requirementsList}
         isFeatured={isFeatured}
       />
+
+      {/* Version History Drawer */}
+      {playgroundId && (
+        <VersionHistoryDrawer
+          open={historyDrawerOpen}
+          onClose={() => setHistoryDrawerOpen(false)}
+          playgroundId={playgroundId}
+          onRevert={handleRevert}
+        />
+      )}
     </div>
   );
 }

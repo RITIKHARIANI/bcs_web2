@@ -93,11 +93,19 @@ export default async function PlaygroundPage({ params }: PageProps) {
   // Edit permission: owner OR admin (not all faculty!)
   const canEdit = isOwner || isAdmin;
 
+  // Fork permission: faculty/admin who is NOT the owner, viewing a public playground
+  const isFacultyOrAdmin = session?.user?.role === 'faculty' || session?.user?.role === 'admin';
+  const canFork = isFacultyOrAdmin && !isOwner && playground.is_public;
+
+  // Version history: owner or admin can view
+  const canViewHistory = isOwner || isAdmin;
+
   return (
     <UnifiedPlaygroundViewer
       title={playground.title}
       sourceCode={playground.source_code || ''}
       dependencies={arrayToDependencies(playground.requirements || [])}
+      playgroundId={playground.id}
       description={playground.description || undefined}
       author={
         playground.author
@@ -116,6 +124,8 @@ export default async function PlaygroundPage({ params }: PageProps) {
       requirementsList={playground.requirements || undefined}
       canEdit={canEdit}
       editUrl={`/playgrounds/builder?edit=${id}`}
+      canFork={canFork}
+      canViewHistory={canViewHistory}
       isFeatured={playground.is_featured}
       isProtected={playground.is_protected}
     />
