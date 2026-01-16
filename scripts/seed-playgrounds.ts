@@ -1633,73 +1633,84 @@ function ThreeScene({ behaviorType, isPaused, lamps, onLampToggle }) {
 
     scene.add(tankGroup);
 
-    // Enhanced nematodes - larger and more visible
-    const nematodeGeo = new THREE.CapsuleGeometry(0.06, 0.45, 6, 12);
+    // Worm-like nematodes - thin and long
     const nematodeColor = behaviorType === 1 ? 0xff7777 : 0x77ff77;
     const nematodeMat = new THREE.MeshStandardMaterial({
-      color: nematodeColor, roughness: 0.4, metalness: 0.1,
-      emissive: nematodeColor, emissiveIntensity: 0.15
+      color: nematodeColor, roughness: 0.5, metalness: 0.05,
+      emissive: nematodeColor, emissiveIntensity: 0.2
     });
 
     for (let i = 0; i < 10; i++) {
-      const nematode = new THREE.Mesh(nematodeGeo, nematodeMat.clone());
-      nematode.position.set((Math.random() - 0.5) * 4.5, 2.45 + 0.35 + Math.random() * 0.9, (Math.random() - 0.5) * 3);
-      nematode.rotation.z = Math.PI / 2;
-      nematode.castShadow = true;
+      // Create segmented worm body using multiple small spheres
+      const wormGroup = new THREE.Group();
+      const numSegments = 8;
+      const segmentRadius = 0.025;
+      const segmentSpacing = 0.045;
+
+      for (let s = 0; s < numSegments; s++) {
+        const segGeo = new THREE.SphereGeometry(segmentRadius * (1 - s * 0.05), 8, 6);
+        const segment = new THREE.Mesh(segGeo, nematodeMat.clone());
+        segment.position.x = s * segmentSpacing;
+        segment.castShadow = true;
+        wormGroup.add(segment);
+      }
+
+      wormGroup.position.set((Math.random() - 0.5) * 4.5, 2.45 + 0.35 + Math.random() * 0.9, (Math.random() - 0.5) * 3);
       const vx = (Math.random() - 0.5) * 0.025;
       const vz = (Math.random() - 0.5) * 0.025;
-      nematode.userData.velocity = new THREE.Vector3(vx, (Math.random() - 0.5) * 0.008, vz);
-      nematode.rotation.y = Math.atan2(vx, vz);
-      scene.add(nematode);
-      nematodesRef.current.push(nematode);
+      wormGroup.userData.velocity = new THREE.Vector3(vx, (Math.random() - 0.5) * 0.008, vz);
+      wormGroup.userData.phase = Math.random() * Math.PI * 2;
+      wormGroup.rotation.y = Math.atan2(vx, vz);
+      scene.add(wormGroup);
+      nematodesRef.current.push(wormGroup);
     }
 
-    // Enhanced lamps with better visual design
+    // Larger, more visible lamps
     lamps.forEach((lamp, idx) => {
       const lampGroup = new THREE.Group();
       lampGroup.position.set(lamp.position[0], lamp.position[1], lamp.position[2]);
 
-      // Lamp base
-      const baseGeo = new THREE.CylinderGeometry(0.35, 0.4, 0.12, 20);
+      // Larger lamp base
+      const baseGeo = new THREE.CylinderGeometry(0.5, 0.55, 0.15, 20);
       const baseMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.3, metalness: 0.7 });
       const base = new THREE.Mesh(baseGeo, baseMat);
-      base.position.y = 0.06;
+      base.position.y = 0.075;
       base.castShadow = true;
       lampGroup.add(base);
 
-      // Lamp pole
-      const poleGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.1, 12);
+      // Thicker lamp pole
+      const poleGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.3, 12);
       const poleMat = new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.4, metalness: 0.6 });
       const pole = new THREE.Mesh(poleGeo, poleMat);
-      pole.position.y = 0.65;
+      pole.position.y = 0.8;
       pole.castShadow = true;
       lampGroup.add(pole);
 
-      // Lamp shade
-      const shadeGeo = new THREE.ConeGeometry(0.25, 0.15, 16, 1, true);
+      // Larger lamp shade
+      const shadeGeo = new THREE.ConeGeometry(0.4, 0.22, 16, 1, true);
       const shadeMat = new THREE.MeshStandardMaterial({ color: 0x4a4a4a, roughness: 0.5, metalness: 0.5, side: THREE.DoubleSide });
       const shade = new THREE.Mesh(shadeGeo, shadeMat);
-      shade.position.y = 1.15;
+      shade.position.y = 1.4;
       shade.rotation.x = Math.PI;
       lampGroup.add(shade);
 
-      // Bulb with glow effect
-      const bulbGeo = new THREE.SphereGeometry(0.12, 20, 20);
+      // Much larger bulb for visibility
+      const bulbGeo = new THREE.SphereGeometry(0.22, 20, 20);
       const bulbMat = new THREE.MeshStandardMaterial({
-        color: lamp.isOn ? 0xffffaa : 0x555555,
+        color: lamp.isOn ? 0xffffcc : 0x444444,
         emissive: lamp.isOn ? 0xffaa44 : 0x000000,
-        emissiveIntensity: lamp.isOn ? 0.8 : 0,
-        roughness: 0.2
+        emissiveIntensity: lamp.isOn ? 1.0 : 0,
+        roughness: 0.15
       });
       const bulb = new THREE.Mesh(bulbGeo, bulbMat);
-      bulb.position.y = 1.25;
+      bulb.position.y = 1.52;
       bulb.userData.lampIndex = idx;
       lampGroup.add(bulb);
 
-      // Light source
+      // Stronger light source
       if (lamp.isOn) {
-        const light = new THREE.PointLight(0xffdd88, 3, 10);
-        light.position.y = 1.25;
+        const light = new THREE.PointLight(0xffdd88, 4, 12);
+        light.position.y = 1.52;
         light.castShadow = true;
         lampGroup.add(light);
         lampLightsRef.current[idx] = light;
@@ -1716,34 +1727,49 @@ function ThreeScene({ behaviorType, isPaused, lamps, onLampToggle }) {
       const elapsed = clockRef.current.getElapsedTime();
 
       if (!isPaused) {
-        nematodesRef.current.forEach(nematode => {
-          const pos = nematode.position;
-          const vel = nematode.userData.velocity;
+        nematodesRef.current.forEach(worm => {
+          const pos = worm.position;
+          const vel = worm.userData.velocity;
+          const phase = worm.userData.phase || 0;
 
+          // Different movement behaviors
           if (behaviorType === 1) {
-            vel.x += Math.sin(elapsed * 2 + pos.z) * 0.0012;
-            vel.z += Math.cos(elapsed * 1.5 + pos.x) * 0.0012;
+            // Vehicle 1: Smooth sinusoidal - coordinated, wave-like swimming
+            vel.x += Math.sin(elapsed * 2 + pos.z + phase) * 0.0015;
+            vel.z += Math.cos(elapsed * 1.5 + pos.x + phase) * 0.0015;
           } else {
-            vel.x += (Math.random() - 0.5) * 0.0025;
-            vel.z += (Math.random() - 0.5) * 0.0025;
+            // Vehicle 2: Erratic - sudden direction changes, unpredictable
+            if (Math.random() < 0.05) {
+              vel.x += (Math.random() - 0.5) * 0.008;
+              vel.z += (Math.random() - 0.5) * 0.008;
+            }
+            vel.x += (Math.random() - 0.5) * 0.002;
+            vel.z += (Math.random() - 0.5) * 0.002;
           }
-          vel.clampLength(0, 0.035);
+          vel.clampLength(0, 0.04);
 
           pos.x += vel.x * delta * 60;
           pos.y += vel.y * delta * 60;
           pos.z += vel.z * delta * 60;
 
           // Tank bounds
-          if (pos.x > 2.4) { pos.x = 2.4; vel.x *= -1; }
-          if (pos.x < -2.4) { pos.x = -2.4; vel.x *= -1; }
-          if (pos.z > 1.6) { pos.z = 1.6; vel.z *= -1; }
-          if (pos.z < -1.6) { pos.z = -1.6; vel.z *= -1; }
-          if (pos.y > 3.8) { pos.y = 3.8; vel.y *= -1; }
+          if (pos.x > 2.3) { pos.x = 2.3; vel.x *= -1; }
+          if (pos.x < -2.3) { pos.x = -2.3; vel.x *= -1; }
+          if (pos.z > 1.5) { pos.z = 1.5; vel.z *= -1; }
+          if (pos.z < -1.5) { pos.z = -1.5; vel.z *= -1; }
+          if (pos.y > 3.7) { pos.y = 3.7; vel.y *= -1; }
           if (pos.y < 2.65) { pos.y = 2.65; vel.y *= -1; }
 
-          nematode.rotation.z = Math.PI / 2;
-          nematode.rotation.y = Math.atan2(vel.x, vel.z);
-          nematode.rotation.x = Math.atan2(vel.y, Math.sqrt(vel.x * vel.x + vel.z * vel.z)) * 0.5;
+          // Face movement direction
+          worm.rotation.y = Math.atan2(vel.x, vel.z);
+
+          // Wriggling animation - segments undulate
+          const segments = worm.children;
+          segments.forEach((seg, i) => {
+            const wave = Math.sin(elapsed * 6 + phase + i * 0.8) * 0.015;
+            seg.position.y = wave;
+            seg.position.z = Math.sin(elapsed * 5 + phase + i * 0.6) * 0.01;
+          });
         });
       }
 
@@ -1817,14 +1843,14 @@ function ThreeScene({ behaviorType, isPaused, lamps, onLampToggle }) {
     lamps.forEach((lamp, idx) => {
       const meshData = lampMeshesRef.current[idx];
       if (!meshData) return;
-      meshData.mat.color.setHex(lamp.isOn ? 0xffffaa : 0x555555);
+      meshData.mat.color.setHex(lamp.isOn ? 0xffffcc : 0x444444);
       meshData.mat.emissive.setHex(lamp.isOn ? 0xffaa44 : 0x000000);
-      meshData.mat.emissiveIntensity = lamp.isOn ? 0.8 : 0;
+      meshData.mat.emissiveIntensity = lamp.isOn ? 1.0 : 0;
 
       const existingLight = lampLightsRef.current[idx];
       if (lamp.isOn && !existingLight) {
-        const light = new THREE.PointLight(0xffdd88, 3, 10);
-        light.position.y = 1.25;
+        const light = new THREE.PointLight(0xffdd88, 4, 12);
+        light.position.y = 1.52;
         light.castShadow = true;
         meshData.group.add(light);
         lampLightsRef.current[idx] = light;
