@@ -1942,9 +1942,62 @@ function AppShell({ tabs, leftMenuButtons }) {
   );
 }
 
+function InfoModal({ isOpen, onClose }) {
+  useEffect(() => {
+    const handleEsc = (e) => e.key === 'Escape' && onClose();
+    if (isOpen) window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '2rem' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', borderRadius: 16, border: '1px solid rgba(99, 102, 241, 0.3)', maxWidth: 500, width: '100%', maxHeight: '80vh', overflow: 'auto', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(99, 102, 241, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>🧬</span> Braitenberg Vehicles 3D Lab
+          </h2>
+          <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: 'rgba(255,255,255,0.1)', color: '#888', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+        </div>
+        <div style={{ padding: '1.5rem' }}>
+          <p style={{ color: '#a5b4fc', marginTop: 0, marginBottom: '1.5rem', lineHeight: 1.6 }}>
+            Explore emergent behavior from simple sensor-motor connections. Watch how different wiring patterns produce distinct movement behaviors.
+          </p>
+
+          <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 12, padding: '1rem', marginBottom: '1rem' }}>
+            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', color: '#6366f1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Controls</h3>
+            <div style={{ display: 'grid', gap: '0.5rem', color: '#ccc', fontSize: '0.9rem' }}>
+              <div>🖱️ <strong>Drag</strong> - Orbit camera around the scene</div>
+              <div>🔍 <strong>Scroll</strong> - Zoom in/out</div>
+              <div>💡 <strong>Double-click lamp</strong> - Toggle light on/off</div>
+              <div>⏸️ <strong>Pause/Resume</strong> - Control simulation</div>
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 12, padding: '1rem' }}>
+            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', color: '#6366f1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Vehicle Types</h3>
+            <div style={{ display: 'grid', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff7777', boxShadow: '0 0 8px #ff7777' }} />
+                <div><strong style={{ color: '#ff9999' }}>Vehicle 1</strong><span style={{ color: '#888' }}> - Sinusoidal, smooth wave-like swimming</span></div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#77ff77', boxShadow: '0 0 8px #77ff77' }} />
+                <div><strong style={{ color: '#99ff99' }}>Vehicle 2</strong><span style={{ color: '#888' }}> - Erratic, unpredictable movements</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [showMobile, setShowMobile] = useState(false);
   const [bypass, setBypass] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   useEffect(() => { setShowMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768); }, []);
   if (showMobile && !bypass) return <MobileWarning onContinue={() => setBypass(true)} />;
   const tabs = [
@@ -1953,10 +2006,15 @@ export default function App() {
     { id: 'v2', label: 'Vehicle 2', render: (s, set) => <VehicleTab behaviorType={2} tabState={s} setTabState={set} /> },
   ];
   const leftMenuButtons = [
-    { id: 'info', icon: 'ℹ️', title: 'About', onClick: () => alert('Braitenberg Vehicles 3D Lab\\nExplore emergent behavior from simple sensor-motor connections.') },
+    { id: 'info', icon: 'ℹ️', title: 'About', onClick: () => setShowInfo(true) },
     { id: 'reset', icon: '↺', title: 'Reset', onClick: () => window.confirm('Reset the simulation?') && window.location.reload() },
   ];
-  return <AppShell tabs={tabs} leftMenuButtons={leftMenuButtons} />;
+  return (
+    <>
+      <AppShell tabs={tabs} leftMenuButtons={leftMenuButtons} />
+      <InfoModal isOpen={showInfo} onClose={() => setShowInfo(false)} />
+    </>
+  );
 }`,
   },
   {
@@ -2242,9 +2300,66 @@ function AppShell({ tabs, leftMenuButtons }) {
   );
 }
 
+function InfoModal({ isOpen, onClose }) {
+  useEffect(() => {
+    const handleEsc = (e) => e.key === 'Escape' && onClose();
+    if (isOpen) window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '2rem' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', borderRadius: 16, border: '1px solid rgba(99, 102, 241, 0.3)', maxWidth: 500, width: '100%', maxHeight: '80vh', overflow: 'auto', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(99, 102, 241, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>🧠</span> Neural Network Simulator
+          </h2>
+          <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: 'rgba(255,255,255,0.1)', color: '#888', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+        </div>
+        <div style={{ padding: '1.5rem' }}>
+          <p style={{ color: '#a5b4fc', marginTop: 0, marginBottom: '1.5rem', lineHeight: 1.6 }}>
+            Build and visualize artificial neural networks. Watch signals propagate through layers and understand how neurons connect.
+          </p>
+
+          <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 12, padding: '1rem', marginBottom: '1rem' }}>
+            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', color: '#6366f1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>How to Use</h3>
+            <div style={{ display: 'grid', gap: '0.5rem', color: '#ccc', fontSize: '0.9rem' }}>
+              <div>1️⃣ <strong>Build</strong> - Add/remove layers and adjust neurons per layer</div>
+              <div>2️⃣ <strong>Train</strong> - Watch the forward propagation animation</div>
+              <div>3️⃣ <strong>Speed</strong> - Use the slider to control animation speed</div>
+              <div>🖱️ <strong>Click neurons</strong> - See connection highlights</div>
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 12, padding: '1rem' }}>
+            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', color: '#6366f1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Layer Types</h3>
+            <div style={{ display: 'grid', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
+                <div><strong style={{ color: '#4ade80' }}>Input Layer</strong><span style={{ color: '#888' }}> - Receives initial data</span></div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 8px #6366f1' }} />
+                <div><strong style={{ color: '#818cf8' }}>Hidden Layers</strong><span style={{ color: '#888' }}> - Process and transform data</span></div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 8px #f59e0b' }} />
+                <div><strong style={{ color: '#fbbf24' }}>Output Layer</strong><span style={{ color: '#888' }}> - Produces final result</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [showMobile, setShowMobile] = useState(false);
   const [bypass, setBypass] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   useEffect(() => { setShowMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768); }, []);
   if (showMobile && !bypass) return <MobileWarning onContinue={() => setBypass(true)} />;
   const tabs = [
@@ -2253,10 +2368,15 @@ export default function App() {
     { id: 'train', label: 'Train & Visualize', render: (states) => <TrainTab tabState={states?.build} /> },
   ];
   const leftMenuButtons = [
-    { id: 'info', icon: 'ℹ️', title: 'About', onClick: () => alert('Neural Network Simulator - Interactive visualization of artificial neural networks') },
+    { id: 'info', icon: 'ℹ️', title: 'About', onClick: () => setShowInfo(true) },
     { id: 'reset', icon: '↺', title: 'Reset', onClick: () => window.confirm('Reset the simulator?') && window.location.reload() },
   ];
-  return <AppShell tabs={tabs} leftMenuButtons={leftMenuButtons} />;
+  return (
+    <>
+      <AppShell tabs={tabs} leftMenuButtons={leftMenuButtons} />
+      <InfoModal isOpen={showInfo} onClose={() => setShowInfo(false)} />
+    </>
+  );
 }`,
   },
   {
@@ -2390,9 +2510,65 @@ function AppShell({ tabs, leftMenuButtons }) {
   );
 }
 
+function InfoModal({ isOpen, onClose }) {
+  useEffect(() => {
+    const handleEsc = (e) => e.key === 'Escape' && onClose();
+    if (isOpen) window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '2rem' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', borderRadius: 16, border: '1px solid rgba(34, 197, 94, 0.3)', maxWidth: 500, width: '100%', maxHeight: '80vh', overflow: 'auto', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(34, 197, 94, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>🧪</span> Experiment Lab
+          </h2>
+          <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: 'rgba(255,255,255,0.1)', color: '#888', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+        </div>
+        <div style={{ padding: '1.5rem' }}>
+          <p style={{ color: '#86efac', marginTop: 0, marginBottom: '1.5rem', lineHeight: 1.6 }}>
+            Simulate A/B tests and understand statistical significance. Configure experiment parameters and watch results accumulate in real-time.
+          </p>
+
+          <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 12, padding: '1rem', marginBottom: '1rem' }}>
+            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.05em' }}>How to Use</h3>
+            <div style={{ display: 'grid', gap: '0.5rem', color: '#ccc', fontSize: '0.9rem' }}>
+              <div>1️⃣ <strong>Setup</strong> - Set control/treatment conversion rates and sample size</div>
+              <div>2️⃣ <strong>Run</strong> - Click "Start Experiment" to simulate data collection</div>
+              <div>3️⃣ <strong>Results</strong> - View statistical analysis and significance</div>
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 12, padding: '1rem' }}>
+            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Key Metrics</h3>
+            <div style={{ display: 'grid', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#60a5fa', boxShadow: '0 0 8px #60a5fa' }} />
+                <div><strong style={{ color: '#93c5fd' }}>Control Rate</strong><span style={{ color: '#888' }}> - Baseline conversion rate</span></div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
+                <div><strong style={{ color: '#4ade80' }}>Treatment Rate</strong><span style={{ color: '#888' }}> - Variant conversion rate</span></div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 8px #f59e0b' }} />
+                <div><strong style={{ color: '#fbbf24' }}>P-Value</strong><span style={{ color: '#888' }}> - Statistical significance (p &lt; 0.05)</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [showMobile, setShowMobile] = useState(false);
   const [bypass, setBypass] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   useEffect(() => { setShowMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768); }, []);
   if (showMobile && !bypass) return <MobileWarning onContinue={() => setBypass(true)} />;
   const tabs = [
@@ -2401,10 +2577,15 @@ export default function App() {
     { id: 'results', label: 'Results', render: (states) => <ResultsTab tabState={states?.run} /> },
   ];
   const leftMenuButtons = [
-    { id: 'info', icon: 'ℹ', title: 'Info', onClick: () => alert('Experiment Lab - A/B Testing Simulator') },
+    { id: 'info', icon: 'ℹ', title: 'Info', onClick: () => setShowInfo(true) },
     { id: 'reset', icon: '↺', title: 'Reset', onClick: () => window.confirm('Reset?') && window.location.reload() },
   ];
-  return <AppShell tabs={tabs} leftMenuButtons={leftMenuButtons} />;
+  return (
+    <>
+      <AppShell tabs={tabs} leftMenuButtons={leftMenuButtons} />
+      <InfoModal isOpen={showInfo} onClose={() => setShowInfo(false)} />
+    </>
+  );
 }`,
   },
 ];
