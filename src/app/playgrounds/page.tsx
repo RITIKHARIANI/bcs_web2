@@ -331,6 +331,55 @@ export default function PlaygroundsPage() {
         {/* ALL Tab */}
         {activeTab === 'all' && (
           <>
+            {/* Standalone Tools Section */}
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                <Brain className="h-6 w-6 text-emerald-400" />
+                Interactive Tools
+              </h2>
+              <p className="text-gray-500 mb-6">Advanced standalone learning tools</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Link
+                  href="/playgrounds/tensorflow"
+                  className="group bg-gradient-to-br from-emerald-900/50 to-blue-900/50 rounded-lg border border-emerald-700/50 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10 transition-all overflow-hidden"
+                >
+                  <div className="h-32 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 relative">
+                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity" />
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs font-medium rounded-full">
+                        <Star className="h-3 w-3 fill-current" />
+                        Featured Tool
+                      </span>
+                    </div>
+                    <div className="absolute top-3 right-3">
+                      <span className="px-2 py-0.5 bg-gray-900/90 rounded-full text-xs font-medium text-gray-300">
+                        Neural Networks
+                      </span>
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-orange-500" />
+                        <div className="w-4 h-4 rounded-full bg-blue-500" />
+                        <div className="w-3 h-3 rounded-full bg-orange-500" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-base font-semibold text-white mb-1 group-hover:text-emerald-400 transition-colors">
+                      Neural Network Playground
+                    </h3>
+                    <p className="text-sm text-gray-400 mb-3 line-clamp-2">
+                      Interactive neural network visualization. Explore how networks learn with real-time training and decision boundary visualization.
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-emerald-400">
+                      <span className="px-2 py-1 bg-emerald-500/10 rounded">Train Networks</span>
+                      <span className="px-2 py-1 bg-emerald-500/10 rounded">Visualize Learning</span>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
             {/* Featured Section */}
             {filteredFeatured.length > 0 && (
               <div className="mb-12">
