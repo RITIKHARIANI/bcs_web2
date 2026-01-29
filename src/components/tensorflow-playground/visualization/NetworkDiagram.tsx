@@ -104,13 +104,22 @@ export function NetworkDiagram() {
       const sourcePositions = positions[l];
       const targetPositions = positions[targetLayerIndex];
 
+      // Skip if positions don't exist (can happen during layer changes)
+      if (!sourcePositions || !targetPositions) continue;
+
       for (let t = 0; t < weights[l].length; t++) {
         const neuronWeights = weights[l][t];
         const targetPos = targetPositions[t];
 
+        // Skip if target position doesn't exist
+        if (!targetPos) continue;
+
         for (let s = 0; s < neuronWeights.length; s++) {
           const weight = neuronWeights[s];
           const sourcePos = sourcePositions[s];
+
+          // Skip if source position doesn't exist
+          if (!sourcePos) continue;
 
           lines.push(
             <line
