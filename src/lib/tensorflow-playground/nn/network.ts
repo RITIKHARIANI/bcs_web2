@@ -210,6 +210,36 @@ export class NeuralNetwork {
     const features = computeFeatures(x1, x2);
     return this.forward(features);
   }
+
+  /**
+   * Forward propagation up to a specific neuron
+   * Returns the output of the specified neuron
+   * @param input Input feature vector
+   * @param layerIndex Index of the layer (0 = first hidden layer)
+   * @param neuronIndex Index of the neuron within that layer
+   * @returns Output of the specified neuron
+   */
+  forwardToNode(input: number[], layerIndex: number, neuronIndex: number): number {
+    const activation = getActivation(this.config.activation);
+    let currentInput = input;
+
+    // Pass through layers up to and including the target layer
+    for (let i = 0; i <= layerIndex && i < this.layers.length; i++) {
+      const layerOutput: number[] = [];
+      for (const neuron of this.layers[i]) {
+        layerOutput.push(neuron.forward(currentInput, activation));
+      }
+
+      // If this is the target layer, return the specific neuron's output
+      if (i === layerIndex) {
+        return this.layers[i][neuronIndex]?.output ?? 0;
+      }
+
+      currentInput = layerOutput;
+    }
+
+    return 0;
+  }
 }
 
 /**

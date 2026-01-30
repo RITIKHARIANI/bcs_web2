@@ -6,9 +6,12 @@
  * Shows neurons as circles with weight connections
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { usePlayground } from '../context/PlaygroundContext';
 import { getEnabledFeatureNames } from '@/lib/tensorflow-playground/data/features';
+import { HoveredNode } from '@/lib/tensorflow-playground/types';
+import { NeuronHeatmap } from './NeuronHeatmap';
+import { OutputHeatmap } from './OutputHeatmap';
 
 // Layout constants
 const NEURON_RADIUS = 18;
@@ -48,12 +51,24 @@ interface NeuronPosition {
 }
 
 export function NetworkDiagram() {
-  const { state } = usePlayground();
-  const { features, hiddenLayers, networkState } = state;
+  const { state, setHoveredNode } = usePlayground();
+  const { features, hiddenLayers, networkState, isRunning, epoch, hoveredNode } = state;
 
   // Get input feature labels
   const inputLabels = getEnabledFeatureNames(features);
   const inputCount = inputLabels.length;
+
+  // Hover handlers for neurons
+  const handleNeuronMouseEnter = useCallback(
+    (layerIndex: number, neuronIndex: number) => {
+      setHoveredNode({ layerIndex, neuronIndex });
+    },
+    [setHoveredNode]
+  );
+
+  const handleNeuronMouseLeave = useCallback(() => {
+    setHoveredNode(null);
+  }, [setHoveredNode]);
 
   // Calculate layer sizes - memoized to prevent recreation
   const layerSizes = useMemo(
@@ -92,12 +107,15 @@ export function NetworkDiagram() {
     return pos;
   }, [numLayers, layerSizes, height]);
 
-  // Draw connections
+  // Draw connections with marching ants animation during training
   const connections = useMemo(() => {
     if (!networkState) return [];
 
     const lines: React.ReactNode[] = [];
     const weights = networkState.weights;
+
+    // Marching ants animation offset based on epoch
+    const dashOffset = isRunning ? -(epoch * 2) % 100 : 0;
 
     for (let l = 0; l < weights.length; l++) {
       const targetLayerIndex = l + 1; // Target is one layer ahead (skip input)
@@ -131,6 +149,9 @@ export function NetworkDiagram() {
               stroke={weightToColor(weight)}
               strokeWidth={weightToStrokeWidth(weight)}
               strokeOpacity={0.8}
+              strokeDasharray={isRunning ? '4 2' : 'none'}
+              strokeDashoffset={dashOffset}
+              style={{ transition: isRunning ? 'none' : 'stroke-dashoffset 0.3s' }}
             />
           );
         }
@@ -138,17 +159,27 @@ export function NetworkDiagram() {
     }
 
     return lines;
-  }, [networkState, positions]);
+  }, [networkState, positions, isRunning, epoch]);
 
-  // Draw neurons
+  // Draw neurons with hover support for hidden layers
+  // Hidden layer neurons show mini heatmaps
   const neurons = useMemo(() => {
     const nodes: React.ReactNode[] = [];
+    const heatmapSize = NEURON_RADIUS * 2;
 
     for (let l = 0; l < positions.length; l++) {
       for (let n = 0; n < positions[l].length; n++) {
         const pos = positions[l][n];
         const isInput = l === 0;
         const isOutput = l === positions.length - 1;
+        const isHidden = !isInput && !isOutput;
+
+        // Check if this neuron is currently hovered
+        // hoveredNode.layerIndex is the index into hidden layers (0 = first hidden)
+        // l is the visual layer index (0 = input, 1 = first hidden, etc.)
+        const isHovered = hoveredNode && isHidden &&
+          hoveredNode.layerIndex === l - 1 &&
+          hoveredNode.neuronIndex === n;
 
         // Get activation value if available
         let activation = 0;
@@ -162,9 +193,9 @@ export function NetworkDiagram() {
           }
         }
 
-        // Color based on activation
+        // Color based on activation (for input/output neurons only now)
         let fillColor = '#1f2937'; // Default dark gray
-        if (!isInput && networkState) {
+        if (!isInput && !isHidden && networkState) {
           const intensity = Math.abs(activation);
           if (activation >= 0) {
             fillColor = `rgba(74, 144, 217, ${0.3 + intensity * 0.7})`;
@@ -173,30 +204,73 @@ export function NetworkDiagram() {
           }
         }
 
-        nodes.push(
-          <g key={`neuron-${l}-${n}`}>
-            <circle
-              cx={pos.x}
-              cy={pos.y}
-              r={NEURON_RADIUS}
-              fill={fillColor}
-              stroke={isOutput ? '#10b981' : '#4b5563'}
-              strokeWidth={isOutput ? 3 : 2}
-            />
-            {/* Input labels */}
-            {isInput && (
-              <text
-                x={pos.x - NEURON_RADIUS - 8}
-                y={pos.y + 4}
-                textAnchor="end"
-                className="text-xs fill-gray-400"
-                style={{ fontSize: '11px' }}
+        // Stroke color: highlight when hovered
+        let strokeColor = isOutput ? '#10b981' : '#4b5563';
+        let strokeWidth = isOutput ? 3 : 2;
+        if (isHovered) {
+          strokeColor = '#facc15'; // Yellow highlight
+          strokeWidth = 3;
+        }
+
+        if (isHidden) {
+          // Hidden layer neurons: use mini heatmap
+          nodes.push(
+            <g key={`neuron-${l}-${n}`}>
+              {/* Border circle behind the heatmap */}
+              <circle
+                cx={pos.x}
+                cy={pos.y}
+                r={NEURON_RADIUS + 1}
+                fill="none"
+                stroke={strokeColor}
+                strokeWidth={strokeWidth}
+                style={{
+                  transition: 'stroke 0.15s, stroke-width 0.15s',
+                }}
+              />
+              {/* Mini heatmap using foreignObject */}
+              <foreignObject
+                x={pos.x - NEURON_RADIUS}
+                y={pos.y - NEURON_RADIUS}
+                width={heatmapSize}
+                height={heatmapSize}
+                style={{ overflow: 'visible' }}
               >
-                {inputLabels[n]}
-              </text>
-            )}
-            {/* Output label */}
-            {isOutput && (
+                <NeuronHeatmap
+                  layerIndex={l - 1}
+                  neuronIndex={n}
+                  size={heatmapSize}
+                  isHovered={!!isHovered}
+                  onMouseEnter={() => handleNeuronMouseEnter(l - 1, n)}
+                  onMouseLeave={handleNeuronMouseLeave}
+                />
+              </foreignObject>
+            </g>
+          );
+        } else if (isOutput) {
+          // Output neuron: use mini heatmap showing final network output
+          nodes.push(
+            <g key={`neuron-${l}-${n}`}>
+              {/* Border circle behind the heatmap */}
+              <circle
+                cx={pos.x}
+                cy={pos.y}
+                r={NEURON_RADIUS + 1}
+                fill="none"
+                stroke={strokeColor}
+                strokeWidth={strokeWidth}
+              />
+              {/* Mini heatmap using foreignObject */}
+              <foreignObject
+                x={pos.x - NEURON_RADIUS}
+                y={pos.y - NEURON_RADIUS}
+                width={heatmapSize}
+                height={heatmapSize}
+                style={{ overflow: 'visible' }}
+              >
+                <OutputHeatmap size={heatmapSize} />
+              </foreignObject>
+              {/* Output label */}
               <text
                 x={pos.x + NEURON_RADIUS + 8}
                 y={pos.y + 4}
@@ -206,14 +280,38 @@ export function NetworkDiagram() {
               >
                 Output
               </text>
-            )}
-          </g>
-        );
+            </g>
+          );
+        } else {
+          // Input neurons: use regular circles
+          nodes.push(
+            <g key={`neuron-${l}-${n}`}>
+              <circle
+                cx={pos.x}
+                cy={pos.y}
+                r={NEURON_RADIUS}
+                fill={fillColor}
+                stroke={strokeColor}
+                strokeWidth={strokeWidth}
+              />
+              {/* Input labels */}
+              <text
+                x={pos.x - NEURON_RADIUS - 8}
+                y={pos.y + 4}
+                textAnchor="end"
+                className="text-xs fill-gray-400"
+                style={{ fontSize: '11px' }}
+              >
+                {inputLabels[n]}
+              </text>
+            </g>
+          );
+        }
       }
     }
 
     return nodes;
-  }, [positions, networkState, inputLabels]);
+  }, [positions, networkState, inputLabels, hoveredNode, handleNeuronMouseEnter, handleNeuronMouseLeave]);
 
   // Layer labels
   const layerLabels = useMemo(() => {

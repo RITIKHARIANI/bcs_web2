@@ -19,6 +19,7 @@ import {
   INITIAL_STATE,
   FeatureFlags,
   DataPoint,
+  HoveredNode,
 } from '@/lib/tensorflow-playground/types';
 import { NeuralNetwork, createNetwork } from '@/lib/tensorflow-playground/nn/network';
 import { Trainer } from '@/lib/tensorflow-playground/training/trainer';
@@ -143,6 +144,9 @@ function playgroundReducer(
       return { ...state, hiddenLayers: newLayers };
     }
 
+    case 'SET_HOVERED_NODE':
+      return { ...state, hoveredNode: action.node };
+
     default:
       return state;
   }
@@ -160,6 +164,8 @@ interface PlaygroundContextType {
   reset: () => void;
   regenerateData: () => void;
   computeOutput: (x: number, y: number) => number;
+  computeIntermediateOutput: (x: number, y: number, layerIndex: number, neuronIndex: number) => number;
+  setHoveredNode: (node: HoveredNode | null) => void;
 }
 
 const PlaygroundContext = createContext<PlaygroundContextType | null>(null);
@@ -348,6 +354,24 @@ export function PlaygroundProvider({ children }: { children: React.ReactNode }) 
     [state.features]
   );
 
+  // Compute intermediate neuron output for a point
+  const computeIntermediateOutput = useCallback(
+    (x: number, y: number, layerIndex: number, neuronIndex: number): number => {
+      if (!networkRef.current) return 0;
+      const features = computeFeatures(x, y, state.features);
+      return networkRef.current.forwardToNode(features, layerIndex, neuronIndex);
+    },
+    [state.features]
+  );
+
+  // Set hovered node
+  const setHoveredNode = useCallback(
+    (node: HoveredNode | null) => {
+      dispatch({ type: 'SET_HOVERED_NODE', node });
+    },
+    []
+  );
+
   return (
     <PlaygroundContext.Provider
       value={{
@@ -361,6 +385,8 @@ export function PlaygroundProvider({ children }: { children: React.ReactNode }) 
         reset,
         regenerateData,
         computeOutput,
+        computeIntermediateOutput,
+        setHoveredNode,
       }}
     >
       {children}

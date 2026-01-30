@@ -117,6 +117,11 @@ export interface NetworkState {
 // Playground State
 // ============================================================================
 
+export interface HoveredNode {
+  layerIndex: number;  // Index into hidden layers (0 = first hidden layer)
+  neuronIndex: number;
+}
+
 export interface PlaygroundState {
   // Network configuration
   hiddenLayers: number[];
@@ -151,6 +156,9 @@ export interface PlaygroundState {
   // Data points
   trainData: DataPoint[];
   testData: DataPoint[];
+
+  // Hover state for neuron preview
+  hoveredNode: HoveredNode | null;
 }
 
 // ============================================================================
@@ -178,7 +186,8 @@ export type PlaygroundAction =
   | { type: 'ADD_LAYER' }
   | { type: 'REMOVE_LAYER' }
   | { type: 'ADD_NEURON'; layerIndex: number }
-  | { type: 'REMOVE_NEURON'; layerIndex: number };
+  | { type: 'REMOVE_NEURON'; layerIndex: number }
+  | { type: 'SET_HOVERED_NODE'; node: HoveredNode | null };
 
 // ============================================================================
 // Preset Values
@@ -217,4 +226,5 @@ export const INITIAL_STATE: PlaygroundState = {
   lossHistory: [],
   trainData: [],
   testData: [],
+  hoveredNode: null,
 };

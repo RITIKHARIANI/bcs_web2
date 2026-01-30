@@ -6,7 +6,7 @@
  * with data points overlaid
  */
 
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useMemo } from 'react';
 import { usePlayground } from '../context/PlaygroundContext';
 import { DataPoint } from '@/lib/tensorflow-playground/types';
 
@@ -60,11 +60,22 @@ export function DecisionBoundary({
   height = 250,
 }: DecisionBoundaryProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { state, computeOutput } = usePlayground();
-  const { trainData, testData, networkState } = state;
+  const { state, computeOutput, computeIntermediateOutput } = usePlayground();
+  const { trainData, testData, networkState, hoveredNode } = state;
 
   // Resolution for heatmap sampling
   const resolution = 50;
+
+  // Compute output based on whether a node is hovered
+  const getOutputValue = useCallback(
+    (x: number, y: number): number => {
+      if (hoveredNode) {
+        return computeIntermediateOutput(x, y, hoveredNode.layerIndex, hoveredNode.neuronIndex);
+      }
+      return computeOutput(x, y);
+    },
+    [hoveredNode, computeIntermediateOutput, computeOutput]
+  );
 
   /**
    * Draw the heatmap
@@ -81,8 +92,8 @@ export function DecisionBoundary({
           const x = COORD_MIN + (px / width) * COORD_RANGE;
           const y = COORD_MAX - (py / height) * COORD_RANGE; // Flip Y
 
-          // Get network output
-          const output = computeOutput(x, y);
+          // Get network output (or intermediate neuron output if hovered)
+          const output = getOutputValue(x, y);
           const [r, g, b] = valueToColor(output);
 
           // Set pixel
@@ -96,7 +107,7 @@ export function DecisionBoundary({
 
       ctx.putImageData(imageData, 0, 0);
     },
-    [width, height, computeOutput]
+    [width, height, getOutputValue]
   );
 
   /**
@@ -158,7 +169,13 @@ export function DecisionBoundary({
     // Draw data points (test first so train points are on top)
     drawPoints(ctx, testData, true);
     drawPoints(ctx, trainData, false);
-  }, [width, height, networkState, trainData, testData, drawHeatmap, drawPoints]);
+  }, [width, height, networkState, trainData, testData, hoveredNode, drawHeatmap, drawPoints]);
+
+  // Generate label for hovered neuron
+  const hoveredLabel = useMemo(() => {
+    if (!hoveredNode) return null;
+    return `Layer ${hoveredNode.layerIndex + 1}, Neuron ${hoveredNode.neuronIndex + 1}`;
+  }, [hoveredNode]);
 
   return (
     <div className="relative">
@@ -166,9 +183,15 @@ export function DecisionBoundary({
         ref={canvasRef}
         width={width}
         height={height}
-        className="rounded-lg border border-gray-700"
+        className={`rounded-lg border ${hoveredNode ? 'border-yellow-500 border-2' : 'border-gray-700'}`}
         style={{ imageRendering: 'pixelated' }}
       />
+      {/* Hovered neuron indicator */}
+      {hoveredLabel && (
+        <div className="absolute top-2 left-2 bg-gray-900/90 text-yellow-400 text-xs px-2 py-1 rounded">
+          {hoveredLabel}
+        </div>
+      )}
       {/* Axis labels */}
       <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-xs text-gray-500">
         X₁
