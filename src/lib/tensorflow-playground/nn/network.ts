@@ -92,8 +92,9 @@ export class NeuralNetwork {
     const outputLayer = this.layers[this.layers.length - 1];
     const outputNeuron = outputLayer[0];
 
-    // MSE derivative: d/dOutput (0.5 * (target - output)^2) = -(target - output)
-    const outputError = target - outputNeuron.output;
+    // MSE derivative: dL/dOutput = d/dOutput (0.5 * (target - output)^2) = -(target - output) = output - target
+    // For gradient descent: w -= lr * dL/dw, so we use (output - target) as the error signal
+    const outputError = outputNeuron.output - target;
     outputNeuron.delta = outputError * outputActivation.derivative(outputNeuron.output);
     outputNeuron.accumulateGradients();
 
