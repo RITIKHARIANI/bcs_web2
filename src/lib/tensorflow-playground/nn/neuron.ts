@@ -45,6 +45,14 @@ export class Neuron {
   }
 
   /**
+   * Clear accumulated gradients before a new batch
+   */
+  clearGradients(): void {
+    this.weightGradients.fill(0);
+    this.biasGradient = 0;
+  }
+
+  /**
    * Accumulate gradients for batch update
    */
   accumulateGradients(): void {
@@ -69,11 +77,11 @@ export class Neuron {
       // Gradient from loss
       let gradient = this.weightGradients[i] * scale;
 
-      // Add regularization gradient
+      // Add regularization gradient (regularization rate is already scaled appropriately)
       if (regularizationType === 'l1' && regularizationRate > 0) {
-        gradient += regularizationRate * Math.sign(this.weights[i]) * learningRate;
+        gradient += regularizationRate * Math.sign(this.weights[i]) * scale;
       } else if (regularizationType === 'l2' && regularizationRate > 0) {
-        gradient += regularizationRate * this.weights[i] * learningRate;
+        gradient += regularizationRate * this.weights[i] * scale;
       }
 
       this.weights[i] -= gradient;

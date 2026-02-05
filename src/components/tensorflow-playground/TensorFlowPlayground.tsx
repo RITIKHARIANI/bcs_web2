@@ -15,6 +15,7 @@ import {
   LearningControls,
 } from './controls';
 import { DecisionBoundary, NetworkDiagram, LossChart } from './visualization';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 function PlaygroundContent() {
   return (
@@ -127,8 +128,10 @@ function PlaygroundContent() {
 
 export function TensorFlowPlayground() {
   return (
-    <PlaygroundProvider>
-      <PlaygroundContent />
-    </PlaygroundProvider>
+    <TooltipProvider delayDuration={300}>
+      <PlaygroundProvider>
+        <PlaygroundContent />
+      </PlaygroundProvider>
+    </TooltipProvider>
   );
 }

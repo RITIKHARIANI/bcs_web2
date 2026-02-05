@@ -87,6 +87,9 @@ export class Trainer {
     const batch = this.getNextBatch();
     const { learningRate, regularization } = this.config;
 
+    // Clear gradients before processing new batch
+    this.network.clearGradients();
+
     // Forward and backward pass for each sample in batch
     for (const point of batch) {
       const features = this.getFeatures(point.x, point.y);
@@ -102,7 +105,9 @@ export class Trainer {
       regularization.rate
     );
 
-    // Compute losses
+    // Compute losses after weight update
+    // Note: This runs forward pass on all data which updates neuron states,
+    // but that's fine since we clear gradients at the start of each step()
     const trainLoss = computeLoss(
       this.network,
       this.trainData,

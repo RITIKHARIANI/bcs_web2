@@ -12,6 +12,11 @@ import {
   REGULARIZATION_RATES,
   RegularizationType,
 } from '@/lib/tensorflow-playground/types';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const REGULARIZATION_TYPES: { type: RegularizationType; label: string }[] = [
   { type: 'none', label: 'None' },
@@ -46,9 +51,14 @@ export function LearningControls() {
     <div className="flex flex-col gap-4">
       {/* Learning Rate */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 uppercase tracking-wider mb-2">
-          Learning Rate
-        </label>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <label className="block text-sm font-medium text-gray-300 uppercase tracking-wider mb-2 cursor-help">
+              Learning Rate
+            </label>
+          </TooltipTrigger>
+          <TooltipContent>Step size for weight updates</TooltipContent>
+        </Tooltip>
         <select
           value={state.learningRate}
           onChange={handleLearningRateChange}
@@ -64,9 +74,14 @@ export function LearningControls() {
 
       {/* Regularization Type */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 uppercase tracking-wider mb-2">
-          Regularization
-        </label>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <label className="block text-sm font-medium text-gray-300 uppercase tracking-wider mb-2 cursor-help">
+              Regularization
+            </label>
+          </TooltipTrigger>
+          <TooltipContent>Penalty method: None, L1 (sparse), L2 (decay)</TooltipContent>
+        </Tooltip>
         <select
           value={state.regularization}
           onChange={handleRegularizationChange}
@@ -83,9 +98,14 @@ export function LearningControls() {
       {/* Regularization Rate */}
       {state.regularization !== 'none' && (
         <div>
-          <label className="block text-sm font-medium text-gray-300 uppercase tracking-wider mb-2">
-            Regularization Rate
-          </label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <label className="block text-sm font-medium text-gray-300 uppercase tracking-wider mb-2 cursor-help">
+                Regularization Rate
+              </label>
+            </TooltipTrigger>
+            <TooltipContent>Strength of regularization penalty</TooltipContent>
+          </Tooltip>
           <select
             value={state.regularizationRate}
             onChange={handleRegularizationRateChange}

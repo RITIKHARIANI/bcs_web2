@@ -56,6 +56,12 @@ export class NeuralNetwork {
    * @returns Network output
    */
   forward(input: number[]): number {
+    // Validate input dimension matches network configuration
+    if (input.length !== this.config.inputSize) {
+      // Return 0 for dimension mismatch to prevent NaN
+      return 0;
+    }
+
     const activation = getActivation(this.config.activation);
     let currentInput = input;
 
@@ -107,6 +113,18 @@ export class NeuralNetwork {
 
         neuron.delta = errorSum * activation.derivative(neuron.output);
         neuron.accumulateGradients();
+      }
+    }
+  }
+
+  /**
+   * Clear accumulated gradients for all neurons
+   * Should be called at the start of each training batch
+   */
+  clearGradients(): void {
+    for (const layer of this.layers) {
+      for (const neuron of layer) {
+        neuron.clearGradients();
       }
     }
   }

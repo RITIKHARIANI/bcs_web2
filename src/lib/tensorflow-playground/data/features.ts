@@ -90,14 +90,15 @@ export interface FeatureInfo {
   key: keyof FeatureFlags;
   label: string;
   shortLabel: string;
+  tooltip: string;
 }
 
 export const FEATURE_INFO: FeatureInfo[] = [
-  { key: 'x1', label: 'X₁', shortLabel: 'X₁' },
-  { key: 'x2', label: 'X₂', shortLabel: 'X₂' },
-  { key: 'x1Sq', label: 'X₁²', shortLabel: 'X₁²' },
-  { key: 'x2Sq', label: 'X₂²', shortLabel: 'X₂²' },
-  { key: 'x1x2', label: 'X₁X₂', shortLabel: 'X₁X₂' },
-  { key: 'sinX1', label: 'sin(X₁)', shortLabel: 'sin' },
-  { key: 'sinX2', label: 'sin(X₂)', shortLabel: 'sin' },
+  { key: 'x1', label: 'X₁', shortLabel: 'X₁', tooltip: 'Raw X₁ input coordinate' },
+  { key: 'x2', label: 'X₂', shortLabel: 'X₂', tooltip: 'Raw X₂ input coordinate' },
+  { key: 'x1Sq', label: 'X₁²', shortLabel: 'X₁²', tooltip: 'X₁ squared (polynomial)' },
+  { key: 'x2Sq', label: 'X₂²', shortLabel: 'X₂²', tooltip: 'X₂ squared (polynomial)' },
+  { key: 'x1x2', label: 'X₁X₂', shortLabel: 'X₁X₂', tooltip: 'X₁ times X₂ (interaction)' },
+  { key: 'sinX1', label: 'sin(X₁)', shortLabel: 'sin', tooltip: 'Sine of X₁ (trigonometric)' },
+  { key: 'sinX2', label: 'sin(X₂)', shortLabel: 'sin', tooltip: 'Sine of X₂ (trigonometric)' },
 ];

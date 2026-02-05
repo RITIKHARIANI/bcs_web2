@@ -9,6 +9,11 @@ import React from 'react';
 import { usePlayground } from '../context/PlaygroundContext';
 import { FeatureFlags } from '@/lib/tensorflow-playground/types';
 import { FEATURE_INFO } from '@/lib/tensorflow-playground/data/features';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export function FeatureControls() {
   const { state, dispatch, reset } = usePlayground();
@@ -28,24 +33,29 @@ export function FeatureControls() {
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        {FEATURE_INFO.map(({ key, label }) => {
+        {FEATURE_INFO.map(({ key, label, tooltip }) => {
           const isEnabled = state.features[key];
           const isDisabled = enabledCount <= 1 && isEnabled;
 
           return (
-            <button
-              key={key}
-              onClick={() => !isDisabled && handleToggle(key)}
-              disabled={isDisabled}
-              className={`px-3 py-2 text-sm rounded-md transition-colors ${
-                isEnabled
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-              title={isDisabled ? 'At least one feature required' : `Toggle ${label}`}
-            >
-              {label}
-            </button>
+            <Tooltip key={key}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => !isDisabled && handleToggle(key)}
+                  disabled={isDisabled}
+                  className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                    isEnabled
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  {label}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isDisabled ? 'At least one feature required' : tooltip}
+              </TooltipContent>
+            </Tooltip>
           );
         })}
       </div>

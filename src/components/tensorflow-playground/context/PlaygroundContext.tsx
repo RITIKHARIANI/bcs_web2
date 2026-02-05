@@ -194,6 +194,14 @@ export function PlaygroundProvider({ children }: { children: React.ReactNode }) 
   const initTrainer = useCallback(() => {
     if (!networkRef.current || state.trainData.length === 0) return;
 
+    // Ensure feature count matches network input size to prevent dimension mismatch
+    const featureCount = countEnabledFeatures(state.features);
+    if (featureCount !== networkRef.current.config.inputSize) {
+      // Network and features are out of sync, skip trainer initialization
+      // This can happen during rapid feature toggling - the network will be reinitialized
+      return;
+    }
+
     const trainer = new Trainer(
       networkRef.current,
       state.trainData,

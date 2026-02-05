@@ -9,6 +9,11 @@ import React from 'react';
 import { usePlayground } from '../context/PlaygroundContext';
 import { ActivationType } from '@/lib/tensorflow-playground/types';
 import { Plus, Minus } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const ACTIVATIONS: { type: ActivationType; label: string }[] = [
   { type: 'relu', label: 'ReLU' },
@@ -49,9 +54,14 @@ export function NetworkControls() {
     <div className="flex flex-col gap-4">
       {/* Activation Function */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 uppercase tracking-wider mb-2">
-          Activation
-        </label>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <label className="block text-sm font-medium text-gray-300 uppercase tracking-wider mb-2 cursor-help">
+              Activation
+            </label>
+          </TooltipTrigger>
+          <TooltipContent>Activation function for hidden layers</TooltipContent>
+        </Tooltip>
         <select
           value={state.activation}
           onChange={handleActivationChange}
@@ -72,22 +82,30 @@ export function NetworkControls() {
             Hidden Layers
           </span>
           <div className="flex gap-1">
-            <button
-              onClick={handleRemoveLayer}
-              disabled={state.hiddenLayers.length <= 1}
-              className="p-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white"
-              title="Remove layer"
-            >
-              <Minus size={14} />
-            </button>
-            <button
-              onClick={handleAddLayer}
-              disabled={state.hiddenLayers.length >= 6}
-              className="p-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white"
-              title="Add layer"
-            >
-              <Plus size={14} />
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleRemoveLayer}
+                  disabled={state.hiddenLayers.length <= 1}
+                  className="p-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white"
+                >
+                  <Minus size={14} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Remove last hidden layer (min 1)</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleAddLayer}
+                  disabled={state.hiddenLayers.length >= 6}
+                  className="p-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white"
+                >
+                  <Plus size={14} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Add hidden layer (max 6)</TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
@@ -100,23 +118,33 @@ export function NetworkControls() {
             >
               <span className="text-xs text-gray-500">Layer {idx + 1}</span>
               <div className="flex items-center gap-1">
-                <button
-                  onClick={() => handleRemoveNeuron(idx)}
-                  disabled={neurons <= 1}
-                  className="p-0.5 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white"
-                >
-                  <Minus size={12} />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => handleRemoveNeuron(idx)}
+                      disabled={neurons <= 1}
+                      className="p-0.5 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white"
+                    >
+                      <Minus size={12} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Decrease neurons in this layer (min 1)</TooltipContent>
+                </Tooltip>
                 <span className="w-6 text-center font-mono text-white">
                   {neurons}
                 </span>
-                <button
-                  onClick={() => handleAddNeuron(idx)}
-                  disabled={neurons >= 8}
-                  className="p-0.5 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white"
-                >
-                  <Plus size={12} />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => handleAddNeuron(idx)}
+                      disabled={neurons >= 8}
+                      className="p-0.5 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white"
+                    >
+                      <Plus size={12} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Increase neurons in this layer (max 8)</TooltipContent>
+                </Tooltip>
               </div>
             </div>
           ))}

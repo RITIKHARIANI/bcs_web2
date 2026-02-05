@@ -40,12 +40,28 @@ export function computeLoss(
 
   for (const point of data) {
     const features = computeFeatures(point.x, point.y);
+
+    // Validate feature dimension matches network input size
+    if (features.length !== network.config.inputSize) {
+      // Return safe fallback for dimension mismatch (e.g., during feature toggling)
+      return 0;
+    }
+
     const prediction = network.forward(features);
+
+    // Check for NaN and return safe value if detected
+    if (isNaN(prediction)) {
+      return 0;
+    }
+
     predictions.push(prediction);
     targets.push(point.label);
   }
 
-  return mse(predictions, targets);
+  const loss = mse(predictions, targets);
+
+  // Guard against NaN in final loss
+  return isNaN(loss) ? 0 : loss;
 }
 
 /**
