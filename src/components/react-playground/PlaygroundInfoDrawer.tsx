@@ -154,11 +154,11 @@ export default function PlaygroundInfoDrawer({
           {/* Stats */}
           {stats && (
             <div className="flex items-center gap-6 text-sm text-gray-400">
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2" suppressHydrationWarning>
                 <Eye className="h-4 w-4" />
                 {stats.viewCount.toLocaleString()} views
               </span>
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2" suppressHydrationWarning>
                 <Calendar className="h-4 w-4" />
                 {new Date(stats.createdAt).toLocaleDateString()}
               </span>
