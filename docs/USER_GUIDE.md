@@ -374,6 +374,8 @@ A standalone tool at `/playgrounds/tensorflow` provides a dedicated neural netwo
 
 If you want to modify the playground itself (change defaults, add datasets, adjust colors, etc.), see the [Customizing the TensorFlow Playground](#customizing-the-tensorflow-playground) section under Faculty Features.
 
+For a detailed explanation of how the playground works internally (training flow, neural network math, datasets, visualizations), see the [TensorFlow Playground Technical Guide](./TF_PLAYGROUND_TECHNICAL_GUIDE.md).
+
 ---
 
 ## 8. Learning Paths
@@ -578,6 +580,8 @@ When viewing a playground created by another user, click the **Fork** button to 
 ### Customizing the TensorFlow Playground
 
 The TensorFlow Neural Network Playground at `/playgrounds/tensorflow` is built directly into the codebase (unlike the React/Sandpack playgrounds, which are stored in the database). This means that customizing it requires editing source code files and deploying the changes. This section provides a complete guide for making common modifications, even if you are not deeply familiar with the tech stack.
+
+> **Want to understand how the playground works first?** See the [TensorFlow Playground Technical Guide](./TF_PLAYGROUND_TECHNICAL_GUIDE.md) for a detailed explanation of the neural network engine, training process, datasets, and visualizations.
 
 #### Prerequisites
 
