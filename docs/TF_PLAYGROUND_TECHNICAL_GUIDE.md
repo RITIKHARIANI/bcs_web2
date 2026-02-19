@@ -4,7 +4,7 @@
 
 This guide explains **how the TensorFlow Neural Network Playground works** — what happens under the hood when you click Play, how the network learns, and how the visualizations are computed.
 
-It is written for someone who understands neural networks conceptually but is not a software engineer. If you are looking for instructions on **how to customize** the playground (change defaults, add datasets, adjust colors), see the [Customizing the TensorFlow Playground](./USER_GUIDE.md#customizing-the-tensorflow-playground) section in the User Guide instead.
+It is written for someone who understands neural networks conceptually but is not a software engineer. If you are looking for instructions on **how to customize** the playground (change defaults, add datasets, adjust colors), see the [Customizing the TensorFlow Playground](/guide#customizing-the-tensorflow-playground) section in the User Guide instead.
 
 ---
 
