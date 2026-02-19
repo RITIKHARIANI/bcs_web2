@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef, useCallback } from "react"
+import { useEffect, useState } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { ChevronRight, BookOpen, Menu, X } from "lucide-react"
@@ -37,48 +37,46 @@ function extractToc(markdown: string): TocItem[] {
 export function UserGuide({ content }: { content: string }) {
   const [activeId, setActiveId] = useState<string>("")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const observerRef = useRef<IntersectionObserver | null>(null)
   const tocItems = extractToc(content)
 
-  const setupObserver = useCallback(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect()
+  useEffect(() => {
+    // Scroll-spy: find the last heading that scrolled past the top of the viewport
+    const OFFSET = 100 // px below viewport top to consider "past"
+
+    function onScroll() {
+      const headings = document.querySelectorAll<HTMLElement>(
+        ".guide-content h2[id], .guide-content h3[id]"
+      )
+      if (headings.length === 0) return
+
+      let current = ""
+      for (const heading of headings) {
+        if (heading.getBoundingClientRect().top <= OFFSET) {
+          current = heading.id
+        } else {
+          break
+        }
+      }
+
+      // If nothing has scrolled past yet, highlight the first heading
+      if (!current && headings.length > 0) {
+        current = headings[0].id
+      }
+
+      setActiveId(current)
     }
 
-    const headings = document.querySelectorAll<HTMLElement>(
-      ".guide-content h2[id], .guide-content h3[id]"
-    )
-
-    if (headings.length === 0) return
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        // Find the topmost visible heading
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort(
-            (a, b) =>
-              a.boundingClientRect.top - b.boundingClientRect.top
-          )
-
-        if (visible.length > 0) {
-          setActiveId(visible[0].target.id)
-        }
-      },
-      { rootMargin: "-80px 0px -60% 0px", threshold: 0 }
-    )
-
-    headings.forEach((heading) => observerRef.current!.observe(heading))
-  }, [])
-
-  useEffect(() => {
     // Small delay to let react-markdown render headings with ids
-    const timer = setTimeout(setupObserver, 100)
+    const timer = setTimeout(() => {
+      onScroll() // Set initial active heading
+      window.addEventListener("scroll", onScroll, { passive: true })
+    }, 100)
+
     return () => {
       clearTimeout(timer)
-      observerRef.current?.disconnect()
+      window.removeEventListener("scroll", onScroll)
     }
-  }, [setupObserver])
+  }, [])
 
   function scrollTo(id: string) {
     const el = document.getElementById(id)
