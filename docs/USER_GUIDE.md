@@ -43,6 +43,7 @@ The BCS E-Textbook Platform is a web-based learning environment designed specifi
 | **Student** | Can enroll in courses, track progress, mark modules complete, and earn achievements |
 | **Faculty** | Can create and manage courses, modules, and playgrounds; view analytics |
 | **Admin** | Full platform management: user administration, faculty approvals, content moderation, audit logs |
+| **Super Admin** | All admin capabilities plus the ability to manage other admin accounts (promote, modify, or delete admins). Only one super admin exists per platform. |
 
 ---
 
@@ -1047,6 +1048,8 @@ Navigate to `/admin/users` to manage platform users:
   - **Edit** — Change role or account status via a dialog
   - **Suspend / Activate** — Toggle account status (with confirmation)
   - **Delete** — Permanently remove a user (with confirmation)
+
+> **Super Admin restrictions:** Only the super admin can modify, promote, or delete other admin accounts. Regular admins can manage students, faculty, and pending faculty but cannot change another admin's role, status, or delete their account. Admins also cannot modify their own account through this interface.
 
 ### Faculty Request Review
 
