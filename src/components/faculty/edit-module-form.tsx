@@ -13,6 +13,7 @@ import { MediaLibraryPanel } from '@/components/ui/media-library-panel'
 import { CollaboratorPanel } from '@/components/collaboration/CollaboratorPanel'
 import { ActivityFeed } from '@/components/collaboration/ActivityFeed'
 import { ResponsiveEditLayout } from '@/components/layout/ResponsiveEditLayout'
+import { QuizBuilder } from '@/components/quiz/QuizBuilder'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -946,6 +947,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
         }}
         editTabContent={editTabContent}
         settingsTabContent={settingsTabContent}
+        quizTabContent={<QuizBuilder moduleId={moduleId} />}
         teamContent={teamContent}
         mediaContent={mediaContent}
       />

@@ -310,6 +310,71 @@ export const ACHIEVEMENT_DEFINITIONS: AchievementDefinition[] = [
     }
   },
 
+  // ============ QUIZ ACHIEVEMENTS ============
+  {
+    id: 'first-quiz',
+    title: 'Quiz Taker',
+    description: 'Complete your first quiz',
+    icon: '📝',
+    category: 'completion',
+    xp_reward: 50,
+    badge_color: 'bronze',
+    criteria: {
+      type: 'quizzes_completed',
+      count: 1
+    }
+  },
+  {
+    id: 'ten-quizzes',
+    title: 'Quiz Master',
+    description: 'Complete 10 quizzes',
+    icon: '🧠',
+    category: 'completion',
+    xp_reward: 300,
+    badge_color: 'silver',
+    criteria: {
+      type: 'quizzes_completed',
+      count: 10
+    }
+  },
+  {
+    id: 'perfect-quiz',
+    title: 'Perfect Score',
+    description: 'Score 100% on any quiz',
+    icon: '💯',
+    category: 'mastery',
+    xp_reward: 200,
+    badge_color: 'gold',
+    criteria: {
+      type: 'perfect_quiz_score'
+    }
+  },
+  {
+    id: 'speed-quizzer',
+    title: 'Speed Quizzer',
+    description: 'Finish a timed quiz in under half the time limit',
+    icon: '⚡',
+    category: 'speed',
+    xp_reward: 150,
+    badge_color: 'silver',
+    criteria: {
+      type: 'speed_quiz'
+    }
+  },
+  {
+    id: 'quiz-streak-5',
+    title: 'Quiz Streak',
+    description: 'Pass 5 quizzes in a row',
+    icon: '🔥',
+    category: 'consistency',
+    xp_reward: 250,
+    badge_color: 'silver',
+    criteria: {
+      type: 'quiz_pass_streak',
+      count: 5
+    }
+  },
+
   // ============ LEVEL MILESTONES ============
   {
     id: 'level-5',

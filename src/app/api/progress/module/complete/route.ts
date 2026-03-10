@@ -274,6 +274,42 @@ export async function POST(request: Request) {
     return await handleUncompletion(userId, moduleId, courseId);
   }
 
+  // Quiz-pass gating: check if module has a published quiz with require_pass_to_complete
+  const quizGate = await withDatabaseRetry(async () => {
+    return await prisma.quizzes.findUnique({
+      where: { module_id: moduleId },
+      select: {
+        id: true,
+        status: true,
+        require_pass_to_complete: true,
+      },
+    });
+  });
+
+  if (
+    quizGate &&
+    quizGate.status === 'published' &&
+    quizGate.require_pass_to_complete
+  ) {
+    const hasPassed = await withDatabaseRetry(async () => {
+      return await prisma.quiz_attempts.findFirst({
+        where: {
+          quiz_id: quizGate.id,
+          user_id: userId,
+          passed: true,
+        },
+        select: { id: true },
+      });
+    });
+
+    if (!hasPassed) {
+      return NextResponse.json(
+        { error: 'You must pass the quiz before completing this module' },
+        { status: 403 }
+      );
+    }
+  }
+
   // Mode 1: Explicit course context
   if (courseId) {
     // Verify enrollment

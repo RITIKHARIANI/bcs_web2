@@ -137,6 +137,9 @@ model modules {
   // Progress tracking (Week 4)
   progress_records module_progress[]      @relation("ModuleProgressRecords")
 
+  // Quiz relation
+  quiz quizzes?
+
   @@unique([parent_module_id, sort_order])
   @@index([author_id])
   @@index([parent_module_id])
@@ -238,6 +241,9 @@ model users {
   achievements          user_achievements[]     @relation("UserAchievements")
   gamification_stats    user_gamification_stats? @relation("UserGamificationStats")
   learning_sessions     learning_sessions[]     @relation("LearningSession")
+
+  // Quiz relations
+  quiz_attempts         quiz_attempts[]         @relation("QuizAttempts")
 
   // Program Map & Learning Paths (Program Visualization Feature)
   created_learning_paths learning_paths[]       @relation("LearningPathCreator")
@@ -663,4 +669,113 @@ model learning_paths {
   @@index([created_by])
   @@index([is_featured])
   @@index([slug])
+}
+
+// ==================== QUIZ SYSTEM ====================
+
+model quizzes {
+  id                    String   @id @default(cuid())
+  module_id             String   @unique
+  title                 String
+  description           String?  @db.Text
+  status                String   @default("draft") // draft | published
+  time_limit_minutes    Int?
+  max_attempts          Int      @default(0) // 0 = unlimited
+  pass_threshold        Int      @default(70) // 0-100 percentage
+  shuffle_questions     Boolean  @default(false)
+  shuffle_options       Boolean  @default(false)
+  show_correct_answers  String   @default("after_submission") // after_submission | after_each | never
+  require_pass_to_complete Boolean @default(false)
+  xp_reward             Int      @default(50)
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  // Relations
+  module   modules          @relation(fields: [module_id], references: [id], onDelete: Cascade)
+  questions quiz_questions[]
+  attempts  quiz_attempts[]
+
+  @@index([module_id])
+}
+
+model quiz_questions {
+  id                   String   @id @default(cuid())
+  quiz_id              String
+  question_type        String   // multiple_choice | multiple_select | true_false | short_answer
+  question_text        String   @db.Text
+  explanation          String?  @db.Text
+  sort_order           Int
+  points               Int      @default(1)
+  short_answer_keywords String[] @default([])
+  case_sensitive       Boolean  @default(false)
+
+  // Relations
+  quiz    quizzes                @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  options quiz_question_options[]
+  answers quiz_attempt_answers[]
+
+  @@unique([quiz_id, sort_order])
+  @@index([quiz_id])
+}
+
+model quiz_question_options {
+  id          String  @id @default(cuid())
+  question_id String
+  option_text String  @db.Text
+  is_correct  Boolean @default(false)
+  sort_order  Int
+
+  // Relations
+  question quiz_questions @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  @@unique([question_id, sort_order])
+  @@index([question_id])
+}
+
+model quiz_attempts {
+  id               String    @id @default(cuid())
+  quiz_id          String
+  user_id          String
+  course_id        String?
+  attempt_number   Int
+  status           String    @default("in_progress") // in_progress | submitted | graded
+  score            Float?    // Percentage 0-100
+  points_earned    Int       @default(0)
+  points_possible  Int       @default(0)
+  passed           Boolean   @default(false)
+  started_at       DateTime  @default(now())
+  submitted_at     DateTime?
+  time_spent_seconds Int?
+  xp_awarded       Int       @default(0)
+
+  // Relations
+  quiz    quizzes              @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  user    users                @relation("QuizAttempts", fields: [user_id], references: [id], onDelete: Cascade)
+  answers quiz_attempt_answers[]
+
+  @@unique([quiz_id, user_id, attempt_number])
+  @@index([quiz_id])
+  @@index([user_id])
+  @@index([user_id, quiz_id])
+}
+
+model quiz_attempt_answers {
+  id                 String    @id @default(cuid())
+  attempt_id         String
+  question_id        String
+  selected_option_ids String[] @default([])
+  text_answer        String?   @db.Text
+  is_correct         Boolean?
+  points_earned      Int       @default(0)
+  graded_by          String?
+  graded_at          DateTime?
+  grading_note       String?   @db.Text
+
+  // Relations
+  attempt  quiz_attempts  @relation(fields: [attempt_id], references: [id], onDelete: Cascade)
+  question quiz_questions @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  @@unique([attempt_id, question_id])
+  @@index([attempt_id])
+  @@index([question_id])
 }
