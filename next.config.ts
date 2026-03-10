@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Vercel deployment optimization
+  output: process.env.VERCEL ? 'standalone' : undefined,
   poweredByHeader: false,
   reactStrictMode: true,
   
