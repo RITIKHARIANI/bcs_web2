@@ -8,8 +8,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { QuizSettingsForm, type QuizSettings } from './QuizSettingsForm';
 import { QuizQuestionEditor, type QuestionData } from './QuizQuestionEditor';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2, Plus, Save, Eye, AlertCircle } from 'lucide-react';
 import { QuizPreview } from './QuizPreview';
+import { QuizAnalytics } from './QuizAnalytics';
 
 interface QuizBuilderProps {
   moduleId: string;
@@ -48,6 +50,7 @@ export function QuizBuilder({ moduleId }: QuizBuilderProps) {
   const [settings, setSettings] = useState<QuizSettings>(DEFAULT_SETTINGS);
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
   const { data, isLoading, error } = useQuery({
@@ -125,6 +128,7 @@ export function QuizBuilder({ moduleId }: QuizBuilderProps) {
     },
     onSuccess: () => {
       toast.success('Quiz saved successfully!');
+      setInitialized(false);
       queryClient.invalidateQueries({ queryKey: ['quiz', moduleId] });
     },
     onError: (err: Error) => {
@@ -261,6 +265,19 @@ export function QuizBuilder({ moduleId }: QuizBuilderProps) {
         </CardContent>
       </Card>
 
+      {/* Analytics Section (only for saved quizzes) */}
+      {data && (
+        <Card className="cognitive-card">
+          <CardHeader>
+            <CardTitle>Quiz Analytics</CardTitle>
+            <CardDescription>Performance data from student attempts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <QuizAnalytics quizId={data.id} />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Danger Zone */}
       {data && (
         <Card className="cognitive-card border-red-200">
@@ -274,11 +291,7 @@ export function QuizBuilder({ moduleId }: QuizBuilderProps) {
             <NeuralButton
               variant="outline"
               size="sm"
-              onClick={() => {
-                if (confirm('Are you sure you want to delete this quiz? This will also delete all student attempts.')) {
-                  deleteMutation.mutate();
-                }
-              }}
+              onClick={() => setShowDeleteConfirm(true)}
               disabled={deleteMutation.isPending}
               className="border-red-300 text-red-600 hover:bg-red-50"
             >
@@ -287,6 +300,33 @@ export function QuizBuilder({ moduleId }: QuizBuilderProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Quiz?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this quiz? This will also delete all student attempts. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <NeuralButton variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+              Cancel
+            </NeuralButton>
+            <NeuralButton
+              variant="outline"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                deleteMutation.mutate();
+              }}
+              className="border-red-300 text-red-600 hover:bg-red-50"
+            >
+              Delete Quiz
+            </NeuralButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Preview Dialog */}
       {showPreview && (

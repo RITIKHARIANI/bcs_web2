@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { ArrowLeft, Users, TrendingUp, Award, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { QuizExportButton } from '@/components/quiz/QuizExportButton';
 
 interface AnalyticsData {
   courseTitle: string;
@@ -118,6 +119,7 @@ export default function CourseAnalyticsDashboard({ courseId }: CourseAnalyticsDa
           <h1 className="text-3xl font-bold text-neural-primary">{analytics.courseTitle}</h1>
           <p className="text-muted-foreground mt-2">Course Analytics Dashboard</p>
         </div>
+        <QuizExportButton courseId={courseId} />
       </div>
 
       {/* Stats Cards */}

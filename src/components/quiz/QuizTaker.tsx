@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NeuralButton } from '@/components/ui/neural-button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { QuizQuestion } from './QuizQuestion';
 import { QuizTimer } from './QuizTimer';
 import { QuizResults } from './QuizResults';
@@ -33,6 +34,7 @@ export function QuizTaker({ quizId, moduleId, courseId, onQuizComplete }: QuizTa
   const [reviewData, setReviewData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -365,11 +367,7 @@ export function QuizTaker({ quizId, moduleId, courseId, onQuizComplete }: QuizTa
           <div className="pt-4 border-t flex justify-end">
             <NeuralButton
               variant="neural"
-              onClick={() => {
-                if (confirm('Are you sure you want to submit? You cannot change your answers after submission.')) {
-                  submitQuiz();
-                }
-              }}
+              onClick={() => setShowSubmitConfirm(true)}
               disabled={submitting}
             >
               {submitting ? (
@@ -382,6 +380,31 @@ export function QuizTaker({ quizId, moduleId, courseId, onQuizComplete }: QuizTa
               )}
             </NeuralButton>
           </div>
+
+          <Dialog open={showSubmitConfirm} onOpenChange={setShowSubmitConfirm}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Submit Quiz?</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to submit? You cannot change your answers after submission.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <NeuralButton variant="outline" onClick={() => setShowSubmitConfirm(false)}>
+                  Cancel
+                </NeuralButton>
+                <NeuralButton
+                  variant="neural"
+                  onClick={() => {
+                    setShowSubmitConfirm(false);
+                    submitQuiz();
+                  }}
+                >
+                  Submit
+                </NeuralButton>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
     );
