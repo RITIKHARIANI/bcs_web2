@@ -5,12 +5,12 @@ import { withDatabaseRetry } from '@/lib/retry';
 import { hasFacultyAccess } from '@/lib/auth/utils';
 
 /**
- * GET /api/faculty/courses/[courseId]/quiz-export
+ * GET /api/faculty/courses/[id]/quiz-export
  * CSV export of quiz grades (Canvas-compatible)
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ courseId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -18,7 +18,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { courseId } = await params;
+    const { id: courseId } = await params;
 
     const csvContent = await withDatabaseRetry(async () => {
       // Get all modules in this course that have quizzes
