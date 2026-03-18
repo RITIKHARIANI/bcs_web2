@@ -4,11 +4,11 @@ import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry';
 import { canEditModuleWithRetry } from '@/lib/collaboration/permissions';
 import { hasFacultyAccess } from '@/lib/auth/utils';
-import { reorderQuestionsSchema } from '@/lib/quiz/schemas';
+import { reorderSetsSchema } from '@/lib/quiz/schemas';
 
 /**
- * PUT /api/modules/[id]/quiz/questions/reorder
- * Reorder questions via { questionIds: string[] }
+ * PUT /api/modules/[id]/question-bank/sets/reorder
+ * Reorder question sets by updating sort_order based on array index.
  */
 export async function PUT(
   request: NextRequest,
@@ -28,7 +28,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const parsed = reorderQuestionsSchema.safeParse(body);
+    const parsed = reorderSetsSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Validation failed', details: parsed.error.flatten() },
@@ -36,28 +36,38 @@ export async function PUT(
       );
     }
 
+    const { setIds } = parsed.data;
+
     await withDatabaseRetry(async () => {
-      // Use a temporary negative sort_order to avoid unique constraint violations
-      for (let i = 0; i < parsed.data.questionIds.length; i++) {
-        await prisma.quiz_questions.update({
-          where: { id: parsed.data.questionIds[i] },
-          data: { sort_order: -(i + 1) },
-        });
+      // Verify the bank exists for this module
+      const bank = await prisma.question_banks.findUnique({
+        where: { module_id: moduleId },
+        select: { id: true },
+      });
+
+      if (!bank) {
+        throw new Error('BANK_NOT_FOUND');
       }
-      // Now set the actual sort orders
-      for (let i = 0; i < parsed.data.questionIds.length; i++) {
-        await prisma.quiz_questions.update({
-          where: { id: parsed.data.questionIds[i] },
-          data: { sort_order: i },
-        });
-      }
+
+      // Update sort_order for each set in a transaction
+      await prisma.$transaction(
+        setIds.map((setId, index) =>
+          prisma.question_sets.updateMany({
+            where: { id: setId, bank_id: bank.id },
+            data: { sort_order: index },
+          })
+        )
+      );
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error reordering questions:', error);
+    if (error instanceof Error && error.message === 'BANK_NOT_FOUND') {
+      return NextResponse.json({ error: 'Question bank not found' }, { status: 404 });
+    }
+    console.error('Error reordering question sets:', error);
     return NextResponse.json(
-      { error: 'Failed to reorder questions' },
+      { error: 'Failed to reorder question sets' },
       { status: 500 }
     );
   }

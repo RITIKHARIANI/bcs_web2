@@ -39,7 +39,7 @@ export function QuizResults({
           )}
         </div>
         <CardTitle className="text-2xl">
-          {passed ? 'Passed!' : 'Not Passed'}
+          {passed ? (hasUngraded ? 'Submitted' : 'Passed!') : 'Not Passed'}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -7,10 +7,8 @@ import { CheckCircle, XCircle, MinusCircle } from 'lucide-react';
 interface ReviewAnswer {
   question_id: string;
   selected_option_ids: string[];
-  text_answer: string | null;
   is_correct: boolean | null;
   points_earned: number;
-  grading_note: string | null;
   question: {
     question_text: string;
     question_type: string;
@@ -65,24 +63,23 @@ export function QuizReview({ answers, showCorrectAnswers }: QuizReviewProps) {
               </div>
 
               {/* Options with highlights */}
-              {q.question_type !== 'short_answer' && (
-                <div className="ml-7 space-y-1.5">
-                  {q.options.map(opt => {
-                    const wasSelected = answer.selected_option_ids.includes(opt.id);
-                    const isCorrect = showCorrectAnswers && opt.is_correct;
+              <div className="ml-7 space-y-1.5">
+                {q.options.map(opt => {
+                  const wasSelected = answer.selected_option_ids.includes(opt.id);
+                  const isCorrect = showCorrectAnswers && opt.is_correct;
 
-                    let borderClass = 'border-gray-200';
-                    if (wasSelected && answer.is_correct) {
-                      borderClass = 'border-green-400 bg-green-50';
-                    } else if (wasSelected && !answer.is_correct) {
-                      borderClass = 'border-red-400 bg-red-50';
-                    } else if (isCorrect) {
-                      borderClass = 'border-green-400 bg-green-50/50';
-                    }
+                  let borderClass = 'border-gray-200';
+                  if (wasSelected && answer.is_correct) {
+                    borderClass = 'border-green-400 bg-green-50';
+                  } else if (wasSelected && !answer.is_correct) {
+                    borderClass = 'border-red-400 bg-red-50';
+                  } else if (isCorrect) {
+                    borderClass = 'border-green-400 bg-green-50/50';
+                  }
 
-                    return (
+                  return (
+                    <div key={opt.id} className="space-y-1">
                       <div
-                        key={opt.id}
                         className={`flex items-center gap-2 p-2 rounded border text-sm ${borderClass}`}
                       >
                         {wasSelected ? (
@@ -103,26 +100,10 @@ export function QuizReview({ answers, showCorrectAnswers }: QuizReviewProps) {
                           </Badge>
                         )}
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Short answer display */}
-              {q.question_type === 'short_answer' && answer.text_answer && (
-                <div className="ml-7">
-                  <div className="p-3 rounded border bg-gray-50 text-sm">
-                    {answer.text_answer}
-                  </div>
-                </div>
-              )}
-
-              {/* Grading note */}
-              {answer.grading_note && (
-                <div className="ml-7 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                  <strong>Instructor note:</strong> {answer.grading_note}
-                </div>
-              )}
+                    </div>
+                  );
+                })}
+              </div>
 
               {/* Explanation */}
               {showCorrectAnswers && q.explanation && (

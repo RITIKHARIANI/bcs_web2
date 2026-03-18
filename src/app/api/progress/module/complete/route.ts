@@ -274,37 +274,50 @@ export async function POST(request: Request) {
     return await handleUncompletion(userId, moduleId, courseId);
   }
 
-  // Quiz-pass gating: check if module has a published quiz with require_pass_to_complete
-  const quizGate = await withDatabaseRetry(async () => {
-    return await prisma.quizzes.findUnique({
-      where: { module_id: moduleId },
-      select: {
-        id: true,
-        status: true,
-        require_pass_to_complete: true,
-      },
+  // V2 Quiz gating: check module unlock_condition
+  const moduleData = await withDatabaseRetry(async () => {
+    return await prisma.modules.findUnique({
+      where: { id: moduleId },
+      select: { unlock_condition: true },
     });
   });
 
-  if (
-    quizGate &&
-    quizGate.status === 'published' &&
-    quizGate.require_pass_to_complete
-  ) {
-    const hasPassed = await withDatabaseRetry(async () => {
-      return await prisma.quiz_attempts.findFirst({
-        where: {
-          quiz_id: quizGate.id,
-          user_id: userId,
-          passed: true,
-        },
-        select: { id: true },
+  const unlockCondition = moduleData?.unlock_condition || 'completion';
+
+  if (unlockCondition !== 'completion') {
+    const quizzes = await withDatabaseRetry(async () => {
+      return await prisma.quizzes.findMany({
+        where: { module_id: moduleId, status: 'published' },
+        select: { id: true, quiz_type: true },
       });
     });
 
-    if (!hasPassed) {
+    const masteryQuiz = quizzes.find(q => q.quiz_type === 'mastery_check');
+    const assessmentQuiz = quizzes.find(q => q.quiz_type === 'module_assessment');
+
+    const checkPassed = async (quizId: string) => {
+      return await withDatabaseRetry(async () => {
+        return await prisma.quiz_attempts.findFirst({
+          where: { quiz_id: quizId, user_id: userId, passed: true },
+          select: { id: true },
+        });
+      });
+    };
+
+    let blocked = false;
+    if (unlockCondition === 'mastery' && masteryQuiz) {
+      blocked = !(await checkPassed(masteryQuiz.id));
+    } else if (unlockCondition === 'assessment' && assessmentQuiz) {
+      blocked = !(await checkPassed(assessmentQuiz.id));
+    } else if (unlockCondition === 'both') {
+      const masteryOk = !masteryQuiz || !!(await checkPassed(masteryQuiz.id));
+      const assessmentOk = !assessmentQuiz || !!(await checkPassed(assessmentQuiz.id));
+      blocked = !masteryOk || !assessmentOk;
+    }
+
+    if (blocked) {
       return NextResponse.json(
-        { error: 'You must pass the quiz before completing this module' },
+        { error: 'You must complete quiz requirements before finishing this module' },
         { status: 403 }
       );
     }

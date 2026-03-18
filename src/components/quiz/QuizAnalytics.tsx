@@ -1,15 +1,20 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { NeuralButton } from '@/components/ui/neural-button';
 import { Loader2, Users, Target, Clock, BarChart3 } from 'lucide-react';
+import { ItemAnalysisDashboard } from './ItemAnalysisDashboard';
 
 interface QuizAnalyticsProps {
   quizId: string;
 }
 
 export function QuizAnalytics({ quizId }: QuizAnalyticsProps) {
+  const [showItemAnalysis, setShowItemAnalysis] = useState(false);
+
   const { data, isLoading } = useQuery({
     queryKey: ['quiz-analytics', quizId],
     queryFn: async () => {
@@ -100,31 +105,44 @@ export function QuizAnalytics({ quizId }: QuizAnalyticsProps) {
       {/* Question Analysis */}
       <Card className="cognitive-card">
         <CardHeader>
-          <CardTitle className="text-sm">Question Analysis</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm">Question Analysis</CardTitle>
+            <NeuralButton
+              variant="outline"
+              size="sm"
+              onClick={() => setShowItemAnalysis(!showItemAnalysis)}
+            >
+              {showItemAnalysis ? 'Simple View' : 'Item Analysis'}
+            </NeuralButton>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {data.questionAnalysis?.map((q: any, i: number) => (
-              <div key={q.questionId} className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground w-6">Q{i + 1}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm truncate">{q.questionText}</p>
+          {showItemAnalysis ? (
+            <ItemAnalysisDashboard quizId={quizId} />
+          ) : (
+            <div className="space-y-3">
+              {data.questionAnalysis?.map((q: any, i: number) => (
+                <div key={q.questionId} className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground w-6">Q{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm truncate">{q.questionText}</p>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={
+                      q.correctRate >= 70
+                        ? 'bg-green-50 text-green-700'
+                        : q.correctRate >= 40
+                        ? 'bg-orange-50 text-orange-700'
+                        : 'bg-red-50 text-red-700'
+                    }
+                  >
+                    {q.correctRate}%
+                  </Badge>
                 </div>
-                <Badge
-                  variant="outline"
-                  className={
-                    q.correctRate >= 70
-                      ? 'bg-green-50 text-green-700'
-                      : q.correctRate >= 40
-                      ? 'bg-orange-50 text-orange-700'
-                      : 'bg-red-50 text-red-700'
-                  }
-                >
-                  {q.correctRate}%
-                </Badge>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

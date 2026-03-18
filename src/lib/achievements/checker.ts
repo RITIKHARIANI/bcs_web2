@@ -290,13 +290,16 @@ export async function checkAchievementsAfterModuleCompletion(
 
 /**
  * Check for new achievements after a quiz is submitted
+ * V2: Supports both mastery_check and module_assessment quiz types
  */
 export async function checkAchievementsAfterQuizSubmission(
   userId: string,
   quizId: string,
   score: number,
   passed: boolean,
-  timeSpentSeconds: number
+  timeSpentSeconds: number,
+  quizType?: string,
+  attemptNumber?: number
 ): Promise<AchievementCheckResult> {
   const newAchievements: AchievementCheckResult['newAchievements'] = [];
   let totalXPAwarded = 0;
@@ -312,34 +315,45 @@ export async function checkAchievementsAfterQuizSubmission(
     const existingIds = new Set(existingAchievements.map(a => a.achievement_id));
 
     // Get quiz data for time limit check
-    const [quizData, completedQuizCount, recentAttempts] = await withDatabaseRetry(async () => {
+    const [quizData, completedQuizCount, recentAttempts, masteryCount] = await withDatabaseRetry(async () => {
       return await Promise.all([
         prisma.quizzes.findUnique({
           where: { id: quizId },
-          select: { time_limit_minutes: true }
+          select: { time_limit_minutes: true, quiz_type: true }
         }),
         // Count distinct quizzes completed by this user
         prisma.quiz_attempts.groupBy({
           by: ['quiz_id'],
           where: {
             user_id: userId,
-            status: { in: ['submitted', 'graded'] }
+            status: 'submitted'
           }
         }),
         // Get recent attempts for streak check
         prisma.quiz_attempts.findMany({
           where: {
             user_id: userId,
-            status: { in: ['submitted', 'graded'] }
+            status: 'submitted'
           },
           orderBy: { submitted_at: 'desc' },
           take: 10,
           select: { passed: true, quiz_id: true }
+        }),
+        // Count mastery checks passed
+        prisma.quiz_attempts.groupBy({
+          by: ['quiz_id'],
+          where: {
+            user_id: userId,
+            status: 'submitted',
+            quiz_type: 'mastery_check',
+            passed: true
+          }
         })
       ]);
     });
 
     const quizzesCompleted = completedQuizCount.length;
+    const effectiveQuizType = quizType || quizData?.quiz_type;
 
     for (const achievement of ACHIEVEMENT_DEFINITIONS) {
       if (existingIds.has(achievement.id)) continue;
@@ -363,7 +377,6 @@ export async function checkAchievementsAfterQuizSubmission(
           break;
 
         case 'quiz_pass_streak': {
-          // Check if last N attempts are all passes (different quizzes)
           const streakTarget = achievement.criteria.count;
           if (recentAttempts.length >= streakTarget) {
             const seenQuizzes = new Set<string>();
@@ -381,6 +394,18 @@ export async function checkAchievementsAfterQuizSubmission(
           }
           break;
         }
+
+        case 'mastery_first_try':
+          earned = effectiveQuizType === 'mastery_check' && passed && (attemptNumber === 1);
+          break;
+
+        case 'mastery_checks_completed':
+          earned = masteryCount.length >= achievement.criteria.count;
+          break;
+
+        case 'assessment_ace':
+          earned = effectiveQuizType === 'module_assessment' && score >= achievement.criteria.threshold;
+          break;
       }
 
       if (earned) {

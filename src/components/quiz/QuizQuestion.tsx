@@ -1,129 +1,168 @@
 'use client';
 
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useState, useEffect, useRef } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
+
+interface QuestionOption {
+  id: string;
+  text: string;
+  is_correct?: boolean;
+  explanation?: string | null;
+}
+
+interface QuestionInstance {
+  id: string;
+  question_id: string;
+  question_text_snapshot: string;
+  options_snapshot: QuestionOption[];
+  weight: number;
+  sort_order: number;
+  block_id: string;
+}
 
 interface QuizQuestionProps {
-  question: {
-    id: string;
-    question_type: string;
-    question_text: string;
-    points: number;
-    options: Array<{
-      id: string;
-      option_text: string;
-    }>;
-  };
+  instance: QuestionInstance;
   index: number;
+  questionType: string;
   selectedOptionIds: string[];
-  textAnswer: string;
-  onSelectOption: (questionId: string, optionIds: string[]) => void;
-  onTextAnswer: (questionId: string, text: string) => void;
+  onSelectOption: (questionId: string, instanceId: string, optionIds: string[]) => void;
+  onResponseTime?: (questionId: string, instanceId: string, timeMs: number) => void;
   disabled?: boolean;
+  showFeedback?: boolean;
+  imageUrl?: string | null;
 }
 
 export function QuizQuestion({
-  question,
+  instance,
   index,
+  questionType,
   selectedOptionIds,
-  textAnswer,
   onSelectOption,
-  onTextAnswer,
-  disabled,
+  onResponseTime,
+  disabled = false,
+  showFeedback = false,
+  imageUrl,
 }: QuizQuestionProps) {
-  const handleRadioChange = (optionId: string) => {
-    onSelectOption(question.id, [optionId]);
+  const startTimeRef = useRef<number>(Date.now());
+  const reportedRef = useRef(false);
+
+  // Track response time
+  useEffect(() => {
+    startTimeRef.current = Date.now();
+    reportedRef.current = false;
+  }, [instance.id]);
+
+  const handleSelect = (optionId: string) => {
+    if (disabled) return;
+
+    // Report response time on first interaction
+    if (!reportedRef.current && onResponseTime) {
+      const elapsed = Date.now() - startTimeRef.current;
+      onResponseTime(instance.question_id, instance.id, elapsed);
+      reportedRef.current = true;
+    }
+
+    const isMultiSelect = questionType === 'multiple_select';
+    if (isMultiSelect) {
+      const newIds = selectedOptionIds.includes(optionId)
+        ? selectedOptionIds.filter(id => id !== optionId)
+        : [...selectedOptionIds, optionId];
+      onSelectOption(instance.question_id, instance.id, newIds);
+    } else {
+      onSelectOption(instance.question_id, instance.id, [optionId]);
+    }
   };
 
-  const handleCheckboxChange = (optionId: string, checked: boolean) => {
-    const newIds = checked
-      ? [...selectedOptionIds, optionId]
-      : selectedOptionIds.filter(id => id !== optionId);
-    onSelectOption(question.id, newIds);
-  };
+  const options = instance.options_snapshot as QuestionOption[];
 
   return (
     <div className="space-y-3">
+      {/* Question header */}
       <div className="flex items-start gap-2">
-        <span className="font-medium text-sm text-muted-foreground shrink-0 pt-0.5">
-          {index + 1}.
-        </span>
+        <span className="text-sm font-medium text-muted-foreground mt-0.5">Q{index + 1}</span>
         <div className="flex-1">
-          <p className="font-medium">{question.question_text}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {question.points} point{question.points !== 1 ? 's' : ''}
-          </p>
+          <p className="font-medium text-sm">{instance.question_text_snapshot}</p>
+          {imageUrl && (
+            <div className="mt-2 relative max-w-md">
+              <Image src={imageUrl} alt="Question image" width={400} height={300} className="rounded-md border" />
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="ml-6">
-        {/* Multiple Choice / True-False */}
-        {(question.question_type === 'multiple_choice' ||
-          question.question_type === 'true_false') && (
-          <div className="space-y-2">
-            {question.options.map(opt => (
-              <label
-                key={opt.id}
-                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                  selectedOptionIds.includes(opt.id)
-                    ? 'border-neural-primary bg-neural-primary/5'
-                    : 'border-gray-200 hover:border-gray-300'
-                } ${disabled ? 'opacity-60 pointer-events-none' : ''}`}
-              >
-                <input
-                  type="radio"
-                  name={`q-${question.id}`}
-                  checked={selectedOptionIds.includes(opt.id)}
-                  onChange={() => handleRadioChange(opt.id)}
-                  disabled={disabled}
-                  className="h-4 w-4 text-neural-primary focus:ring-neural-primary"
-                />
-                <span className="text-sm">{opt.option_text}</span>
-              </label>
-            ))}
-          </div>
-        )}
+      {/* Options */}
+      <div className="ml-7 space-y-1.5">
+        {options.map(opt => {
+          const isSelected = selectedOptionIds.includes(opt.id);
+          const isMulti = questionType === 'multiple_select';
 
-        {/* Multiple Select */}
-        {question.question_type === 'multiple_select' && (
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground mb-1">Select all that apply</p>
-            {question.options.map(opt => (
-              <label
-                key={opt.id}
-                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                  selectedOptionIds.includes(opt.id)
-                    ? 'border-neural-primary bg-neural-primary/5'
-                    : 'border-gray-200 hover:border-gray-300'
-                } ${disabled ? 'opacity-60 pointer-events-none' : ''}`}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedOptionIds.includes(opt.id)}
-                  onChange={e => handleCheckboxChange(opt.id, e.target.checked)}
-                  disabled={disabled}
-                  className="h-4 w-4 rounded text-neural-primary focus:ring-neural-primary"
-                />
-                <span className="text-sm">{opt.option_text}</span>
-              </label>
-            ))}
-          </div>
-        )}
+          let borderClass = 'border-gray-200 hover:border-neural-primary/50';
+          if (disabled) borderClass = 'border-gray-200';
 
-        {/* Short Answer */}
-        {question.question_type === 'short_answer' && (
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Your answer</Label>
-            <Textarea
-              value={textAnswer}
-              onChange={e => onTextAnswer(question.id, e.target.value)}
-              placeholder="Type your answer..."
-              rows={3}
+          if (showFeedback && isSelected) {
+            borderClass = opt.is_correct
+              ? 'border-green-400 bg-green-50'
+              : 'border-red-400 bg-red-50';
+          } else if (showFeedback && opt.is_correct) {
+            borderClass = 'border-green-400 bg-green-50/50';
+          } else if (isSelected) {
+            borderClass = 'border-neural-primary bg-neural-primary/5';
+          }
+
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => handleSelect(opt.id)}
               disabled={disabled}
-            />
-          </div>
-        )}
+              className={`w-full flex items-center gap-3 p-2.5 rounded-lg border text-sm text-left transition-colors ${borderClass} ${
+                disabled ? 'cursor-default' : 'cursor-pointer'
+              }`}
+            >
+              {/* Radio/Checkbox indicator */}
+              <div className={`shrink-0 w-4 h-4 ${isMulti ? 'rounded-sm' : 'rounded-full'} border-2 flex items-center justify-center ${
+                isSelected
+                  ? 'bg-neural-primary border-neural-primary'
+                  : 'border-gray-300'
+              }`}>
+                {isSelected && (
+                  <div className={`${isMulti ? 'w-2 h-2 rounded-sm' : 'w-1.5 h-1.5 rounded-full'} bg-white`} />
+                )}
+              </div>
+
+              <span className="flex-1">{opt.text}</span>
+
+              {isSelected && !showFeedback && (
+                <Badge variant="outline" className="text-xs shrink-0">Selected</Badge>
+              )}
+            </button>
+          );
+        })}
       </div>
+
+      {/* Inline feedback (mastery mode) */}
+      {showFeedback && (
+        <div className="ml-7 space-y-1.5">
+          {options.filter(opt => opt.explanation).map(opt => {
+            const isSelected = selectedOptionIds.includes(opt.id);
+            if (!isSelected && !opt.is_correct) return null;
+            return (
+              <div
+                key={`exp-${opt.id}`}
+                className={`p-2 rounded text-xs border ${
+                  opt.is_correct
+                    ? 'bg-green-50 border-green-200 text-green-800'
+                    : 'bg-amber-50 border-amber-200 text-amber-800'
+                }`}
+              >
+                <strong>{opt.is_correct ? 'Correct:' : 'Explanation:'}</strong> {opt.explanation}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

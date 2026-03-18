@@ -12,6 +12,7 @@ interface Attempt {
   started_at: string;
   submitted_at: string | null;
   xp_awarded: number;
+  quiz_type?: string;
 }
 
 interface QuizAttemptHistoryProps {

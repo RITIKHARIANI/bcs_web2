@@ -4,9 +4,16 @@ import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry';
 import { hasFacultyAccess } from '@/lib/auth/utils';
 
+function escapeCSV(val: string): string {
+  if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+    return `"${val.replace(/"/g, '""')}"`;
+  }
+  return val;
+}
+
 /**
  * GET /api/faculty/courses/[id]/quiz-export
- * CSV export of quiz grades (Canvas-compatible)
+ * Enhanced CSV export with quiz_type and enrolled students
  */
 export async function GET(
   request: NextRequest,
@@ -20,25 +27,27 @@ export async function GET(
 
     const { id: courseId } = await params;
 
-    const csvContent = await withDatabaseRetry(async () => {
-      // Get all modules in this course that have quizzes
+    const data = await withDatabaseRetry(async () => {
+      // Get all modules in course with quizzes (V2: plural relation)
       const courseModules = await prisma.course_modules.findMany({
         where: { course_id: courseId },
         include: {
           modules: {
-            include: {
-              quiz: {
-                include: {
+            select: {
+              id: true,
+              title: true,
+              quizzes: {
+                select: {
+                  id: true,
+                  title: true,
+                  quiz_type: true,
                   attempts: {
-                    where: {
-                      status: { in: ['submitted', 'graded'] },
-                    },
+                    where: { status: 'submitted' },
                     include: {
                       user: {
                         select: { id: true, name: true, email: true },
                       },
                     },
-                    orderBy: { score: 'desc' },
                   },
                 },
               },
@@ -48,106 +57,114 @@ export async function GET(
         orderBy: { sort_order: 'asc' },
       });
 
-      const header =
-        'Student Name,Student Email,Student ID,Module Title,Quiz Title,Best Score (%),Points Earned,Points Possible,Attempts Used,Passed,Last Attempt Date';
+      // Get enrolled students
+      const enrolledStudents = await prisma.course_tracking.findMany({
+        where: { course_id: courseId },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      });
 
-      const rows: string[] = [];
+      return { courseModules, enrolledStudents };
+    });
 
-      for (const cm of courseModules) {
-        const quiz = cm.modules.quiz;
-        if (!quiz || quiz.attempts.length === 0) continue;
+    const studentMap = new Map(data.enrolledStudents.map(e => [e.user.id, e.user]));
 
-        // Group attempts by user and find best
-        const userBest = new Map<
-          string,
-          {
-            name: string;
-            email: string;
-            userId: string;
-            bestScore: number;
-            pointsEarned: number;
-            pointsPossible: number;
-            attemptCount: number;
-            passed: boolean;
-            lastDate: Date | null;
-          }
-        >();
+    const headers = [
+      'Student Name',
+      'Student Email',
+      'Student ID',
+      'Module Title',
+      'Quiz Type',
+      'Quiz Title',
+      'Best Score %',
+      'Points Earned',
+      'Points Possible',
+      'Attempts Used',
+      'Passed',
+      'Last Attempt Date',
+    ];
 
+    const rows: string[][] = [];
+
+    for (const cm of data.courseModules) {
+      const mod = cm.modules;
+      for (const quiz of mod.quizzes) {
+        const quizTypeLabel = quiz.quiz_type === 'mastery_check' ? 'Mastery Check' : 'Assessment';
+
+        // Group attempts by user
+        const attemptsByUser = new Map<string, typeof quiz.attempts>();
         for (const attempt of quiz.attempts) {
-          const key = attempt.user_id;
-          const existing = userBest.get(key);
-
-          if (
-            !existing ||
-            (attempt.score !== null &&
-              attempt.score > existing.bestScore)
-          ) {
-            userBest.set(key, {
-              name: attempt.user.name,
-              email: attempt.user.email,
-              userId: attempt.user.id,
-              bestScore: attempt.score ?? 0,
-              pointsEarned: attempt.points_earned,
-              pointsPossible: attempt.points_possible,
-              attemptCount: existing
-                ? existing.attemptCount + 1
-                : 1,
-              passed: attempt.passed || existing?.passed || false,
-              lastDate: attempt.submitted_at,
-            });
-          } else if (existing) {
-            existing.attemptCount++;
-            if (attempt.passed) existing.passed = true;
-            if (
-              attempt.submitted_at &&
-              (!existing.lastDate ||
-                attempt.submitted_at > existing.lastDate)
-            ) {
-              existing.lastDate = attempt.submitted_at;
-            }
+          if (!attemptsByUser.has(attempt.user_id)) {
+            attemptsByUser.set(attempt.user_id, []);
           }
+          attemptsByUser.get(attempt.user_id)!.push(attempt);
         }
 
-        for (const [, data] of userBest) {
-          const escapeCsv = (s: string) =>
-            s.includes(',') || s.includes('"')
-              ? `"${s.replace(/"/g, '""')}"`
-              : s;
+        // Add row for each enrolled student
+        for (const [userId, student] of studentMap) {
+          const userAttempts = attemptsByUser.get(userId) || [];
 
-          rows.push(
-            [
-              escapeCsv(data.name),
-              escapeCsv(data.email),
-              data.userId,
-              escapeCsv(cm.modules.title),
-              escapeCsv(quiz.title),
-              data.bestScore.toFixed(1),
-              data.pointsEarned.toString(),
-              data.pointsPossible.toString(),
-              data.attemptCount.toString(),
-              data.passed ? 'Yes' : 'No',
-              data.lastDate
-                ? data.lastDate.toISOString().split('T')[0]
+          if (userAttempts.length === 0) {
+            rows.push([
+              student.name,
+              student.email,
+              student.id,
+              mod.title,
+              quizTypeLabel,
+              quiz.title,
+              'N/A',
+              'N/A',
+              'N/A',
+              '0',
+              'N/A',
+              'N/A',
+            ]);
+          } else {
+            const bestAttempt = userAttempts.reduce((best, a) =>
+              (a.score || 0) > (best.score || 0) ? a : best
+            );
+            const lastAttempt = userAttempts.reduce((last, a) =>
+              new Date(a.submitted_at!) > new Date(last.submitted_at!) ? a : last
+            );
+
+            rows.push([
+              student.name,
+              student.email,
+              student.id,
+              mod.title,
+              quizTypeLabel,
+              quiz.title,
+              bestAttempt.score !== null ? Math.round(bestAttempt.score).toString() : '0',
+              bestAttempt.points_earned.toString(),
+              bestAttempt.points_possible.toString(),
+              userAttempts.length.toString(),
+              bestAttempt.passed ? 'Yes' : 'No',
+              lastAttempt.submitted_at
+                ? new Date(lastAttempt.submitted_at).toISOString().split('T')[0]
                 : '',
-            ].join(',')
-          );
+            ]);
+          }
         }
       }
+    }
 
-      return header + '\n' + rows.join('\n');
-    });
+    const csvLines = [
+      headers.map(escapeCSV).join(','),
+      ...rows.map(row => row.map(escapeCSV).join(',')),
+    ];
+    const csvContent = csvLines.join('\n');
 
     return new NextResponse(csvContent, {
       headers: {
-        'Content-Type': 'text/csv',
+        'Content-Type': 'text/csv; charset=utf-8',
         'Content-Disposition': `attachment; filename="quiz-grades-${courseId}.csv"`,
       },
     });
   } catch (error) {
     console.error('Error exporting quiz grades:', error);
-    return NextResponse.json(
-      { error: 'Failed to export grades' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to export' }, { status: 500 });
   }
 }

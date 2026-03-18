@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/config';
 import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry';
+import { hasFacultyAccess } from '@/lib/auth/utils';
 import { saveAnswersSchema } from '@/lib/quiz/schemas';
 
 /**
  * GET /api/quizzes/[quizId]/attempts/[attemptId]
- * Get detailed attempt review
+ * Get attempt detail for review.
+ * Faculty can view any attempt, students only their own.
+ * For students, conditionally include correct answers based on feedback_depth.
  */
 export async function GET(
   request: NextRequest,
@@ -19,25 +22,25 @@ export async function GET(
     }
 
     const { attemptId } = await params;
+    const isFaculty = hasFacultyAccess(session);
 
     const attempt = await withDatabaseRetry(async () => {
       return await prisma.quiz_attempts.findUnique({
         where: { id: attemptId },
         include: {
-          answers: {
-            include: {
-              question: {
-                include: {
-                  options: { orderBy: { sort_order: 'asc' } },
-                },
-              },
-            },
+          question_instances: {
+            orderBy: { sort_order: 'asc' },
           },
+          answers: true,
           quiz: {
             select: {
-              show_correct_answers: true,
+              id: true,
               title: true,
+              quiz_type: true,
               pass_threshold: true,
+              mastery_threshold: true,
+              feedback_timing: true,
+              feedback_depth: true,
             },
           },
         },
@@ -48,15 +51,86 @@ export async function GET(
       return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
     }
 
-    // Only allow the attempt owner to view it
-    if (attempt.user_id !== session.user.id) {
-      // Allow faculty to view any attempt
-      const userRole = session.user.role;
-      if (userRole !== 'faculty' && userRole !== 'admin') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-      }
+    // Faculty can view any attempt, students only their own
+    if (attempt.user_id !== session.user.id && !isFaculty) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // For faculty, return full data including correct answers
+    if (isFaculty) {
+      return NextResponse.json({ attempt });
+    }
+
+    // For students, apply feedback_depth rules
+    const feedbackDepth = attempt.quiz.feedback_depth;
+    const isSubmitted = attempt.status === 'submitted';
+
+    // If attempt is still in progress, strip correct answers
+    if (!isSubmitted) {
+      const sanitizedInstances = attempt.question_instances.map(inst => ({
+        ...inst,
+        options_snapshot: Array.isArray(inst.options_snapshot)
+          ? (inst.options_snapshot as Array<Record<string, unknown>>).map(
+              ({ is_correct: _removed, explanation: _exp, ...opt }) => opt
+            )
+          : inst.options_snapshot,
+      }));
+
+      return NextResponse.json({
+        attempt: {
+          ...attempt,
+          question_instances: sanitizedInstances,
+        },
+      });
+    }
+
+    // For submitted attempts, apply feedback depth
+    if (feedbackDepth === 'score_only') {
+      // Only show score, no question-level details
+      return NextResponse.json({
+        attempt: {
+          id: attempt.id,
+          quiz_id: attempt.quiz_id,
+          quiz_type: attempt.quiz_type,
+          attempt_number: attempt.attempt_number,
+          status: attempt.status,
+          score: attempt.score,
+          raw_score: attempt.raw_score,
+          points_earned: attempt.points_earned,
+          points_possible: attempt.points_possible,
+          passed: attempt.passed,
+          started_at: attempt.started_at,
+          submitted_at: attempt.submitted_at,
+          time_spent_seconds: attempt.time_spent_seconds,
+          xp_awarded: attempt.xp_awarded,
+          quiz: attempt.quiz,
+          question_instances: [],
+          answers: [],
+        },
+      });
+    }
+
+    if (feedbackDepth === 'which_wrong') {
+      // Show which answers were wrong, but not the correct answers
+      const sanitizedInstances = attempt.question_instances.map(inst => ({
+        ...inst,
+        options_snapshot: Array.isArray(inst.options_snapshot)
+          ? (inst.options_snapshot as Array<Record<string, unknown>>).map(
+              ({ is_correct: _removed, explanation: _exp, ...opt }) => opt
+            )
+          : inst.options_snapshot,
+      }));
+
+      return NextResponse.json({
+        attempt: {
+          ...attempt,
+          question_instances: sanitizedInstances,
+          // answers still include is_correct flag per answer so student sees which they got wrong
+        },
+      });
+    }
+
+    // feedback_depth === 'full' — show everything including correct answers and explanations
     return NextResponse.json({ attempt });
   } catch (error) {
     console.error('Error fetching attempt:', error);
@@ -69,7 +143,7 @@ export async function GET(
 
 /**
  * PUT /api/quizzes/[quizId]/attempts/[attemptId]
- * Save partial answers (auto-save)
+ * Save answers (auto-save). Upsert quiz_attempt_answers.
  */
 export async function PUT(
   request: NextRequest,
@@ -118,28 +192,32 @@ export async function PUT(
           },
           update: {
             selected_option_ids: answer.selected_option_ids,
-            text_answer: answer.text_answer,
+            question_instance_id: answer.question_instance_id,
+            response_time_ms: answer.response_time_ms ?? null,
           },
           create: {
             attempt_id: attemptId,
             question_id: answer.question_id,
+            question_instance_id: answer.question_instance_id,
             selected_option_ids: answer.selected_option_ids,
-            text_answer: answer.text_answer,
+            response_time_ms: answer.response_time_ms ?? null,
           },
         });
       }
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    if (error?.message === 'NOT_FOUND') {
-      return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
-    }
-    if (error?.message === 'ALREADY_SUBMITTED') {
-      return NextResponse.json(
-        { error: 'Attempt already submitted' },
-        { status: 409 }
-      );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.message === 'NOT_FOUND') {
+        return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
+      }
+      if (error.message === 'ALREADY_SUBMITTED') {
+        return NextResponse.json(
+          { error: 'Attempt already submitted' },
+          { status: 409 }
+        );
+      }
     }
     console.error('Error saving answers:', error);
     return NextResponse.json(

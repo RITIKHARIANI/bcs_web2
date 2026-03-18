@@ -26,8 +26,8 @@ export function MarkCompleteButton({
   const [isCompleted, setIsCompleted] = useState(initialStatus === 'completed');
   const [isLoading, setIsLoading] = useState(false);
   const [quizGate, setQuizGate] = useState<{
-    requiresPass: boolean;
-    passed: boolean;
+    canComplete: boolean;
+    unlockCondition: string;
   } | null>(null);
 
   // Check quiz gate status
@@ -37,8 +37,8 @@ export function MarkCompleteButton({
         const res = await fetch(`/api/progress/module/${moduleId}/quiz-status`);
         if (res.ok) {
           const data = await res.json();
-          if (data.hasQuiz && data.requiresPass) {
-            setQuizGate({ requiresPass: true, passed: data.passed });
+          if (data.unlockCondition && data.unlockCondition !== 'completion') {
+            setQuizGate({ canComplete: data.canComplete, unlockCondition: data.unlockCondition });
           }
         }
       } catch {
@@ -48,7 +48,7 @@ export function MarkCompleteButton({
     checkQuizGate();
   }, [moduleId]);
 
-  const isQuizBlocked = quizGate?.requiresPass && !quizGate?.passed && !isCompleted;
+  const isQuizBlocked = quizGate && !quizGate.canComplete && !isCompleted;
 
   const handleToggle = async () => {
     setIsLoading(true);
@@ -144,7 +144,12 @@ export function MarkCompleteButton({
         className="gap-2 opacity-70 cursor-not-allowed"
       >
         <Lock className="h-4 w-4" />
-        <span>Pass the quiz to complete this module</span>
+        <span>{
+          quizGate?.unlockCondition === 'mastery' ? 'Pass the mastery check to complete' :
+          quizGate?.unlockCondition === 'assessment' ? 'Pass the assessment to complete' :
+          quizGate?.unlockCondition === 'both' ? 'Pass mastery check and assessment to complete' :
+          'Complete quiz requirements to continue'
+        }</span>
       </NeuralButton>
     );
   }

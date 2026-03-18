@@ -1,170 +1,180 @@
 /**
- * Quiz Grading Logic
+ * Quiz V2 Grading Logic
  *
- * Handles auto-grading for all question types and XP calculation.
+ * Question types: multiple_choice, multiple_select, true_false only.
+ * All grading is all-or-nothing per question.
+ * Supports weighted scoring and scoring procedures.
  */
 
-interface QuestionWithOptions {
+interface OptionSnapshot {
   id: string;
-  question_type: string;
-  points: number;
-  short_answer_keywords: string[];
-  case_sensitive: boolean;
-  options: Array<{
-    id: string;
-    is_correct: boolean;
-  }>;
+  text: string;
+  is_correct: boolean;
+  explanation?: string | null;
+}
+
+interface QuestionInstance {
+  id: string;
+  question_id: string;
+  weight: number;
+  question_text_snapshot: string;
+  options_snapshot: OptionSnapshot[];
 }
 
 interface AnswerInput {
   question_id: string;
+  question_instance_id: string;
   selected_option_ids: string[];
-  text_answer?: string | null;
 }
 
 export interface GradedAnswer {
   question_id: string;
-  is_correct: boolean | null; // null = needs manual review
+  question_instance_id: string;
+  is_correct: boolean;
   points_earned: number;
+  weight: number;
 }
 
 /**
- * Grade a single answer based on question type
+ * Grade a single answer against a question instance snapshot
  */
 export function gradeAnswer(
-  question: QuestionWithOptions,
-  answer: AnswerInput
+  instance: QuestionInstance,
+  answer: AnswerInput,
+  points: number
 ): GradedAnswer {
-  switch (question.question_type) {
-    case 'multiple_choice':
-    case 'true_false': {
-      const correctOption = question.options.find(o => o.is_correct);
-      const isCorrect =
-        answer.selected_option_ids.length === 1 &&
-        answer.selected_option_ids[0] === correctOption?.id;
-      return {
-        question_id: question.id,
-        is_correct: isCorrect,
-        points_earned: isCorrect ? question.points : 0,
-      };
-    }
+  const options = instance.options_snapshot as OptionSnapshot[];
+  const correctIds = new Set(options.filter(o => o.is_correct).map(o => o.id));
+  const selectedIds = new Set(answer.selected_option_ids);
 
-    case 'multiple_select': {
-      const correctIds = new Set(
-        question.options.filter(o => o.is_correct).map(o => o.id)
-      );
-      const selectedIds = new Set(answer.selected_option_ids);
+  // All-or-nothing: exact set match
+  const isCorrect =
+    correctIds.size === selectedIds.size &&
+    [...correctIds].every(id => selectedIds.has(id));
 
-      // Exact set match
-      const isCorrect =
-        correctIds.size === selectedIds.size &&
-        [...correctIds].every(id => selectedIds.has(id));
-
-      return {
-        question_id: question.id,
-        is_correct: isCorrect,
-        points_earned: isCorrect ? question.points : 0,
-      };
-    }
-
-    case 'short_answer': {
-      if (!answer.text_answer || answer.text_answer.trim() === '') {
-        return {
-          question_id: question.id,
-          is_correct: false,
-          points_earned: 0,
-        };
-      }
-
-      if (question.short_answer_keywords.length === 0) {
-        // No keywords defined - flag for manual review
-        return {
-          question_id: question.id,
-          is_correct: null,
-          points_earned: 0,
-        };
-      }
-
-      const studentAnswer = question.case_sensitive
-        ? answer.text_answer.trim()
-        : answer.text_answer.trim().toLowerCase();
-
-      const matched = question.short_answer_keywords.some(keyword => {
-        const k = question.case_sensitive ? keyword : keyword.toLowerCase();
-        return studentAnswer.includes(k);
-      });
-
-      if (matched) {
-        return {
-          question_id: question.id,
-          is_correct: true,
-          points_earned: question.points,
-        };
-      }
-
-      // No keyword match - flag for manual review
-      return {
-        question_id: question.id,
-        is_correct: null,
-        points_earned: 0,
-      };
-    }
-
-    default:
-      return {
-        question_id: question.id,
-        is_correct: null,
-        points_earned: 0,
-      };
-  }
+  return {
+    question_id: instance.question_id,
+    question_instance_id: instance.id,
+    is_correct: isCorrect,
+    points_earned: isCorrect ? points : 0,
+    weight: instance.weight,
+  };
 }
 
 /**
- * Grade all answers for a quiz attempt
+ * Grade all answers for a quiz attempt using weighted scoring
  */
 export function gradeAttempt(
-  questions: QuestionWithOptions[],
-  answers: AnswerInput[]
+  instances: QuestionInstance[],
+  answers: AnswerInput[],
+  questionPoints: Map<string, number> // question_id -> points
 ): {
   gradedAnswers: GradedAnswer[];
   pointsEarned: number;
   pointsPossible: number;
-  score: number;
+  rawScore: number;
+  weightedScore: number;
 } {
   const answerMap = new Map(answers.map(a => [a.question_id, a]));
-  const pointsPossible = questions.reduce((sum, q) => sum + q.points, 0);
 
-  const gradedAnswers = questions.map(question => {
-    const answer = answerMap.get(question.id);
+  const gradedAnswers = instances.map(instance => {
+    const answer = answerMap.get(instance.question_id);
+    const pts = questionPoints.get(instance.question_id) || 1;
     if (!answer) {
       return {
-        question_id: question.id,
+        question_id: instance.question_id,
+        question_instance_id: instance.id,
         is_correct: false,
         points_earned: 0,
+        weight: instance.weight,
       };
     }
-    return gradeAnswer(question, answer);
+    return gradeAnswer(instance, answer, pts);
   });
 
+  const pointsPossible = gradedAnswers.reduce(
+    (sum, a) => sum + (questionPoints.get(a.question_id) || 1),
+    0
+  );
   const pointsEarned = gradedAnswers.reduce(
     (sum, a) => sum + a.points_earned,
     0
   );
-  const score = pointsPossible > 0 ? (pointsEarned / pointsPossible) * 100 : 0;
+
+  // Raw score (unweighted)
+  const rawScore = pointsPossible > 0 ? (pointsEarned / pointsPossible) * 100 : 0;
+
+  // Weighted score: Σ(weight × points_earned) / Σ(weight × points_possible) × 100
+  const weightedNumerator = gradedAnswers.reduce(
+    (sum, a) => sum + a.weight * a.points_earned,
+    0
+  );
+  const weightedDenominator = gradedAnswers.reduce(
+    (sum, a) => sum + a.weight * (questionPoints.get(a.question_id) || 1),
+    0
+  );
+  const weightedScore = weightedDenominator > 0
+    ? (weightedNumerator / weightedDenominator) * 100
+    : 0;
 
   return {
     gradedAnswers,
     pointsEarned,
     pointsPossible,
-    score: Math.round(score * 100) / 100,
+    rawScore: Math.round(rawScore * 100) / 100,
+    weightedScore: Math.round(weightedScore * 100) / 100,
   };
 }
 
 /**
- * Calculate XP to award for a quiz attempt.
- * Uses delta-only approach: only awards max(0, newXP - previousBestXP).
+ * Apply scoring procedure across multiple attempt scores
  */
-export function calculateQuizXP(params: {
+export function applyScoringProcedure(
+  scores: number[],
+  procedure: 'best' | 'last' | 'average_drop_n',
+  dropCount: number = 0
+): number {
+  if (scores.length === 0) return 0;
+
+  switch (procedure) {
+    case 'best':
+      return Math.max(...scores);
+
+    case 'last':
+      return scores[scores.length - 1];
+
+    case 'average_drop_n': {
+      if (scores.length <= dropCount) return 0;
+      const sorted = [...scores].sort((a, b) => a - b);
+      const kept = sorted.slice(dropCount);
+      const avg = kept.reduce((sum, s) => sum + s, 0) / kept.length;
+      return Math.round(avg * 100) / 100;
+    }
+
+    default:
+      return Math.max(...scores);
+  }
+}
+
+/**
+ * Calculate XP for mastery check.
+ * Award xp_reward on first mastery only. No XP on retakes.
+ */
+export function calculateMasteryXP(params: {
+  baseXP: number;
+  isMastered: boolean;
+  previouslyMastered: boolean;
+}): number {
+  const { baseXP, isMastered, previouslyMastered } = params;
+  if (!isMastered || previouslyMastered) return 0;
+  return baseXP;
+}
+
+/**
+ * Calculate XP for assessment.
+ * Delta-only: only awards max(0, newXP - previousBestXP).
+ */
+export function calculateAssessmentXP(params: {
   baseXP: number;
   score: number;
   attemptNumber: number;
@@ -184,7 +194,6 @@ export function calculateQuizXP(params: {
     xp = Math.round(xp * 1.25);
   }
 
-  // Delta-only: only award the difference above previous best
-  const delta = Math.max(0, xp - previousBestXP);
-  return delta;
+  // Delta-only
+  return Math.max(0, xp - previousBestXP);
 }
