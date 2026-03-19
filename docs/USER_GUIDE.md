@@ -705,7 +705,7 @@ Navigate to `/faculty/modules/edit/[id]` to update any module field, add media, 
 
 The **Quiz** tab in the module editor is where you build question banks and configure quizzes. Each module supports one question bank and up to two quizzes: a **Mastery Check** (formative, unlimited attempts) and a **Module Assessment** (summative, configurable limits).
 
-> For the full technical reference — including block configuration, scoring procedures, XP calculations, item analysis, and import/export — see the [Quiz System Guide](./QUIZ_SYSTEM_GUIDE.md).
+> For the full technical reference — including block configuration, scoring procedures, XP calculations, item analysis, and import/export — see the [Quiz System Guide](/guide/quiz-system).
 
 #### Question Bank
 
