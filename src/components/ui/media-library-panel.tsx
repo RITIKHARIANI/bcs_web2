@@ -170,6 +170,7 @@ export function MediaLibraryPanel({
 
   const handleUploadComplete = useCallback((file: MediaFile) => {
     refetch();
+    setActiveTab('library');
     toast.success('File uploaded successfully');
   }, [refetch]);
 
