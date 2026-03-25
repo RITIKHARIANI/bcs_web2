@@ -15,6 +15,7 @@ import { MasterySettingsForm } from './MasterySettingsForm';
 import { AssessmentSettingsForm } from './AssessmentSettingsForm';
 import { QuizAnalytics } from './QuizAnalytics';
 import { Loader2, Plus, Save, Trash2, Brain, ClipboardCheck } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 
 interface QuizBuilderV2Props {
@@ -82,6 +83,7 @@ export function QuizBuilderV2({ moduleId }: QuizBuilderV2Props) {
   const [mastery, setMastery] = useState<QuizData>(defaultMastery);
   const [assessment, setAssessment] = useState<QuizData>(defaultAssessment);
   const [saving, setSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Load existing quizzes
   const { data: quizzes, isLoading } = useQuery({
@@ -200,10 +202,13 @@ export function QuizBuilderV2({ moduleId }: QuizBuilderV2Props) {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDeleteClick = () => {
     if (!currentQuiz.id) return;
-    if (!confirm(`Delete this ${activeType === 'mastery_check' ? 'mastery check' : 'assessment'}?`)) return;
+    setShowDeleteConfirm(true);
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!currentQuiz.id) return;
     try {
       const res = await fetch(`/api/modules/${moduleId}/quiz/${currentQuiz.id}`, {
         method: 'DELETE',
@@ -215,6 +220,7 @@ export function QuizBuilderV2({ moduleId }: QuizBuilderV2Props) {
     } catch {
       toast.error('Failed to delete quiz');
     }
+    setShowDeleteConfirm(false);
   };
 
   const addBlock = () => {
@@ -259,6 +265,14 @@ export function QuizBuilderV2({ moduleId }: QuizBuilderV2Props) {
 
   return (
     <div className="space-y-6">
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title={`Delete ${activeType === 'mastery_check' ? 'Mastery Check' : 'Assessment'}`}
+        description="This quiz and all its blocks will be permanently deleted. Student attempt data will be preserved."
+        confirmLabel="Delete"
+        onConfirm={handleDeleteConfirm}
+      />
       {/* Type Selector */}
       <Tabs value={activeType} onValueChange={setActiveType}>
         <TabsList className="grid w-full grid-cols-2">
@@ -391,7 +405,7 @@ export function QuizBuilderV2({ moduleId }: QuizBuilderV2Props) {
                 {currentQuiz.id && (
                   <NeuralButton
                     variant="outline"
-                    onClick={handleDelete}
+                    onClick={handleDeleteClick}
                     className="text-red-600 hover:text-red-700"
                   >
                     <Trash2 className="h-4 w-4 mr-1" /> Delete

@@ -9,6 +9,7 @@ import { Loader2, Plus, Download, Upload, BookOpen } from 'lucide-react';
 import { QuestionBankQuestionEditor } from './QuestionBankQuestionEditor';
 import { QuestionSetEditor } from './QuestionSetEditor';
 import { QuizImportExport } from './QuizImportExport';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 
 interface QuestionBankEditorProps {
@@ -21,6 +22,7 @@ export function QuestionBankEditor({ moduleId }: QuestionBankEditorProps) {
   const [newQuestion, setNewQuestion] = useState(false);
   const [newSetName, setNewSetName] = useState('');
   const [showNewSet, setShowNewSet] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'question' | 'set'; id: string; label: string } | null>(null);
 
   const { data: bank, isLoading } = useQuery({
     queryKey: ['question-bank', moduleId],
@@ -56,8 +58,7 @@ export function QuestionBankEditor({ moduleId }: QuestionBankEditorProps) {
     setNewQuestion(false);
   }, [moduleId, invalidateBank]);
 
-  const deleteQuestion = useCallback(async (questionId: string) => {
-    if (!confirm('Delete this question?')) return;
+  const doDeleteQuestion = useCallback(async (questionId: string) => {
     const res = await fetch(`/api/modules/${moduleId}/question-bank/questions/${questionId}`, {
       method: 'DELETE',
     });
@@ -65,6 +66,10 @@ export function QuestionBankEditor({ moduleId }: QuestionBankEditorProps) {
     toast.success('Question deleted');
     invalidateBank();
   }, [moduleId, invalidateBank]);
+
+  const deleteQuestion = useCallback((questionId: string) => {
+    setDeleteConfirm({ type: 'question', id: questionId, label: 'Delete this question?' });
+  }, []);
 
   const duplicateQuestion = useCallback(async (questionId: string) => {
     const res = await fetch(`/api/modules/${moduleId}/question-bank/questions/${questionId}/duplicate`, {
@@ -141,6 +146,24 @@ export function QuestionBankEditor({ moduleId }: QuestionBankEditorProps) {
 
   return (
     <div className="space-y-6">
+      <ConfirmDialog
+        open={!!deleteConfirm}
+        onOpenChange={(open) => { if (!open) setDeleteConfirm(null); }}
+        title={deleteConfirm?.type === 'question' ? 'Delete Question' : 'Delete Set'}
+        description={deleteConfirm?.type === 'question'
+          ? 'This question will be permanently removed from the bank.'
+          : 'This set will be deleted. Questions will remain in the bank.'}
+        confirmLabel="Delete"
+        onConfirm={async () => {
+          if (!deleteConfirm) return;
+          if (deleteConfirm.type === 'question') {
+            await doDeleteQuestion(deleteConfirm.id);
+          } else {
+            await deleteSet(deleteConfirm.id);
+          }
+          setDeleteConfirm(null);
+        }}
+      />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -197,7 +220,7 @@ export function QuestionBankEditor({ moduleId }: QuestionBankEditorProps) {
                 allQuestions={questions}
                 moduleId={moduleId}
                 onUpdate={(data) => updateSet(set.id, data)}
-                onDelete={() => deleteSet(set.id)}
+                onDelete={() => setDeleteConfirm({ type: 'set', id: set.id, label: set.title })}
                 onAddQuestions={(qIds) => addQuestionsToSet(set.id, qIds)}
                 onRemoveQuestion={(qId) => removeQuestionFromSet(set.id, qId)}
               />

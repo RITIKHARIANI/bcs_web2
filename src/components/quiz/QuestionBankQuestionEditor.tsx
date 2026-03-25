@@ -38,7 +38,7 @@ interface QuestionBankQuestionEditorProps {
   moduleId: string;
   bankId: string;
   onSave: (question: Question) => Promise<void>;
-  onDelete?: () => Promise<void>;
+  onDelete?: () => void | Promise<void>;
   onDuplicate?: () => Promise<void>;
   isNew?: boolean;
 }

@@ -34,7 +34,7 @@ interface QuestionSetEditorProps {
   allQuestions: Question[];
   moduleId: string;
   onUpdate: (set: Partial<QuestionSet>) => Promise<void>;
-  onDelete: () => Promise<void>;
+  onDelete: () => void | Promise<void>;
   onAddQuestions: (questionIds: string[]) => Promise<void>;
   onRemoveQuestion: (questionId: string) => Promise<void>;
 }
@@ -192,11 +192,7 @@ export function QuestionSetEditor({
               variant="outline"
               size="sm"
               className="text-red-600 hover:text-red-700"
-              onClick={async () => {
-                if (confirm('Delete this set? Questions will remain in the bank.')) {
-                  await onDelete();
-                }
-              }}
+              onClick={() => onDelete()}
             >
               <Trash2 className="h-3 w-3 mr-1" /> Delete Set
             </NeuralButton>
