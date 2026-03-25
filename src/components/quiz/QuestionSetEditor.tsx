@@ -86,7 +86,7 @@ export function QuestionSetEditor({
   };
 
   return (
-    <Card className="cognitive-card">
+    <Card className={`cognitive-card ${expanded ? 'relative z-20 overflow-visible' : ''}`} style={expanded ? { overflow: 'visible' } : undefined}>
       <CardHeader className="p-3 cursor-pointer" onClick={() => setExpanded(!expanded)}>
         <div className="flex items-center gap-2">
           <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
@@ -99,7 +99,7 @@ export function QuestionSetEditor({
       </CardHeader>
 
       {expanded && (
-        <CardContent className="p-3 pt-0 space-y-3">
+        <CardContent className="p-3 pt-0 space-y-3 overflow-visible">
           {/* Title edit */}
           <div>
             <Input
@@ -169,7 +169,7 @@ export function QuestionSetEditor({
             </NeuralButton>
 
             {showAddMenu && availableQuestions.length > 0 && (
-              <div className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto bg-background border rounded-md shadow-lg">
+              <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto bg-background border rounded-md shadow-lg">
                 {availableQuestions.map(q => (
                   <button
                     key={q.id}
