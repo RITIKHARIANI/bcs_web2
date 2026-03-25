@@ -27,7 +27,8 @@ export function QuestionBankEditor({ moduleId }: QuestionBankEditorProps) {
     queryFn: async () => {
       const res = await fetch(`/api/modules/${moduleId}/question-bank`);
       if (!res.ok) throw new Error('Failed to load question bank');
-      return res.json();
+      const data = await res.json();
+      return data.bank;
     },
   });
 

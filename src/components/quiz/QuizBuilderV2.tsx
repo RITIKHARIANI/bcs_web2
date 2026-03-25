@@ -99,7 +99,8 @@ export function QuizBuilderV2({ moduleId }: QuizBuilderV2Props) {
     queryFn: async () => {
       const res = await fetch(`/api/modules/${moduleId}/question-bank`);
       if (!res.ok) return null;
-      return res.json();
+      const data = await res.json();
+      return data.bank;
     },
   });
 
