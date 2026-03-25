@@ -128,7 +128,6 @@ export function MediaLibraryPanel({
   const documentFiles = filteredFiles.filter(f => !f.mimeType.startsWith('image/') && !f.mimeType.startsWith('video/'));
 
   const totalSize = mediaFiles.reduce((acc, file) => acc + file.fileSize, 0);
-  const maxSize = 100 * 1024 * 1024; // 100MB limit
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType.startsWith('image/')) return <ImageIcon className="h-4 w-4" />;
@@ -186,16 +185,10 @@ export function MediaLibraryPanel({
         </CardDescription>
 
         {/* Storage Usage */}
-        <div className="mt-3 space-y-1">
+        <div className="mt-3">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Storage Used</span>
-            <span>{formatFileSize(totalSize)} / {formatFileSize(maxSize)}</span>
-          </div>
-          <div className="w-full bg-border rounded-full h-2">
-            <div
-              className="bg-gradient-neural h-2 rounded-full transition-all"
-              style={{ width: `${Math.min((totalSize / maxSize) * 100, 100)}%` }}
-            />
+            <span>{formatFileSize(totalSize)}</span>
           </div>
         </div>
       </CardHeader>
