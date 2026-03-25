@@ -114,6 +114,11 @@ export const saveAnswersSchema = z.object({
   ),
 });
 
+export const checkAnswerSchema = z.object({
+  question_instance_id: z.string(),
+  selected_option_ids: z.array(z.string()).min(1),
+});
+
 // ==================== Import/Export Schemas ====================
 
 export const importBankSchema = z.object({
@@ -155,4 +160,5 @@ export type CreateBlockInput = z.infer<typeof createBlockSchema>;
 export type UpdateBlockInput = z.infer<typeof updateBlockSchema>;
 export type StartAttemptInput = z.infer<typeof startAttemptSchema>;
 export type SaveAnswersInput = z.infer<typeof saveAnswersSchema>;
+export type CheckAnswerInput = z.infer<typeof checkAnswerSchema>;
 export type ImportBankInput = z.infer<typeof importBankSchema>;

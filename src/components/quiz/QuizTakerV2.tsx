@@ -239,8 +239,9 @@ export function QuizTakerV2({ quizId, quizType, moduleId, courseId, onQuizComple
     }));
   };
 
-  // Mastery: check answer for current question and show inline feedback
-  const checkMasteryAnswer = () => {
+  // Mastery: check answer via server-side endpoint for accurate grading
+  const [checkingAnswer, setCheckingAnswer] = useState(false);
+  const checkMasteryAnswer = async () => {
     if (!attempt) return;
     const instances = attempt.question_instances || [];
     const current = instances[currentStep];
@@ -252,25 +253,48 @@ export function QuizTakerV2({ quizId, quizType, moduleId, courseId, onQuizComple
       return;
     }
 
-    const options = current.options_snapshot as any[];
-    const correctIds = new Set(options.filter((o: any) => o.is_correct).map((o: any) => o.id));
-    const selectedIds = new Set(answer.selected_option_ids);
-    const isCorrect = correctIds.size === selectedIds.size && [...correctIds].every(id => selectedIds.has(id));
+    setCheckingAnswer(true);
+    try {
+      const res = await fetch(
+        `/api/quizzes/${quizId}/attempts/${attempt.id}/check-answer`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question_instance_id: current.id,
+            selected_option_ids: answer.selected_option_ids,
+          }),
+        }
+      );
 
-    const explanations = options.map((opt: any) => ({
-      optionText: opt.text,
-      isCorrect: opt.is_correct,
-      explanation: opt.explanation,
-      wasSelected: selectedIds.has(opt.id),
-    }));
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.error || 'Failed to check answer');
+        return;
+      }
 
-    setAnswers(prev => ({
-      ...prev,
-      [current.question_id]: {
-        ...prev[current.question_id],
-        feedback: { is_correct: isCorrect, explanations },
-      },
-    }));
+      const data = await res.json();
+
+      setAnswers(prev => ({
+        ...prev,
+        [current.question_id]: {
+          ...prev[current.question_id],
+          feedback: {
+            is_correct: data.is_correct,
+            explanations: data.explanations.map((e: any) => ({
+              optionText: e.optionText,
+              isCorrect: e.isCorrect,
+              explanation: e.explanation,
+              wasSelected: e.wasSelected,
+            })),
+          },
+        },
+      }));
+    } catch {
+      toast.error('Failed to check answer');
+    } finally {
+      setCheckingAnswer(false);
+    }
   };
 
   const loadAttemptReview = async (attemptId: string) => {
@@ -425,8 +449,8 @@ export function QuizTakerV2({ quizId, quizType, moduleId, courseId, onQuizComple
 
             <div className="flex justify-between pt-4 border-t">
               {!hasFeedback ? (
-                <NeuralButton variant="neural" onClick={checkMasteryAnswer}>
-                  Check Answer
+                <NeuralButton variant="neural" onClick={checkMasteryAnswer} disabled={checkingAnswer}>
+                  {checkingAnswer ? <><Loader2 className="h-4 w-4 animate-spin mr-1" /> Checking...</> : 'Check Answer'}
                 </NeuralButton>
               ) : isLastQuestion ? (
                 <NeuralButton variant="neural" onClick={submitQuiz} disabled={submitting}>
