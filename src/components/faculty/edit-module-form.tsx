@@ -63,6 +63,7 @@ const editModuleSchema = z.object({
   difficultyLevel: z.enum(['beginner', 'intermediate', 'advanced', 'boss']).default('beginner'),
   estimatedMinutes: z.number().int().min(0).max(999).optional(),
   questType: z.enum(['standard', 'challenge', 'boss', 'bonus']).default('standard'),
+  unlockCondition: z.enum(['completion', 'mastery', 'assessment', 'both']).default('completion'),
 })
 
 type EditModuleFormData = z.infer<typeof editModuleSchema>
@@ -103,6 +104,7 @@ interface Module {
   difficulty_level: 'beginner' | 'intermediate' | 'advanced' | 'boss'
   estimated_minutes: number | null
   quest_type: 'standard' | 'challenge' | 'boss' | 'bonus'
+  unlock_condition: string
 }
 
 interface ParentModule {
@@ -151,6 +153,7 @@ async function updateModule(id: string, data: EditModuleFormData) {
     difficultyLevel,
     estimatedMinutes,
     questType,
+    unlockCondition,
     ...rest
   } = data;
 
@@ -164,6 +167,7 @@ async function updateModule(id: string, data: EditModuleFormData) {
     difficulty_level: difficultyLevel,
     estimated_minutes: estimatedMinutes,
     quest_type: questType,
+    unlock_condition: unlockCondition,
   }
 
   const response = await fetch(`/api/modules/${id}`, {
@@ -317,6 +321,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
       setValue('difficultyLevel', module.difficulty_level || 'beginner')
       setValue('estimatedMinutes', module.estimated_minutes ?? undefined)
       setValue('questType', module.quest_type || 'standard')
+      setValue('unlockCondition', (module.unlock_condition as any) || 'completion')
     }
   }, [module, setValue])
 
@@ -803,6 +808,30 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
               {watchedVisibility === 'public'
                 ? 'Other faculty can discover and add this module to their courses. Students see it in the module catalog.'
                 : 'Only you can see and use this module. It won\u2019t appear in the module catalog or be available to other faculty.'}
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Module Completion Requirement</Label>
+            <Controller
+              name="unlockCondition"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="completion">Content Only</SelectItem>
+                    <SelectItem value="mastery">Mastery Check Required</SelectItem>
+                    <SelectItem value="assessment">Assessment Required</SelectItem>
+                    <SelectItem value="both">Both Mastery &amp; Assessment</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <p className="text-xs text-muted-foreground">
+              Controls what students must complete before they can mark this module as done.
             </p>
           </div>
         </CardContent>
