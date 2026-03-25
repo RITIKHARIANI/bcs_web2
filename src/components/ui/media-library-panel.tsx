@@ -45,6 +45,7 @@ interface MediaFile {
 interface MediaLibraryPanelProps {
   moduleId?: string;
   onMediaSelect?: (file: MediaFile, altText?: string, caption?: string) => void;
+  onMediaDelete?: (file: MediaFile) => void;
   editorContent?: string;
   className?: string;
 }
@@ -65,6 +66,7 @@ async function fetchMediaFiles(moduleId?: string): Promise<MediaFile[]> {
 export function MediaLibraryPanel({
   moduleId,
   onMediaSelect,
+  onMediaDelete,
   editorContent,
   className = ''
 }: MediaLibraryPanelProps) {
@@ -92,6 +94,9 @@ export function MediaLibraryPanel({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['media-files', moduleId] });
+      if (deleteTarget && isFileInUse(deleteTarget)) {
+        onMediaDelete?.(deleteTarget);
+      }
       setShowDeleteDialog(false);
       setDeleteTarget(null);
       toast.success('File deleted');

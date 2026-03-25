@@ -925,6 +925,13 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
           insertImageFn(file.url, altText || file.originalName, caption);
         }
       }}
+      onMediaDelete={(file) => {
+        const content = watch('content') || '';
+        const div = document.createElement('div');
+        div.innerHTML = content;
+        div.querySelectorAll(`img[src="${file.url}"]`).forEach(img => img.remove());
+        setValue('content', div.innerHTML);
+      }}
     />
   );
 
