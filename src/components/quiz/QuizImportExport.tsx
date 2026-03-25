@@ -70,7 +70,7 @@ export function QuizImportExport({ moduleId, onImportComplete }: QuizImportExpor
       }
 
       const result = await res.json();
-      toast.success(`Imported ${result.questionsCreated} questions and ${result.setsCreated} sets`);
+      toast.success(`Imported ${result.questions_created} questions and ${result.sets_created} sets`);
       onImportComplete();
     } catch {
       toast.error('Failed to import');
