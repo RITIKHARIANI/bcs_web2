@@ -153,6 +153,7 @@ export async function POST(
         block_id: string;
         question_id: string;
         question_version: number;
+        question_type: string;
         weight: number;
         sort_order: number;
         question_text_snapshot: string;
@@ -193,6 +194,7 @@ export async function POST(
             block_id: block.id,
             question_id: q.id,
             question_version: q.version,
+            question_type: q.question_type,
             weight: 1.0,
             sort_order: globalSortOrder++,
             question_text_snapshot: q.question_text,

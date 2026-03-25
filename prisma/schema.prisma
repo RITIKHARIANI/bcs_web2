@@ -864,6 +864,7 @@ model quiz_question_instances {
   question_version       Int
   weight                 Float  @default(1.0)
   sort_order             Int
+  question_type          String @default("multiple_choice") // multiple_choice | multiple_select | true_false
   question_text_snapshot String @db.Text
   options_snapshot        Json  // [{id, text, is_correct, explanation}]
 
