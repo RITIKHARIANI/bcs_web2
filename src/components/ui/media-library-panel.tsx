@@ -1,13 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { NeuralButton } from '@/components/ui/neural-button';
 import { MediaUpload } from '@/components/ui/media-upload';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import {
   Search,
@@ -19,7 +27,9 @@ import {
   HardDrive,
   Grid3x3,
   List,
-  X
+  X,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface MediaFile {
@@ -35,6 +45,7 @@ interface MediaFile {
 interface MediaLibraryPanelProps {
   moduleId?: string;
   onMediaSelect?: (file: MediaFile, altText?: string, caption?: string) => void;
+  editorContent?: string;
   className?: string;
 }
 
@@ -54,6 +65,7 @@ async function fetchMediaFiles(moduleId?: string): Promise<MediaFile[]> {
 export function MediaLibraryPanel({
   moduleId,
   onMediaSelect,
+  editorContent,
   className = ''
 }: MediaLibraryPanelProps) {
   const [activeTab, setActiveTab] = useState<'library' | 'upload'>('library');
@@ -63,6 +75,31 @@ export function MediaLibraryPanel({
   const [showAltTextDialog, setShowAltTextDialog] = useState(false);
   const [altText, setAltText] = useState('');
   const [caption, setCaption] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<MediaFile | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const queryClient = useQueryClient();
+
+  const isFileInUse = (file: MediaFile) => editorContent?.includes(file.url) ?? false;
+
+  const deleteMutation = useMutation({
+    mutationFn: async (fileId: string) => {
+      const res = await fetch(`/api/media/${fileId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete file');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['media-files', moduleId] });
+      setShowDeleteDialog(false);
+      setDeleteTarget(null);
+      toast.success('File deleted');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
 
   // Disable body scroll when modal is open
   useEffect(() => {
@@ -279,6 +316,16 @@ export function MediaLibraryPanel({
                           Insert
                         </NeuralButton>
                       </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTarget(file);
+                          setShowDeleteDialog(true);
+                        }}
+                        className="absolute top-1.5 right-1.5 z-10 p-1.5 rounded-md bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                       <div className="p-2 bg-background/95 backdrop-blur">
                         <p className="text-xs font-medium truncate">
                           {file.originalName}
@@ -326,6 +373,18 @@ export function MediaLibraryPanel({
                       </div>
                       <NeuralButton variant="ghost" size="sm">
                         Insert
+                      </NeuralButton>
+                      <NeuralButton
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTarget(file);
+                          setShowDeleteDialog(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </NeuralButton>
                     </div>
                   ))}
@@ -434,6 +493,59 @@ export function MediaLibraryPanel({
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={(open) => {
+        if (!open) {
+          setShowDeleteDialog(false);
+          setDeleteTarget(null);
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Media File</DialogTitle>
+            <DialogDescription>
+              {deleteTarget && isFileInUse(deleteTarget) ? (
+                <span className="flex items-start gap-2 mt-2 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800">
+                  <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+                  <span>This image is currently used in the module content. Deleting it will cause a broken image.</span>
+                </span>
+              ) : (
+                'Are you sure? This cannot be undone.'
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          {deleteTarget && (
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground">{deleteTarget.originalName}</p>
+              <p>{formatFileSize(deleteTarget.fileSize)}</p>
+            </div>
+          )}
+          <DialogFooter>
+            <NeuralButton
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setDeleteTarget(null);
+              }}
+            >
+              Cancel
+            </NeuralButton>
+            <NeuralButton
+              variant="neural"
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (deleteTarget) {
+                  deleteMutation.mutate(deleteTarget.id);
+                }
+              }}
+            >
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            </NeuralButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

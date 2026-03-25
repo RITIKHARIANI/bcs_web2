@@ -919,6 +919,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
   const mediaContent = (
     <MediaLibraryPanel
       moduleId={moduleId}
+      editorContent={watch('content') || ''}
       onMediaSelect={(file, altText, caption) => {
         if (insertImageFn) {
           insertImageFn(file.url, altText || file.originalName, caption);
