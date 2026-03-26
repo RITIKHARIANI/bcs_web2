@@ -165,8 +165,8 @@ export function QuestionBankEditor({ moduleId }: QuestionBankEditorProps) {
         }}
       />
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <BookOpen className="h-5 w-5 text-neural-primary" />
           <h3 className="font-semibold">Question Bank</h3>
           <Badge variant="outline">{questions.length} questions</Badge>

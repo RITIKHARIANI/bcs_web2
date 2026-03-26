@@ -82,7 +82,7 @@ export function QuizImportExport({ moduleId, onImportComplete }: QuizImportExpor
 
   return (
     <Card className="cognitive-card">
-      <CardContent className="p-4 flex items-center gap-3">
+      <CardContent className="p-4 flex items-center gap-3 flex-wrap">
         <FileJson className="h-5 w-5 text-neural-primary shrink-0" />
         <div className="flex-1">
           <p className="text-sm font-medium">Import / Export Questions</p>

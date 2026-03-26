@@ -65,7 +65,7 @@ export function ItemAnalysisDashboard({ quizId }: ItemAnalysisDashboardProps) {
               </div>
 
               {/* Stats row */}
-              <div className="flex items-center gap-4 text-xs">
+              <div className="flex items-center gap-x-4 gap-y-1 flex-wrap text-xs">
                 <div className="flex items-center gap-1">
                   <Badge
                     variant="outline"

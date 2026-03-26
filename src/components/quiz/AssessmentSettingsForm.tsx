@@ -25,7 +25,7 @@ interface AssessmentSettingsFormProps {
 export function AssessmentSettingsForm({ settings, onChange }: AssessmentSettingsFormProps) {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Time Limit */}
         <div>
           <Label className="text-xs">Time Limit (minutes)</Label>
@@ -83,7 +83,7 @@ export function AssessmentSettingsForm({ settings, onChange }: AssessmentSetting
       </div>
 
       {/* Scoring Procedure */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label className="text-xs">Scoring Procedure</Label>
           <Select
@@ -116,7 +116,7 @@ export function AssessmentSettingsForm({ settings, onChange }: AssessmentSetting
       </div>
 
       {/* Feedback Settings */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label className="text-xs">Feedback Timing</Label>
           <Select

@@ -20,7 +20,7 @@ export function MasterySettingsForm({ settings, onChange }: MasterySettingsFormP
         Mastery checks always have unlimited attempts, per-question feedback, and full explanation depth.
       </p>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label className="text-xs">Mastery Threshold (%)</Label>
           <Input
