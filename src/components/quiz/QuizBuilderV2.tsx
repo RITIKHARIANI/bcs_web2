@@ -8,18 +8,18 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { NeuralButton } from '@/components/ui/neural-button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { QuizBlockEditor } from './QuizBlockEditor';
 import { MasterySettingsForm } from './MasterySettingsForm';
 import { AssessmentSettingsForm } from './AssessmentSettingsForm';
 import { QuizAnalytics } from './QuizAnalytics';
-import { Loader2, Plus, Save, Trash2, Brain, ClipboardCheck } from 'lucide-react';
+import { Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 
 interface QuizBuilderV2Props {
   moduleId: string;
+  quizType: 'mastery_check' | 'module_assessment';
 }
 
 interface QuizData {
@@ -77,9 +77,8 @@ const defaultAssessment: QuizData = {
   blocks: [],
 };
 
-export function QuizBuilderV2({ moduleId }: QuizBuilderV2Props) {
+export function QuizBuilderV2({ moduleId, quizType }: QuizBuilderV2Props) {
   const queryClient = useQueryClient();
-  const [activeType, setActiveType] = useState<string>('mastery_check');
   const [mastery, setMastery] = useState<QuizData>(defaultMastery);
   const [assessment, setAssessment] = useState<QuizData>(defaultAssessment);
   const [saving, setSaving] = useState(false);
@@ -122,8 +121,8 @@ export function QuizBuilderV2({ moduleId }: QuizBuilderV2Props) {
     questionCount: s.memberships?.length || 0,
   }));
 
-  const currentQuiz = activeType === 'mastery_check' ? mastery : assessment;
-  const setCurrentQuiz = activeType === 'mastery_check' ? setMastery : setAssessment;
+  const currentQuiz = quizType === 'mastery_check' ? mastery : assessment;
+  const setCurrentQuiz = quizType === 'mastery_check' ? setMastery : setAssessment;
 
   const handleSave = async () => {
     const data = currentQuiz;
@@ -179,8 +178,6 @@ export function QuizBuilderV2({ moduleId }: QuizBuilderV2Props) {
   };
 
   const syncBlocks = async (quizId: string, blocks: any[]) => {
-    // Delete existing blocks and recreate (simple sync approach)
-    // In a more sophisticated version, this would diff and update
     for (const block of blocks) {
       if (block.id) {
         await fetch(`/api/quizzes/${quizId}/blocks/${block.id}`, {
@@ -214,7 +211,7 @@ export function QuizBuilderV2({ moduleId }: QuizBuilderV2Props) {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Failed to delete');
-      setCurrentQuiz(activeType === 'mastery_check' ? defaultMastery : defaultAssessment);
+      setCurrentQuiz(quizType === 'mastery_check' ? defaultMastery : defaultAssessment);
       toast.success('Quiz deleted');
       queryClient.invalidateQueries({ queryKey: ['quizzes', moduleId] });
     } catch {
@@ -263,167 +260,148 @@ export function QuizBuilderV2({ moduleId }: QuizBuilderV2Props) {
     );
   }
 
+  const typeLabel = quizType === 'mastery_check' ? 'Mastery Check' : 'Module Assessment';
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <ConfirmDialog
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
-        title={`Delete ${activeType === 'mastery_check' ? 'Mastery Check' : 'Assessment'}`}
+        title={`Delete ${typeLabel}`}
         description="This quiz and all its blocks will be permanently deleted. Student attempt data will be preserved."
         confirmLabel="Delete"
         onConfirm={handleDeleteConfirm}
       />
-      {/* Type Selector */}
-      <Tabs value={activeType} onValueChange={setActiveType}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="mastery_check" className="flex items-center gap-1.5">
-            <Brain className="h-4 w-4" />
-            Mastery Check
-            {mastery.id && <Badge variant="outline" className="text-xs ml-1">{mastery.status}</Badge>}
-          </TabsTrigger>
-          <TabsTrigger value="module_assessment" className="flex items-center gap-1.5">
-            <ClipboardCheck className="h-4 w-4" />
-            Assessment
-            {assessment.id && <Badge variant="outline" className="text-xs ml-1">{assessment.status}</Badge>}
-          </TabsTrigger>
-        </TabsList>
 
-        {['mastery_check', 'module_assessment'].map(type => (
-          <TabsContent key={type} value={type}>
-            <div className="space-y-4">
-              {/* Basic Info */}
-              <Card className="cognitive-card">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">
-                    {type === 'mastery_check' ? 'Mastery Check' : 'Module Assessment'} Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-xs">Title</Label>
-                      <Input
-                        value={currentQuiz.title}
-                        onChange={(e) => setCurrentQuiz({ ...currentQuiz, title: e.target.value })}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Status</Label>
-                      <Select
-                        value={currentQuiz.status}
-                        onValueChange={(v) => setCurrentQuiz({ ...currentQuiz, status: v })}
-                      >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="published">Published</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs">Description</Label>
-                    <Textarea
-                      value={currentQuiz.description}
-                      onChange={(e) => setCurrentQuiz({ ...currentQuiz, description: e.target.value })}
-                      placeholder="Optional description..."
-                      rows={2}
-                      className="mt-1"
-                    />
-                  </div>
-
-                  {/* Type-specific settings */}
-                  {type === 'mastery_check' ? (
-                    <MasterySettingsForm
-                      settings={{
-                        mastery_threshold: currentQuiz.mastery_threshold,
-                        xp_reward: currentQuiz.xp_reward,
-                      }}
-                      onChange={(s) => setCurrentQuiz({ ...currentQuiz, ...s })}
-                    />
-                  ) : (
-                    <AssessmentSettingsForm
-                      settings={{
-                        time_limit_minutes: currentQuiz.time_limit_minutes,
-                        max_attempts: currentQuiz.max_attempts,
-                        pass_threshold: currentQuiz.pass_threshold,
-                        scoring_procedure: currentQuiz.scoring_procedure,
-                        scoring_drop_count: currentQuiz.scoring_drop_count,
-                        feedback_timing: currentQuiz.feedback_timing,
-                        feedback_depth: currentQuiz.feedback_depth,
-                        xp_reward: currentQuiz.xp_reward,
-                        randomize_blocks: currentQuiz.randomize_blocks,
-                      }}
-                      onChange={(s) => setCurrentQuiz({ ...currentQuiz, ...s })}
-                    />
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Blocks */}
-              <Card className="cognitive-card">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm">Quiz Blocks</CardTitle>
-                    <NeuralButton variant="outline" size="sm" onClick={addBlock}>
-                      <Plus className="h-3 w-3 mr-1" /> Add Block
-                    </NeuralButton>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Each block pulls N questions from a question set
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {currentQuiz.blocks.map((block: any, i: number) => (
-                    <QuizBlockEditor
-                      key={block.id || `new-${i}`}
-                      block={block}
-                      index={i}
-                      availableSets={availableSets}
-                      onChange={(b) => updateBlock(i, b)}
-                      onDelete={() => deleteBlock(i)}
-                    />
-                  ))}
-                  {currentQuiz.blocks.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No blocks yet. Add a block to pull questions from a set.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                <NeuralButton variant="neural" onClick={handleSave} disabled={saving}>
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
-                  {currentQuiz.id ? 'Update Quiz' : 'Create Quiz'}
-                </NeuralButton>
-                {currentQuiz.id && (
-                  <NeuralButton
-                    variant="outline"
-                    onClick={handleDeleteClick}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" /> Delete
-                  </NeuralButton>
-                )}
-              </div>
-
-              {/* Analytics */}
-              {currentQuiz.id && (
-                <div>
-                  <h4 className="text-sm font-medium mb-3">Analytics</h4>
-                  <QuizAnalytics quizId={currentQuiz.id} />
-                </div>
-              )}
+      {/* Basic Info */}
+      <Card className="cognitive-card">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm">
+            {typeLabel} Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label className="text-xs">Title</Label>
+              <Input
+                value={currentQuiz.title}
+                onChange={(e) => setCurrentQuiz({ ...currentQuiz, title: e.target.value })}
+                className="mt-1"
+              />
             </div>
-          </TabsContent>
-        ))}
-      </Tabs>
+            <div>
+              <Label className="text-xs">Status</Label>
+              <Select
+                value={currentQuiz.status}
+                onValueChange={(v) => setCurrentQuiz({ ...currentQuiz, status: v })}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs">Description</Label>
+            <Textarea
+              value={currentQuiz.description}
+              onChange={(e) => setCurrentQuiz({ ...currentQuiz, description: e.target.value })}
+              placeholder="Optional description..."
+              rows={2}
+              className="mt-1"
+            />
+          </div>
+
+          {/* Type-specific settings */}
+          {quizType === 'mastery_check' ? (
+            <MasterySettingsForm
+              settings={{
+                mastery_threshold: currentQuiz.mastery_threshold,
+                xp_reward: currentQuiz.xp_reward,
+              }}
+              onChange={(s) => setCurrentQuiz({ ...currentQuiz, ...s })}
+            />
+          ) : (
+            <AssessmentSettingsForm
+              settings={{
+                time_limit_minutes: currentQuiz.time_limit_minutes,
+                max_attempts: currentQuiz.max_attempts,
+                pass_threshold: currentQuiz.pass_threshold,
+                scoring_procedure: currentQuiz.scoring_procedure,
+                scoring_drop_count: currentQuiz.scoring_drop_count,
+                feedback_timing: currentQuiz.feedback_timing,
+                feedback_depth: currentQuiz.feedback_depth,
+                xp_reward: currentQuiz.xp_reward,
+                randomize_blocks: currentQuiz.randomize_blocks,
+              }}
+              onChange={(s) => setCurrentQuiz({ ...currentQuiz, ...s })}
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Blocks */}
+      <Card className="cognitive-card">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm">Quiz Blocks</CardTitle>
+            <NeuralButton variant="outline" size="sm" onClick={addBlock}>
+              <Plus className="h-3 w-3 mr-1" /> Add Block
+            </NeuralButton>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Each block pulls N questions from a question set
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {currentQuiz.blocks.map((block: any, i: number) => (
+            <QuizBlockEditor
+              key={block.id || `new-${i}`}
+              block={block}
+              index={i}
+              availableSets={availableSets}
+              onChange={(b) => updateBlock(i, b)}
+              onDelete={() => deleteBlock(i)}
+            />
+          ))}
+          {currentQuiz.blocks.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No blocks yet. Add a block to pull questions from a set.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2">
+        <NeuralButton variant="neural" onClick={handleSave} disabled={saving}>
+          {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
+          {currentQuiz.id ? 'Update Quiz' : 'Create Quiz'}
+        </NeuralButton>
+        {currentQuiz.id && (
+          <NeuralButton
+            variant="outline"
+            onClick={handleDeleteClick}
+            className="text-red-600 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4 mr-1" /> Delete
+          </NeuralButton>
+        )}
+      </div>
+
+      {/* Analytics */}
+      {currentQuiz.id && (
+        <div>
+          <h4 className="text-sm font-medium mb-3">Analytics</h4>
+          <QuizAnalytics quizId={currentQuiz.id} />
+        </div>
+      )}
     </div>
   );
 }

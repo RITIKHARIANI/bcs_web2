@@ -95,11 +95,12 @@ When you edit a question that has already been used in attempts, the system incr
 ### Creating Questions
 
 1. Open the module editor and click the **Quiz** tab
-2. In the **Question Bank** section, click **New Question**
-3. Select the question type, enter the text, set the point value
-4. Add answer options with explanations
-5. Mark the correct option(s)
-6. Click **Save**
+2. Click the **Question Bank** sub-tab
+3. Click **New Question**
+4. Select the question type, enter the text, set the point value
+5. Add answer options with explanations
+6. Mark the correct option(s)
+7. Click **Save**
 
 ### Duplicating Questions
 
@@ -121,7 +122,7 @@ Sets are the bridge between the question bank and quizzes. When you create a qui
 
 ### Creating Sets
 
-1. In the Question Bank section, click **New Set**
+1. In the **Question Bank** sub-tab, click **New Set**
 2. Give it a title (e.g., "Chapter 3 — Memory & Cognition")
 3. Optionally add tags
 4. Add questions to the set by clicking the add button next to each question
@@ -409,13 +410,13 @@ The `question_indexes` in sets refer to the position of questions in the `questi
 
 #### How to Export
 
-1. Open the module editor, go to the Quiz tab
-2. Click **Import/Export** in the Question Bank section
+1. Open the module editor, go to the **Quiz** tab → **Question Bank** sub-tab
+2. Click **Import/Export**
 3. Click **Export** to download the JSON file
 
 #### How to Import
 
-1. Open the target module editor, go to the Quiz tab
+1. Open the target module editor, go to the **Quiz** tab → **Question Bank** sub-tab
 2. Click **Import/Export**
 3. Select your JSON file
 4. The system validates the format, creates all questions with options, and recreates sets with the correct memberships
@@ -440,8 +441,8 @@ Here is a step-by-step walkthrough for creating a complete quiz setup for a modu
 ### Step 1: Build the Question Bank
 
 1. Navigate to `/faculty/modules/edit/[moduleId]`
-2. Click the **Quiz** tab
-3. In the Question Bank section, click **New Question**
+2. Click the **Quiz** tab, then the **Question Bank** sub-tab
+3. Click **New Question**
 4. Create 10–20 questions covering the module's key concepts
 5. For each question:
    - Choose the type (MC, MS, or T/F)
@@ -454,14 +455,14 @@ Here is a step-by-step walkthrough for creating a complete quiz setup for a modu
 
 ### Step 2: Organize into Sets
 
-1. Click **New Set** and name it (e.g., "Key Concepts")
+1. Still in the **Question Bank** sub-tab, click **New Set** and name it (e.g., "Key Concepts")
 2. Add relevant questions to the set
 3. Create additional sets as needed (e.g., "Application Questions", "Review Questions")
 4. A question can be in multiple sets
 
 ### Step 3: Configure the Mastery Check
 
-1. Click the **Mastery Check** tab in the quiz builder
+1. Click the **Mastery Check** sub-tab
 2. Set the title (e.g., "Module 3 Mastery Check")
 3. Set the mastery threshold (default 80%)
 4. Set the XP reward (e.g., 50 XP)
@@ -474,7 +475,7 @@ Here is a step-by-step walkthrough for creating a complete quiz setup for a modu
 
 ### Step 4: Configure the Assessment (optional)
 
-1. Click the **Assessment** tab
+1. Click the **Assessment** sub-tab
 2. Set the title, pass threshold, and XP reward
 3. Configure assessment-specific settings:
    - Time limit (e.g., 30 minutes)

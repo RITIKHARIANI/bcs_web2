@@ -210,6 +210,7 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
   const [tags, setTags] = useState<string[]>([])
   const [availableTags, setAvailableTags] = useState<string[]>([])
   const [insertImageFn, setInsertImageFn] = useState<((url: string, alt?: string, caption?: string) => void) | null>(null)
+  const [quizSubTab, setQuizSubTab] = useState<'question_bank' | 'mastery_check' | 'module_assessment'>('question_bank')
 
   // Disable body scroll when modal is open
   useEffect(() => {
@@ -986,11 +987,33 @@ export function EditModuleForm({ moduleId }: EditModuleFormProps) {
         editTabContent={editTabContent}
         settingsTabContent={settingsTabContent}
         quizTabContent={
-          <div className="space-y-8">
-            <QuestionBankEditor moduleId={moduleId} />
-            <div className="border-t pt-8">
-              <QuizBuilderV2 moduleId={moduleId} />
+          <div>
+            {/* Sub-tab navigation */}
+            <div className="border-b border-gray-200 mb-6">
+              <nav className="flex gap-6 sm:gap-8">
+                {([
+                  { key: 'question_bank', label: 'Question Bank' },
+                  { key: 'mastery_check', label: 'Mastery Check' },
+                  { key: 'module_assessment', label: 'Assessment' },
+                ] as const).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setQuizSubTab(key)}
+                    className={`py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                      quizSubTab === key
+                        ? 'border-blue-600 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </nav>
             </div>
+
+            {quizSubTab === 'question_bank' && <QuestionBankEditor moduleId={moduleId} />}
+            {quizSubTab === 'mastery_check' && <QuizBuilderV2 moduleId={moduleId} quizType="mastery_check" />}
+            {quizSubTab === 'module_assessment' && <QuizBuilderV2 moduleId={moduleId} quizType="module_assessment" />}
           </div>
         }
         teamContent={teamContent}
