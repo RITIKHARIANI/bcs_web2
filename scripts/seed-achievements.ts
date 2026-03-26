@@ -294,6 +294,36 @@ const ACHIEVEMENT_DEFINITIONS = [
     badge_color: 'silver',
     criteria: { type: 'quiz_pass_streak', count: 5 }
   },
+  {
+    id: 'mastery-first-try',
+    title: 'Master Mind',
+    description: 'Master a mastery check on first attempt',
+    icon: '🎯',
+    category: 'mastery',
+    xp_reward: 100,
+    badge_color: 'bronze',
+    criteria: { type: 'mastery_first_try' }
+  },
+  {
+    id: 'ten-mastery',
+    title: 'Knowledge Master',
+    description: 'Master 10 mastery checks',
+    icon: '🧪',
+    category: 'mastery',
+    xp_reward: 300,
+    badge_color: 'silver',
+    criteria: { type: 'mastery_checks_completed', count: 10 }
+  },
+  {
+    id: 'assessment-ace',
+    title: 'Assessment Ace',
+    description: 'Score 90% or higher on an assessment',
+    icon: '🏅',
+    category: 'mastery',
+    xp_reward: 200,
+    badge_color: 'silver',
+    criteria: { type: 'assessment_ace', threshold: 90 }
+  },
 
   // ============ LEVEL MILESTONES ============
   {
