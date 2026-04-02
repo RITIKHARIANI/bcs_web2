@@ -246,6 +246,29 @@ export function UserGuide({ content }: { content: string }) {
                     </h3>
                   )
                 },
+                pre: ({ children, ...props }) => (
+                  <pre
+                    className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm leading-relaxed border border-gray-700/50"
+                    {...props}
+                  >
+                    {children}
+                  </pre>
+                ),
+                code: ({ children, className, ...props }) => {
+                  const isBlock = className?.startsWith("language-")
+                  if (isBlock) {
+                    return (
+                      <code className={`${className} text-gray-100`} {...props}>
+                        {children}
+                      </code>
+                    )
+                  }
+                  return (
+                    <code className="text-neural-primary bg-muted/50 px-1.5 py-0.5 rounded text-sm" {...props}>
+                      {children}
+                    </code>
+                  )
+                },
               }}
             >
               {content}
