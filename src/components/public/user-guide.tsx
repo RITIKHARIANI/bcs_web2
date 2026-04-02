@@ -210,7 +210,8 @@ export function UserGuide({ content }: { content: string }) {
                 prose-th:bg-muted/50 prose-th:text-foreground prose-th:font-semibold prose-th:px-4 prose-th:py-2
                 prose-td:px-4 prose-td:py-2 prose-td:text-muted-foreground prose-td:border-border/40
                 prose-hr:border-border/40
-                prose-code:text-neural-primary prose-code:bg-muted/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none">
+                prose-code:text-neural-primary prose-code:bg-muted/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+                prose-pre:bg-transparent prose-pre:p-0">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -254,11 +255,11 @@ export function UserGuide({ content }: { content: string }) {
                     {children}
                   </pre>
                 ),
-                code: ({ children, className, ...props }) => {
-                  const isBlock = className?.startsWith("language-")
+                code: ({ children, className, node, ...props }) => {
+                  const isBlock = className?.startsWith("language-") || node?.position?.start?.line !== node?.position?.end?.line
                   if (isBlock) {
                     return (
-                      <code className={`${className} text-gray-100`} {...props}>
+                      <code className="text-gray-100 bg-transparent p-0" {...props}>
                         {children}
                       </code>
                     )
