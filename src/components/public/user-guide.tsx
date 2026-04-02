@@ -16,7 +16,6 @@ function slugify(text: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
     .trim()
 }
 
@@ -89,6 +88,23 @@ export function UserGuide({ content }: { content: string }) {
       activeBtn.scrollIntoView({ block: "nearest", behavior: "smooth" })
     }
   }, [activeId])
+
+  // Scroll to hash anchor on initial page load
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "")
+    if (!hash) return
+    // Wait for react-markdown to render headings with ids
+    const timer = setTimeout(() => {
+      const el = document.getElementById(hash)
+      if (el) {
+        const offset = 90
+        const top = el.getBoundingClientRect().top + window.scrollY - offset
+        window.scrollTo({ top, behavior: "smooth" })
+        setActiveId(hash)
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [])
 
   function scrollTo(id: string) {
     const el = document.getElementById(id)
