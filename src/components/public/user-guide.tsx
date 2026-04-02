@@ -211,7 +211,8 @@ export function UserGuide({ content }: { content: string }) {
                 prose-td:px-4 prose-td:py-2 prose-td:text-muted-foreground prose-td:border-border/40
                 prose-hr:border-border/40
                 prose-code:text-neural-primary prose-code:bg-muted/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
-                prose-pre:bg-transparent prose-pre:p-0">
+                prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-lg prose-pre:p-4 prose-pre:border prose-pre:border-gray-700/50
+                [&_pre_code]:bg-transparent [&_pre_code]:text-gray-100 [&_pre_code]:p-0 [&_pre_code]:rounded-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -245,29 +246,6 @@ export function UserGuide({ content }: { content: string }) {
                     <h3 id={id} {...props}>
                       {children}
                     </h3>
-                  )
-                },
-                pre: ({ children, ...props }) => (
-                  <pre
-                    className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm leading-relaxed border border-gray-700/50"
-                    {...props}
-                  >
-                    {children}
-                  </pre>
-                ),
-                code: ({ children, className, node, ...props }) => {
-                  const isBlock = className?.startsWith("language-") || node?.position?.start?.line !== node?.position?.end?.line
-                  if (isBlock) {
-                    return (
-                      <code className="text-gray-100 bg-transparent p-0" {...props}>
-                        {children}
-                      </code>
-                    )
-                  }
-                  return (
-                    <code className="text-neural-primary bg-muted/50 px-1.5 py-0.5 rounded text-sm" {...props}>
-                      {children}
-                    </code>
                   )
                 },
               }}
