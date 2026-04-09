@@ -92,7 +92,7 @@ export function QuizExportButton({ courseId }: QuizExportButtonProps) {
             <div className="flex flex-col">
               <span className="font-medium">Excel (.xlsx)</span>
               <span className="text-xs text-muted-foreground">
-                Both sheets in one file
+                Course gradebook + quiz-by-quiz breakdown
               </span>
             </div>
           </DropdownMenuItem>
@@ -100,7 +100,7 @@ export function QuizExportButton({ courseId }: QuizExportButtonProps) {
             <div className="flex flex-col">
               <span className="font-medium">CSV</span>
               <span className="text-xs text-muted-foreground">
-                Choose a single sheet
+                Gradebook or quiz breakdown (pick one)
               </span>
             </div>
           </DropdownMenuItem>
