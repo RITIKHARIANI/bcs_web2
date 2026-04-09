@@ -119,7 +119,16 @@ export default function CourseAnalyticsDashboard({ courseId }: CourseAnalyticsDa
           <h1 className="text-3xl font-bold text-neural-primary">{analytics.courseTitle}</h1>
           <p className="text-muted-foreground mt-2">Course Analytics Dashboard</p>
         </div>
-        <QuizExportButton courseId={courseId} />
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            href={`/faculty/courses/${courseId}/groups`}
+            className="inline-flex items-center gap-1 px-3 h-9 text-sm rounded-md border border-border/60 hover:bg-muted/50 transition-colors"
+          >
+            <Users className="w-4 h-4" />
+            Groups
+          </Link>
+          <QuizExportButton courseId={courseId} />
+        </div>
       </div>
 
       {/* Stats Cards */}

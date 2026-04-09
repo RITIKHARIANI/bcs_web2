@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NeuralButton } from '@/components/ui/neural-button';
 import {
   DropdownMenu,
@@ -18,10 +18,23 @@ import {
 } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Download, Loader2, ChevronDown } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Download, Loader2, ChevronDown, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 type CsvSheet = 'quiz' | 'gradebook';
+
+interface Group {
+  id: string;
+  name: string;
+  memberCount: number;
+}
 
 interface QuizExportButtonProps {
   courseId: string;
@@ -31,12 +44,31 @@ export function QuizExportButton({ courseId }: QuizExportButtonProps) {
   const [loading, setLoading] = useState(false);
   const [csvDialogOpen, setCsvDialogOpen] = useState(false);
   const [csvSheet, setCsvSheet] = useState<CsvSheet>('gradebook');
+  const [groups, setGroups] = useState<Group[]>([]);
+  // "all" sentinel means export every enrolled student (no group filter)
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('all');
+
+  // Fetch groups on mount so the picker can show them. Non-fatal if it fails
+  // — faculty can still export "all enrolled" and the select just stays hidden.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/faculty/courses/${courseId}/groups`)
+      .then((res) => (res.ok ? res.json() : { groups: [] }))
+      .then((data) => {
+        if (!cancelled) setGroups(data.groups || []);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [courseId]);
 
   const download = async (format: 'xlsx' | 'csv', sheet?: CsvSheet) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ format });
       if (format === 'csv' && sheet) params.set('sheet', sheet);
+      if (selectedGroupId !== 'all') params.set('groupId', selectedGroupId);
 
       const res = await fetch(
         `/api/faculty/courses/${courseId}/quiz-export?${params.toString()}`
@@ -74,7 +106,25 @@ export function QuizExportButton({ courseId }: QuizExportButtonProps) {
   };
 
   return (
-    <>
+    <div className="flex items-center gap-2">
+      {/* Group picker — only shown when the course has at least one group */}
+      {groups.length > 0 && (
+        <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+          <SelectTrigger className="h-9 w-auto min-w-[180px]">
+            <Users className="h-4 w-4 mr-1 text-muted-foreground" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All enrolled students</SelectItem>
+            {groups.map((g) => (
+              <SelectItem key={g.id} value={g.id}>
+                {g.name} ({g.memberCount})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <NeuralButton variant="outline" size="sm" disabled={loading}>
@@ -170,6 +220,6 @@ export function QuizExportButton({ courseId }: QuizExportButtonProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

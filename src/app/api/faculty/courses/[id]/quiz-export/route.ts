@@ -62,6 +62,7 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const format = (searchParams.get('format') || 'xlsx').toLowerCase();
     const sheet = (searchParams.get('sheet') || 'quiz').toLowerCase();
+    const groupId = searchParams.get('groupId') || null;
 
     if (format !== 'xlsx' && format !== 'csv') {
       return NextResponse.json({ error: 'Invalid format' }, { status: 400 });
@@ -75,6 +76,29 @@ export async function GET(
         where: { id: courseId },
         select: { id: true, slug: true, title: true },
       });
+
+      // If groupId provided, verify it belongs to this course and collect
+      // the member user IDs to filter the enrolled-students query.
+      let group: { id: string; name: string } | null = null;
+      let groupMemberIds: string[] | null = null;
+      if (groupId) {
+        const g = await prisma.course_groups.findUnique({
+          where: { id: groupId },
+          select: {
+            id: true,
+            name: true,
+            course_id: true,
+            memberships: { select: { user_id: true } },
+          },
+        });
+        if (g && g.course_id === courseId) {
+          group = { id: g.id, name: g.name };
+          groupMemberIds = g.memberships.map((m) => m.user_id);
+        } else {
+          // Treat an invalid/cross-course groupId as a 404 below
+          return { course, courseModules: [], enrolledStudents: [], group: null, groupMemberIds: null, groupNotFound: true };
+        }
+      }
 
       // Get all modules in course with quizzes and submitted attempts
       const courseModules = await prisma.course_modules.findMany({
@@ -105,9 +129,12 @@ export async function GET(
         orderBy: { sort_order: 'asc' },
       });
 
-      // Get enrolled students
+      // Get enrolled students, optionally filtered to a group's member list
       const enrolledStudents = await prisma.course_tracking.findMany({
-        where: { course_id: courseId },
+        where: {
+          course_id: courseId,
+          ...(groupMemberIds !== null && { user_id: { in: groupMemberIds } }),
+        },
         include: {
           user: {
             select: { id: true, name: true, email: true },
@@ -115,11 +142,14 @@ export async function GET(
         },
       });
 
-      return { course, courseModules, enrolledStudents };
+      return { course, courseModules, enrolledStudents, group, groupMemberIds, groupNotFound: false };
     });
 
     if (!data.course) {
       return NextResponse.json({ error: 'Course not found' }, { status: 404 });
+    }
+    if (data.groupNotFound) {
+      return NextResponse.json({ error: 'Group not found' }, { status: 404 });
     }
 
     const studentMap = new Map(data.enrolledStudents.map((e) => [e.user.id, e.user]));
@@ -283,6 +313,13 @@ export async function GET(
 
     const courseSlug = data.course.slug;
     const dateStr = new Date().toISOString().split('T')[0];
+    // Slugify the group name for the filename so it's safe on every filesystem
+    const groupSlug = data.group
+      ? `-${data.group.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '')}`
+      : '';
 
     if (format === 'xlsx') {
       const workbook = new ExcelJS.Workbook();
@@ -313,7 +350,7 @@ export async function GET(
         headers: {
           'Content-Type':
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'Content-Disposition': `attachment; filename="gradebook-${courseSlug}-${dateStr}.xlsx"`,
+          'Content-Disposition': `attachment; filename="gradebook-${courseSlug}${groupSlug}-${dateStr}.xlsx"`,
         },
       });
     }
@@ -331,7 +368,7 @@ export async function GET(
     return new NextResponse(csvContent, {
       headers: {
         'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="gradebook-${courseSlug}-${sheet}-${dateStr}.csv"`,
+        'Content-Disposition': `attachment; filename="gradebook-${courseSlug}${groupSlug}-${sheet}-${dateStr}.csv"`,
       },
     });
   } catch (error) {
