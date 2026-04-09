@@ -31,7 +31,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Group {
@@ -680,13 +679,30 @@ function AddMembersDialog({
           <ReportView report={report} onDone={() => onOpenChange(false)} onAddMore={() => setReport(null)} />
         ) : (
           <>
-            <Tabs value={tab} onValueChange={(v) => setTab(v as 'picker' | 'bulk')}>
-              <TabsList className="grid grid-cols-2 w-full">
-                <TabsTrigger value="picker">Pick Enrolled</TabsTrigger>
-                <TabsTrigger value="bulk">Paste Emails</TabsTrigger>
-              </TabsList>
+            <div className="border-b border-border mb-4">
+              <nav className="flex gap-6 sm:gap-8">
+                {([
+                  { key: 'picker', label: 'Pick Enrolled' },
+                  { key: 'bulk', label: 'Paste Emails' },
+                ] as const).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setTab(key)}
+                    className={`py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                      tab === key
+                        ? 'border-blue-600 text-blue-600'
+                        : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </nav>
+            </div>
 
-              <TabsContent value="picker" className="space-y-3">
+            {tab === 'picker' && (
+              <div className="space-y-3">
                 <Input
                   placeholder="Search by name or email..."
                   value={pickerSearch}
@@ -722,9 +738,11 @@ function AddMembersDialog({
                 <p className="text-xs text-muted-foreground">
                   {selectedUserIds.size} selected
                 </p>
-              </TabsContent>
+              </div>
+            )}
 
-              <TabsContent value="bulk" className="space-y-3">
+            {tab === 'bulk' && (
+              <div className="space-y-3">
                 <Label htmlFor="bulk-emails">
                   Paste emails (comma, space, or newline separated)
                 </Label>
@@ -739,8 +757,8 @@ function AddMembersDialog({
                   Students must already be enrolled in this course. You&apos;ll see
                   a report showing exactly what happened for each email.
                 </p>
-              </TabsContent>
-            </Tabs>
+              </div>
+            )}
 
             <DialogFooter>
               <NeuralButton variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
