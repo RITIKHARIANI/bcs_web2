@@ -311,6 +311,8 @@ Faculty members see a **Clone** button on module cards. Clicking it opens a dial
 - Choose whether to clone media associations and collaborators
 - The clone starts as a private draft in your library
 
+Cloning also copies the module's **entire question bank** — all questions, answer options, explanations, question sets, and set memberships. Any quizzes (mastery checks and assessments) configured on the original module are cloned as well, including their blocks and settings. This means you can clone a fully quizzed module and immediately have a working copy without re-creating the quiz setup from scratch.
+
 ---
 
 ## 7. Interactive Playgrounds
