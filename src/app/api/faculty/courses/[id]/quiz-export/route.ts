@@ -322,16 +322,17 @@ export async function GET(
       : '';
 
     // Canvas-compatible CSV: pivot table with one column per quiz, matched by email.
-    // Canvas requires: Student, ID, SIS User ID, SIS Login ID as the first 4 columns.
-    // Assignment columns follow. A "Points Possible" pseudo-row sets point values.
+    // Canvas CSV import format (matched from Canvas's own export):
+    // Header: Student, ID, SIS User ID, SIS Login ID, Integration ID, Section, <assignments...>
+    // Row 2:  "    Points Possible", empty x5, <point values...>
+    // Data:   "Last, First", canvas_id, sis_user_id, sis_login_id, integration_id, section, <scores...>
     if (format === 'canvas') {
       const canvasQuizzes: { name: string; pointsPossible: number; bestByUser: Map<string, number> }[] = [];
       for (const cm of data.courseModules) {
         const mod = cm.modules;
         for (const quiz of mod.quizzes) {
           if (quiz.attempts.length === 0) continue;
-          // Use ASCII dash to avoid encoding issues with Canvas CSV parser
-          const name = `${mod.title} - ${quiz.title}`;
+          const name = `${mod.title} \u2014 ${quiz.title}`;
           let pointsPossible = 0;
           const bestByUser = new Map<string, number>();
           for (const a of quiz.attempts) {
@@ -347,18 +348,19 @@ export async function GET(
         }
       }
 
-      // Canvas requires these 4 columns in order, then assignment columns
-      const canvasHeaders = ['Student', 'ID', 'SIS User ID', 'SIS Login ID', ...canvasQuizzes.map(q => q.name)];
-      // Canvas "Points Possible" pseudo-row (leading spaces required)
-      const pointsRow = ['    Points Possible', '', '', '', ...canvasQuizzes.map(q => q.pointsPossible.toString())];
+      // Canvas requires exactly these 6 columns before assignment columns
+      const canvasHeaders = ['Student', 'ID', 'SIS User ID', 'SIS Login ID', 'Integration ID', 'Section', ...canvasQuizzes.map(q => q.name)];
+      const pointsRow = ['    Points Possible', '', '', '', '', '', ...canvasQuizzes.map(q => q.pointsPossible.toString())];
 
       const canvasRows: string[][] = [pointsRow];
       for (const [userId, student] of studentMap) {
         const row = [
           student.name,
-          '',              // Canvas user ID — left blank, Canvas matches by SIS Login ID
+          '',              // Canvas user ID — blank, Canvas matches by SIS Login ID
           student.email,   // SIS User ID
           student.email,   // SIS Login ID
+          '',              // Integration ID
+          '',              // Section
           ...canvasQuizzes.map(q => {
             const best = q.bestByUser.get(userId);
             return best !== undefined ? best.toString() : '';
