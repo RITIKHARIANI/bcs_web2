@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   // Vercel deployment optimization
@@ -18,7 +19,7 @@ const nextConfig: NextConfig = {
   // Image optimization
   images: {
     formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 3600,
     dangerouslyAllowSVG: false,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
@@ -179,4 +180,23 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Sentry webpack plugin options
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // Suppress source map upload logs in build output
+  silent: true,
+
+  // Upload larger set of source maps for better stack traces
+  widenClientFileUpload: true,
+
+  // Hide source maps from client bundles
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+
+  // Tree-shake Sentry logger statements to reduce bundle size
+  disableLogger: true,
+});

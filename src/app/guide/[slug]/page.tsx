@@ -18,6 +18,14 @@ const GUIDE_DOCS: Record<string, { file: string; title: string }> = {
     file: "CANVAS_LMS_INTEGRATION_GUIDE.md",
     title: "Canvas LMS Grade Sync Guide",
   },
+  "architecture": {
+    file: "ARCHITECTURE_GUIDE.md",
+    title: "Platform Architecture",
+  },
+  "system-design": {
+    file: "SYSTEM_DESIGN_ANALYSIS.md",
+    title: "System Design Analysis",
+  },
 }
 
 interface PageProps {
