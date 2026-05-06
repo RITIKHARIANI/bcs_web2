@@ -4,6 +4,8 @@ This guide walks you through syncing quiz grades from the BCS E-Learning Platfor
 
 For general information about course groups and grade exports, see the [User Guide](/guide) sections on Course Groups and Gradebook Export.
 
+> **Alternative: Canvas CSV Export** — If you prefer to upload grades manually instead of using the API sync, you can download a Canvas-compatible CSV from the **Export Grades** > **Canvas CSV** option on the analytics dashboard. This generates a file you can import directly into the Canvas gradebook via Canvas's built-in Import feature. No API token or environment setup is required for the CSV approach. See the [User Guide](/guide) Gradebook Export section for details.
+
 ---
 
 ## Table of Contents

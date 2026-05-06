@@ -829,6 +829,27 @@ CSV files can only contain one sheet, so you choose which one to download:
 - **Course Gradebook** — Same columns as the Excel gradebook sheet
 - **Quiz Breakdown** — Same columns as the Excel quiz sheet
 
+#### Canvas CSV
+
+Downloads a CSV file formatted specifically for **Canvas LMS grade import**. Unlike the regular CSV which has one row per student per quiz, the Canvas CSV uses a **pivot table** layout with one column per quiz — exactly the format Canvas expects when you use "Import" in the Canvas gradebook.
+
+The file includes:
+- **Student** and **SIS Login ID** (email) columns for Canvas to match students
+- One column per quiz, named to match the Canvas assignment naming convention (e.g., "Module Title — Quiz Title")
+- A **Points Possible** row that tells Canvas the point value of each assignment
+- Each student's **best score** (in points) for each quiz, with blank cells for unattempted quizzes
+
+**How to use it:**
+1. Click **Export Grades** > **Canvas CSV** to download the file
+2. In Canvas, go to your course's **Grades** page
+3. Click the **Import** button (top-right)
+4. Upload the downloaded CSV file
+5. Canvas will preview the import — review the column mappings and click **Save Changes**
+
+Canvas automatically creates assignments for any quiz column names it does not recognize. Students are matched by their **SIS Login ID** (email address), so student emails must match between BCS and Canvas.
+
+> **Tip:** If you select a group before exporting, the Canvas CSV will only include students in that group. This is recommended so the file matches the roster of a specific Canvas course section.
+
 #### Grade Calculation
 
 The overall grade is calculated as: `sum(best points earned across all quizzes) / sum(total points possible) * 100`, rounded to one decimal place. Students with zero quiz attempts show 0%.
