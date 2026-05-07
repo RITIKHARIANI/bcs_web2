@@ -39,9 +39,8 @@ The BCS E-Learning Platform is a web-based learning environment designed specifi
 |------|-------------|
 | **Public Visitor** | Can browse all courses, modules, playgrounds, and visualizations without an account |
 | **Student** | Can enroll in courses, track progress, mark modules complete, and earn achievements |
-| **Faculty** | Can create and manage courses, modules, and playgrounds; view analytics |
-| **Admin** | Full platform management: user administration, faculty approvals, content moderation, audit logs |
-| **Super Admin** | All admin capabilities plus the ability to manage other admin accounts (promote, modify, or delete admins). Only one super admin exists per platform. |
+| **Faculty** | Can create and manage courses, modules, and playgrounds |
+| **Admin** | Platform management and user administration |
 
 ---
 
@@ -273,22 +272,11 @@ Each module card shows:
 - "Root" badge (if it has no parent) and "Published" badge
 - "Sub-module of: [Parent Title]" link (if it's a child module)
 - Description, tags, author, submodule count, and last updated date
-- **Explore Module** button (or **View** + **Clone** buttons for faculty)
+- **Explore Module** button
 
 ### Viewing a Module
 
 Click a module to open it at `/modules/[slug]`. The view is similar to the course module viewer, with the module's content, resources, and hierarchical navigation if it has submodules.
-
-### Cloning a Module (Faculty)
-
-Faculty members see a **Clone** button on module cards. Clicking it opens a dialog where you can:
-
-- See the original module name and author
-- Enter a new title for the cloned module
-- Choose whether to clone media associations and collaborators
-- The clone starts as a private draft in your library
-
-Cloning also copies the module's **entire question bank** — all questions, answer options, explanations, question sets, and set memberships. Any quizzes (mastery checks and assessments) configured on the original module are cloned as well, including their blocks and settings. This means you can clone a fully quizzed module and immediately have a working copy without re-creating the quiz setup from scratch.
 
 ---
 
@@ -305,7 +293,7 @@ The gallery has four tabs:
 | **All** | Featured and community playgrounds combined |
 | **Featured** | Curated playgrounds marked by administrators |
 | **Community** | User-created public playgrounds |
-| **My Playgrounds** | Your own playgrounds (logged-in faculty only) |
+| **My Playgrounds** | Your own playgrounds (logged-in users) |
 
 ### Category Filters
 
@@ -330,30 +318,12 @@ Click a card to open the playground viewer at `/playgrounds/[id]`. You'll see:
 
 - A **thin header bar** with the playground title, a Back button, and action buttons:
   - **Info** — Opens a slide-out drawer with the title, author, view count, creation date, category, description, tags, and dependencies
-  - **Version History** — View previous versions (owners/admins only)
-  - **Fork** — Create a personal copy of the playground (non-owners only)
-  - **Edit** — Open the builder to modify the code (owners/admins only)
+  - **Fork** — Create a personal copy of the playground
 - A **full-screen live preview** showing the running playground output
-
-### Creating a Playground (Faculty)
-
-Faculty members see a **Create Playground** button in the gallery. Clicking it opens the Playground Builder at `/playgrounds/builder`.
-
-The builder has three panels:
-
-1. **Toolbar** — Title input, save status indicator, view mode buttons (code-only, split, preview-only), dependency manager toggle, and Save button
-2. **Code Editor** — A full code editor with syntax highlighting, line numbers, and inline error display. The editor loads a starter template for new playgrounds.
-3. **Live Preview** — Shows the running output of your code, updating automatically as you type
-
-Use the **dependency manager** (package icon) to add npm packages like Three.js, Framer Motion, D3, Recharts, and more.
-
-Keyboard shortcut: **Cmd/Ctrl+S** to save.
 
 ### TensorFlow Neural Network Playground
 
 A standalone tool at `/playgrounds/tensorflow` provides a dedicated neural network playground experience, separate from the React-based playgrounds. It lets you experiment with neural network architectures, datasets, and training parameters in real time — adjust the number of layers and neurons, pick a dataset, tune the learning rate, and watch the network learn to classify data points.
-
-If you want to modify the playground itself (change defaults, add datasets, adjust colors, etc.), see the [Faculty Guide](/guide/faculty-guide) section on Customizing the TensorFlow Playground.
 
 For a detailed explanation of how the playground works internally (training flow, neural network math, datasets, visualizations), see the [TensorFlow Playground Technical Guide](/guide/tensorflow-technical).
 
@@ -370,16 +340,6 @@ A learning path is an ordered sequence of courses designed to guide you through 
 - Whether it's featured
 
 Click a path to view its details at `/paths/[slug]`, which lists the courses in the recommended sequence.
-
-### Creating Learning Paths (Faculty)
-
-Faculty members can create and edit learning paths from their dashboard. The Learning Path Form includes:
-
-- **Title** and **Slug** fields
-- **Description**
-- **Course Selection** — Choose from published courses and add them to the path
-- **Drag-and-Drop Ordering** — Reorder courses by dragging
-- **Featured** toggle and **Sort Order** setting
 
 ---
 
