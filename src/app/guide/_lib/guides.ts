@@ -1,0 +1,72 @@
+export type GuideRole = 'public' | 'faculty'
+
+export interface GuideEntry {
+  slug: string
+  file: string
+  title: string
+  description: string
+  role: GuideRole
+}
+
+export const GUIDES: GuideEntry[] = [
+  {
+    slug: 'user-guide',
+    file: 'USER_GUIDE.md',
+    title: 'User Guide',
+    description:
+      'Complete guide to using the BCS E-Learning Platform — browsing courses, managing content, tracking progress, and more.',
+    role: 'public',
+  },
+  {
+    slug: 'tensorflow-technical',
+    file: 'TF_PLAYGROUND_TECHNICAL_GUIDE.md',
+    title: 'TensorFlow Playground Technical Guide',
+    description:
+      'Technical documentation for the interactive neural network playground — datasets, architectures, and training visualization.',
+    role: 'public',
+  },
+  {
+    slug: 'quiz-system',
+    file: 'QUIZ_SYSTEM_GUIDE.md',
+    title: 'Quiz System Guide',
+    description:
+      'Question banks, quiz configuration, grading rules, and the assessment architecture.',
+    role: 'faculty',
+  },
+  {
+    slug: 'canvas-integration',
+    file: 'CANVAS_LMS_INTEGRATION_GUIDE.md',
+    title: 'Canvas LMS Grade Sync Guide',
+    description:
+      'Sync quiz grades to Canvas via API or CSV import — setup, student matching, and troubleshooting.',
+    role: 'faculty',
+  },
+  {
+    slug: 'architecture',
+    file: 'ARCHITECTURE_GUIDE.md',
+    title: 'Platform Architecture',
+    description:
+      'System overview, request lifecycle, data model diagrams, scalability architecture, and security layers.',
+    role: 'faculty',
+  },
+  {
+    slug: 'system-design',
+    file: 'SYSTEM_DESIGN_ANALYSIS.md',
+    title: 'System Design Analysis',
+    description:
+      'In-depth analysis of design decisions, scalability ratings, and improvement roadmap.',
+    role: 'faculty',
+  },
+  {
+    slug: 'sentry-setup',
+    file: 'SENTRY_SETUP_GUIDE.md',
+    title: 'Sentry Error Tracking Setup',
+    description:
+      'Configure Sentry for error monitoring — project setup, environment variables, verification, and daily usage.',
+    role: 'faculty',
+  },
+]
+
+export function getGuideBySlug(slug: string): GuideEntry | undefined {
+  return GUIDES.find((g) => g.slug === slug)
+}
