@@ -65,6 +65,22 @@ export const GUIDES: GuideEntry[] = [
       'Configure Sentry for error monitoring — project setup, environment variables, verification, and daily usage.',
     role: 'faculty',
   },
+  {
+    slug: 'faculty-guide',
+    file: 'FACULTY_GUIDE.md',
+    title: 'Faculty Guide',
+    description:
+      'Creating courses and modules, building quizzes, viewing analytics, managing groups, and exporting grades.',
+    role: 'faculty',
+  },
+  {
+    slug: 'admin-guide',
+    file: 'ADMIN_GUIDE.md',
+    title: 'Admin Guide',
+    description:
+      'User management, faculty approvals, content moderation, platform analytics, and audit logs.',
+    role: 'faculty',
+  },
 ]
 
 export function getGuideBySlug(slug: string): GuideEntry | undefined {
