@@ -36,7 +36,7 @@ The BCS E-Learning Platform is a full-featured Learning Management System (LMS) 
                    │          │
         ┌──────────┴──┐  ┌───┴──────────────┐
         │   Server    │  │   API Routes      │
-        │  Components │  │   (~65 endpoints) │
+        │  Components │  │   (~95 endpoints) │
         │             │  │                   │
         │ Direct      │  │ ┌───────────────┐ │
         │ Prisma      │  │ │ Auth (JWT)    │ │
