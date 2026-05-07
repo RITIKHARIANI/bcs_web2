@@ -120,6 +120,17 @@ These three fields work together to create the gamified learning experience stud
 
 These are guidelines, not rules. The key is internal consistency within a course — if a standard module is 100 XP, a module that takes twice the effort should be roughly 200 XP.
 
+### Cloning a Module
+
+On the Module Library page, faculty members see a **Clone** button on module cards. Clicking it opens a dialog where you can:
+
+- See the original module name and author
+- Enter a new title for the cloned module
+- Choose whether to clone media associations and collaborators
+- The clone starts as a private draft in your library
+
+Cloning also copies the module's **entire question bank** — all questions, answer options, explanations, question sets, and set memberships. Any quizzes (mastery checks and assessments) configured on the original module are cloned as well, including their blocks and settings. This means you can clone a fully quizzed module and immediately have a working copy without re-creating the quiz setup from scratch.
+
 ### Editing a Module
 
 Navigate to `/faculty/modules/edit/[id]` to update any module field, add media, or change the hierarchy. The editor has three tabs: **Edit** (content), **Settings** (metadata, difficulty, unlock conditions), and **Quiz** (question bank and assessments).
@@ -303,7 +314,26 @@ For the complete setup walkthrough, see the dedicated [Canvas LMS Grade Sync Gui
 
 ## 11. Creating Playgrounds
 
-Faculty can create interactive React/JavaScript playgrounds using the Playground Builder at `/playgrounds/builder`. See the [User Guide](/guide/user-guide) section on Interactive Playgrounds for how playgrounds work from a user perspective.
+Faculty members see a **Create Playground** button in the playground gallery. Clicking it opens the Playground Builder at `/playgrounds/builder`.
+
+The builder has three panels:
+
+1. **Toolbar** — Title input, save status indicator, view mode buttons (code-only, split, preview-only), dependency manager toggle, and Save button
+2. **Code Editor** — A full code editor with syntax highlighting, line numbers, and inline error display. The editor loads a starter template for new playgrounds.
+3. **Live Preview** — Shows the running output of your code, updating automatically as you type
+
+Use the **dependency manager** (package icon) to add npm packages like Three.js, Framer Motion, D3, Recharts, and more.
+
+Keyboard shortcut: **Cmd/Ctrl+S** to save.
+
+### Viewing and Managing Playgrounds
+
+When viewing a playground you own, additional action buttons appear in the header:
+
+- **Version History** — View previous versions and revert if needed
+- **Edit** — Open the builder to modify the code
+
+These actions are also available to admins on any playground.
 
 ### Forking Playgrounds
 
@@ -772,7 +802,13 @@ Navigate to `/faculty/program/edit` to arrange courses on the program map. Drag 
 
 ## 15. Managing Learning Paths
 
-Faculty can create and edit learning paths from `/faculty/paths`. See the [User Guide](/guide/user-guide) section on Learning Paths for details on the path creation form.
+Faculty can create and edit learning paths from `/faculty/paths`. The Learning Path Form includes:
+
+- **Title** and **Slug** fields
+- **Description**
+- **Course Selection** — Choose from published courses and add them to the path
+- **Drag-and-Drop Ordering** — Reorder courses by dragging
+- **Featured** toggle and **Sort Order** setting
 
 ---
 

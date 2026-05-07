@@ -2,6 +2,13 @@
 
 This guide covers all administrative features on the BCS E-Learning Platform — user management, faculty approvals, content moderation, analytics, and audit logs.
 
+### Admin Roles
+
+| Role | Description |
+|------|-------------|
+| **Admin** | Full platform management: user administration, faculty approvals, content moderation, audit logs |
+| **Super Admin** | All admin capabilities plus the ability to manage other admin accounts (promote, modify, or delete admins). Only one super admin exists per platform. |
+
 ---
 
 ## Table of Contents
