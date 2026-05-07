@@ -81,6 +81,30 @@ export const GUIDES: GuideEntry[] = [
       'User management, faculty approvals, content moderation, platform analytics, and audit logs.',
     role: 'faculty',
   },
+  {
+    slug: 'email-setup',
+    file: 'EMAIL_SETUP_GUIDE.md',
+    title: 'Email Setup Guide',
+    description:
+      'Configure Resend for email verification and password reset — API keys, domain verification, and environment variables.',
+    role: 'faculty',
+  },
+  {
+    slug: 'database-migrations',
+    file: 'DATABASE_MIGRATION_GUIDE.md',
+    title: 'Database Migration Guide',
+    description:
+      'Prisma migration workflow — creating migrations, deploying to production, and avoiding common pitfalls.',
+    role: 'faculty',
+  },
+  {
+    slug: 'dev-prod-workflow',
+    file: 'DEV_PROD_WORKFLOW.md',
+    title: 'Dev & Production Workflow',
+    description:
+      'Development and production environments, Vercel deployment pipeline, and environment variable management.',
+    role: 'faculty',
+  },
 ]
 
 export function getGuideBySlug(slug: string): GuideEntry | undefined {
