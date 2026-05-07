@@ -93,7 +93,7 @@ const nextConfig: NextConfig = {
             "img-src 'self' data: blob: https:",
             "font-src 'self' https://fonts.gstatic.com",
             // Connect sources: includes Sandpack bundler, esm.sh, and npm registry for dependency resolution
-            "connect-src 'self' https://www.google-analytics.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://va.vercel-scripts.com https://*.codesandbox.io https://esm.sh https://registry.npmjs.org https://esm.run https://*.supabase.co https://*.ingest.sentry.io",
+            "connect-src 'self' https://www.google-analytics.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://va.vercel-scripts.com https://*.codesandbox.io https://esm.sh https://registry.npmjs.org https://esm.run https://*.supabase.co https://*.ingest.sentry.io https://*.ingest.us.sentry.io",
             // Frame sources: Sandpack preview iframe + YouTube embeds
             "frame-src 'self' https://*.codesandbox.io https://www.youtube-nocookie.com https://www.youtube.com",
             "media-src 'self' blob:",
