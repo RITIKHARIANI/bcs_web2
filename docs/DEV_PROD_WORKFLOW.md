@@ -186,8 +186,7 @@ SENTRY_AUTH_TOKEN=""                             # Auth token for source map upl
 
 # ── Canvas LMS Grade Sync (optional) ──
 CANVAS_BASE_URL="https://canvas.illinois.edu"
-CANVAS_API_TOKEN="[your-canvas-personal-access-token]"
-CANVAS_ALLOWED_COURSE_IDS="68879"               # Comma-separated safety guard
+CANVAS_TOKEN_ENCRYPTION_KEY="[openssl rand -hex 32]" # Encrypts per-faculty Canvas tokens
 
 # ── Telemetry ──
 NEXT_TELEMETRY_DISABLED=1
@@ -234,8 +233,7 @@ SENTRY_AUTH_TOKEN="sntrys_[your-auth-token]"    # Sensitive — has write access
 
 # ── Canvas LMS Grade Sync (optional) ──
 CANVAS_BASE_URL="https://canvas.illinois.edu"
-CANVAS_API_TOKEN="[canvas-personal-access-token]"
-CANVAS_ALLOWED_COURSE_IDS="68879,73000"         # Update each semester
+CANVAS_TOKEN_ENCRYPTION_KEY="[openssl rand -hex 32]" # Encrypts per-faculty Canvas tokens
 
 # ── Telemetry ──
 NEXT_TELEMETRY_DISABLED=1
@@ -267,8 +265,7 @@ NEXT_PUBLIC_ENABLE_ANALYTICS=true                # Enable analytics in prod
 | `SENTRY_PROJECT` | Sentry project slug | No |
 | `SENTRY_AUTH_TOKEN` | Sentry auth token for source map uploads | Yes |
 | `CANVAS_BASE_URL` | Canvas LMS instance URL | No |
-| `CANVAS_API_TOKEN` | Canvas personal access token | Yes |
-| `CANVAS_ALLOWED_COURSE_IDS` | Safety guard for Canvas sync targets | No |
+| `CANVAS_TOKEN_ENCRYPTION_KEY` | Encrypts per-faculty Canvas tokens in DB | Yes |
 | `NEXT_TELEMETRY_DISABLED` | Disable Next.js telemetry | No |
 
 **Important Notes:**
