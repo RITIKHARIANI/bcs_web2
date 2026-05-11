@@ -53,7 +53,7 @@ Before you can sync grades, make sure you have:
 | Your **Canvas course ID** | The numeric ID from your Canvas course URL (see Step 2) |
 | **Students enrolled in both systems** | Students must be enrolled in both BCS and Canvas, using the **same email address** |
 | **Quiz attempts in BCS** | Students must have completed at least one quiz — there are no grades to sync otherwise |
-| **Admin setup complete** | Your platform administrator must have added the Canvas API token and base URL to the server environment variables |
+| **Server configuration** | Your platform administrator must have set `CANVAS_BASE_URL` and `CANVAS_TOKEN_ENCRYPTION_KEY` in the server environment variables |
 
 ### For Administrators
 
@@ -84,7 +84,7 @@ A personal access token lets BCS communicate with Canvas on your behalf. Each fa
 - Your token acts with **your permissions**. It can only modify courses where you are a Teacher or TA.
 - Your token is **encrypted at rest** in the database using AES-256-GCM. It is never displayed after saving.
 - **Do not share your token** with anyone.
-- If your institution has disabled personal token generation, contact your Canvas administrator to request one or to have it enabled for your account.
+- If your institution has disabled personal token generation, see [this guide](https://answers.uillinois.edu/illinois/internal/150325) to request access, or contact your Canvas administrator.
 - If your token expires or is revoked, the sync will stop working until you update it in your profile settings.
 
 ---
@@ -297,7 +297,7 @@ If you do not have a Canvas API token configured, or prefer to upload grades man
 | No Canvas API token is configured on the server | API token is configured and working |
 | You want to review grades before they appear in Canvas | You want one-click grade pushing |
 | Your institution restricts API token generation | API access is available |
-| You need to import grades into a Canvas course not in the allowlist | The Canvas course is in the allowlist |
+| You only need a one-time export | You want ongoing, repeatable syncs |
 
 ### How to Export a Canvas CSV
 

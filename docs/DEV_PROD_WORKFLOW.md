@@ -186,7 +186,7 @@ SENTRY_AUTH_TOKEN=""                             # Auth token for source map upl
 
 # ── Canvas LMS Grade Sync (optional) ──
 CANVAS_BASE_URL="https://canvas.illinois.edu"
-CANVAS_TOKEN_ENCRYPTION_KEY="[openssl rand -hex 32]" # Encrypts per-faculty Canvas tokens
+CANVAS_TOKEN_ENCRYPTION_KEY="<see generation steps below>"  # Encrypts per-faculty Canvas tokens
 
 # ── Telemetry ──
 NEXT_TELEMETRY_DISABLED=1
@@ -196,6 +196,23 @@ NEXT_PUBLIC_ENABLE_RICH_TEXT_EDITOR=true
 NEXT_PUBLIC_ENABLE_GRAPH_VISUALIZATION=true
 NEXT_PUBLIC_ENABLE_ANALYTICS=false               # Disable analytics in dev
 ```
+
+#### Generating `CANVAS_TOKEN_ENCRYPTION_KEY`
+
+This key encrypts faculty Canvas API tokens at rest in the database. Generate it once per environment (dev and prod should use **different** keys):
+
+```bash
+# Run in any terminal (macOS, Linux, or WSL):
+openssl rand -hex 32
+```
+
+This outputs a 64-character hex string (e.g., `a1b2c3d4...`). Copy the full string and set it as the value of `CANVAS_TOKEN_ENCRYPTION_KEY` in Vercel.
+
+**Important:**
+- Mark this variable as **Sensitive** in Vercel — you will not need to view it again after setting it.
+- Use a **different key** for dev and prod environments.
+- **Do not rotate this key** unless necessary. If rotated, all faculty must re-enter their Canvas tokens because previously encrypted tokens cannot be decrypted with a new key.
+- If you do not plan to use Canvas grade sync, you can skip this variable entirely.
 
 ### Production Variables (University Vercel)
 
@@ -233,7 +250,7 @@ SENTRY_AUTH_TOKEN="sntrys_[your-auth-token]"    # Sensitive — has write access
 
 # ── Canvas LMS Grade Sync (optional) ──
 CANVAS_BASE_URL="https://canvas.illinois.edu"
-CANVAS_TOKEN_ENCRYPTION_KEY="[openssl rand -hex 32]" # Encrypts per-faculty Canvas tokens
+CANVAS_TOKEN_ENCRYPTION_KEY="<see generation steps above>" # Encrypts per-faculty Canvas tokens
 
 # ── Telemetry ──
 NEXT_TELEMETRY_DISABLED=1
@@ -243,6 +260,8 @@ NEXT_PUBLIC_ENABLE_RICH_TEXT_EDITOR=true
 NEXT_PUBLIC_ENABLE_GRAPH_VISUALIZATION=true
 NEXT_PUBLIC_ENABLE_ANALYTICS=true                # Enable analytics in prod
 ```
+
+> **Note:** Generate `CANVAS_TOKEN_ENCRYPTION_KEY` with `openssl rand -hex 32` — see the [generation steps](#generating-canvas_token_encryption_key) in the Development Variables section above. Use a **different** key for production than development.
 
 ### Variable Reference
 
